@@ -969,9 +969,10 @@ void IPHelperApp::loadPlugins()
      thePath = aPluginDir.absolutePath() + "/Plugins";
      m_PluginDirs << thePath;
 #else
-     aPluginDir.cd("Plugins");
-     thePath = aPluginDir.absolutePath();
-     m_PluginDirs << thePath;
+     if (aPluginDir.cd("plugins")) {
+      thePath = aPluginDir.absolutePath();
+      m_PluginDirs << thePath;
+     }
 #endif
 
   this->setWindowTitle("IPHelper - No Plugins Loaded");
