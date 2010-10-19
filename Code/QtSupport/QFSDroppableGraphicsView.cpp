@@ -92,9 +92,11 @@ void QFSDroppableGraphicsView::dropEvent(QDropEvent *event)
     {
       fName = urlList[0].toLocalFile(); // convert first QUrl to local path
       info.setFile( fName ); // information about file
-      QString ext = info.suffix();
-      if (ext.compare("tif") == 0
+      QString ext = info.suffix().toLower();
+      if (ext.compare("tif") == 0\
+          || ext.compare("tiff") == 0
           || ext.compare("jpg") == 0
+          || ext.compare("jpeg") == 0
           || ext.compare("png") == 0
           || ext.compare("bmp") == 0)
       {

@@ -171,14 +171,15 @@ void IPHelperApp::resizeEvent ( QResizeEvent * event )
     QRect sceneRect(0, 0, osize.width(), osize.height());
     processedImageFrame->setGeometry(sceneRect);
     processedImageGView->setGeometry(sceneRect);
-    m_ProcessedImageGScene->setSceneRect(sceneRect);
+    if (NULL != m_ProcessedImageGScene) m_ProcessedImageGScene->setSceneRect(sceneRect);
   }
   else if (processedImageGView->isVisible() == true)
   {
     QRect sceneRect(0, 0, psize.width(), psize.height());
     originalImageFrame->setGeometry(sceneRect);
     originalImageGView->setGeometry(sceneRect);
-    m_OriginalImageGScene->setSceneRect(sceneRect);
+
+    if (NULL != m_OriginalImageGScene) m_OriginalImageGScene->setSceneRect(sceneRect);
   }
   emit parentResized();
 }
@@ -978,23 +979,31 @@ void IPHelperApp::loadPlugins()
   this->setWindowTitle("IPHelper - No Plugins Loaded");
 
 foreach (QString pluginDirString, m_PluginDirs) {
-  std::cout << "Plugin Directory being Searched: " << pluginDirString.toStdString() << std::endl;
+ // std::cout << "Plugin Directory being Searched: " << pluginDirString.toStdString() << std::endl;
     aPluginDir = QDir(pluginDirString);
      foreach (QString fileName, aPluginDir.entryList(QDir::Files))
     {
+   //   std::cout << "File: " << fileName.toStdString() << std::endl;
 #ifdef QT_DEBUG
        if (fileName.endsWith( "_debug.plugin", Qt::CaseSensitive) )
-#else
+#endif
+
+#if defined (QT_NO_DEBUG)
        if (fileName.endsWith( ".plugin", Qt::CaseSensitive) )
 #endif
        {
+    //     std::cout << "File Extension matches.." << std::endl;
          QPluginLoader loader(aPluginDir.absoluteFilePath(fileName));
          QObject *plugin = loader.instance();
+         std::cout << "plugin Pointer: " << plugin << std::endl;
          if (plugin && pluginFileNames.contains(fileName, Qt::CaseSensitive) == false)
          {
              populateMenus(plugin);
              pluginFileNames += fileName;
-
+         }
+         else
+         {
+           std::cout << "The plugin did not load with the following error\n   " << loader.errorString().toStdString() << std::endl;
          }
        }
      }
