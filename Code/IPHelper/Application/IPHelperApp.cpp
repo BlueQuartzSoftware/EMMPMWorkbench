@@ -514,9 +514,11 @@ void IPHelperApp::processingFinished()
   initWithFile(m_CurrentImageFile, m_CurrentProcessedFile);
 
   m_InputOutputFilePairList = m_ActivePlugin->getInputOutputFilePairs();
+  originalImageFileList->blockSignals(true);
+  processedImageFileList->blockSignals(true);
   originalImageFileList->clear();
   processedImageFileList->clear();
-  for (int i = 0; i < m_InputOutputFilePairList.size(); ++i) 
+  for (int i = 0; i < m_InputOutputFilePairList.size(); ++i)
   {
     QPair<QString, QString> pair = m_InputOutputFilePairList.at(i);
     QFileInfo fi(pair.first);
@@ -524,6 +526,8 @@ void IPHelperApp::processingFinished()
     fi = QFileInfo(pair.second);
     processedImageFileList->addItem(fi.fileName());
   }
+  originalImageFileList->blockSignals(false);
+  processedImageFileList->blockSignals(false);
 }
 
 // -----------------------------------------------------------------------------
@@ -531,6 +535,7 @@ void IPHelperApp::processingFinished()
 // -----------------------------------------------------------------------------
 void IPHelperApp::on_originalImageFileList_currentIndexChanged(int index)
 {
+  if (index < 0) return;
   openFile(m_InputOutputFilePairList.at(index).first);
   if (openProcessedImageCB->isChecked())
   {
@@ -995,7 +1000,7 @@ foreach (QString pluginDirString, m_PluginDirs) {
     //     std::cout << "File Extension matches.." << std::endl;
          QPluginLoader loader(aPluginDir.absoluteFilePath(fileName));
          QObject *plugin = loader.instance();
-         std::cout << "plugin Pointer: " << plugin << std::endl;
+       //  std::cout << "plugin Pointer: " << plugin << std::endl;
          if (plugin && pluginFileNames.contains(fileName, Qt::CaseSensitive) == false)
          {
              populateMenus(plugin);
@@ -1076,18 +1081,9 @@ void IPHelperApp::setInputUI()
 // -----------------------------------------------------------------------------
 void IPHelperApp::on_fixedZoomCombo_currentIndexChanged(int index)
 {
-  std::cout << "on_fixedZoomCombo_currentIndexChanged" << std::endl;
-  if (index == fixedZoomCombo->count()-1)
-  {
-    m_OriginalGDelegate->fitToWindow(Qt::Checked);
-  }
-  else
-  {
-    m_OriginalGDelegate->fitToWindow(Qt::Unchecked);
-    m_OriginalGDelegate->setZoomFactor(m_ZoomFactors[index]);
-  }
-
-  m_OriginalGDelegate->updateGraphicsView();
+//  std::cout << "on_fixedZoomCombo_currentIndexChanged" << std::endl;
+  m_OriginalGDelegate->setZoomFactor(index);
+  m_OriginalGDelegate->updateGraphicsView(true);
 }
 
 
@@ -1096,15 +1092,18 @@ void IPHelperApp::on_fixedZoomCombo_currentIndexChanged(int index)
 // -----------------------------------------------------------------------------
 void IPHelperApp::on_processedZoomCombo_currentIndexChanged(int index)
 {
-  if (index == fixedZoomCombo->count()-1)
-  {
-    m_ProcessedGDelegate->fitToWindow(Qt::Checked);
-  }
-  else
-  {
-    m_ProcessedGDelegate->fitToWindow(Qt::Unchecked);
-    m_ProcessedGDelegate->setZoomFactor(m_ZoomFactors[index]);
-  }
+//  if (index == fixedZoomCombo->count()-1)
+//  {
+//    m_ProcessedGDelegate->fitToWindow(Qt::Checked);
+//  }
+//  else
+//  {
+//    m_ProcessedGDelegate->fitToWindow(Qt::Unchecked);
+//    m_ProcessedGDelegate->setZoomFactor(m_ZoomFactors[index]);
+//  }
+//
+//  m_ProcessedGDelegate->updateGraphicsView();
+  m_ProcessedGDelegate->setZoomFactor(index);
+  m_ProcessedGDelegate->updateGraphicsView(true);
 
-  m_ProcessedGDelegate->updateGraphicsView();
 }

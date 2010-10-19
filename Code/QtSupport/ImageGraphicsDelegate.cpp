@@ -56,21 +56,20 @@ ImageGraphicsDelegate::ImageGraphicsDelegate(QObject* parent) :
   m_GraphicsScene(NULL),
   m_CompositeImages(false),
   m_CurrentGraphicsItem(NULL),
-  _zoomFactor(1.0),
   _shouldFitToWindow(false)
 {
 
-  _zoomFactors[0] = 0.05;
-  _zoomFactors[1] = 0.1;
-  _zoomFactors[2] = 0.25;
-  _zoomFactors[3] = 0.50;
-  _zoomFactors[4] = 1.0;
+  _zoomFactors[0] = 0.1;
+  _zoomFactors[1] = 0.25;
+  _zoomFactors[2] = 0.5;
+  _zoomFactors[3] = 1.0;
+  _zoomFactors[4] = 1.25;
   _zoomFactors[5] = 1.5;
   _zoomFactors[6] = 2.0;
   _zoomFactors[7] = 4.0;
   _zoomFactors[8] = 6.0;
   _zoomFactors[9] = -1.0;
-  _zoomIndex = 4;
+  _zoomIndex = 3;
 
   m_composition_mode = QPainter::CompositionMode_Exclusion;
   this->m_CachedImage = QImage();
@@ -103,6 +102,7 @@ void ImageGraphicsDelegate::displayTextMessage(QString message)
   _displayTextMessage(message);
 }
 
+#if 0
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
@@ -185,10 +185,13 @@ void ImageGraphicsDelegate::decreaseZoom()
   }
   updateGraphicsView();
 }
+#endif
+
 
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
+#if 0
 void ImageGraphicsDelegate::fitToWindow(int checkbox_state)
 {
   if (m_CachedImage.isNull() == true)
@@ -222,45 +225,9 @@ void ImageGraphicsDelegate::fitToWindow(int checkbox_state)
   {
     this->setZoomFactor(zfH);
   }
-
-  updateGraphicsView();
 }
+#endif
 
-// -----------------------------------------------------------------------------
-//
-// -----------------------------------------------------------------------------
-void ImageGraphicsDelegate::setZoomFactor(double zoomFactor)
-{
-  this->_zoomFactor = zoomFactor;
-}
-
-// -----------------------------------------------------------------------------
-//
-// -----------------------------------------------------------------------------
-QImage ImageGraphicsDelegate::_scaleImage()
-{
-  QSize imageSize = this->m_CachedImage.size();
-  if (_zoomFactor > -1.0)
-  {
-    imageSize *= _zoomFactor;
-  }
-
-  return this->m_CachedImage.scaled(imageSize, Qt::KeepAspectRatio, Qt::SmoothTransformation);
-}
-
-// -----------------------------------------------------------------------------
-//
-// -----------------------------------------------------------------------------
-QImage ImageGraphicsDelegate::_scaleImage(QImage image)
-{
-  QSize imageSize = image.size();
-  if (_zoomFactor > -1.0)
-  {
-    imageSize *= _zoomFactor;
-  }
-
-  return image.scaled(imageSize, Qt::KeepAspectRatio);
-}
 
 // -----------------------------------------------------------------------------
 //
@@ -269,12 +236,94 @@ void ImageGraphicsDelegate::on_parentResized()
 {
   if (_shouldFitToWindow == true)
   {
-    fitToWindow(Qt::Checked);
+    setZoomFactor(9); // Force a rescaling of the image
+  }
+  updateGraphicsView();
+}
+
+
+// -----------------------------------------------------------------------------
+//
+// -----------------------------------------------------------------------------
+void ImageGraphicsDelegate::setZoomFactor(int zoomIndex)
+{
+  this->_zoomIndex = zoomIndex;
+  if (this->_zoomIndex == 9)
+  {
+    _shouldFitToWindow = true;
   }
   else
   {
-    updateGraphicsView();
+    _shouldFitToWindow = false;
   }
+
+  m_ScaledCachedImage = _scaleImage();
+}
+
+// -----------------------------------------------------------------------------
+//
+// -----------------------------------------------------------------------------
+QImage ImageGraphicsDelegate::_scaleImage()
+{
+  QSize imageSize = this->m_CachedImage.size();
+  double _zoomFactor = _zoomFactors[_zoomIndex];
+
+  if (_shouldFitToWindow)
+  {
+    QSize imageSize = this->m_CachedImage.size();
+    int gvWidth = m_GraphicsView->size().width();
+    int gvHeight = m_GraphicsView->size().height();
+    double zfW = (double)(gvWidth) / (double)(imageSize.width());
+    double zfH = (double)(gvHeight) / (double)(imageSize.height());
+    if (zfW < zfH)
+    {
+      imageSize *= zfW;
+    }
+    else
+    {
+      imageSize *= zfH;
+    }
+    return this->m_CachedImage.scaled(imageSize, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+  }
+  else if (_zoomIndex != 3)
+  {
+    imageSize *= _zoomFactor;
+    return this->m_CachedImage.scaled(imageSize, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+  }
+  return this->m_CachedImage;
+}
+
+// -----------------------------------------------------------------------------
+//
+// -----------------------------------------------------------------------------
+QImage ImageGraphicsDelegate::_scaleImage(QImage image)
+{
+  QSize imageSize = image.size();
+  double _zoomFactor = _zoomFactors[_zoomIndex];
+
+  if (_shouldFitToWindow)
+  {
+    QSize imageSize = this->m_CachedImage.size();
+    int gvWidth = m_GraphicsView->size().width();
+    int gvHeight = m_GraphicsView->size().height();
+    double zfW = (double)(gvWidth) / (double)(imageSize.width());
+    double zfH = (double)(gvHeight) / (double)(imageSize.height());
+    if (zfW < zfH)
+    {
+      imageSize *= zfW;
+    }
+    else
+    {
+      imageSize *= zfH;
+    }
+    return image.scaled(imageSize, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+  }
+  else if (_zoomIndex != 3)
+  {
+    imageSize *= _zoomFactor;
+    return image.scaled(imageSize, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+  }
+  return image;
 }
 
 // -----------------------------------------------------------------------------
@@ -294,7 +343,16 @@ void ImageGraphicsDelegate::updateGraphicsView(bool updateGraphicsScene)
     delete m_CurrentGraphicsItem; // Delete the object
   }
 
-  QImage dataImage = _scaleImage();
+  QImage dataImage;
+  if (_zoomIndex != 3) // There was scaling and a scaled image already exists
+  {
+    dataImage = m_ScaledCachedImage;
+  }
+  else // 100% view, ie, no scaling just use the existing cached image
+  {
+    dataImage = m_CachedImage;
+  }
+
   QPixmap imagePixmap;
   if (m_CompositeImages == true && m_OverlayImage.isNull() == false)
   {

@@ -66,6 +66,7 @@ class ImageGraphicsDelegate : public QObject
     MXA_INSTANCE_PROPERTY(QGraphicsView*, GraphicsView)
     MXA_INSTANCE_PROPERTY(QGraphicsScene*, GraphicsScene)
     MXA_INSTANCE_PROPERTY(QImage, CachedImage)
+    MXA_INSTANCE_PROPERTY(QImage, ScaledCachedImage)
     MXA_INSTANCE_PROPERTY(QImage, OverlayImage)
     MXA_INSTANCE_PROPERTY(QImage, CompositedImage)
     MXA_INSTANCE_PROPERTY(bool, CompositeImages)
@@ -96,8 +97,9 @@ class ImageGraphicsDelegate : public QObject
      * where 1.0 is 100% or NO ZOOM and -1.0 represents fit to current window.
      * @param zoomFactor The value of the zoom Factor
      */
-    void setZoomFactor(double zoomFactor);
+    void setZoomFactor(int zoomIndex);
 
+#if 0
     /**
      * @brief Increase the zoom level of the view which is the same as zooming in.
      */
@@ -107,12 +109,14 @@ class ImageGraphicsDelegate : public QObject
      * @brief Decrease the zoom level of the view which is the same as zooming out.
      */
     void decreaseZoom();
+#endif
+
 
     /**
      * @brief If checkbox_state is "Qt::Checked" then ensures the Image fits into the current size of the QGraphicsView object.
      * @param checkbox_state Use eithet Qt::Checked or Qt::UnChecked.
      */
-    void fitToWindow(int checkbox_state);
+  //  void fitToWindow(int checkbox_state);
 
     /**
      * @brief Forcibly updates the embedded QGraphicsView with an option to update the
@@ -316,7 +320,6 @@ class ImageGraphicsDelegate : public QObject
   private:
     QGraphicsPixmapItem* m_CurrentGraphicsItem;
 
-    double _zoomFactor;
     double _zoomFactors[10];
     int _zoomIndex;
     bool _shouldFitToWindow;
