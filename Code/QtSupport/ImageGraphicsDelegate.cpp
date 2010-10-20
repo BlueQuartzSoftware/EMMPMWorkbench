@@ -210,7 +210,7 @@ void ImageGraphicsDelegate::fitToWindow(int checkbox_state)
   }
   //  std::cout << m_DelegateName.toStdString() << " fitToWindow." << std::endl;
   _zoomIndex = ZOOM_INDEX_MAX;
-  this->setZoomFactor(_zoomFactors[_zoomIndex]);
+  this->setZoomIndex(_zoomFactors[_zoomIndex]);
 
   QSize imageSize = this->m_CachedImage.size();
   int gvWidth = m_GraphicsView->size().width();
@@ -219,11 +219,11 @@ void ImageGraphicsDelegate::fitToWindow(int checkbox_state)
   double zfH = (double)(gvHeight) / (double)(imageSize.height());
   if (zfW < zfH)
   {
-    this->setZoomFactor(zfW);
+    this->setZoomIndex(zfW);
   }
   else
   {
-    this->setZoomFactor(zfH);
+    this->setZoomIndex(zfH);
   }
 }
 #endif
@@ -236,16 +236,23 @@ void ImageGraphicsDelegate::on_parentResized()
 {
   if (_shouldFitToWindow == true)
   {
-    setZoomFactor(9); // Force a rescaling of the image
+    setZoomIndex(9); // Force a rescaling of the image
   }
   updateGraphicsView();
 }
 
+// -----------------------------------------------------------------------------
+//
+// -----------------------------------------------------------------------------
+int ImageGraphicsDelegate::getZoomIndex()
+{
+  return this->_zoomIndex;
+}
 
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
-void ImageGraphicsDelegate::setZoomFactor(int zoomIndex)
+void ImageGraphicsDelegate::setZoomIndex(int zoomIndex)
 {
   this->_zoomIndex = zoomIndex;
   if (this->_zoomIndex == 9)

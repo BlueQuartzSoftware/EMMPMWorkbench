@@ -97,7 +97,9 @@ class ImageGraphicsDelegate : public QObject
      * where 1.0 is 100% or NO ZOOM and -1.0 represents fit to current window.
      * @param zoomFactor The value of the zoom Factor
      */
-    void setZoomFactor(int zoomIndex);
+    void setZoomIndex(int zoomIndex);
+
+    int getZoomIndex();
 
 #if 0
     /**

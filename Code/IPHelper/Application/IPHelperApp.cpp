@@ -232,6 +232,9 @@ void IPHelperApp::setupGui()
   m_OriginalImageGScene = NULL;
   m_ProcessedImageGScene = NULL;
 
+  openProcessedImageCB->setVisible(false);
+  openOriginalImageCB->setVisible(false);
+
   modeComboBox->blockSignals(true);
 
   modeComboBox->insertItem(0, "Exclusion");
@@ -537,10 +540,6 @@ void IPHelperApp::on_originalImageFileList_currentIndexChanged(int index)
 {
   if (index < 0) return;
   openFile(m_InputOutputFilePairList.at(index).first);
-  if (openProcessedImageCB->isChecked())
-  {
-    openProcessedImage(m_InputOutputFilePairList.at(index).second);
-  }
 }
 
 // -----------------------------------------------------------------------------
@@ -548,11 +547,8 @@ void IPHelperApp::on_originalImageFileList_currentIndexChanged(int index)
 // -----------------------------------------------------------------------------
 void IPHelperApp::on_processedImageFileList_currentIndexChanged(int index)
 {
+  if (index < 0) return;
   openProcessedImage(m_InputOutputFilePairList.at(index).second);
-  if (openOriginalImageCB->isChecked())
-  {
-    openFile(m_InputOutputFilePairList.at(index).first);
-  }
 }
 
 // -----------------------------------------------------------------------------
@@ -789,6 +785,7 @@ qint32 IPHelperApp::initImageViews()
     }
 
     m_OriginalGDelegate->setCachedImage(image);
+    m_OriginalGDelegate->setZoomIndex(fixedZoomCombo->currentIndex());
     m_OriginalGDelegate->updateGraphicsView(false);
 
     connect(this, SIGNAL(parentResized () ),
@@ -854,6 +851,7 @@ qint32 IPHelperApp::initImageViews()
       m_ProcessedGDelegate->setMainWindow(this);
     }
     m_ProcessedGDelegate->setCachedImage(processedImage);
+    m_ProcessedGDelegate->setZoomIndex(processedZoomCombo->currentIndex());
     m_ProcessedGDelegate->updateGraphicsView(false);
 
     connect(this, SIGNAL(parentResized () ),
@@ -903,7 +901,8 @@ void IPHelperApp::initWithFile(const QString imageFile, QString processedImage)
     compositeWithOriginal->setEnabled(false);
     processedZoomCombo->setEnabled(false);
   }
-  else {
+  else
+  {
     QFileInfo segInfo(m_CurrentProcessedFile);
     this->processedImageTitle->setText(segInfo.fileName());
     this->processedImageTitle->setToolTip(m_CurrentProcessedFile);
@@ -1082,7 +1081,7 @@ void IPHelperApp::setInputUI()
 void IPHelperApp::on_fixedZoomCombo_currentIndexChanged(int index)
 {
 //  std::cout << "on_fixedZoomCombo_currentIndexChanged" << std::endl;
-  m_OriginalGDelegate->setZoomFactor(index);
+  m_OriginalGDelegate->setZoomIndex(index);
   m_OriginalGDelegate->updateGraphicsView(true);
 }
 
@@ -1092,18 +1091,7 @@ void IPHelperApp::on_fixedZoomCombo_currentIndexChanged(int index)
 // -----------------------------------------------------------------------------
 void IPHelperApp::on_processedZoomCombo_currentIndexChanged(int index)
 {
-//  if (index == fixedZoomCombo->count()-1)
-//  {
-//    m_ProcessedGDelegate->fitToWindow(Qt::Checked);
-//  }
-//  else
-//  {
-//    m_ProcessedGDelegate->fitToWindow(Qt::Unchecked);
-//    m_ProcessedGDelegate->setZoomFactor(m_ZoomFactors[index]);
-//  }
-//
-//  m_ProcessedGDelegate->updateGraphicsView();
-  m_ProcessedGDelegate->setZoomFactor(index);
+  m_ProcessedGDelegate->setZoomIndex(index);
   m_ProcessedGDelegate->updateGraphicsView(true);
 
 }

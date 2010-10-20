@@ -309,7 +309,7 @@ void QMIApp::on_modeComboBox_currentIndexChanged()
 void QMIApp::on_zoomCBox_currentIndexChanged() {
   // std::cout << "on_zoomCBox_currentIndexChanged" << std::endl;
   QVariant zoom = zoomCBox->itemData( zoomCBox->currentIndex(), Qt::UserRole);
-  view->setZoomFactor( zoom.toDouble() );
+  view->setZoomIndex( zoom.toDouble() );
 //  this->movingSliceBox->setZoomLevel(zoom.toDouble());
 //
 //  _initializeMovingImageOffset();
