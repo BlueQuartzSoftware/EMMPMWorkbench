@@ -55,7 +55,11 @@ EMMPMPlugin::~EMMPMPlugin()
 // -----------------------------------------------------------------------------
 QString EMMPMPlugin::getPluginName()
 {
+#ifdef NDEBUG
   return QString("EM/MPM");
+#else
+  return QString("EM/MPM Debug");
+#endif
 }
 
 // -----------------------------------------------------------------------------

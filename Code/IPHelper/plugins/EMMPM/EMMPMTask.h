@@ -452,14 +452,14 @@ void EMMPMTask::execute( T* imageData, S* outputData)
     }
 
     /* Monitor estimates of mean and variance */
+    setDebug(true);
     if (getDebug())
     {
       if (EMIterations < 10 || (k + 1) % (EMIterations / 10) == 0)
       {
-        for (int l = 0; l < NumberClasses - 1; l++) {
-        //  printf("%.3f %.3f ", local_mean_estimate[l], local_variance[l]);
+        for (int l = 0; l < NumberClasses ; l++) {
+          printf("%d %.3f %.3f\n", l, local_mean_estimate[l], local_variance[l]);
         }
-       // printf("%.3f %.3f\n", local_mean_estimate[NumberClasses - 1], local_variance[NumberClasses - 1]);
       }
     }
 

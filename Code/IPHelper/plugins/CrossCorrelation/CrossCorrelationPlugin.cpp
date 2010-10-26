@@ -53,7 +53,11 @@ CrossCorrelationPlugin::~CrossCorrelationPlugin()
 // -----------------------------------------------------------------------------
 QString CrossCorrelationPlugin::getPluginName()
 {
+#ifdef NDEBUG
   return QString("Cross Correlation");
+#else
+  return QString("Cross Correlation Debug");
+#endif
 }
 
 // -----------------------------------------------------------------------------
