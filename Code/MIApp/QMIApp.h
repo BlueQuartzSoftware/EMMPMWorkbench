@@ -56,15 +56,20 @@ class QMIApp : public QMainWindow, private Ui::QMIApp
     virtual ~QMIApp();
     void initWithFile(const QString imageFile, QString mountImage);
 
+
     protected slots:
     void on_actionOpenFixedImage_triggered(); // Open a Data File
     void on_actionOpenMovingImage_triggered(); // Open a Data File
 
-      void on_actionExit_triggered();
-      void on_zoomCBox_currentIndexChanged();
-      void on_modeComboBox_currentIndexChanged();
-      void openFixedRecentFile();
-      void openMovingRecentFile();
+    void on_actionExit_triggered();
+    void on_zoomCBox_currentIndexChanged();
+    void on_modeComboBox_currentIndexChanged();
+    void openFixedRecentFile();
+    void openMovingRecentFile();
+
+    void on_newInitAreaBtn_clicked();
+
+
 
       /**
        * @brief Updates the QMenu 'Recent Files' with the latest list of files. This

@@ -142,16 +142,17 @@ add_subdirectory(${PROJECT_CODE_DIR}/MXA ${PROJECT_BINARY_DIR}/MXA)
 add_subdirectory(${PROJECT_CODE_DIR}/AngReader ${PROJECT_BINARY_DIR}/AngReader)
 set (MXADATAMODEL_INCLUDE_DIRS ${PROJECT_CODE_DIR})
 
-# add_subdirectory(${PROJECT_CODE_DIR}/MIApp ${PROJECT_BINARY_DIR}/Applications/MIApp)
+#add_subdirectory(${PROJECT_CODE_DIR}/MIApp ${PROJECT_BINARY_DIR}/Applications/MIApp)
+add_subdirectory(${PROJECT_CODE_DIR}/EmMpmGui ${PROJECT_BINARY_DIR}/Applications/EmMpmGui)
 
 
 # Compile the image processing plugins
-add_subdirectory(${PROJECT_CODE_DIR}/IPHelper/plugins/EMMPM ${PROJECT_BINARY_DIR}/plugins/EMMPM)
-add_subdirectory(${PROJECT_CODE_DIR}/IPHelper/plugins/CrossCorrelation ${PROJECT_BINARY_DIR}/plugins/CrossCorrelation)
+#add_subdirectory(${PROJECT_CODE_DIR}/IPHelper/plugins/EMMPM ${PROJECT_BINARY_DIR}/plugins/EMMPM)
+#add_subdirectory(${PROJECT_CODE_DIR}/IPHelper/plugins/CrossCorrelation ${PROJECT_BINARY_DIR}/plugins/CrossCorrelation)
 #add_subdirectory(${PROJECT_CODE_DIR}/IPHelper/plugins/MutualInformation ${PROJECT_BINARY_DIR}/plugins/MutualInformation)
 
 # Compile the main Application - this MUST be last due to how some variables are built up.
-add_subdirectory(${PROJECT_CODE_DIR}/IPHelper/Application ${PROJECT_BINARY_DIR}/Applications/IPHelper)
+#add_subdirectory(${PROJECT_CODE_DIR}/IPHelper/Application ${PROJECT_BINARY_DIR}/Applications/IPHelper)
 
 
 

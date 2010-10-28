@@ -18,11 +18,13 @@
 #define R3DCOMPOSITIONRENDERER_H_
 
 //-- R3D Includes
-#include <MIApp/hoverpoints.h>
+#include <MIApp/InitArea.h>
+#include <QFSDroppableGraphicsView.h>
 
 #include <QtCore/QEvent>
 #include <QtGui/QWidget>
 #include <QtGui/QPainter>
+#include <QtGui/QRubberBand>
 
 
 QT_FORWARD_DECLARE_CLASS(QPushButton)
@@ -35,14 +37,14 @@ QT_FORWARD_DECLARE_CLASS(QRadioButton)
 * @date Apr 24, 2009
 * @version 1.0
 */
-class R3DCompositionRenderer : public QWidget
+class CompositingRenderer : public QWidget
 {
     Q_OBJECT
 
     enum ObjectType { NoObject, Image };
 
 public:
-    R3DCompositionRenderer(QWidget *parent);
+    CompositingRenderer(QWidget *parent);
 
     virtual void paint(QPainter *);
 
@@ -58,24 +60,32 @@ public:
     void setZoomFactor(double zoom);
     double getZoomFactor() { return zoomFactor; }
 
-    void setFixedImageGrid(int x, int y);
-    void setMovingImageGrid(int x, int y);
+//    void setFixedImageGrid(int x, int y);
+//    void setMovingImageGrid(int x, int y);
 
     void init(QPixmap fixedImage, QPixmap movingImage);
-    void setMovingImageOffset(float x, float y);
+ //   void setMovingImageOffset(float x, float y);
 
-    void setRotation(qreal r);
+ //   void setRotation(qreal r);
 
-    HoverPoints* getHoverPoints();
+    void addNewInitArea(const QRect &area);
+
+    QList<InitArea*> getInitAreas();
 
     int saveToFile(QString &filename);
 
     signals:
-      void updateOffsets(int x, int y);
-      void rotationChanged(int rotation);
-      void updateCenterOfRotation(int x, int y);
+//      void updateOffsets(int x, int y);
+//      void rotationChanged(int rotation);
+//      void updateCenterOfRotation(int x, int y);
 
   public slots:
+
+    void setNewInitArea() { m_NewInitArea = true; }
+
+
+
+
     void setClearMode() { m_composition_mode = QPainter::CompositionMode_Clear; update(); }
     void setSourceMode() { m_composition_mode = QPainter::CompositionMode_Source; update(); }
     void setDestinationMode() { m_composition_mode = QPainter::CompositionMode_Destination; update(); }
@@ -101,21 +111,23 @@ public:
     void setDifferenceMode() { m_composition_mode = QPainter::CompositionMode_Difference; update(); }
     void setExclusionMode() { m_composition_mode = QPainter::CompositionMode_Exclusion; update(); }
 
-    void setFixedGridEnabled(bool enabled) { _enableFixedGrid = enabled; update(); }
-    void setMovingGridEnabled(bool enabled) { _enableMovingGrid = enabled; update(); }
+//    void setFixedGridEnabled(bool enabled) { _enableFixedGrid = enabled; update(); }
+//    void setMovingGridEnabled(bool enabled) { _enableMovingGrid = enabled; update(); }
 
-    void updateCtrlPoints(const QPolygonF &);
-    void changeRotation(double rotation);
+//    void updateCtrlPoints(const QPolygonF &);
+//    void changeRotation(double rotation);
+
+    void updateInitArea(const QPointF &);
 
   protected:
     void paintEvent(QPaintEvent *);
     void resizeEvent(QResizeEvent *);
 
 private:
-    void updateMovingImagePos();
-    void drawFixedImageGrid(QPainter &p);
-    void drawMovingImageGrid(QPainter &p);
-    void initHoverPoints();
+  //  void updateMovingImagePos();
+//    void drawFixedImageGrid(QPainter &p);
+//    void drawMovingImageGrid(QPainter &p);
+//    void initHoverPoints();
 
     QPainter::CompositionMode m_composition_mode;
 
@@ -129,20 +141,26 @@ private:
 
     ObjectType m_current_object;
     double zoomFactor;
-    int fixedGridX;
-    int fixedGridY;
+//    int fixedGridX;
+//    int fixedGridY;
+//
+//    int movingGridX;
+//    int movingGridY;
 
-    int movingGridX;
-    int movingGridY;
-
-    bool _enableFixedGrid;
-    bool _enableMovingGrid;
+//    bool _enableFixedGrid;
+//    bool _enableMovingGrid;
 
     bool imageModified;
 
-    QPolygonF ctrlPoints;
-    HoverPoints* hoverPts;
-    qreal m_rotation;
+//    QPolygonF ctrlPoints;
+//    HoverPoints* hoverPts;
+//    qreal m_rotation;
+
+    bool m_NewInitArea;
+    QList<InitArea*> m_InitAreas;
+
+    QRubberBand* m_RubberBand;
+    QPoint m_MouseClickOrigin;
 
 };
 

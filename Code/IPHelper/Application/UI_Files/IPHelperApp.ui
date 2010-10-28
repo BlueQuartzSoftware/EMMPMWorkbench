@@ -115,7 +115,7 @@
             <number>0</number>
            </property>
            <item row="1" column="0">
-            <widget class="QFSDroppableGraphicsView" name="originalImageGView">
+            <widget class="QFSDroppableGraphicsView" name="originalImageGView" native="true">
              <property name="baseSize">
               <size>
                <width>622</width>
@@ -309,7 +309,7 @@
             <number>0</number>
            </property>
            <item row="4" column="0">
-            <widget class="QFSDroppableGraphicsView" name="processedImageGView">
+            <widget class="QFSDroppableGraphicsView" name="processedImageGView" native="true">
              <property name="baseSize">
               <size>
                <width>622</width>
@@ -629,8 +629,9 @@
  <customwidgets>
   <customwidget>
    <class>QFSDroppableGraphicsView</class>
-   <extends>QGraphicsView</extends>
+   <extends>QWidget</extends>
    <header location="global">QFSDroppableGraphicsView.h</header>
+   <container>1</container>
   </customwidget>
  </customwidgets>
  <resources>

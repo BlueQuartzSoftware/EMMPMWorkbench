@@ -81,7 +81,12 @@ include_directories(${QtSupport_BINARY_DIR}/..)
 add_definitions(-DQT_CORE_LIB)
 
 add_library(QtSupport STATIC ${Project_SRCS})
-target_link_libraries(QtSupport ${QT_QTCORE_LIBRARY} ${QT_QTGUI_LIBRARY} AIMLib ${ITK_LIBRARIES})
+target_link_libraries(QtSupport 
+                    ${QT_QTCORE_LIBRARY} 
+                    ${QT_QTGUI_LIBRARY} 
+#                    AIMLib
+#                    ${ITK_LIBRARIES}
+                    )
 
 LibraryProperties( QtSupport ${EXE_DEBUG_EXTENSION})
 

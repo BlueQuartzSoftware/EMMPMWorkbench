@@ -40,33 +40,33 @@
 **
 ****************************************************************************/
 
-#include "hoverpoints.h"
+#include "InitArea.h"
 #include <iostream>
 #define printf
 
-HoverPoints::HoverPoints(QWidget *widget, PointShape shape)
+InitArea::InitArea(QWidget *widget, PointShape shape)
     : QObject(widget)
 {
     m_widget = widget;
     widget->installEventFilter(this);
 
-    m_connectionType = CurveConnection;
-    m_sortType = NoSort;
+//    m_connectionType = CurveConnection;
+//    m_sortType = NoSort;
     m_shape = shape;
     m_pointPen = QPen(QColor(255, 255, 255, 191), 1);
     m_connectionPen = QPen(QColor(255, 255, 255, 127), 2);
     m_pointBrush = QBrush(QColor(191, 191, 191, 127));
     m_pointSize = QSize(8, 8);
-    m_currentIndex = -1;
+
     m_editable = true;
     m_enabled = true;
 
-    connect(this, SIGNAL(pointsChanged(const QPolygonF &)),
+    connect(this, SIGNAL(pointChanged(const QPointF &)),
             m_widget, SLOT(update()));
 }
 
 
-void HoverPoints::setEnabled(bool enabled)
+void InitArea::setEnabled(bool enabled)
 {
     if (m_enabled != enabled) {
         m_enabled = enabled;
@@ -75,7 +75,7 @@ void HoverPoints::setEnabled(bool enabled)
 }
 
 
-bool HoverPoints::eventFilter(QObject *object, QEvent *event)
+bool InitArea::eventFilter(QObject *object, QEvent *event)
 {
     if (object == m_widget && m_enabled) {
         switch (event->type()) {
@@ -85,55 +85,56 @@ bool HoverPoints::eventFilter(QObject *object, QEvent *event)
             QMouseEvent *me = (QMouseEvent *) event;
 
             QPointF clickPos = me->pos();
-            int index = -1;
-            for (int i=0; i<m_points.size(); ++i) {
+          //  int index = -1;
+          //  for (int i=0; i<m_point.size(); ++i) {
                 QPainterPath path;
                 if (m_shape == CircleShape)
-                    path.addEllipse(pointBoundingRect(i));
+                    path.addEllipse(pointBoundingRect());
                 else
-                    path.addRect(pointBoundingRect(i));
+                    path.addRect(pointBoundingRect());
 
                 if (path.contains(clickPos)) {
-                    index = i;
+                  //  index = i;
                     break;
                 }
-            }
+           // }
 
             if (me->button() == Qt::LeftButton) {
-                if (index == -1) {
+//                if (index == -1) {
                     if (!m_editable)
                         return false;
                     int pos = 0;
-                    // Insert sort for x or y
-                    if (m_sortType == XSort) {
-                        for (int i=0; i<m_points.size(); ++i)
-                            if (m_points.at(i).x() > clickPos.x()) {
-                                pos = i;
-                                break;
-                            }
-                    } else if (m_sortType == YSort) {
-                        for (int i=0; i<m_points.size(); ++i)
-                            if (m_points.at(i).y() > clickPos.y()) {
-                                pos = i;
-                                break;
-                            }
-                    }
-
-                    m_points.insert(pos, clickPos);
-                    m_locks.insert(pos, 0);
-                    m_currentIndex = pos;
+//                    // Insert sort for x or y
+//                    if (m_sortType == XSort) {
+//                        for (int i=0; i<m_point.size(); ++i)
+//                            if (m_point.at(i).x() > clickPos.x()) {
+//                                pos = i;
+//                                break;
+//                            }
+//                    } else if (m_sortType == YSort) {
+//                        for (int i=0; i<m_point.size(); ++i)
+//                            if (m_point.at(i).y() > clickPos.y()) {
+//                                pos = i;
+//                                break;
+//                            }
+//                    }
+//
+//                    m_point.insert(pos, clickPos);
+//                    m_locks.insert(pos, 0);
+//                    m_currentIndex = pos;
                     firePointChange();
-                } else {
-                    m_currentIndex = index;
-                }
+//                } else {
+//                    m_currentIndex = index;
+//                }
                 return true;
 
             } else if (me->button() == Qt::RightButton) {
-                if (index >= 0 && m_editable) {
-                    if (m_locks[index] == 0) {
-                        m_locks.remove(index);
-                        m_points.remove(index);
-                    }
+                if (m_editable) {
+//                    if (m_locks[index] == 0) {
+//                        m_locks.remove(index);
+//                        m_point.remove(index);
+//                    }
+                    //TODO: Delete the point by sending a signal?
                     firePointChange();
                     return true;
                 }
@@ -143,12 +144,12 @@ bool HoverPoints::eventFilter(QObject *object, QEvent *event)
         break;
 
         case QEvent::MouseButtonRelease:
-            m_currentIndex = -1;
+
             break;
 
         case QEvent::MouseMove:
-            if (m_currentIndex >= 0)
-                movePoint(m_currentIndex, ((QMouseEvent *)event)->pos());
+            std::cout << "QEvent::MouseMove" << std::endl;
+                movePoint( ((QMouseEvent *)event)->pos());
             break;
 
         case QEvent::Resize:
@@ -159,10 +160,10 @@ bool HoverPoints::eventFilter(QObject *object, QEvent *event)
                 break;
             qreal stretch_x = e->size().width() / qreal(e->oldSize().width());
             qreal stretch_y = e->size().height() / qreal(e->oldSize().height());
-            for (int i=0; i<m_points.size(); ++i) {
-                QPointF p = m_points[i];
-                movePoint(i, QPointF(p.x() * stretch_x, p.y() * stretch_y), false);
-            }
+     //       for (int i=0; i<m_point.size(); ++i) {
+                QPointF p = m_point;
+                movePoint( QPointF(p.x() * stretch_x, p.y() * stretch_y), false);
+       //     }
 
             firePointChange();
             break;
@@ -186,19 +187,20 @@ bool HoverPoints::eventFilter(QObject *object, QEvent *event)
 }
 
 
-void HoverPoints::paintPoints()
+void InitArea::paintPoints()
 {
     QPainter p;
     p.begin(m_widget);
     p.setRenderHint(QPainter::Antialiasing);
 
-    if (m_connectionPen.style() != Qt::NoPen && m_connectionType != NoConnection) { }
+  //  if (m_connectionPen.style() != Qt::NoPen && m_connectionType != NoConnection) { }
 
     p.setPen(m_pointPen);
     p.setBrush(m_pointBrush);
 
-    for (int i=0; i<m_points.size(); ++i) {
-        QRectF bounds = pointBoundingRect(i);
+   // for (int i=0; i<m_point.size(); ++i)
+    {
+        QRectF bounds = pointBoundingRect();
         if (m_shape == CircleShape)
             p.drawEllipse(bounds);
         else
@@ -209,19 +211,20 @@ void HoverPoints::paintPoints()
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
-void HoverPoints::paintPoints(QImage &image)
+void InitArea::paintPoints(QImage &image)
 {
   QPainter p;
   p.begin(&image);
   p.setRenderHint(QPainter::Antialiasing);
 
-  if (m_connectionPen.style() != Qt::NoPen && m_connectionType != NoConnection) { }
+  //if (m_connectionPen.style() != Qt::NoPen && m_connectionType != NoConnection) { }
 
   p.setPen(m_pointPen);
   p.setBrush(m_pointBrush);
 
-  for (int i=0; i<m_points.size(); ++i) {
-      QRectF bounds = pointBoundingRect(i);
+ // for (int i=0; i<m_point.size(); ++i)
+  {
+      QRectF bounds = pointBoundingRect();
       if (m_shape == CircleShape)
           p.drawEllipse(bounds);
       else
@@ -230,55 +233,65 @@ void HoverPoints::paintPoints(QImage &image)
   p.end();
 }
 
-static QPointF bound_point(const QPointF &point, const QRectF &bounds, int lock)
+static QPointF bound_point(const QPointF &point, const QRectF &bounds)
 {
     QPointF p = point;
 
+#if 0
     qreal left = bounds.left();
     qreal right = bounds.right();
     qreal top = bounds.top();
     qreal bottom = bounds.bottom();
 
-    if (p.x() < left || (lock & HoverPoints::LockToLeft)) {
+    if (p.x() < left )
+    {
       p.setX(left);
     }
-    else if (p.x() > right || (lock & HoverPoints::LockToRight)) {
+    else if (p.x() > right )
+    {
       p.setX(right);
     }
 
-    if (p.y() < top || (lock & HoverPoints::LockToTop)) {
+    if (p.y() < top )
+    {
       p.setY(top);
     }
-    else if (p.y() > bottom || (lock & HoverPoints::LockToBottom)) {
+    else if (p.y() > bottom )
+    {
       p.setY(bottom);
     }
+#endif
+
 
     return p;
 }
 
-void HoverPoints::setPoints(const QPolygonF &points)
+#if 0
+void InitArea::setPoints(const QPolygonF &points)
 {
-    m_points.clear();
-    for (int i=0; i<points.size(); ++i)
-        m_points << bound_point(points.at(i), boundingRect(), 0);
+  m_point.clear();
+  for (int i=0; i<points.size(); ++i)
+  m_point << bound_point(points.at(i), boundingRect(), 0);
 
-    m_locks.clear();
-    if (m_points.size() > 0)
-    {
-        m_locks.resize(m_points.size());
-        m_locks.fill(0);
-    }
+  m_locks.clear();
+  if (m_point.size() > 0)
+  {
+    m_locks.resize(m_point.size());
+    m_locks.fill(0);
+  }
 }
+#endif
+
 
 // -----------------------------------------------------------------------------
 //  index - The index into the QPloygonF to change
 //  newPos - A 2D point in Pixels relative to the upper left corner of the image
 //  emitChange - Should we emit an update through a signal
 // -----------------------------------------------------------------------------
-void HoverPoints::movePoint(int index, const QPointF &newPos, bool emitChange)
+void InitArea::movePoint( const QPointF &newPos, bool emitChange)
 {
  // std::cout << "HoverPoints::movePoint(): [" << index << "] " << newPos.x() << ", " << newPos.y() << std::endl;
-  m_points[index] = bound_point(newPos, boundingRect(), m_locks.at(index));
+  m_point = bound_point(newPos, boundingRect());
   if (emitChange)
       firePointChange();
 }
@@ -288,10 +301,10 @@ void HoverPoints::movePoint(int index, const QPointF &newPos, bool emitChange)
 //  newPos - A 2D point in Pixels relative to the upper left corner of the image
 //  emitChange - Should we emit an update through a signal
 // -----------------------------------------------------------------------------
-void HoverPoints::unboundedMovePoint(int index, const QPointF &newPos, bool emitChange)
+void InitArea::unboundedMovePoint( const QPointF &newPos, bool emitChange)
 {
   //std::cout << "HoverPoints::unboundedMovePoint(): [" << index << "] " << newPos.x() << ", " << newPos.y() << std::endl;
-  m_points[index] = newPos;
+  m_point = newPos;
   if (emitChange)
       firePointChange();
 }
@@ -310,42 +323,45 @@ inline static bool y_less_than(const QPointF &p1, const QPointF &p2)
     return p1.y() < p2.y();
 }
 
-void HoverPoints::firePointChange()
+void InitArea::firePointChange()
 {
   //std::cout << "HoverPoints::firePointChange()" << std::endl;
+#if 0
   if (m_sortType != NoSort)
   {
 
     QPointF oldCurrent;
     if (m_currentIndex != -1)
     {
-      oldCurrent = m_points[m_currentIndex];
+      oldCurrent = m_point[m_currentIndex];
     }
 
     if (m_sortType == XSort)
-      qSort(m_points.begin(), m_points.end(), x_less_than);
+    qSort(m_point.begin(), m_point.end(), x_less_than);
     else if (m_sortType == YSort)
-      qSort(m_points.begin(), m_points.end(), y_less_than);
+    qSort(m_point.begin(), m_point.end(), y_less_than);
 
     // Compensate for changed order...
     if (m_currentIndex != -1)
     {
-      for (int i = 0; i < m_points.size(); ++i)
+      for (int i = 0; i < m_point.size(); ++i)
       {
-        if (m_points[i] == oldCurrent)
+        if (m_point[i] == oldCurrent)
         {
           m_currentIndex = i;
           break;
         }
       }
     }
-  //  printf(" - firePointChange(), current=%d\n", m_currentIndex);
+    //  printf(" - firePointChange(), current=%d\n", m_currentIndex);
   }
+#endif
 
-  //     for (int i=0; i<m_points.size(); ++i) {
+
+  //     for (int i=0; i<m_point.size(); ++i) {
   //         printf(" - point(%2d)=[%.2f, %.2f], lock=%d\n",
-  //                i, m_points.at(i).x(), m_points.at(i).y(), m_locks.at(i));
+  //                i, m_point.at(i).x(), m_point.at(i).y(), m_locks.at(i));
   //     }
  // std::cout << "About to emit 'pointsChanged' " << std::endl;
-  emit pointsChanged(m_points);
+  emit pointChanged(m_point);
 }

@@ -30,27 +30,22 @@
 
 #include "QMIApp.h"
 
-
 #include "QtSupport/QRecentFileList.h"
 #include "AngReader/AngReader.h"
 #include "AngReader/OIMColoring.hpp"
 
-
 //-- C++ includes
 #include <iostream>
-
 
 #define READ_STRING_SETTING(prefs, var, emptyValue)\
   var->setText( prefs.value(#var).toString() );\
   if (var->text().isEmpty() == true) { var->setText(emptyValue); }
-
 
 #define READ_SETTING(prefs, var, ok, temp, default, type)\
   ok = false;\
   temp = prefs.value(#var).to##type(&ok);\
   if (false == ok) {temp = default;}\
   var->setValue(temp);
-
 
 #define WRITE_STRING_SETTING(prefs, var)\
   prefs.setValue(#var , this->var->text());
@@ -67,38 +62,40 @@
 #define WRITE_BOOL_SETTING(prefs, var, b)\
     prefs.setValue(#var, (b) );
 
-
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
 QMIApp::QMIApp(QWidget *parent) :
-QMainWindow(parent),
+  QMainWindow(parent),
 #if defined(Q_WS_WIN)
-    m_OpenDialogLastDirectory("C:\\")
+      m_OpenDialogLastDirectory("C:\\")
 #else
-m_OpenDialogLastDirectory("~/")
+      m_OpenDialogLastDirectory("~/")
 #endif
 {
   setupUi(this);
 
-    setupGui();
-    readSettings();
+  setupGui();
+  readSettings();
 
-    QRecentFileList* recentFixedFileList = QRecentFileList::instance();
-    connect(recentFixedFileList, SIGNAL (fileListChanged(const QString &)), this, SLOT(updateFixedRecentFileList(const QString &)));
-    // Get our initial Recent File List
-    this->updateFixedRecentFileList(QString::null);
+  QRecentFileList* recentFixedFileList = QRecentFileList::instance();
+  connect(recentFixedFileList, SIGNAL (fileListChanged(const QString &)), this, SLOT(updateFixedRecentFileList(const QString &)));
+  // Get our initial Recent File List
+  this->updateFixedRecentFileList(QString::null);
 
-    QRecentFileList* recentMovingFileList = QRecentFileList::instance();
-    connect(recentMovingFileList, SIGNAL (fileListChanged(const QString &)), this, SLOT(updateMovingRecentFileList(const QString &)));
-    // Get our initial Recent File List
-    this->updateMovingRecentFileList(QString::null);
+  QRecentFileList* recentMovingFileList = QRecentFileList::instance();
+  connect(recentMovingFileList, SIGNAL (fileListChanged(const QString &)), this, SLOT(updateMovingRecentFileList(const QString &)));
+  // Get our initial Recent File List
+  this->updateMovingRecentFileList(QString::null);
 
 }
 
+// -----------------------------------------------------------------------------
+//
+// -----------------------------------------------------------------------------
 QMIApp::~QMIApp()
 {
-  // TODO Auto-generated destructor stub
+
 }
 
 // -----------------------------------------------------------------------------
@@ -107,11 +104,10 @@ QMIApp::~QMIApp()
 void QMIApp::on_actionOpenFixedImage_triggered()
 {
   //std::cout << "on_actionOpen_triggered" << std::endl;
-  QString file = QFileDialog::getOpenFileName(this, tr("Open Fixed Image"),
-                                              m_OpenDialogLastDirectory,
-                                              tr("Images (*.tif *.tiff *.bmp *.jpg *.jpeg *.png *.ang)") );
+  QString file =
+      QFileDialog::getOpenFileName(this, tr("Open Fixed Image"), m_OpenDialogLastDirectory, tr("Images (*.tif *.tiff *.bmp *.jpg *.jpeg *.png *.ang)"));
 
-  if ( true == file.isNull() )
+  if (true == file.isNull())
   {
     return;
   }
@@ -128,11 +124,10 @@ void QMIApp::on_actionOpenFixedImage_triggered()
 void QMIApp::on_actionOpenMovingImage_triggered()
 {
   //std::cout << "on_actionOpen_triggered" << std::endl;
-  QString file = QFileDialog::getOpenFileName(this, tr("Open Moving Image"),
-                                              m_OpenDialogLastDirectory,
-                                              tr("Images (*.tif *.tiff *.bmp *.jpg *.jpeg *.png *.ang)") );
+  QString file =
+      QFileDialog::getOpenFileName(this, tr("Open Moving Image"), m_OpenDialogLastDirectory, tr("Images (*.tif *.tiff *.bmp *.jpg *.jpeg *.png *.ang)"));
 
-  if ( true == file.isNull() )
+  if (true == file.isNull())
   {
     return;
   }
@@ -171,7 +166,7 @@ void QMIApp::closeEvent(QCloseEvent *event)
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
-void QMIApp::resizeEvent ( QResizeEvent * event )
+void QMIApp::resizeEvent(QResizeEvent * event)
 {
 
 }
@@ -186,7 +181,6 @@ void QMIApp::readSettings()
 #else
   QSettings prefs(QSettings::IniFormat, QSettings::UserScope, QCoreApplication::organizationDomain(), QCoreApplication::applicationName());
 #endif
-
 
 }
 
@@ -203,7 +197,6 @@ void QMIApp::writeSettings()
 
 }
 
-
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
@@ -213,7 +206,7 @@ void QMIApp::setupGui()
 #ifdef Q_WS_MAC
   // Adjust for the size of the menu bar which is at the top of the screen not in the window
   QSize mySize = size();
-  mySize.setHeight( mySize.height() -30);
+  mySize.setHeight(mySize.height() - 30);
   resize(mySize);
 #endif
   //-----------------------------
@@ -230,7 +223,6 @@ void QMIApp::setupGui()
   zoomCBox->insertItem(9, "Fit In Window", -1.0);
   zoomCBox->setCurrentIndex(4);
   zoomCBox->blockSignals(false);
-
 
   modeComboBox->blockSignals(true);
 
@@ -266,7 +258,6 @@ void QMIApp::setupGui()
 
 }
 
-
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
@@ -275,46 +266,89 @@ void QMIApp::on_modeComboBox_currentIndexChanged()
   int index = modeComboBox->currentIndex();
   switch(index)
   {
-  case 0: view->setExclusionMode(); break;
-  case 1: view->setDifferenceMode(); break;
-  case 2: view->setPlusMode(); break;
-  case 3: view->setMultiplyMode(); break;
-  case 4: view->setScreenMode(); break;
-  case 5: view->setDarkenMode(); break;
-  case 6: view->setLightenMode(); break;
-  case 7: view->setColorDodgeMode(); break;
-  case 8: view->setColorBurnMode(); break;
-  case 9: view->setHardLightMode(); break;
-  case 10: view->setSoftLightMode(); break;
+    case 0:
+      compositionRenderer->setExclusionMode();
+      break;
+    case 1:
+      compositionRenderer->setDifferenceMode();
+      break;
+    case 2:
+      compositionRenderer->setPlusMode();
+      break;
+    case 3:
+      compositionRenderer->setMultiplyMode();
+      break;
+    case 4:
+      compositionRenderer->setScreenMode();
+      break;
+    case 5:
+      compositionRenderer->setDarkenMode();
+      break;
+    case 6:
+      compositionRenderer->setLightenMode();
+      break;
+    case 7:
+      compositionRenderer->setColorDodgeMode();
+      break;
+    case 8:
+      compositionRenderer->setColorBurnMode();
+      break;
+    case 9:
+      compositionRenderer->setHardLightMode();
+      break;
+    case 10:
+      compositionRenderer->setSoftLightMode();
+      break;
 
-  case 11: view->setSourceMode(); break;
-  case 12: view->setDestinationMode(); break;
-  case 13: view->setSourceOverMode(); break;
-  case 14: view->setDestinationOverMode(); break;
-  case 15: view->setSourceInMode(); break;
-  case 16: view->setDestInMode(); break;
-  case 17: view->setDestOutMode(); break;
-  case 18: view->setSourceAtopMode(); break;
-  case 19: view->setDestAtopMode(); break;
-  case 20: view->setOverlayMode(); break;
+    case 11:
+      compositionRenderer->setSourceMode();
+      break;
+    case 12:
+      compositionRenderer->setDestinationMode();
+      break;
+    case 13:
+      compositionRenderer->setSourceOverMode();
+      break;
+    case 14:
+      compositionRenderer->setDestinationOverMode();
+      break;
+    case 15:
+      compositionRenderer->setSourceInMode();
+      break;
+    case 16:
+      compositionRenderer->setDestInMode();
+      break;
+    case 17:
+      compositionRenderer->setDestOutMode();
+      break;
+    case 18:
+      compositionRenderer->setSourceAtopMode();
+      break;
+    case 19:
+      compositionRenderer->setDestAtopMode();
+      break;
+    case 20:
+      compositionRenderer->setOverlayMode();
+      break;
 
-  default:
-    view->setExclusionMode(); break;
+    default:
+      compositionRenderer->setExclusionMode();
+      break;
   }
 }
 
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
-void QMIApp::on_zoomCBox_currentIndexChanged() {
+void QMIApp::on_zoomCBox_currentIndexChanged()
+{
   // std::cout << "on_zoomCBox_currentIndexChanged" << std::endl;
-  QVariant zoom = zoomCBox->itemData( zoomCBox->currentIndex(), Qt::UserRole);
-  view->setZoomIndex( zoom.toDouble() );
-//  this->movingSliceBox->setZoomLevel(zoom.toDouble());
-//
-//  _initializeMovingImageOffset();
+  QVariant zoom = zoomCBox->itemData(zoomCBox->currentIndex(), Qt::UserRole);
+  compositionRenderer->setZoomFactor(zoom.toDouble());
+  //  this->movingSliceBox->setZoomLevel(zoom.toDouble());
+  //
+  //  _initializeMovingImageOffset();
 }
-
 
 // -----------------------------------------------------------------------------
 //
@@ -322,11 +356,10 @@ void QMIApp::on_zoomCBox_currentIndexChanged() {
 void QMIApp::setWidgetListEnabled(bool b)
 {
   foreach (QWidget* w, m_WidgetList)
-  {
-    w->setEnabled(b);
-  }
+    {
+      w->setEnabled(b);
+    }
 }
-
 
 // -----------------------------------------------------------------------------
 //
@@ -397,12 +430,12 @@ void QMIApp::openFixedRecentFile()
 {
   //std::cout << "QRecentFileList::openRecentFile()" << std::endl;
 
-  QAction *action = qobject_cast<QAction *>(sender());
+  QAction *action = qobject_cast<QAction * > (sender());
   if (action)
   {
     //std::cout << "Opening Recent file: " << action->data().toString().toStdString() << std::endl;
     QString file = action->data().toString();
-    openFixedImageFile( file );
+    openFixedImageFile(file);
   }
 
 }
@@ -437,23 +470,22 @@ void QMIApp::openMovingRecentFile()
 {
   //std::cout << "QRecentFileList::openRecentFile()" << std::endl;
 
-  QAction *action = qobject_cast<QAction *>(sender());
+  QAction *action = qobject_cast<QAction * > (sender());
   if (action)
   {
     //std::cout << "Opening Recent file: " << action->data().toString().toStdString() << std::endl;
     QString file = action->data().toString();
-    openMovingImageFile( file );
+    openMovingImageFile(file);
   }
 
 }
-
 
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
 void QMIApp::openFixedImageFile(QString imageFile)
 {
-  if ( true == imageFile.isEmpty() ) // User cancelled the operation
+  if (true == imageFile.isEmpty()) // User cancelled the operation
   {
     return;
   }
@@ -470,7 +502,7 @@ void QMIApp::openFixedImageFile(QString imageFile)
 // -----------------------------------------------------------------------------
 void QMIApp::openMovingImageFile(QString imageFile)
 {
-  if ( true == imageFile.isEmpty() ) // User cancelled the operation
+  if (true == imageFile.isEmpty()) // User cancelled the operation
   {
     return;
   }
@@ -491,7 +523,7 @@ void QMIApp::initWithFile(const QString fixedImageFile, QString movingImageFile)
   m_FixedImageFile = fixedImageFile;
   m_MovingImageFile = movingImageFile;
 
-  QVector<QRgb> colorTable(256);
+  QVector<QRgb > colorTable(256);
   for (quint32 i = 0; i < 256; ++i)
   {
     colorTable[i] = qRgb(i, i, i);
@@ -502,7 +534,7 @@ void QMIApp::initWithFile(const QString fixedImageFile, QString movingImageFile)
   {
     QFileInfo fi(m_FixedImageFile);
     QString ext = fi.suffix();
-    if (fi.exists() && fi.isFile() && (ext.compare("ang") == 0) )
+    if (fi.exists() && fi.isFile() && (ext.compare("ang") == 0))
     {
       image = angFileToQImage(m_FixedImageFile);
     }
@@ -517,14 +549,14 @@ void QMIApp::initWithFile(const QString fixedImageFile, QString movingImageFile)
     }
 
     //fixedImage.setColorTable(colorTable);
-    view->setFixedImage(QPixmap::fromImage(image));
+    compositionRenderer->setFixedImage(QPixmap::fromImage(image));
   }
 
   if (m_MovingImageFile.isEmpty() == false)
   {
     QFileInfo fi(m_MovingImageFile);
     QString ext = fi.suffix();
-    if (fi.exists() && fi.isFile() && (ext.compare("ang") == 0) )
+    if (fi.exists() && fi.isFile() && (ext.compare("ang") == 0))
     {
       image = angFileToQImage(m_MovingImageFile);
     }
@@ -538,12 +570,24 @@ void QMIApp::initWithFile(const QString fixedImageFile, QString movingImageFile)
     }
 
     //fixedImage.setColorTable(colorTable);
-    view->setMovingImage(QPixmap::fromImage(image));
+    compositionRenderer->setMovingImage(QPixmap::fromImage(image));
   }
-
 
   this->statusBar()->showMessage("Fixed Image Loaded");
 }
+
+// -----------------------------------------------------------------------------
+//
+// -----------------------------------------------------------------------------
+void QMIApp::on_newInitAreaBtn_clicked()
+{
+  std::cout << "on_newInitAreaBtn_clicked" << std::endl;
+  if (compositionRenderer != NULL)
+  {
+    compositionRenderer->setNewInitArea();
+  }
+}
+
 
 // -----------------------------------------------------------------------------
 //
@@ -554,12 +598,12 @@ QImage QMIApp::angFileToQImage(QString angFileToRead)
   AngReader reader;
   reader.setUserOrigin(AngReader::UpperLeftOrigin);
   int err = 0;
-//  std::cout << " Reading File " << angFileToRead.toStdString() << std::endl;
+  //  std::cout << " Reading File " << angFileToRead.toStdString() << std::endl;
   reader.setFileName(angFileToRead.toStdString());
   err = reader.readFile();
   if (1 != err)
   {
-   return QImage();
+    return QImage();
   }
   int xpoints = reader.getNumEvenCols();
   int ypoints = reader.getNumRows();
@@ -573,28 +617,22 @@ QImage QMIApp::angFileToQImage(QString angFileToRead)
   float refDir2 = 1.0f; // ND Normal Direction
 
   unsigned int rgba = 0x00000000;
-//  unsigned char* rgbPtr = reinterpret_cast<unsigned char* > (&rgba);
+  //  unsigned char* rgbPtr = reinterpret_cast<unsigned char* > (&rgba);
   size_t index = 0;
   //- Create Color QImage
   QImage image(xpoints, ypoints, QImage::Format_RGB32);
   image.fill(0);
   for (int y = 0; y < ypoints; ++y)
   {
-   for (int x = 0; x < xpoints; ++x)
-   {
-//     index = (y *  xpoints) + x;
-     rgba = 0;
-     OIMColoring::GenerateIPFColor<float >(phi1F[index], phiF[index], phi2F[index],
-                                           refDir0, refDir1, refDir2,
-                                           reinterpret_cast<unsigned char* > (&rgba),
-                                           2, 1, 0);
-     image.setPixel(x, y, rgba);
-     ++index;
-   }
+    for (int x = 0; x < xpoints; ++x)
+    {
+      //     index = (y *  xpoints) + x;
+      rgba = 0;
+      OIMColoring::GenerateIPFColor<float >(phi1F[index], phiF[index], phi2F[index], refDir0, refDir1, refDir2, reinterpret_cast<unsigned char* > (&rgba), 2, 1, 0);
+      image.setPixel(x, y, rgba);
+      ++index;
+    }
   }
   return image;
 }
-
-
-
 
