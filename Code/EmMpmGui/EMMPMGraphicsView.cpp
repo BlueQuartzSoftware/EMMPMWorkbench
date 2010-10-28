@@ -41,14 +41,16 @@
 #include <QtGui/QPixmap>
 #include <QtGui/QGraphicsPolygonItem>
 
-#include "qtbox.h"
+#include "uia.h"
+#include "UserInitAreaTableModel.h"
 
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
 EMMPMGraphicsView::EMMPMGraphicsView(QWidget *parent)
 : QGraphicsView(parent),
-  m_ImageGraphicsItem(NULL)
+  m_ImageGraphicsItem(NULL),
+  m_UserInitAreaTableModel(NULL)
 {
   setAcceptDrops(true);
   setDragMode(RubberBandDrag);
@@ -218,7 +220,7 @@ void EMMPMGraphicsView::mouseReleaseEvent(QMouseEvent *event)
  }
  else
  {
- QGraphicsView::mouseReleaseEvent(event);
+   QGraphicsView::mouseReleaseEvent(event);
  }
 }
 
@@ -228,30 +230,48 @@ void EMMPMGraphicsView::mouseReleaseEvent(QMouseEvent *event)
 void EMMPMGraphicsView::addNewInitArea(const QPolygonF &polygon)
 {
   QGraphicsScene* gScene = scene();
-
-
   if (gScene == NULL)
   {
     gScene = new QGraphicsScene(this);
     setScene(gScene);
   }
+#if 0
+  QList<QGraphicsItem * > items;
+  items = gScene->items();
+  int index = 0;
+  foreach (QGraphicsItem *item, items)
+  {
+    UIA *itemBase = qgraphicsitem_cast<UIA * > (item);
+    if (itemBase)
+    {
+      itemBase->setEmMpmClass(index);
+      ++index;
+    }
+
+  }
+#endif
+
+
   const int alpha = 155;
   QRectF brect = polygon.boundingRect();
 
 #if 1
-  SquareItem* item = new SquareItem(200, brect.x(), brect.y());
-  gScene->addItem(item);
+  UIA* userInitArea = new UIA(m_UserInitAreaTableModel->rowCount(), brect);
 #else
   QGraphicsPolygonItem* userInitArea = new QGraphicsPolygonItem(brect);
-  userInitArea->setPen(QPen(QColor(255, 100, 50, alpha)));
-  userInitArea->setBrush(QBrush(QColor(151, 0, 0, alpha)));
+#endif
+  // Line Color
+  userInitArea->setPen(QPen(QColor(225, 225, 225, alpha)));
+  // Fill Color
+  userInitArea->setBrush(QBrush(QColor(28, 28, 200, alpha)));
   userInitArea->setParentItem(m_ImageGraphicsItem);
   userInitArea->setZValue(1);
-  userInitArea->setFlag(QGraphicsItem::ItemIsMovable, true);
-  userInitArea->setFlag(QGraphicsItem::ItemSendsGeometryChanges, true);
-  userInitArea->setFlag(QGraphicsItem::ItemIsSelectable, true);
   userInitArea->setCacheMode(QGraphicsItem::DeviceCoordinateCache);
-  userInitArea->setAcceptsHoverEvents(true);
-  m_UserInitAreas << userInitArea;
-#endif
+
+  emit fireUserInitAreaAdded();
+  m_UserInitAreaTableModel->addUserInitArea(userInitArea);
+  connect (userInitArea, SIGNAL(fireUserInitAreaDeleted(UIA*)),
+           m_UserInitAreaTableModel, SLOT(deleteUserInitArea(UIA*)), Qt::QueuedConnection);
+  connect (userInitArea, SIGNAL(fireUserInitAreaUpdated(UIA*)),
+           m_UserInitAreaTableModel, SLOT(updateUserInitArea(UIA*)), Qt::QueuedConnection);
  }

@@ -29,9 +29,10 @@
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 
 #include "EmMpmGui.h"
+#include "UserInitAreaTableModel.h"
 
 #include <iostream>
-
+#include <sstream>
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
@@ -94,13 +95,22 @@ void EmMpmGui::setupGui()
   compositeModeCB->blockSignals(false);
 
 
+  m_UserInitAreaTableModel = new UserInitAreaTableModel;
+  m_GraphicsView->setUserInitAreaTableModel(m_UserInitAreaTableModel);
+  userInitTable->setModel(m_UserInitAreaTableModel);
 
 
   connect (m_GraphicsView, SIGNAL(fireImageFileLoaded(const QString &)),
            this, SLOT(imageFileLoaded(const QString &)), Qt::QueuedConnection);
 
-  connect (addUserInitArea, SIGNAL(clicked()),
-           m_GraphicsView, SLOT(addUserInitArea()), Qt::QueuedConnection);
+  connect (addUserInitArea, SIGNAL(toggled(bool)),
+           m_GraphicsView, SLOT(addUserInitArea(bool)), Qt::QueuedConnection);
+
+  connect (m_GraphicsView, SIGNAL(fireUserInitAreaAdded()),
+           addUserInitArea, SLOT(toggle()), Qt::QueuedConnection);
+
+//  connect (m_GraphicsView, SIGNAL(fireUserInitAreaAdded(bool, int, const QRectF&)),
+//           this, SLOT(userInitAreaAdded(bool, int, const QRectF&)), Qt::QueuedConnection);
 
 //  connect (zoomCB, SIGNAL(currentIndexChanged(int)),
 //           m_GraphicsView, SLOT(setZoomIndex(int)), Qt::QueuedConnection);
@@ -114,8 +124,9 @@ void EmMpmGui::setupGui()
 
   connect (compositeModeCB, SIGNAL(currentIndexChanged(int)),
            m_GraphicsView, SLOT(setCompositeMode(int)), Qt::QueuedConnection);
-
 }
+
+
 
 // -----------------------------------------------------------------------------
 //
@@ -125,10 +136,6 @@ void EmMpmGui::imageFileLoaded(const QString &filename)
   std::cout << "Loaded Image file " << filename.toStdString() << std::endl;
   this->setWindowFilePath(filename);
 }
-
-
-
-
 
 
 

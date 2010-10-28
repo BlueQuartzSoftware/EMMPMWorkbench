@@ -28,63 +28,69 @@
  * USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 
-#ifndef EMMPMGUI_H_
-#define EMMPMGUI_H_
+#ifndef _UIA_H_
+#define _UIA_H_
 
-//-- Qt Includes
 #include <QtCore/QObject>
-#include <QtCore/QString>
-#include <QtGui/QMainWindow>
-#include <QtGui/QGraphicsScene>
+#include <QtGui/QGraphicsPolygonItem>
+#include <QtGui/QGraphicsRectItem>
 
-//-- UIC generated Header
-#include <ui_EmMpmGui.h>
-class UIA;
-class UserInitAreaTableModel;
 
-class EmMpmGui : public QMainWindow, private Ui::EmMpmGui
+
+class UIA : public QObject, public QGraphicsPolygonItem
 {
-
     Q_OBJECT;
 
-  public:
-    EmMpmGui(QWidget *parent = 0);
-    virtual ~EmMpmGui();
+public:
+    enum { Type = UserType + 1 };
+    enum CTRL_POINTS
+    {
+      NO_CTRL_POINT, UPPER_LEFT_CTRL_POINT, UPPER_RIGHT_CTRL_POINT, LOWER_RIGHT_CTRL_POINT, LOWER_LEFT_CTRL_POINT
+    };
 
 
+    UIA(int userIndex, const QPolygonF &polygon,
+                         QGraphicsItem *parent = 0);
+    virtual ~UIA();
 
-  protected slots:
+    void setEmMpmClass(int i) { m_EmMpmClass = i; }
+    int getEmMpmClass() { return m_EmMpmClass; }
 
-    void imageFileLoaded(const QString &filename);
-//    void userInitAreaAdded(bool b, UIA* uia);
-//    void userInitAreaDeleted(UIA* uia);
-//    void userInitAreaUpdated(UIA* uia);
+    void setEmMpmGrayLevel(int gray) { m_GrayLevel = gray; }
+    int getEmMpmGrayLevel() { return m_GrayLevel; }
+
+    void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget = 0);
+
+
+ signals:
+
+  void fireUserInitAreaUpdated(UIA*);
+  void fireUserInitAreaDeleted(UIA*);
 
   protected:
+    virtual void contextMenuEvent(QGraphicsSceneContextMenuEvent *event);
+    virtual void mouseMoveEvent(QGraphicsSceneMouseEvent *event);
+    virtual void hoverMoveEvent(QGraphicsSceneHoverEvent *event);
+    virtual void mousePressEvent(QGraphicsSceneMouseEvent *event);
+    virtual void mouseReleaseEvent(QGraphicsSceneMouseEvent *event);
+    virtual void keyPressEvent(QKeyEvent *event);
+
+    virtual int type() const;
+    CTRL_POINTS isInResizeArea(const QPointF &pos);
+
+    static void duplicateSelectedItems(QGraphicsScene *scene);
+    static void deleteSelectedItems(QGraphicsScene *scene);
+    static void growSelectedItems(QGraphicsScene *scene);
+    static void shrinkSelectedItems(QGraphicsScene *scene);
 
 
-  /**
-   * @brief Initializes some of the GUI elements with selections or other GUI related items
-   */
-  void setupGui();
-
-
-  signals:
-
-
-
-
-  private:
-  QString                     m_OpenDialogLastDirectory;
-  QString                     m_CurrentImageFile;
-
-  QList<UIA*>                 m_UserInitAreas;
-  UserInitAreaTableModel*         m_UserInitAreaTableModel;
-
-
-
-  EmMpmGui(const EmMpmGui&); // Copy Constructor Not Implemented
-  void operator=(const EmMpmGui&); // Operator '=' Not Implemented
+private:
+    bool m_isResizing;
+    CTRL_POINTS m_CurrentResizeHandle;
+    float ctrlPointSize;
+    int m_EmMpmClass;
+    int  m_GrayLevel;
 };
 
-#endif /* EMMPMGUI_H_ */
+
+#endif // _UIA_H_

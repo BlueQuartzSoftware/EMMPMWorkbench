@@ -36,9 +36,8 @@
 #include <QtGui/QGraphicsItem>
 #include <QtGui/QRubberBand>
 
-// +#include "EMMPMUserInitArea.h"
-
-
+class UserInitAreaTableModel;
+class UIA;
 
 class EMMPMGraphicsView : public QGraphicsView
 {
@@ -46,6 +45,12 @@ class EMMPMGraphicsView : public QGraphicsView
 
   public:
     EMMPMGraphicsView(QWidget *parent = NULL);
+
+    void setUserInitAreaTableModel(UserInitAreaTableModel* userInitAreaTableModel)
+    {
+      m_UserInitAreaTableModel = userInitAreaTableModel;
+    }
+//  void setEmMpmGui(EmMpmGui* gui);
 
     /**
      * @brief Over-riding implementation from base class
@@ -90,11 +95,12 @@ class EMMPMGraphicsView : public QGraphicsView
       std::cout << "TODO:// Need to implement setCompositeMode(int)" << std::endl;
     }
 
-    void addUserInitArea() { m_AddUserInitArea = true; }
+    void addUserInitArea(bool b) { m_AddUserInitArea = b; }
 
 
   signals:
    void fireImageFileLoaded(const QString &filename);
+   void fireUserInitAreaAdded();
 
   protected:
     void loadImageFile(const QString &filename);
@@ -102,16 +108,14 @@ class EMMPMGraphicsView : public QGraphicsView
 
   private:
    QGraphicsItem* m_ImageGraphicsItem;
-   bool m_AddUserInitArea;
-   QRubberBand* m_RubberBand;
-   QPoint m_MouseClickOrigin;
-   float m_ZoomFactors[10];
-
-   QList<QGraphicsPolygonItem*>   m_UserInitAreas;
-
+   bool           m_AddUserInitArea;
+   QRubberBand*   m_RubberBand;
+   QPoint         m_MouseClickOrigin;
+   float          m_ZoomFactors[10];
+   UserInitAreaTableModel* m_UserInitAreaTableModel;
 
    EMMPMGraphicsView(const EMMPMGraphicsView&); // Copy Constructor Not Implemented
-  void operator=(const EMMPMGraphicsView&); // Operator '=' Not Implemented
+   void operator=(const EMMPMGraphicsView&); // Operator '=' Not Implemented
 };
 
 #endif /* QFSDROPPABLEGRAPHICSVIEW_H_ */

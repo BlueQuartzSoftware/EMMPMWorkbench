@@ -28,63 +28,50 @@
  * USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 
-#ifndef EMMPMGUI_H_
-#define EMMPMGUI_H_
+#ifndef USERINITAREATABLEMODEL_H_
+#define USERINITAREATABLEMODEL_H_
 
-//-- Qt Includes
-#include <QtCore/QObject>
-#include <QtCore/QString>
-#include <QtGui/QMainWindow>
-#include <QtGui/QGraphicsScene>
+#include <QtCore/QAbstractTableModel>
 
-//-- UIC generated Header
-#include <ui_EmMpmGui.h>
-class UIA;
-class UserInitAreaTableModel;
+#include "uia.h"
 
-class EmMpmGui : public QMainWindow, private Ui::EmMpmGui
+/*
+ *
+ */
+class UserInitAreaTableModel : public QAbstractTableModel
 {
-
     Q_OBJECT;
+  public:
+    UserInitAreaTableModel(QObject* parent = 0);
+    virtual ~UserInitAreaTableModel();
+
+
 
   public:
-    EmMpmGui(QWidget *parent = 0);
-    virtual ~EmMpmGui();
+    int rowCount ( const QModelIndex & parent = QModelIndex() ) const;
+    int  columnCount ( const QModelIndex & parent = QModelIndex() ) const;
+    QVariant  data ( const QModelIndex & index, int role = Qt::DisplayRole ) const;
+    QVariant  headerData ( int section, Qt::Orientation orientation, int role = Qt::DisplayRole ) const;
+
+//    bool  insertRow ( int row, const QModelIndex & parent = QModelIndex() );
+//    virtual bool  insertRows ( int row, int count, const QModelIndex & parent = QModelIndex() );
 
 
+  public slots:
 
-  protected slots:
+    void addUserInitArea(UIA* uia);
+    void deleteUserInitArea(UIA* uia);
+    void updateUserInitArea(UIA* uia);
 
-    void imageFileLoaded(const QString &filename);
-//    void userInitAreaAdded(bool b, UIA* uia);
-//    void userInitAreaDeleted(UIA* uia);
-//    void userInitAreaUpdated(UIA* uia);
 
   protected:
 
 
-  /**
-   * @brief Initializes some of the GUI elements with selections or other GUI related items
-   */
-  void setupGui();
-
-
-  signals:
-
-
-
-
   private:
-  QString                     m_OpenDialogLastDirectory;
-  QString                     m_CurrentImageFile;
-
-  QList<UIA*>                 m_UserInitAreas;
-  UserInitAreaTableModel*         m_UserInitAreaTableModel;
+    QList<UIA*> m_UserInitAreas;
+    int m_column_count;
 
 
-
-  EmMpmGui(const EmMpmGui&); // Copy Constructor Not Implemented
-  void operator=(const EmMpmGui&); // Operator '=' Not Implemented
 };
 
-#endif /* EMMPMGUI_H_ */
+#endif /* USERINITAREATABLEMODEL_H_ */

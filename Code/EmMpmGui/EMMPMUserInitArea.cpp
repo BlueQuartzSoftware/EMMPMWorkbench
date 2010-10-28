@@ -1,228 +1,300 @@
-/*
-    Copyright (c) 2009-10 Qtrac Ltd. All rights reserved.
-
-    This program or module is free software: you can redistribute it
-    and/or modify it under the terms of the GNU General Public License
-    as published by the Free Software Foundation, either version 3 of
-    the License, or (at your option) any later version. It is provided
-    for educational purposes and is distributed in the hope that it will
-    be useful, but WITHOUT ANY WARRANTY; without even the implied
-    warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See
-    the GNU General Public License for more details.
-*/
-
-//#include "alt_key.hpp"
-//#include "aqp.hpp"
-//#include "global.hpp"
+/* ============================================================================
+ * Copyright (c) 2010, Michael A. Jackson (BlueQuartz Software)
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without modification,
+ * are permitted provided that the following conditions are met:
+ *
+ * Redistributions of source code must retain the above copyright notice, this
+ * list of conditions and the following disclaimer.
+ *
+ * Redistributions in binary form must reproduce the above copyright notice, this
+ * list of conditions and the following disclaimer in the documentation and/or
+ * other materials provided with the distribution.
+ *
+ * Neither the name of Michael A. Jackson nor the names of its contributors may
+ * be used to endorse or promote products derived from this software without
+ * specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+ * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+ * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+ * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+ * CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+ * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE
+ * USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 
 #include "EMMPMUserInitArea.h"
 
+
 #include <QtGui/QGraphicsScene>
 #include <QtGui/QGraphicsSceneMouseEvent>
+#include <QtGui/QPainter>
+#include <QtGui/QStyleOption>
+#include <QtGui/QMenu>
 #include <QtGui/QKeyEvent>
-#include <QtGui/QCursor>
 
-
-EMMPMUserInitArea::EMMPMUserInitArea(const QRectF &rect_, QGraphicsScene *scene)
-    : QObject(), QGraphicsRectItem(), m_resizing(false)
+// -----------------------------------------------------------------------------
+//
+// -----------------------------------------------------------------------------
+EMMPMUserInitArea::EMMPMUserInitArea(const QRectF &bounds) :
+m_isResizing(false)
 {
-    setFlags(QGraphicsItem::ItemIsSelectable|
-#if QT_VERSION >= 0x040600
-             QGraphicsItem::ItemSendsGeometryChanges|
-#endif
-             QGraphicsItem::ItemIsMovable|
-             QGraphicsItem::ItemIsFocusable);
-    setPos(rect_.center());
-//    setRect(QRectF(QPointF(-rect_.width() / 2.0,
-//                           -rect_.height() / 2.0), rect_.size()));
-    setRect(rect_);
-    scene->clearSelection();
-    scene->addItem(this);
-    setSelected(true);
-    setFocus();
+    setFlag(QGraphicsItem::ItemIsMovable, true);
+    setFlag(QGraphicsItem::ItemIsSelectable, true);
+    setFlag(QGraphicsItem::ItemIsFocusable, true);
+    setAcceptHoverEvents(true);
+    setPos(bounds.x(), bounds.y());
+    m_BoundingRect = bounds;
+
+
+ //   m_startTime = QTime::currentTime();
 }
 
-
-void EMMPMUserInitArea::setPen(const QPen &pen_)
+EMMPMUserInitArea::~EMMPMUserInitArea()
 {
-    if (isSelected() && pen_ != pen()) {
-        QGraphicsRectItem::setPen(pen_);
-        emit dirty();
+}
+
+QRectF EMMPMUserInitArea::boundingRect() const
+{
+    return m_BoundingRect;
+}
+
+void EMMPMUserInitArea::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *)
+{
+    if (option->state & QStyle::State_Selected)
+    {
+        painter->setRenderHint(QPainter::Antialiasing, true);
+        if (option->state & QStyle::State_HasFocus)
+            painter->setPen(Qt::yellow);
+        else
+            painter->setPen(Qt::white);
+        painter->drawRect(boundingRect());
+
+        int m_size = m_BoundingRect.width();
+        painter->drawLine(m_size / 2 - 9, m_size / 2, m_size / 2, m_size / 2 - 9);
+        painter->drawLine(m_size / 2 - 6, m_size / 2, m_size / 2, m_size / 2 - 6);
+        painter->drawLine(m_size / 2 - 3, m_size / 2, m_size / 2, m_size / 2 - 3);
+
+        painter->setRenderHint(QPainter::Antialiasing, false);
     }
-}
-
-
-void EMMPMUserInitArea::setBrush(const QBrush &brush_)
-{
-    if (isSelected() && brush_ != brush()) {
-        QGraphicsRectItem::setBrush(brush_);
-        emit dirty();
+    else // Just draw the outline
+    {
+      painter->setPen(m_Pen);
+      painter->setBrush(m_Brush);
+      painter->drawRect(m_BoundingRect);
     }
+
+
+
+
 }
 
+void EMMPMUserInitArea::contextMenuEvent(QGraphicsSceneContextMenuEvent *event)
+{
+    if (!isSelected() && scene()) {
+        scene()->clearSelection();
+        setSelected(true);
+    }
 
+    QMenu menu;
+    QAction *delAction = menu.addAction("Delete");
+    QAction *newAction = menu.addAction("New");
+    QAction *growAction = menu.addAction("Grow");
+    QAction *shrinkAction = menu.addAction("Shrink");
+
+    QAction *selectedAction = menu.exec(event->screenPos());
+
+    if (selectedAction == delAction)
+        deleteSelectedItems(scene());
+    else if (selectedAction == newAction)
+        duplicateSelectedItems(scene());
+    else if (selectedAction == growAction)
+        growSelectedItems(scene());
+    else if (selectedAction == shrinkAction)
+        shrinkSelectedItems(scene());
+}
+
+void EMMPMUserInitArea::duplicateSelectedItems(QGraphicsScene *scene)
+{
+    if (!scene)
+        return;
+//TODO This needs to be fully implemeted
 #if 0
-void EMMPMUserInitArea::setAngle(double angle)
-{
-  if (isSelected() && !qFuzzyCompare(m_angle, angle))
-  {
-    m_angle = angle;
-    updateTransform();
-  }
-}
+    QList<QGraphicsItem *> selected;
+    selected = scene->selectedItems();
 
-void EMMPMUserInitArea::setShear(double shearHorizontal, double shearVertical)
-{
-  if (isSelected() &&
-      (!qFuzzyCompare(m_shearHorizontal, shearHorizontal) ||
-          !qFuzzyCompare(m_shearVertical, shearVertical)))
-  {
-    m_shearHorizontal = shearHorizontal;
-    m_shearVertical = shearVertical;
-    updateTransform();
-  }
-}
+    foreach (QGraphicsItem *item, selected)
+    {
+      EMMPMUserInitArea *itemBase = qgraphicsitem_cast<EMMPMUserInitArea *>(item);
+      if (itemBase)
+      scene->addItem(itemBase->createNew(itemBase->m_size, itemBase->pos().x() + itemBase->m_size, itemBase->pos().y()));
+    }
 #endif
 
-
-
-void EMMPMUserInitArea::updateTransform()
-{
-    QTransform transform;
-//    transform.shear(m_shearHorizontal, m_shearVertical);
-//    transform.rotate(m_angle);
-    setTransform(transform);
 }
 
-
-QVariant EMMPMUserInitArea::itemChange(GraphicsItemChange change,
-                             const QVariant &value)
+void EMMPMUserInitArea::deleteSelectedItems(QGraphicsScene *scene)
 {
-//    if (isDirtyChange(change))
-//        emit dirty();
-    return QGraphicsRectItem::itemChange(change, value);
-}
+    if (!scene)
+        return;
 
+    QList<QGraphicsItem *> selected;
+    selected = scene->selectedItems();
 
-void EMMPMUserInitArea::keyPressEvent(QKeyEvent *event)
-{
-    if (event->modifiers() & Qt::ShiftModifier ||
-        event->modifiers() & Qt::ControlModifier) {
-        bool move = event->modifiers() & Qt::ControlModifier;
-        bool changed = true;
-        double dx1 = 0.0;
-        double dy1 = 0.0;
-        double dx2 = 0.0;
-        double dy2 = 0.0;
-        switch (event->key()) {
-            case Qt::Key_Left:
-                if (move)
-                    dx1 = -1.0;
-                dx2 = -1.0;
-                break;
-            case Qt::Key_Right:
-                if (move)
-                    dx1 = 1.0;
-                dx2 = 1.0;
-                break;
-            case Qt::Key_Up:
-                if (move)
-                    dy1 = -1.0;
-                dy2 = -1.0;
-                break;
-            case Qt::Key_Down:
-                if (move)
-                    dy1 = 1.0;
-                dy2 = 1.0;
-                break;
-            default:
-                changed = false;
-        }
-        if (changed) {
-            setRect(rect().adjusted(dx1, dy1, dx2, dy2));
-            event->accept();
-            emit dirty();
-            return;
-        }
+    foreach (QGraphicsItem *item, selected) {
+        EMMPMUserInitArea *itemBase = qgraphicsitem_cast<EMMPMUserInitArea *>(item);
+        if (itemBase)
+            delete itemBase;
     }
-    QGraphicsRectItem::keyPressEvent(event);
 }
 
-
-void EMMPMUserInitArea::mousePressEvent(QGraphicsSceneMouseEvent *event)
+void EMMPMUserInitArea::growSelectedItems(QGraphicsScene *scene)
 {
-    if (event->modifiers() & Qt::ShiftModifier) {
-        m_resizing = true;
-        setCursor(Qt::SizeAllCursor);
+    if (!scene)
+        return;
+//TODO: This needs to be fully implemented
+#if 0
+    QList<QGraphicsItem *> selected;
+    selected = scene->selectedItems();
+
+    foreach (QGraphicsItem *item, selected)
+    {
+      EMMPMUserInitArea *itemBase = qgraphicsitem_cast<EMMPMUserInitArea *>(item);
+      if (itemBase)
+      {
+        itemBase->prepareGeometryChange();
+        itemBase->m_size *= 2;
+        if (itemBase->m_size > MAX_ITEM_SIZE)
+        itemBase->m_size = MAX_ITEM_SIZE;
+      }
     }
-    else
-        QGraphicsRectItem::mousePressEvent(event);
+#endif
+
 }
 
+void EMMPMUserInitArea::shrinkSelectedItems(QGraphicsScene *scene)
+{
+    if (!scene)
+        return;
+
+    //TODO: This needs to be fully implemented
+#if 0
+    QList<QGraphicsItem *> selected;
+    selected = scene->selectedItems();
+
+    foreach (QGraphicsItem *item, selected)
+    {
+      EMMPMUserInitArea *itemBase = qgraphicsitem_cast<EMMPMUserInitArea *>(item);
+      if (itemBase)
+      {
+        itemBase->prepareGeometryChange();
+        itemBase->m_size /= 2;
+        if (itemBase->m_size < MIN_ITEM_SIZE)
+        itemBase->m_size = MIN_ITEM_SIZE;
+      }
+    }
+#endif
+
+}
 
 void EMMPMUserInitArea::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
 {
-    if (m_resizing) {
-#ifdef ALTERNATIVE_RESIZING
-        qreal dx = event->pos().x() - event->lastPos().x();
-        qreal dy = event->pos().y() - event->lastPos().y();
-        setRect(rect().adjusted(0, 0, dx, dy).normalized());
-#else
-        QRectF rectangle(rect());
-        if (event->pos().x() < rectangle.x())
-            rectangle.setBottomLeft(event->pos());
-        else
-            rectangle.setBottomRight(event->pos());
-        setRect(rectangle);
+    if (m_isResizing) {
+        int dx = int(2.0 * event->pos().x());
+        int dy = int(2.0 * event->pos().y());
+        prepareGeometryChange();
+        m_BoundingRect.setWidth(m_BoundingRect.width() + dy);
+        m_BoundingRect.setHeight(m_BoundingRect.height() + dx);
+#if 0
+        m_size = (dx > dy ? dx : dy);
+        if (m_size < MIN_ITEM_SIZE)
+        m_size = MIN_ITEM_SIZE;
+        else if (m_size > MAX_ITEM_SIZE)
+        m_size = MAX_ITEM_SIZE;
 #endif
-        scene()->update();
+
+    } else {
+        QGraphicsItem::mouseMoveEvent(event);
     }
-    else
-        QGraphicsRectItem::mouseMoveEvent(event);
 }
 
+void EMMPMUserInitArea::hoverMoveEvent(QGraphicsSceneHoverEvent *event)
+{
+    if (m_isResizing || (isInResizeArea(event->pos()) && isSelected()))
+        setCursor(Qt::SizeFDiagCursor);
+    else
+        setCursor(Qt::ArrowCursor);
+    QGraphicsItem::hoverMoveEvent(event);
+}
+
+void EMMPMUserInitArea::mousePressEvent(QGraphicsSceneMouseEvent *event)
+{
+    static qreal z = 0.0;
+    setZValue(z += 1.0);
+    if (event->button() == Qt::LeftButton && isInResizeArea(event->pos())) {
+        m_isResizing = true;
+    } else {
+        QGraphicsItem::mousePressEvent(event);
+    }
+}
 
 void EMMPMUserInitArea::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
 {
-    if (m_resizing) {
-        m_resizing = false;
-        setCursor(Qt::ArrowCursor);
-        emit dirty();
+    if (event->button() == Qt::LeftButton && m_isResizing) {
+        m_isResizing = false;
+    } else {
+        QGraphicsItem::mouseReleaseEvent(event);
     }
-    else
-        QGraphicsRectItem::mouseReleaseEvent(event);
+}
+
+void EMMPMUserInitArea::keyPressEvent(QKeyEvent *event)
+{
+    switch (event->key()) {
+    case Qt::Key_Delete:
+        deleteSelectedItems(scene());
+        break;
+    case Qt::Key_Insert:
+        duplicateSelectedItems(scene());
+        break;
+    case Qt::Key_Plus:
+        growSelectedItems(scene());
+        break;
+    case Qt::Key_Minus:
+        shrinkSelectedItems(scene());
+        break;
+    default:
+        QGraphicsItem::keyPressEvent(event);
+        break;
+    }
+}
+
+#if 0
+void EMMPMUserInitArea::wheelEvent(QGraphicsSceneWheelEvent *event)
+{
+  prepareGeometryChange();
+  m_size = int(m_size * exp(-event->delta() / 600.0));
+  if (m_size > MAX_ITEM_SIZE)
+  m_size = MAX_ITEM_SIZE;
+  else if (m_size < MIN_ITEM_SIZE)
+  m_size = MIN_ITEM_SIZE;
+}
+#endif
+
+
+int EMMPMUserInitArea::type() const
+{
+    return Type;
 }
 
 
-QDataStream &operator<<(QDataStream &out, const EMMPMUserInitArea &boxItem)
+bool EMMPMUserInitArea::isInResizeArea(const QPointF &pos)
 {
-    out << boxItem.pos()
-//        << boxItem.angle()
-//        << boxItem.shearHorizontal() << boxItem.shearVertical()
-        << boxItem.zValue() << boxItem.rect() << boxItem.pen()
-        << boxItem.brush();
-    return out;
-}
-
-
-QDataStream &operator>>(QDataStream &in, EMMPMUserInitArea &boxItem)
-{
-    QPointF position;
-    double angle;
-    double shearHorizontal;
-    double shearVertical;
-    double z;
-    QRectF rect;
-    QPen pen;
-    QBrush brush;
-    in >> position >> angle >> shearHorizontal >> shearVertical >> z
-       >> rect >> pen >> brush;
-    boxItem.setPos(position);
-//    boxItem.setAngle(angle);
-//    boxItem.setShear(shearHorizontal, shearVertical);
-    boxItem.setZValue(z);
-    boxItem.setRect(rect);
-    boxItem.setPen(pen);
-    boxItem.setBrush(brush);
-    return in;
+  //TODO: Fix this with real areas
+  int m_size = m_BoundingRect.width();
+    return (-pos.y() < pos.x() - m_size + 9);
 }
