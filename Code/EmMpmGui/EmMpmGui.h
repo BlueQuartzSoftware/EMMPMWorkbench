@@ -39,7 +39,7 @@
 
 //-- UIC generated Header
 #include <ui_EmMpmGui.h>
-class UIA;
+class UserInitArea;
 class UserInitAreaTableModel;
 
 class EmMpmGui : public QMainWindow, private Ui::EmMpmGui
@@ -78,7 +78,7 @@ class EmMpmGui : public QMainWindow, private Ui::EmMpmGui
   QString                     m_OpenDialogLastDirectory;
   QString                     m_CurrentImageFile;
 
-  QList<UIA*>                 m_UserInitAreas;
+  QList<UserInitArea*>                 m_UserInitAreas;
   UserInitAreaTableModel*         m_UserInitAreaTableModel;
 
 

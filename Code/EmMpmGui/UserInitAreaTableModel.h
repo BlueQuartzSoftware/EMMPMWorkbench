@@ -33,7 +33,7 @@
 
 #include <QtCore/QAbstractTableModel>
 
-#include "uia.h"
+#include "UserInitArea.h"
 
 /*
  *
@@ -59,16 +59,16 @@ class UserInitAreaTableModel : public QAbstractTableModel
 
   public slots:
 
-    void addUserInitArea(UIA* uia);
-    void deleteUserInitArea(UIA* uia);
-    void updateUserInitArea(UIA* uia);
+    void addUserInitArea(UserInitArea* uia);
+    void deleteUserInitArea(UserInitArea* uia);
+    void updateUserInitArea(UserInitArea* uia);
 
 
   protected:
 
 
   private:
-    QList<UIA*> m_UserInitAreas;
+    QList<UserInitArea*> m_UserInitAreas;
     int m_column_count;
 
 

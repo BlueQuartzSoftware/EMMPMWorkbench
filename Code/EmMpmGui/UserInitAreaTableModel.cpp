@@ -45,20 +45,20 @@ UserInitAreaTableModel::~UserInitAreaTableModel()
 }
 
 
-void UserInitAreaTableModel::addUserInitArea(UIA* uia)
+void UserInitAreaTableModel::addUserInitArea(UserInitArea* uia)
 {
   m_UserInitAreas.push_back(uia);
   emit layoutChanged();
 
 }
 
-void UserInitAreaTableModel::deleteUserInitArea(UIA* uia)
+void UserInitAreaTableModel::deleteUserInitArea(UserInitArea* uia)
 {
   m_UserInitAreas.removeAll(uia);
   emit layoutChanged();
 }
 
-void UserInitAreaTableModel::updateUserInitArea(UIA* uia)
+void UserInitAreaTableModel::updateUserInitArea(UserInitArea* uia)
 {
 
   int row = m_UserInitAreas.indexOf(uia, 0);
@@ -98,7 +98,7 @@ QVariant UserInitAreaTableModel::data(const QModelIndex &index, int32_t role) co
   }
   else if (role == Qt::DisplayRole)
   {
-    UIA* uia = m_UserInitAreas.at(index.row());
+    UserInitArea* uia = m_UserInitAreas.at(index.row());
     if (NULL == uia)
     {
       return QVariant();

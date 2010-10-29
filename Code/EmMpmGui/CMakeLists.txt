@@ -49,7 +49,7 @@ SET( EmMpmGui_SRCS
   ${EmMpmGui_SOURCE_DIR}/main.cpp
   ${EmMpmGui_SOURCE_DIR}/EmMpmGui.cpp
   ${EmMpmGui_SOURCE_DIR}/EMMPMGraphicsView.cpp
-  ${EmMpmGui_SOURCE_DIR}/uia.cpp
+  ${EmMpmGui_SOURCE_DIR}/UserInitArea.cpp
   ${EmMpmGui_SOURCE_DIR}/UserInitAreaTableModel.cpp
 )
 
@@ -58,7 +58,7 @@ SET( EmMpmGui_SRCS
 SET( EmMpmGui_MOC_HDRS
   ${EmMpmGui_SOURCE_DIR}/EmMpmGui.h
   ${EmMpmGui_SOURCE_DIR}/EMMPMGraphicsView.h
-  ${EmMpmGui_SOURCE_DIR}/uia.h
+  ${EmMpmGui_SOURCE_DIR}/UserInitArea.h
   ${EmMpmGui_SOURCE_DIR}/UserInitAreaTableModel.h
 )
 cmp_IDE_SOURCE_PROPERTIES(GuiAlignment "${EmMpmGui_MOC_HDRS}" "${EmMpmGui_SRCS}" "${CMP_INSTALL_FILES}")

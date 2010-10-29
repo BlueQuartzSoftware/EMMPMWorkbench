@@ -37,7 +37,7 @@
 #include <QtGui/QRubberBand>
 
 class UserInitAreaTableModel;
-class UIA;
+class UserInitArea;
 
 class EMMPMGraphicsView : public QGraphicsView
 {

@@ -41,7 +41,7 @@
 #include <QtGui/QPixmap>
 #include <QtGui/QGraphicsPolygonItem>
 
-#include "uia.h"
+#include "UserInitArea.h"
 #include "UserInitAreaTableModel.h"
 
 // -----------------------------------------------------------------------------
@@ -241,7 +241,7 @@ void EMMPMGraphicsView::addNewInitArea(const QPolygonF &polygon)
   int index = 0;
   foreach (QGraphicsItem *item, items)
   {
-    UIA *itemBase = qgraphicsitem_cast<UIA * > (item);
+    UserInitArea *itemBase = qgraphicsitem_cast<UserInitArea * > (item);
     if (itemBase)
     {
       itemBase->setEmMpmClass(index);
@@ -256,7 +256,7 @@ void EMMPMGraphicsView::addNewInitArea(const QPolygonF &polygon)
   QRectF brect = polygon.boundingRect();
 
 #if 1
-  UIA* userInitArea = new UIA(m_UserInitAreaTableModel->rowCount(), brect);
+  UserInitArea* userInitArea = new UserInitArea(m_UserInitAreaTableModel->rowCount(), brect);
 #else
   QGraphicsPolygonItem* userInitArea = new QGraphicsPolygonItem(brect);
 #endif
@@ -270,8 +270,8 @@ void EMMPMGraphicsView::addNewInitArea(const QPolygonF &polygon)
 
   emit fireUserInitAreaAdded();
   m_UserInitAreaTableModel->addUserInitArea(userInitArea);
-  connect (userInitArea, SIGNAL(fireUserInitAreaDeleted(UIA*)),
-           m_UserInitAreaTableModel, SLOT(deleteUserInitArea(UIA*)), Qt::QueuedConnection);
-  connect (userInitArea, SIGNAL(fireUserInitAreaUpdated(UIA*)),
-           m_UserInitAreaTableModel, SLOT(updateUserInitArea(UIA*)), Qt::QueuedConnection);
+  connect (userInitArea, SIGNAL(fireUserInitAreaDeleted(UserInitArea*)),
+           m_UserInitAreaTableModel, SLOT(deleteUserInitArea(UserInitArea*)), Qt::QueuedConnection);
+  connect (userInitArea, SIGNAL(fireUserInitAreaUpdated(UserInitArea*)),
+           m_UserInitAreaTableModel, SLOT(updateUserInitArea(UserInitArea*)), Qt::QueuedConnection);
  }
