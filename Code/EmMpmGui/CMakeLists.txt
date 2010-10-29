@@ -79,7 +79,6 @@ SET( EmMpmGui_UIS
 # and finally any resource files
 SET( EmMpmGui_RCS
  ${PROJECT_RESOURCES_DIR}/icons/images/Icons.qrc
- ${EmMpmGui_SOURCE_DIR}/qtbox.qrc
 )
 
 # -- Run MOC and UIC on the necessary files   

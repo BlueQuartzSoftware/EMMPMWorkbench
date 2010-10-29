@@ -28,12 +28,12 @@
  * USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 
+#include <iostream>
 #include "UserInitAreaTableModel.h"
 
 UserInitAreaTableModel::UserInitAreaTableModel(QObject* parent) :
 QAbstractTableModel(parent),
 m_column_count(4)
-
 {
 
 
@@ -60,7 +60,10 @@ void UserInitAreaTableModel::deleteUserInitArea(UserInitArea* uia)
 
 void UserInitAreaTableModel::updateUserInitArea(UserInitArea* uia)
 {
+  QRectF r = uia->boundingRect();
+  QPolygonF p = uia->polygon();
 
+  std::cout << "updateUserInitArea: " << r.x() << ", " << r.y() << std::endl;
   int row = m_UserInitAreas.indexOf(uia, 0);
   QModelIndex index = createIndex(row, 0);
   emit layoutChanged();
