@@ -53,19 +53,22 @@ public:
                          QGraphicsItem *parent = 0);
     virtual ~UserInitArea();
 
+
+
+    void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget = 0);
+
+ public slots:
     void setEmMpmClass(int i) { m_EmMpmClass = i; }
     int getEmMpmClass() { return m_EmMpmClass; }
 
     void setEmMpmGrayLevel(int gray) { m_GrayLevel = gray; }
     int getEmMpmGrayLevel() { return m_GrayLevel; }
 
-    void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget = 0);
-
-
  signals:
 
   void fireUserInitAreaUpdated(UserInitArea*);
   void fireUserInitAreaDeleted(UserInitArea*);
+  void fireUserInitAreaSelected(UserInitArea*);
 
   protected:
     virtual void contextMenuEvent(QGraphicsSceneContextMenuEvent *event);
@@ -78,8 +81,11 @@ public:
     virtual int type() const;
     CTRL_POINTS isInResizeArea(const QPointF &pos);
 
-    static void duplicateSelectedItems(QGraphicsScene *scene);
+
     static void deleteSelectedItems(QGraphicsScene *scene);
+    static void propertiesSelectedItems(QGraphicsScene *scene);
+
+    static void duplicateSelectedItems(QGraphicsScene *scene);
     static void growSelectedItems(QGraphicsScene *scene);
     static void shrinkSelectedItems(QGraphicsScene *scene);
 

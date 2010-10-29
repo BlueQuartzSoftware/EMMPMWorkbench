@@ -78,16 +78,28 @@ class EMMPMGraphicsView : public QGraphicsView
 
 
   public slots:
-    void zoomIn() { scaleBy(1.1); }
-    void zoomOut() { scaleBy(1.0/1.1); }
-    void scaleBy(double factor)
-    {
-      scale(factor, factor);
-    }
+    void zoomIn() { scale(1.1, 1.1); }
+    void zoomOut() { scale(1.0/1.1, 1.0/1.1); }
+
     void fitToWindow()
     {
       QRectF r = scene()->sceneRect();
       fitInView(r, Qt::KeepAspectRatio);
+    }
+
+    void setZoomIndex(int index)
+    {
+      if (index == 3)
+      {
+        resetMatrix();
+        resetTransform();
+      }
+      else
+      {
+        resetMatrix();
+        resetTransform();
+        scale(m_ZoomFactors[index], m_ZoomFactors[index]);
+      }
     }
 
     //TODO Need to implement setCompositeMode(int)

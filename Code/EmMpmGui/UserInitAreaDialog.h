@@ -28,73 +28,31 @@
  * USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 
-#ifndef EMMPMGUI_H_
-#define EMMPMGUI_H_
+#ifndef USERINITAREADIALOG_H_
+#define USERINITAREADIALOG_H_
 
-//-- Qt Includes
-#include <QtCore/QObject>
-#include <QtCore/QString>
-#include <QtGui/QCloseEvent>
-#include <QtGui/QMainWindow>
-#include <QtGui/QWidget>
-#include <QtGui/QGraphicsScene>
+#include <QtGui/QDialog>
+
 
 //-- UIC generated Header
-#include <ui_EmMpmGui.h>
+#include <ui_UserInitAreaDialog.h>
+
 class UserInitArea;
-class UserInitAreaTableModel;
 
-class EmMpmGui : public QMainWindow, private Ui::EmMpmGui
+
+
+class UserInitAreaDialog : public QDialog, public Ui::UserInitAreaDialog
 {
-
-    Q_OBJECT;
+  Q_OBJECT;
 
   public:
-    EmMpmGui(QWidget *parent = 0);
-    virtual ~EmMpmGui();
-
-
-
-  protected slots:
-
-    void imageFileLoaded(const QString &filename);
-//    void userInitAreaAdded(bool b, UIA* uia);
-//    void userInitAreaDeleted(UIA* uia);
-//    void userInitAreaUpdated(UIA* uia);
-
-  private slots:
-
-  void on_actionClose_triggered();
-
-  protected:
-    /**
-     * @brief Implements the CloseEvent to Quit the application and write settings
-     * to the preference file
-     */
-    void closeEvent(QCloseEvent *event);
-
-  /**
-   * @brief Initializes some of the GUI elements with selections or other GUI related items
-   */
-  void setupGui();
-
-
-  signals:
-
-
-
+    UserInitAreaDialog( UserInitArea* uia, QWidget *parent = 0);
+    virtual ~UserInitAreaDialog();
 
   private:
-  QString                     m_OpenDialogLastDirectory;
-  QString                     m_CurrentImageFile;
 
-  QList<UserInitArea*>                 m_UserInitAreas;
-  UserInitAreaTableModel*         m_UserInitAreaTableModel;
-
-
-
-  EmMpmGui(const EmMpmGui&); // Copy Constructor Not Implemented
-  void operator=(const EmMpmGui&); // Operator '=' Not Implemented
+    UserInitAreaDialog(const UserInitAreaDialog&); // Copy Constructor Not Implemented
+    void operator=(const UserInitAreaDialog&); // Operator '=' Not Implemented
 };
 
-#endif /* EMMPMGUI_H_ */
+#endif /* USERINITAREADIALOG_H_ */

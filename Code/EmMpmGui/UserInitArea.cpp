@@ -29,7 +29,7 @@
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 #include <iostream>
 
-#include "UserInitArea.h"
+
 #include <QtGui/QGraphicsScene>
 #include <QtGui/QGraphicsSceneMouseEvent>
 #include <QtGui/QPainter>
@@ -38,6 +38,9 @@
 #include <QtGui/QKeyEvent>
 #include <QtCore/QRect>
 
+
+#include "UserInitArea.h"
+#include "UserInitAreaDialog.h"
 
 
 // -----------------------------------------------------------------------------
@@ -119,7 +122,7 @@ void UserInitArea::contextMenuEvent(QGraphicsSceneContextMenuEvent *event)
 
     QMenu menu;
     QAction *delAction = menu.addAction("Delete");
-//    QAction *newAction = menu.addAction("New");
+    QAction *propertiesAction = menu.addAction("Properties");
 //    QAction *growAction = menu.addAction("Grow");
 //    QAction *shrinkAction = menu.addAction("Shrink");
 
@@ -127,12 +130,35 @@ void UserInitArea::contextMenuEvent(QGraphicsSceneContextMenuEvent *event)
 
     if (selectedAction == delAction)
         deleteSelectedItems(scene());
-//    else if (selectedAction == newAction)
-//        duplicateSelectedItems(scene());
+    else if (selectedAction == propertiesAction)
+        propertiesSelectedItems(scene());
 //    else if (selectedAction == growAction)
 //        growSelectedItems(scene());
 //    else if (selectedAction == shrinkAction)
 //        shrinkSelectedItems(scene());
+}
+
+// -----------------------------------------------------------------------------
+//
+// -----------------------------------------------------------------------------
+void UserInitArea::propertiesSelectedItems(QGraphicsScene *scene)
+{
+    if (!scene)
+        return;
+
+    QList<QGraphicsItem *> selected;
+    selected = scene->selectedItems();
+
+    foreach (QGraphicsItem *item, selected)
+    {
+      UserInitArea *itemBase = qgraphicsitem_cast<UserInitArea *>(item);
+      if (itemBase) {
+        UserInitAreaDialog about(itemBase);
+        about.exec();
+      }
+    }
+
+
 }
 
 // -----------------------------------------------------------------------------
@@ -235,6 +261,39 @@ void UserInitArea::shrinkSelectedItems(QGraphicsScene *scene)
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
+void UserInitArea::mousePressEvent(QGraphicsSceneMouseEvent *event)
+{
+  static qreal z = 0.0;
+  setZValue(z += 1.0);
+  m_CurrentResizeHandle = isInResizeArea(event->pos());
+  if (event->button() == Qt::LeftButton && m_CurrentResizeHandle != UserInitArea::NO_CTRL_POINT)
+  {
+  //  std::cout << "mousePressEvent m_isResizing = true" << std::endl;
+    m_isResizing = true;
+  }
+  else
+  {
+    QGraphicsItem::mousePressEvent(event);
+    emit fireUserInitAreaSelected(this);
+  }
+}
+
+// -----------------------------------------------------------------------------
+//
+// -----------------------------------------------------------------------------
+void UserInitArea::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
+{
+    if (event->button() == Qt::LeftButton && m_isResizing) {
+        m_isResizing = false;
+    } else {
+        QGraphicsItem::mouseReleaseEvent(event);
+    }
+    emit fireUserInitAreaUpdated(this);
+}
+
+// -----------------------------------------------------------------------------
+//
+// -----------------------------------------------------------------------------
 void UserInitArea::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
 {
   if (m_isResizing)
@@ -249,7 +308,7 @@ void UserInitArea::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
     float w = boundingRect().width();
     float h = boundingRect().height();
     //        std::cout << "Delta(): " << deltaX << ", " << deltaY << std::endl;
-    //        std::cout << "newRect: " << x << ", " << y << " (" << w << " x " << h << ")" << std::endl;
+  //  std::cout << "newRect: " << x << ", " << y << " (" << w << " x " << h << ")" << std::endl;
     QRectF newRect = boundingRect();
     // Move the upper left corner as it is grown
     if (m_CurrentResizeHandle == UserInitArea::UPPER_LEFT_CTRL_POINT)
@@ -274,8 +333,6 @@ void UserInitArea::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
       newRect.setWidth(w + deltaX);
       newRect.setHeight(h + deltaY);
     }
-
- //   std::cout << "newRect: " << newRect.x() << ", " << newRect.y() << " (" << newRect.width() << " x " << newRect.height() << ")" << std::endl;
     prepareGeometryChange();
     setPolygon(QPolygonF(newRect));
   }
@@ -283,24 +340,12 @@ void UserInitArea::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
   {
     QGraphicsItem::mouseMoveEvent(event);
   }
-  QPointF p = pos();
-  QPointF sp = scenePos();
-  QPointF pp = mapFromParent(p);
-  QRectF brect = boundingRect();
-
-  std::cout << "---------------------------------------------" << std::endl;
-  std::cout << "pos: " << p.x() << ", " << p.y() << std::endl;
-  std::cout << "scenePos: " << sp.x() << ", " << sp.y() << std::endl;
-  std::cout << "mapFromParent: " << pp.x() << ", " << pp.y() << std::endl;
-  std::cout << "bound rect: " << brect.x() << ", " << brect.y()  <<  "  " << brect.width() << "x" << brect.height() << std::endl;
-
-  const QRect oldRect = brect.toAlignedRect();
-  std::cout << "oldRect: " << oldRect.x() << ", " << oldRect.y()  <<  "  " << oldRect.width() << "x" << oldRect.height() << std::endl;
-
-
- // emit fireUserInitAreaUpdated(this);
+  emit fireUserInitAreaUpdated(this);
 }
 
+// -----------------------------------------------------------------------------
+//
+// -----------------------------------------------------------------------------
 void UserInitArea::hoverMoveEvent(QGraphicsSceneHoverEvent *event)
 {
   UserInitArea::CTRL_POINTS pt = isInResizeArea(event->pos());
@@ -323,32 +368,9 @@ void UserInitArea::hoverMoveEvent(QGraphicsSceneHoverEvent *event)
   QGraphicsItem::hoverMoveEvent(event);
 }
 
-void UserInitArea::mousePressEvent(QGraphicsSceneMouseEvent *event)
-{
-    static qreal z = 0.0;
-  setZValue(z += 1.0);
-  m_CurrentResizeHandle = isInResizeArea(event->pos());
-  if (event->button() == Qt::LeftButton && m_CurrentResizeHandle != UserInitArea::NO_CTRL_POINT)
-  {
-  //  std::cout << "mousePressEvent m_isResizing = true" << std::endl;
-    m_isResizing = true;
-  }
-  else
-  {
-    QGraphicsItem::mousePressEvent(event);
-  }
-}
-
-void UserInitArea::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
-{
-    if (event->button() == Qt::LeftButton && m_isResizing) {
-        m_isResizing = false;
-    } else {
-        QGraphicsItem::mouseReleaseEvent(event);
-    }
-    emit fireUserInitAreaUpdated(this);
-}
-
+// -----------------------------------------------------------------------------
+//
+// -----------------------------------------------------------------------------
 void UserInitArea::keyPressEvent(QKeyEvent *event)
 {
     switch (event->key()) {
@@ -370,6 +392,9 @@ void UserInitArea::keyPressEvent(QKeyEvent *event)
     }
 }
 
+// -----------------------------------------------------------------------------
+//
+// -----------------------------------------------------------------------------
 UserInitArea::CTRL_POINTS UserInitArea::isInResizeArea(const QPointF &pos)
 {
   float x = boundingRect().x();
@@ -403,7 +428,9 @@ UserInitArea::CTRL_POINTS UserInitArea::isInResizeArea(const QPointF &pos)
   return NO_CTRL_POINT;
 }
 
-
+// -----------------------------------------------------------------------------
+//
+// -----------------------------------------------------------------------------
 int UserInitArea::type() const
 {
     return Type;

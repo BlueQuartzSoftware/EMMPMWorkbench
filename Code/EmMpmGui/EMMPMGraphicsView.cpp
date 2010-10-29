@@ -43,6 +43,7 @@
 
 #include "UserInitArea.h"
 #include "UserInitAreaTableModel.h"
+#include "UserInitAreaDialog.h"
 
 // -----------------------------------------------------------------------------
 //
@@ -268,10 +269,15 @@ void EMMPMGraphicsView::addNewInitArea(const QPolygonF &polygon)
   userInitArea->setZValue(1);
   userInitArea->setCacheMode(QGraphicsItem::DeviceCoordinateCache);
 
+  // Show a dialog to let the user set the values
+  UserInitAreaDialog about(userInitArea);
+  about.exec();
+
   emit fireUserInitAreaAdded();
   m_UserInitAreaTableModel->addUserInitArea(userInitArea);
   connect (userInitArea, SIGNAL(fireUserInitAreaDeleted(UserInitArea*)),
            m_UserInitAreaTableModel, SLOT(deleteUserInitArea(UserInitArea*)), Qt::QueuedConnection);
   connect (userInitArea, SIGNAL(fireUserInitAreaUpdated(UserInitArea*)),
            m_UserInitAreaTableModel, SLOT(updateUserInitArea(UserInitArea*)), Qt::QueuedConnection);
+
  }

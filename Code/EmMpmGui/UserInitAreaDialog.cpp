@@ -28,73 +28,25 @@
  * USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 
-#ifndef EMMPMGUI_H_
-#define EMMPMGUI_H_
-
-//-- Qt Includes
-#include <QtCore/QObject>
-#include <QtCore/QString>
-#include <QtGui/QCloseEvent>
-#include <QtGui/QMainWindow>
-#include <QtGui/QWidget>
-#include <QtGui/QGraphicsScene>
-
-//-- UIC generated Header
-#include <ui_EmMpmGui.h>
-class UserInitArea;
-class UserInitAreaTableModel;
-
-class EmMpmGui : public QMainWindow, private Ui::EmMpmGui
+#include "UserInitAreaDialog.h"
+#include "UserInitArea.h"
+// -----------------------------------------------------------------------------
+//
+// -----------------------------------------------------------------------------
+UserInitAreaDialog::UserInitAreaDialog(UserInitArea* uia, QWidget *parent) :
+QDialog(parent)
 {
+  setupUi(this);
+  classSB->setValue(uia->getEmMpmClass());
+  grayLevelSB->setValue(uia->getEmMpmGrayLevel());
 
-    Q_OBJECT;
+  connect(classSB, SIGNAL(valueChanged(int)),
+          uia, SLOT(setEmMpmClass(int)), Qt::QueuedConnection);
 
-  public:
-    EmMpmGui(QWidget *parent = 0);
-    virtual ~EmMpmGui();
+  connect(grayLevelSB, SIGNAL(valueChanged(int)),
+          uia, SLOT(setEmMpmGrayLevel(int)), Qt::QueuedConnection);
+}
 
-
-
-  protected slots:
-
-    void imageFileLoaded(const QString &filename);
-//    void userInitAreaAdded(bool b, UIA* uia);
-//    void userInitAreaDeleted(UIA* uia);
-//    void userInitAreaUpdated(UIA* uia);
-
-  private slots:
-
-  void on_actionClose_triggered();
-
-  protected:
-    /**
-     * @brief Implements the CloseEvent to Quit the application and write settings
-     * to the preference file
-     */
-    void closeEvent(QCloseEvent *event);
-
-  /**
-   * @brief Initializes some of the GUI elements with selections or other GUI related items
-   */
-  void setupGui();
-
-
-  signals:
-
-
-
-
-  private:
-  QString                     m_OpenDialogLastDirectory;
-  QString                     m_CurrentImageFile;
-
-  QList<UserInitArea*>                 m_UserInitAreas;
-  UserInitAreaTableModel*         m_UserInitAreaTableModel;
-
-
-
-  EmMpmGui(const EmMpmGui&); // Copy Constructor Not Implemented
-  void operator=(const EmMpmGui&); // Operator '=' Not Implemented
-};
-
-#endif /* EMMPMGUI_H_ */
+UserInitAreaDialog::~UserInitAreaDialog()
+{
+}

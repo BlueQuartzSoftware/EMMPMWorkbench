@@ -52,6 +52,37 @@ EmMpmGui::~EmMpmGui()
 }
 
 // -----------------------------------------------------------------------------
+//  Called when the main window is closed.
+// -----------------------------------------------------------------------------
+void EmMpmGui::closeEvent(QCloseEvent *event)
+{
+//  qint32 err = _checkDirtyDocument();
+//  if (err < 0)
+//  {
+//    event->ignore();
+//  }
+//  else
+  {
+   // writeSettings();
+    event->accept();
+  }
+}
+
+// -----------------------------------------------------------------------------
+//
+// -----------------------------------------------------------------------------
+void EmMpmGui::on_actionClose_triggered() {
+  //std::cout << "on_actionClose_triggered" << std::endl;
+  qint32 err = 0;
+//  err = _checkDirtyDocument();
+  if (err >= 0)
+  {
+    // Close the window. Files have been saved if needed
+    this->close();
+  }
+}
+
+// -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
 void EmMpmGui::setupGui()
@@ -94,10 +125,14 @@ void EmMpmGui::setupGui()
   compositeModeCB->setCurrentIndex(0);
   compositeModeCB->blockSignals(false);
 
-
+  QHeaderView* headerView = new QHeaderView(Qt::Horizontal, userInitTable);
+  headerView->setResizeMode(QHeaderView::Interactive);
+  userInitTable->setHorizontalHeader(headerView);
   m_UserInitAreaTableModel = new UserInitAreaTableModel;
   m_GraphicsView->setUserInitAreaTableModel(m_UserInitAreaTableModel);
   userInitTable->setModel(m_UserInitAreaTableModel);
+  headerView->show();
+
 
 
   connect (m_GraphicsView, SIGNAL(fireImageFileLoaded(const QString &)),
@@ -124,6 +159,9 @@ void EmMpmGui::setupGui()
 
   connect (compositeModeCB, SIGNAL(currentIndexChanged(int)),
            m_GraphicsView, SLOT(setCompositeMode(int)), Qt::QueuedConnection);
+
+  connect (zoomCB, SIGNAL(currentIndexChanged(int)),
+           m_GraphicsView, SLOT(setZoomIndex(int)), Qt::QueuedConnection);
 }
 
 
