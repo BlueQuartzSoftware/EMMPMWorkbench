@@ -154,8 +154,6 @@ add_subdirectory(${PROJECT_CODE_DIR}/EmMpmGui ${PROJECT_BINARY_DIR}/Applications
 # Compile the main Application - this MUST be last due to how some variables are built up.
 #add_subdirectory(${PROJECT_CODE_DIR}/IPHelper/Application ${PROJECT_BINARY_DIR}/Applications/IPHelper)
 
-
-
 # Should we build the HTML documentation
 option(IPHelper_BUILD_API_DOCS "Use Doxygen to create the HTML based API documentation" OFF)
 if(IPHelper_BUILD_API_DOCS)

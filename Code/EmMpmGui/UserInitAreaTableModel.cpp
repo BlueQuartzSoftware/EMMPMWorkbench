@@ -109,7 +109,7 @@ QVariant UserInitAreaTableModel::data(const QModelIndex &index, int32_t role) co
     int col = index.column();
     if (col == 0)
     {
-      return QVariant(uia->getEmMpmClass());
+      return QVariant(index.row());
     }
     else if (col == 1) // TOP LEFT CORNER
     {

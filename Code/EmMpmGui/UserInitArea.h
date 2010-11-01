@@ -58,8 +58,8 @@ public:
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget = 0);
 
  public slots:
-    void setEmMpmClass(int i) { m_EmMpmClass = i; }
-    int getEmMpmClass() { return m_EmMpmClass; }
+//    void setEmMpmClass(int i) { m_EmMpmClass = i; }
+//    int getEmMpmClass() { return m_EmMpmClass; }
 
     void setEmMpmGrayLevel(int gray) { m_GrayLevel = gray; }
     int getEmMpmGrayLevel() { return m_GrayLevel; }
