@@ -37,11 +37,9 @@ UserInitAreaDialog::UserInitAreaDialog(UserInitArea* uia, QWidget *parent) :
 QDialog(parent)
 {
   setupUi(this);
-  classSB->setValue(uia->getEmMpmClass());
+
   grayLevelSB->setValue(uia->getEmMpmGrayLevel());
 
-  connect(classSB, SIGNAL(valueChanged(int)),
-          uia, SLOT(setEmMpmClass(int)), Qt::QueuedConnection);
 
   connect(grayLevelSB, SIGNAL(valueChanged(int)),
           uia, SLOT(setEmMpmGrayLevel(int)), Qt::QueuedConnection);
