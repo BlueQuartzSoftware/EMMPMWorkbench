@@ -53,7 +53,7 @@ m_EmMpmClass(userIndex)
   setFlag(QGraphicsItem::ItemIsMovable, true);
   setFlag(QGraphicsItem::ItemIsSelectable, true);
   setFlag(QGraphicsItem::ItemIsFocusable, true);
-  setFlag(QGraphicsItem::ItemSendsGeometryChanges, true);
+  //  setFlag(QGraphicsItem::ItemSendsGeometryChanges, true);
   setAcceptHoverEvents(true);
   m_isResizing = false;
   m_CurrentResizeHandle = UserInitArea::NO_CTRL_POINT;
@@ -98,13 +98,13 @@ void UserInitArea::paint(QPainter *painter, const QStyleOptionGraphicsItem *opti
     painter->setPen(QPen(QColor(255, 25, 25, alpha)));
     painter->setBrush( QBrush(QColor(255, 25, 25, alpha)));
     //Upper Left
-    painter->drawRect(x, y, ctrlPointSize, ctrlPointSize);
+    painter->drawRect((int)x, (int)y, (int)ctrlPointSize, (int)ctrlPointSize);
     //Upper Right
-    painter->drawRect(x + w - ctrlPointSize, y, ctrlPointSize, ctrlPointSize);
+    painter->drawRect((int)x + (int)w - (int)ctrlPointSize, (int)y, (int)ctrlPointSize, (int)ctrlPointSize);
     // Lower Right
-    painter->drawRect(x + w - ctrlPointSize, y + h - ctrlPointSize, ctrlPointSize, ctrlPointSize);
+    painter->drawRect((int)x + (int)w - (int)ctrlPointSize, (int)y + (int)h - (int)ctrlPointSize, (int)ctrlPointSize, (int)ctrlPointSize);
     // Lower Left
-    painter->drawRect(x, y + h - ctrlPointSize, ctrlPointSize, ctrlPointSize);
+    painter->drawRect((int)x, (int)y + (int)h - (int)ctrlPointSize, (int)ctrlPointSize, (int)ctrlPointSize);
   }
 
   painter->setRenderHint(QPainter::Antialiasing, false);
