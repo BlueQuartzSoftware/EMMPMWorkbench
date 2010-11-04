@@ -41,6 +41,7 @@
 #include <QtGui/QPixmap>
 #include <QtGui/QGraphicsPolygonItem>
 
+#include "EmMpmGui.h"
 #include "UserInitArea.h"
 #include "UserInitAreaTableModel.h"
 #include "UserInitAreaDialog.h"
@@ -67,6 +68,7 @@ EMMPMGraphicsView::EMMPMGraphicsView(QWidget *parent)
   m_ZoomFactors[7] = 4.000f;
   m_ZoomFactors[8] = 6.000f;
   m_ZoomFactors[9] = -1.0f;
+  m_MainGui = NULL;
 }
 
 // -----------------------------------------------------------------------------
@@ -143,14 +145,29 @@ void EMMPMGraphicsView::loadImageFile(const QString &filename)
 
   if (NULL != m_ImageGraphicsItem)
   {
+    QList<QGraphicsItem* > items;
+    items = m_ImageGraphicsItem->children();
+    foreach (QGraphicsItem *item, items)
+      {
+        UserInitArea *itemBase = qgraphicsitem_cast<UserInitArea * > (item);
+        if (itemBase)
+        {
+          m_MainGui->deleteUserInitArea(itemBase);
+          gScene->removeItem(itemBase);
+          m_UserInitAreaTableModel->deleteUserInitArea(itemBase);
+          delete itemBase;
+        }
+
+      }
+
     gScene->removeItem(m_ImageGraphicsItem); //Remove the image that is displaying
     m_ImageGraphicsItem->setParentItem(NULL); // Set the parent to NULL
     delete m_ImageGraphicsItem; // Delete the object
   }
 
 
-  QImage image = QImage(filename);
-  if (image.isNull() == true)
+  m_CurrentImage = QImage(filename);
+  if (m_CurrentImage.isNull() == true)
   {
     //TODO: Show some sort of error message
     return;
@@ -160,9 +177,9 @@ void EMMPMGraphicsView::loadImageFile(const QString &filename)
   {
     colorTable[i] = qRgb(i, i, i);
   }
-  image.setColorTable(colorTable);
+  m_CurrentImage.setColorTable(colorTable);
 
-  QPixmap imagePixmap = QPixmap::fromImage(image);
+  QPixmap imagePixmap = QPixmap::fromImage(m_CurrentImage);
   m_ImageGraphicsItem = gScene->addPixmap(imagePixmap); // Add the new image into the display
   m_ImageGraphicsItem->setAcceptDrops(true);
   m_ImageGraphicsItem->setZValue(-1);
@@ -170,9 +187,17 @@ void EMMPMGraphicsView::loadImageFile(const QString &filename)
   gScene->setSceneRect(rect);
   centerOn(m_ImageGraphicsItem);
 
-
   emit fireImageFileLoaded(filename);
 }
+
+// -----------------------------------------------------------------------------
+//
+// -----------------------------------------------------------------------------
+QImage EMMPMGraphicsView::getCurrentImage()
+{
+  return m_CurrentImage;
+}
+
 
 // -----------------------------------------------------------------------------
 //
@@ -228,6 +253,14 @@ void EMMPMGraphicsView::mouseReleaseEvent(QMouseEvent *event)
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
+void EMMPMGraphicsView::setEmMpmGui(EmMpmGui* gui)
+{
+  m_MainGui = gui;
+}
+
+// -----------------------------------------------------------------------------
+//
+// -----------------------------------------------------------------------------
 void EMMPMGraphicsView::addNewInitArea(const QPolygonF &polygon)
 {
   QGraphicsScene* gScene = scene();
@@ -236,48 +269,41 @@ void EMMPMGraphicsView::addNewInitArea(const QPolygonF &polygon)
     gScene = new QGraphicsScene(this);
     setScene(gScene);
   }
-#if 0
-  QList<QGraphicsItem * > items;
-  items = gScene->items();
-  int index = 0;
-  foreach (QGraphicsItem *item, items)
-  {
-    UserInitArea *itemBase = qgraphicsitem_cast<UserInitArea * > (item);
-    if (itemBase)
-    {
-      itemBase->setEmMpmClass(index);
-      ++index;
-    }
-
-  }
-#endif
-
-
-  const int alpha = 155;
   QRectF brect = polygon.boundingRect();
 
-#if 1
   UserInitArea* userInitArea = new UserInitArea(m_UserInitAreaTableModel->rowCount(), brect);
-#else
-  QGraphicsPolygonItem* userInitArea = new QGraphicsPolygonItem(brect);
-#endif
+
   // Line Color
-  userInitArea->setPen(QPen(QColor(225, 225, 225, alpha)));
+  userInitArea->setPen(QPen(QColor(225, 225, 225, UIA::Alpha)));
   // Fill Color
-  userInitArea->setBrush(QBrush(QColor(28, 28, 200, alpha)));
+  userInitArea->setBrush(QBrush(QColor(28, 28, 200, UIA::Alpha)));
   userInitArea->setParentItem(m_ImageGraphicsItem);
   userInitArea->setZValue(1);
   userInitArea->setCacheMode(QGraphicsItem::DeviceCoordinateCache);
 
   // Show a dialog to let the user set the values
-  UserInitAreaDialog about(userInitArea);
-  about.exec();
+  UserInitAreaDialog initDialog(userInitArea);
+  int ret =initDialog.exec();
+  if (ret == QDialog::Accepted)
+  {
+    m_UserInitAreaTableModel->addUserInitArea(userInitArea);
 
-  emit fireUserInitAreaAdded();
-  m_UserInitAreaTableModel->addUserInitArea(userInitArea);
-  connect (userInitArea, SIGNAL(fireUserInitAreaDeleted(UserInitArea*)),
-           m_UserInitAreaTableModel, SLOT(deleteUserInitArea(UserInitArea*)), Qt::QueuedConnection);
-  connect (userInitArea, SIGNAL(fireUserInitAreaUpdated(UserInitArea*)),
-           m_UserInitAreaTableModel, SLOT(updateUserInitArea(UserInitArea*)), Qt::QueuedConnection);
+
+    connect (userInitArea, SIGNAL(fireUserInitAreaUpdated(UserInitArea*)),
+             m_UserInitAreaTableModel, SLOT(updateUserInitArea(UserInitArea*)), Qt::QueuedConnection);
+    connect (userInitArea, SIGNAL (fireUserInitAreaUpdated(UserInitArea*)),
+             m_MainGui, SLOT(userInitAreaUpdated(UserInitArea*)), Qt::QueuedConnection);
+    connect (userInitArea, SIGNAL(fireUserInitAreaAboutToDelete(UserInitArea*)),
+             m_MainGui, SLOT(deleteUserInitArea(UserInitArea*)) );
+    connect (userInitArea, SIGNAL(fireUserInitAreaDeleted(UserInitArea*)),
+             m_UserInitAreaTableModel, SLOT(deleteUserInitArea(UserInitArea*)));
+
+    emit fireUserInitAreaAdded(userInitArea);
+  }
+  else
+  {
+    delete userInitArea;
+  }
+
 
  }

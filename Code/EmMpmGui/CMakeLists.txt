@@ -29,6 +29,13 @@ endif(QT4_FOUND)
 # Set the GUI type for different platforms
 SET(GUI_TYPE )
 
+find_package(Qwt)
+if (QWT_FOUND)
+    include_directories(${QWT_INCLUDE_DIR})
+else()
+    message(FATAL_ERROR "Qwt is required for this project")
+endif()
+
 # Set some Win32 Specific Settings
 IF(WIN32)
  SET(GUI_TYPE WIN32)
@@ -52,6 +59,7 @@ SET( EmMpmGui_SRCS
   ${EmMpmGui_SOURCE_DIR}/UserInitArea.cpp
   ${EmMpmGui_SOURCE_DIR}/UserInitAreaTableModel.cpp
   ${EmMpmGui_SOURCE_DIR}/UserInitAreaDialog.cpp
+  ${EmMpmGui_SOURCE_DIR}/histogram_item.cpp
 )
 
 # another list, this time it includes all header files that should 
@@ -67,7 +75,7 @@ cmp_IDE_SOURCE_PROPERTIES(GuiAlignment "${EmMpmGui_MOC_HDRS}" "${EmMpmGui_SRCS}"
 
 
 SET (EmMpmGui_HDRS
-#  ${EmMpmGui_SOURCE_DIR}/EMMPMUserInitArea.h
+    ${EmMpmGui_SOURCE_DIR}/histogram_item.h
 )
 cmp_IDE_SOURCE_PROPERTIES(GuiAlignment "${EmMpmGui_HDRS}" "${EmMpmGui_SRCS}" "${CMP_INSTALL_FILES}")
 
@@ -140,12 +148,9 @@ ENDIF(Q_WS_WIN)
 ADD_EXECUTABLE( EmMpmGui ${GUI_TYPE} ${${PROJECT_NAME}_PROJECT_SRCS} )
 TARGET_LINK_LIBRARIES(EmMpmGui
                       ${QT_LIBRARIES}
-                  #      ${ITK_LIBRARIES}
-                  #      AIMLib
                         QtSupport
-                  #      MXADataModel
-                  #      AngReader
-                        )
+                        ${QWT_LIBRARIES}
+)
 
 
 cmp_InstallationSupport(EmMpmGui ${EXE_DEBUG_EXTENSION} ${${PROJECT_NAME}_BINARY_DIR} "1")

@@ -53,9 +53,7 @@ class UserInitAreaTableModel : public QAbstractTableModel
     QVariant  data ( const QModelIndex & index, int role = Qt::DisplayRole ) const;
     QVariant  headerData ( int section, Qt::Orientation orientation, int role = Qt::DisplayRole ) const;
 
-//    bool  insertRow ( int row, const QModelIndex & parent = QModelIndex() );
-//    virtual bool  insertRows ( int row, int count, const QModelIndex & parent = QModelIndex() );
-
+    const QList<UserInitArea*>& getUserInitAreas() { return m_UserInitAreas; }
 
   public slots:
 

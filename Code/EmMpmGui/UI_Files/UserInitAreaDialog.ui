@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>264</width>
-    <height>86</height>
+    <height>148</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -50,18 +50,18 @@
    <item row="0" column="0">
     <widget class="QLabel" name="label_2">
      <property name="text">
-      <string>Gray Level</string>
+      <string>Class</string>
      </property>
     </widget>
    </item>
    <item row="0" column="1">
-    <widget class="QSpinBox" name="grayLevelSB">
+    <widget class="QSpinBox" name="m_Class">
      <property name="maximum">
-      <number>255</number>
+      <number>15</number>
      </property>
     </widget>
    </item>
-   <item row="3" column="0" colspan="2">
+   <item row="5" column="0" colspan="2">
     <widget class="QDialogButtonBox" name="buttonBox">
      <property name="orientation">
       <enum>Qt::Horizontal</enum>
@@ -71,8 +71,39 @@
      </property>
     </widget>
    </item>
+   <item row="1" column="0">
+    <widget class="QLabel" name="label_3">
+     <property name="text">
+      <string>Gray Level</string>
+     </property>
+    </widget>
+   </item>
+   <item row="1" column="1">
+    <widget class="QSpinBox" name="m_GrayLevel">
+     <property name="maximum">
+      <number>255</number>
+     </property>
+    </widget>
+   </item>
+   <item row="2" column="0">
+    <widget class="QLabel" name="label">
+     <property name="text">
+      <string>Color of Area</string>
+     </property>
+    </widget>
+   </item>
+   <item row="2" column="1">
+    <widget class="ColorComboPicker" name="colorPicker"/>
+   </item>
   </layout>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>ColorComboPicker</class>
+   <extends>QComboBox</extends>
+   <header location="global">ColorComboPicker.h</header>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections>
   <connection>

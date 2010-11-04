@@ -28,51 +28,29 @@
  * USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 
-#include "UserInitAreaDialog.h"
-#include "UserInitArea.h"
-// -----------------------------------------------------------------------------
-//
-// -----------------------------------------------------------------------------
-UserInitAreaDialog::UserInitAreaDialog(UserInitArea* uia, QWidget *parent) :
-QDialog(parent),
-m_uia(uia)
+#ifndef COLORCOMBOPICKER_H_
+#define COLORCOMBOPICKER_H_
+
+#include <QComboBox>
+
+class QColor;
+class QWidget;
+
+class ColorComboPicker : public QComboBox
 {
-  setupUi(this);
+  Q_OBJECT;
+  Q_PROPERTY(QColor color READ color WRITE setColor USER true);
 
-  m_GrayLevel->setValue(uia->getEmMpmGrayLevel());
-  m_Class->setValue(uia->getEmMpmClass());
+  public:
+    ColorComboPicker(QWidget *widget = 0);
 
+  public:
+    QColor color() const;
+    void setColor(QColor c);
 
-  connect(m_GrayLevel, SIGNAL(valueChanged(int)),
-          uia, SLOT(setEmMpmGrayLevel(int)), Qt::QueuedConnection);
-  connect(m_Class, SIGNAL(valueChanged(int)),
-          uia, SLOT(setEmMpmClass(int)), Qt::QueuedConnection);
-}
+  private:
+    void populateList();
+};
 
-// -----------------------------------------------------------------------------
-//
-// -----------------------------------------------------------------------------
-UserInitAreaDialog::~UserInitAreaDialog()
-{
-}
+#endif
 
-// -----------------------------------------------------------------------------
-//
-// -----------------------------------------------------------------------------
-//QColor UserInitAreaDialog::getSelectedColor()
-//{
-//  QStringList colorNames = QColor::colorNames();
-//  return QColor(colorNames[colorPicker->currentIndex()]);
-//}
-
-
-// -----------------------------------------------------------------------------
-//
-// -----------------------------------------------------------------------------
-void UserInitAreaDialog::on_colorPicker_currentIndexChanged(int index)
-{
-  QStringList colorNames = QColor::colorNames();
-  QColor c = QColor(colorNames[colorPicker->currentIndex()]);
-  c.setAlpha(UIA::Alpha);
-  m_uia->setColor( c );
-}

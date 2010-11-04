@@ -47,18 +47,20 @@
 //
 // -----------------------------------------------------------------------------
 UserInitArea::UserInitArea(int userIndex, const QPolygonF &polygon,  QGraphicsItem *parent) :
-QGraphicsPolygonItem(polygon, parent),
-m_EmMpmClass(userIndex)
+QGraphicsPolygonItem(polygon, parent)
 {
   setFlag(QGraphicsItem::ItemIsMovable, true);
   setFlag(QGraphicsItem::ItemIsSelectable, true);
   setFlag(QGraphicsItem::ItemIsFocusable, true);
-  setFlag(QGraphicsItem::ItemSendsGeometryChanges, true);
+ // setFlag(QGraphicsItem::ItemSendsGeometryChanges, true);
   setAcceptHoverEvents(true);
   m_isResizing = false;
   m_CurrentResizeHandle = UserInitArea::NO_CTRL_POINT;
   ctrlPointSize = 7.0f;
-  m_GrayLevel = 255/16 * userIndex;
+  m_GrayLevel = 255 - (255/16 * userIndex);
+  m_Color.setRgb(25, 25, 255, 150);
+  m_Class = userIndex;
+  setBrush(QBrush(m_Color));
 }
 
 // -----------------------------------------------------------------------------
@@ -75,10 +77,10 @@ UserInitArea::~UserInitArea()
 void UserInitArea::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget)
 {
   painter->setRenderHint(QPainter::Antialiasing, true);
-  const int alpha = 128;
+
   if (option->state & QStyle::State_HasFocus)
   {
-    painter->setPen(QPen(QColor(255, 25, 25, alpha), 3.0));
+    painter->setPen(QPen(QColor(255, 25, 25, UIA::Alpha), 3.0));
     painter->setBrush(brush());
   }
   else
@@ -95,8 +97,8 @@ void UserInitArea::paint(QPainter *painter, const QStyleOptionGraphicsItem *opti
     float w = boundingRect().width();
     float h = boundingRect().height();
 
-    painter->setPen(QPen(QColor(255, 25, 25, alpha)));
-    painter->setBrush( QBrush(QColor(255, 25, 25, alpha)));
+    painter->setPen(QPen(QColor(255, 25, 25, UIA::Alpha)));
+    painter->setBrush( QBrush(QColor(255, 25, 25, UIA::Alpha)));
     //Upper Left
     painter->drawRect(x, y, ctrlPointSize, ctrlPointSize);
     //Upper Right
@@ -121,12 +123,16 @@ void UserInitArea::contextMenuEvent(QGraphicsSceneContextMenuEvent *event)
     }
 
     QMenu menu;
-    QAction *delAction = menu.addAction("Delete");
+
     QAction *propertiesAction = menu.addAction("Properties");
+    menu.addSeparator();
+    QAction *delAction = menu.addAction("Delete");
+
 //    QAction *growAction = menu.addAction("Grow");
 //    QAction *shrinkAction = menu.addAction("Shrink");
 
     QAction *selectedAction = menu.exec(event->screenPos());
+
 
     if (selectedAction == delAction)
         deleteSelectedItems(scene());
@@ -155,6 +161,7 @@ void UserInitArea::propertiesSelectedItems(QGraphicsScene *scene)
       if (itemBase) {
         UserInitAreaDialog about(itemBase);
         about.exec();
+        emit itemBase->fireUserInitAreaUpdated(itemBase);
       }
     }
 
@@ -194,12 +201,15 @@ void UserInitArea::deleteSelectedItems(QGraphicsScene *scene)
     QList<QGraphicsItem *> selected;
     selected = scene->selectedItems();
 
-    foreach (QGraphicsItem *item, selected) {
-        UserInitArea *itemBase = qgraphicsitem_cast<UserInitArea *>(item);
-        if (itemBase) {
-            emit itemBase->fireUserInitAreaDeleted(itemBase);
-            delete itemBase;
-        }
+    foreach (QGraphicsItem *item, selected)
+    {
+      UserInitArea *itemBase = qgraphicsitem_cast<UserInitArea *>(item);
+      if (itemBase)
+      {
+        emit itemBase->fireUserInitAreaAboutToDelete(itemBase);
+        emit itemBase->fireUserInitAreaDeleted(itemBase);
+        delete itemBase;
+      }
     }
 }
 
@@ -434,4 +444,10 @@ UserInitArea::CTRL_POINTS UserInitArea::isInResizeArea(const QPointF &pos)
 int UserInitArea::type() const
 {
     return Type;
+}
+
+void UserInitArea::setColor(QColor color)
+{
+  m_Color = color;
+  setBrush(QBrush(m_Color));
 }

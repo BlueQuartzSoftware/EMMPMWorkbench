@@ -31,6 +31,9 @@
 #include <iostream>
 #include "UserInitAreaTableModel.h"
 
+// -----------------------------------------------------------------------------
+//
+// -----------------------------------------------------------------------------
 UserInitAreaTableModel::UserInitAreaTableModel(QObject* parent) :
 QAbstractTableModel(parent),
 m_column_count(4)
@@ -39,12 +42,17 @@ m_column_count(4)
 
 }
 
+// -----------------------------------------------------------------------------
+//
+// -----------------------------------------------------------------------------
 UserInitAreaTableModel::~UserInitAreaTableModel()
 {
 
 }
 
-
+// -----------------------------------------------------------------------------
+//
+// -----------------------------------------------------------------------------
 void UserInitAreaTableModel::addUserInitArea(UserInitArea* uia)
 {
   m_UserInitAreas.push_back(uia);
@@ -52,17 +60,23 @@ void UserInitAreaTableModel::addUserInitArea(UserInitArea* uia)
 
 }
 
+// -----------------------------------------------------------------------------
+//
+// -----------------------------------------------------------------------------
 void UserInitAreaTableModel::deleteUserInitArea(UserInitArea* uia)
 {
   m_UserInitAreas.removeAll(uia);
   emit layoutChanged();
 }
 
+// -----------------------------------------------------------------------------
+//
+// -----------------------------------------------------------------------------
 void UserInitAreaTableModel::updateUserInitArea(UserInitArea* uia)
 {
   int row = m_UserInitAreas.indexOf(uia, 0);
   QModelIndex index0 = createIndex(row, 0);
-  QModelIndex index1 = createIndex(row, 3);
+  QModelIndex index1 = createIndex(row, m_column_count);
   emit dataChanged(index0, index1);
 }
 
@@ -99,35 +113,36 @@ QVariant UserInitAreaTableModel::data(const QModelIndex &index, int32_t role) co
   else if (role == Qt::DisplayRole)
   {
     UserInitArea* uia = m_UserInitAreas.at(index.row());
-    QPoint p = uia->pos().toPoint();
-    QRect b = uia->boundingRect().toAlignedRect();
     if (NULL == uia)
     {
       return QVariant();
     }
+    QPoint p = uia->pos().toPoint();
+    QRect b = uia->boundingRect().toAlignedRect();
+
 
     int col = index.column();
-    if (col == 0)
-    {
-      return QVariant(index.row());
-    }
-    else if (col == 1) // TOP LEFT CORNER
+    if (col == 2) // TOP LEFT CORNER
     {
       QString s = QString::number(b.x()+p.x());
       s.append(", ");
       s.append(QString::number(b.y()+p.y()));
       return QVariant(s);
     }
-    else if (col == 2) // BOTTOM RIGHT CORNER
+    else if (col == 3) // BOTTOM RIGHT CORNER
     {
       QString s = QString::number(b.x()+p.x() + b.width());
       s.append(", ");
       s.append(QString::number(b.y()+p.y() + b.height()));
       return QVariant(s);
     }
-    else if (col == 3)
+    else if (col == 1)
     {
       return QVariant(QString::number(uia->getEmMpmGrayLevel()));
+    }
+    else if (col == 0)
+    {
+      return QVariant(QString::number(uia->getEmMpmClass()));
     }
   }
 
@@ -139,11 +154,13 @@ QVariant UserInitAreaTableModel::data(const QModelIndex &index, int32_t role) co
 // -----------------------------------------------------------------------------
 QVariant  UserInitAreaTableModel::headerData ( int section, Qt::Orientation orientation, int role ) const
 {
-  if (orientation == Qt::Horizontal && role == Qt::DisplayRole) {
-  if (section == 0) return QVariant(QString("Class"));
-  if (section == 1) return QVariant(QString("Upper Left"));
-  if (section == 2) return QVariant(QString("Lower Right"));
-  if (section == 3) return QVariant(QString("Gray Value"));
+  if (orientation == Qt::Horizontal && role == Qt::DisplayRole)
+  {
+    if (section == 0) return QVariant(QString("Class"));
+    else if (section == 1) return QVariant(QString("Gray Value"));
+    else if (section == 2) return QVariant(QString("Upper Left"));
+    else if (section == 3) return QVariant(QString("Lower Right"));
+
   }
   return QVariant();
 }

@@ -58,15 +58,19 @@ public:
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget = 0);
 
  public slots:
-//    void setEmMpmClass(int i) { m_EmMpmClass = i; }
-//    int getEmMpmClass() { return m_EmMpmClass; }
-
     void setEmMpmGrayLevel(int gray) { m_GrayLevel = gray; }
     int getEmMpmGrayLevel() { return m_GrayLevel; }
+
+    void setEmMpmClass(int eClass) { m_Class = eClass; }
+    int getEmMpmClass() { return m_Class; }
+
+    void setColor(QColor color);
+    QColor getColor() { return m_Color; }
 
  signals:
 
   void fireUserInitAreaUpdated(UserInitArea*);
+  void fireUserInitAreaAboutToDelete(UserInitArea*);
   void fireUserInitAreaDeleted(UserInitArea*);
   void fireUserInitAreaSelected(UserInitArea*);
 
@@ -94,8 +98,9 @@ private:
     bool m_isResizing;
     CTRL_POINTS m_CurrentResizeHandle;
     float ctrlPointSize;
-    int m_EmMpmClass;
-    int  m_GrayLevel;
+    int m_GrayLevel;
+    int m_Class;
+    QColor m_Color;
 };
 
 

@@ -38,19 +38,22 @@
 
 class UserInitAreaTableModel;
 class UserInitArea;
+class EmMpmGui;
+
 
 class EMMPMGraphicsView : public QGraphicsView
 {
     Q_OBJECT
 
   public:
-    EMMPMGraphicsView(QWidget *parent = NULL);
+    EMMPMGraphicsView( QWidget *parent = NULL);
 
     void setUserInitAreaTableModel(UserInitAreaTableModel* userInitAreaTableModel)
     {
       m_UserInitAreaTableModel = userInitAreaTableModel;
     }
-//  void setEmMpmGui(EmMpmGui* gui);
+
+    void setEmMpmGui(EmMpmGui* gui);
 
     /**
      * @brief Over-riding implementation from base class
@@ -73,6 +76,9 @@ class EMMPMGraphicsView : public QGraphicsView
     void mousePressEvent(QMouseEvent *);
     void mouseMoveEvent(QMouseEvent *);
     void mouseReleaseEvent(QMouseEvent *);
+
+
+    QImage getCurrentImage();
 
 
 
@@ -112,7 +118,7 @@ class EMMPMGraphicsView : public QGraphicsView
 
   signals:
    void fireImageFileLoaded(const QString &filename);
-   void fireUserInitAreaAdded();
+   void fireUserInitAreaAdded(UserInitArea* uia);
 
   protected:
     void loadImageFile(const QString &filename);
@@ -125,6 +131,8 @@ class EMMPMGraphicsView : public QGraphicsView
    QPoint         m_MouseClickOrigin;
    float          m_ZoomFactors[10];
    UserInitAreaTableModel* m_UserInitAreaTableModel;
+   QImage         m_CurrentImage;
+   EmMpmGui*     m_MainGui;
 
    EMMPMGraphicsView(const EMMPMGraphicsView&); // Copy Constructor Not Implemented
    void operator=(const EMMPMGraphicsView&); // Operator '=' Not Implemented

@@ -39,10 +39,19 @@
 #include <QtGui/QWidget>
 #include <QtGui/QGraphicsScene>
 
+
+
 //-- UIC generated Header
 #include <ui_EmMpmGui.h>
 class UserInitArea;
 class UserInitAreaTableModel;
+class QwtPlotZoomer;
+class QwtPlotPicker;
+class QwtPlotPanner;
+class QwtPlotGrid;
+class QwtPlotCurve;
+
+//class HistogramItem;
 
 class EmMpmGui : public QMainWindow, private Ui::EmMpmGui
 {
@@ -55,12 +64,15 @@ class EmMpmGui : public QMainWindow, private Ui::EmMpmGui
 
 
 
-  protected slots:
+  public slots:
 
     void imageFileLoaded(const QString &filename);
-//    void userInitAreaAdded(bool b, UIA* uia);
-//    void userInitAreaDeleted(UIA* uia);
-//    void userInitAreaUpdated(UIA* uia);
+    void userInitAreaAdded(UserInitArea* uia);
+    void deleteUserInitArea(UserInitArea* uia);
+    void userInitAreaUpdated(UserInitArea* uia);
+    void on_fitToWindow_clicked();
+
+
 
   private slots:
 
@@ -78,9 +90,7 @@ class EmMpmGui : public QMainWindow, private Ui::EmMpmGui
    */
   void setupGui();
 
-
-  signals:
-
+  void plotImageHistogram();
 
 
 
@@ -92,6 +102,13 @@ class EmMpmGui : public QMainWindow, private Ui::EmMpmGui
   UserInitAreaTableModel*         m_UserInitAreaTableModel;
 
 
+  QwtPlotZoomer* m_zoomer;
+  QwtPlotPicker* m_picker;
+  QwtPlotPanner* m_panner;
+  QwtPlotGrid*   m_grid;
+
+  QwtPlotCurve*  m_histogram;
+  QList<QwtPlotCurve*>  m_UIAGaussians;
 
   EmMpmGui(const EmMpmGui&); // Copy Constructor Not Implemented
   void operator=(const EmMpmGui&); // Operator '=' Not Implemented

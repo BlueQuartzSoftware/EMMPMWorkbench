@@ -32,6 +32,7 @@
 #define USERINITAREADIALOG_H_
 
 #include <QtGui/QDialog>
+#include <QtGui/QColor>
 
 
 //-- UIC generated Header
@@ -39,6 +40,10 @@
 
 class UserInitArea;
 
+namespace UIA
+{
+  const static int Alpha = 155;
+}
 
 
 class UserInitAreaDialog : public QDialog, public Ui::UserInitAreaDialog
@@ -49,8 +54,14 @@ class UserInitAreaDialog : public QDialog, public Ui::UserInitAreaDialog
     UserInitAreaDialog( UserInitArea* uia, QWidget *parent = 0);
     virtual ~UserInitAreaDialog();
 
-  private:
+  //  QColor getSelectedColor();
 
+    protected slots:
+    void on_colorPicker_currentIndexChanged(int index);
+
+
+  private:
+    UserInitArea* m_uia;
     UserInitAreaDialog(const UserInitAreaDialog&); // Copy Constructor Not Implemented
     void operator=(const UserInitAreaDialog&); // Operator '=' Not Implemented
 };
