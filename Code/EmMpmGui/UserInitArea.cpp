@@ -100,13 +100,13 @@ void UserInitArea::paint(QPainter *painter, const QStyleOptionGraphicsItem *opti
     painter->setPen(QPen(QColor(255, 25, 25, UIA::Alpha)));
     painter->setBrush( QBrush(QColor(255, 25, 25, UIA::Alpha)));
     //Upper Left
-    painter->drawRect(x, y, ctrlPointSize, ctrlPointSize);
+    painter->drawRect((int)x, (int)y, (int)ctrlPointSize, (int)ctrlPointSize);
     //Upper Right
-    painter->drawRect(x + w - ctrlPointSize, y, ctrlPointSize, ctrlPointSize);
+    painter->drawRect((int)x + (int)w - (int)ctrlPointSize, (int)y, (int)ctrlPointSize, (int)ctrlPointSize);
     // Lower Right
-    painter->drawRect(x + w - ctrlPointSize, y + h - ctrlPointSize, ctrlPointSize, ctrlPointSize);
+    painter->drawRect((int)x + (int)w - (int)ctrlPointSize, (int)y + (int)h - (int)ctrlPointSize, (int)ctrlPointSize, (int)ctrlPointSize);
     // Lower Left
-    painter->drawRect(x, y + h - ctrlPointSize, ctrlPointSize, ctrlPointSize);
+    painter->drawRect((int)x, (int)y + (int)h - (int)ctrlPointSize, (int)ctrlPointSize, (int)ctrlPointSize);
   }
 
   painter->setRenderHint(QPainter::Antialiasing, false);
