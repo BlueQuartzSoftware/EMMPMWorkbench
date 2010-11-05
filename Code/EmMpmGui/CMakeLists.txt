@@ -71,13 +71,13 @@ SET( EmMpmGui_MOC_HDRS
   ${EmMpmGui_SOURCE_DIR}/UserInitAreaTableModel.h
   ${EmMpmGui_SOURCE_DIR}/UserInitAreaDialog.h
 )
-cmp_IDE_SOURCE_PROPERTIES(GuiAlignment "${EmMpmGui_MOC_HDRS}" "${EmMpmGui_SRCS}" "${CMP_INSTALL_FILES}")
+cmp_IDE_SOURCE_PROPERTIES(EmMpmGui "${EmMpmGui_MOC_HDRS}" "${EmMpmGui_SRCS}" "0")
 
 
 SET (EmMpmGui_HDRS
     ${EmMpmGui_SOURCE_DIR}/histogram_item.h
 )
-cmp_IDE_SOURCE_PROPERTIES(GuiAlignment "${EmMpmGui_HDRS}" "${EmMpmGui_SRCS}" "${CMP_INSTALL_FILES}")
+cmp_IDE_SOURCE_PROPERTIES(EmMpmGui "${EmMpmGui_HDRS}" "${EmMpmGui_SRCS}" "0")
 
 
 
