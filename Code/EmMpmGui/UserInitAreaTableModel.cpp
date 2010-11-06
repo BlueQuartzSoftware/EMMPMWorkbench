@@ -99,7 +99,7 @@ int UserInitAreaTableModel::columnCount(const QModelIndex &index) const
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
-QVariant UserInitAreaTableModel::data(const QModelIndex &index, int32_t role) const
+QVariant UserInitAreaTableModel::data(const QModelIndex &index, qint32 role) const
 {
 
   if (! index.isValid())
