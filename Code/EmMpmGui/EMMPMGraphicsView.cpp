@@ -69,6 +69,9 @@ EMMPMGraphicsView::EMMPMGraphicsView(QWidget *parent)
   m_ZoomFactors[8] = 6.000f;
   m_ZoomFactors[9] = -1.0f;
   m_MainGui = NULL;
+  m_RubberBand = NULL;
+  m_ImageGraphicsItem = NULL;
+
 }
 
 // -----------------------------------------------------------------------------
@@ -222,7 +225,7 @@ void EMMPMGraphicsView::mousePressEvent(QMouseEvent *event)
 // -----------------------------------------------------------------------------
 void EMMPMGraphicsView::mouseMoveEvent(QMouseEvent *event)
 {
- if (m_AddUserInitArea == true) {
+ if (m_AddUserInitArea == true && m_RubberBand != NULL) {
    m_RubberBand->setGeometry(QRect(m_MouseClickOrigin, event->pos()).normalized());
  }
  else

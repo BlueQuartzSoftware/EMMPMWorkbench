@@ -163,7 +163,7 @@ void EmMpmGui::setupGui()
            this, SLOT(imageFileLoaded(const QString &)), Qt::QueuedConnection);
 
   connect (addUserInitArea, SIGNAL(toggled(bool)),
-           m_GraphicsView, SLOT(addUserInitArea(bool)), Qt::QueuedConnection);
+           m_GraphicsView, SLOT(addUserInitArea(bool)));
 
   connect (m_GraphicsView, SIGNAL(fireUserInitAreaAdded(UserInitArea*)),
            this, SLOT(userInitAreaAdded(UserInitArea*)), Qt::QueuedConnection);

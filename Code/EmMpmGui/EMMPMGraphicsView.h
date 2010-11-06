@@ -113,7 +113,9 @@ class EMMPMGraphicsView : public QGraphicsView
       std::cout << "TODO:// Need to implement setCompositeMode(int)" << std::endl;
     }
 
-    void addUserInitArea(bool b) { m_AddUserInitArea = b; }
+    void addUserInitArea(bool b) {
+      m_AddUserInitArea = b;
+    }
 
 
   signals:
