@@ -119,7 +119,7 @@ m_OpenDialogLastDirectory("~/")
   readSettings();
 
   QRecentFileList* recentFileList = QRecentFileList::instance();
-  connect(recentFileList, SIGNAL (fileListChanged(const QString &)), this, SLOT(updateRecentFileList(const QString &)));
+  connect(recentFileList, SIGNAL (fileListChanged(const QString &)), this, SLOT(updateBaseRecentFileList(const QString &)));
   // Get out initial Recent File List
   this->updateRecentFileList(QString::null);
 }
@@ -424,7 +424,7 @@ void IPHelperApp::updateRecentFileList(const QString &file)
       action->setData(file);
       action->setVisible(true);
       this->menu_RecentFiles->addAction(action);
-      connect(action, SIGNAL(triggered()), this, SLOT(openRecentFile()));
+      connect(action, SIGNAL(triggered()), this, SLOT(openRecentBaseImageFile()));
     }
 }
 

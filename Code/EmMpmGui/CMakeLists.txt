@@ -7,15 +7,8 @@
 PROJECT( EmMpmGui )
 cmake_minimum_required(VERSION 2.8)
 
-# --------------------------------------------------------------------
-# Find the ITK Package
-# --------------------------------------------------------------------
-#IF(ITK_FOUND)
-#  INCLUDE(${USE_ITK_FILE})
-#ELSE(ITK_FOUND)
-#  MESSAGE(FATAL_ERROR "Cannot build without ITK.  Please set ITK_DIR.")
-#ENDIF(ITK_FOUND)
 
+cmpGenerateVersionString ( ${EmMpmGui_BINARY_DIR}/EmMpmGuiVersion.h "EmMpm_Gui" "EmMpmGui")
 
 # ------------------------------------------------------------------------------
 #  Qt 4 Section
@@ -30,12 +23,26 @@ endif(QT4_FOUND)
 # Set the GUI type for different platforms
 SET(GUI_TYPE )
 
+# ------------------------------------------------------------------------------
+#  Qwt Section
+# ------------------------------------------------------------------------------
 find_package(Qwt)
 if (QWT_FOUND)
     include_directories(${QWT_INCLUDE_DIR})
     CMP_COPY_DEPENDENT_LIBRARIES("qwt")
 else()
     message(FATAL_ERROR "Qwt is required for this project")
+endif()
+
+# ------------------------------------------------------------------------------
+#  EM/MPM Library Section
+# ------------------------------------------------------------------------------
+find_package(EMMPM)
+if (EMMPM_FOUND)
+    include_directories(${EMMPM_INCLUDE_DIR})
+    CMP_COPY_DEPENDENT_LIBRARIES("EMMPM")
+else()
+    message(FATAL_ERROR "EMMPM is required for this project")
 endif()
 
 # Set some Win32 Specific Settings
@@ -49,8 +56,8 @@ include_directories( ${PROJECT_CODE_DIR}/EmMpmGui )
 include_directories( ${PROJECT_CODE_DIR}/QtSupport )
 
 include_directories( ${EmMpmGui_BINARY_DIR} )
-include_directories( ${EmMpmGui_BINARY_DIR}/MXA)
-include_directories( ${EmMpmGui_BINARY_DIR}/QtSupport )
+include_directories( ${IPHelper_BINARY_DIR}/MXA)
+include_directories( ${IPHelper_BINARY_DIR}/QtSupport )
  
 # --------------------------------------------------------------------
 # Set up all the source codes
@@ -61,7 +68,9 @@ SET( EmMpmGui_SRCS
   ${EmMpmGui_SOURCE_DIR}/UserInitArea.cpp
   ${EmMpmGui_SOURCE_DIR}/UserInitAreaTableModel.cpp
   ${EmMpmGui_SOURCE_DIR}/UserInitAreaDialog.cpp
-  ${EmMpmGui_SOURCE_DIR}/histogram_item.cpp
+  ${EmMpmGui_SOURCE_DIR}/EMMPMTask.cpp
+  
+  
 )
 
 # another list, this time it includes all header files that should 
@@ -72,12 +81,15 @@ SET( EmMpmGui_MOC_HDRS
   ${EmMpmGui_SOURCE_DIR}/UserInitArea.h
   ${EmMpmGui_SOURCE_DIR}/UserInitAreaTableModel.h
   ${EmMpmGui_SOURCE_DIR}/UserInitAreaDialog.h
+  ${EmMpmGui_SOURCE_DIR}/EMMPMTask.h
+  ${PROJECT_CODE_DIR}/AIM/Common/AIMImage.cpp
 )
 cmp_IDE_SOURCE_PROPERTIES(EmMpmGui "${EmMpmGui_MOC_HDRS}" "${EmMpmGui_SRCS}" "0")
 
 
 SET (EmMpmGui_HDRS
-    ${EmMpmGui_SOURCE_DIR}/histogram_item.h
+#    ${EmMpmGui_SOURCE_DIR}/histogram_item.h
+    ${PROJECT_CODE_DIR}/AIM/Common/AIMImage.h
 )
 cmp_IDE_SOURCE_PROPERTIES(EmMpmGui "${EmMpmGui_HDRS}" "${EmMpmGui_SRCS}" "0")
 
@@ -150,8 +162,8 @@ ENDIF(Q_WS_WIN)
 ADD_EXECUTABLE( EmMpmGui ${GUI_TYPE} ${${PROJECT_NAME}_PROJECT_SRCS} )
 TARGET_LINK_LIBRARIES(EmMpmGui
                       ${QT_LIBRARIES}
-                        QtSupport
-                        ${QWT_LIBRARIES}
+                      QtSupport
+                      ${QWT_LIBRARIES}
 )
 
 

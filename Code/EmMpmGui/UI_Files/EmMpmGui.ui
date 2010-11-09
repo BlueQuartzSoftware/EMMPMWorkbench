@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>836</width>
-    <height>802</height>
+    <width>983</width>
+    <height>857</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -30,7 +30,7 @@
     <item>
      <widget class="QTabWidget" name="tabWidget">
       <property name="currentIndex">
-       <number>0</number>
+       <number>1</number>
       </property>
       <widget class="QWidget" name="tab">
        <attribute name="title">
@@ -47,6 +47,9 @@
          <layout class="QHBoxLayout" name="horizontalLayout_2">
           <item>
            <layout class="QHBoxLayout" name="horizontalLayout">
+            <property name="spacing">
+             <number>4</number>
+            </property>
             <item>
              <widget class="QToolButton" name="zoomIn">
               <property name="text">
@@ -149,7 +152,7 @@
             </property>
             <property name="sizeHint" stdset="0">
              <size>
-              <width>40</width>
+              <width>12</width>
               <height>20</height>
              </size>
             </property>
@@ -188,9 +191,28 @@
              <enum>QLayout::SetMinimumSize</enum>
             </property>
             <item>
+             <widget class="QComboBox" name="imageDisplayCombo">
+              <item>
+               <property name="text">
+                <string>Original Image</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Segmented Image</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Composited Image</string>
+               </property>
+              </item>
+             </widget>
+            </item>
+            <item>
              <widget class="QLabel" name="label">
               <property name="text">
-               <string>Composition Mode:</string>
+               <string>Composite Mode</string>
               </property>
              </widget>
             </item>
@@ -290,9 +312,6 @@
             <attribute name="horizontalHeaderStretchLastSection">
              <bool>false</bool>
             </attribute>
-            <attribute name="horizontalHeaderStretchLastSection">
-             <bool>false</bool>
-            </attribute>
            </widget>
            <widget class="QwtPlot" name="m_HistogramPlot">
             <property name="minimumSize">
@@ -319,111 +338,56 @@
          <number>4</number>
         </property>
         <item>
+         <widget class="QLabel" name="label_16">
+          <property name="font">
+           <font>
+            <weight>75</weight>
+            <bold>true</bold>
+           </font>
+          </property>
+          <property name="text">
+           <string>Single File to Segment</string>
+          </property>
+         </widget>
+        </item>
+        <item>
          <layout class="QGridLayout" name="gridLayout_5">
-          <item row="0" column="1">
+          <item row="2" column="1">
            <widget class="QLabel" name="label_6">
             <property name="text">
              <string>Input Image</string>
             </property>
            </widget>
           </item>
-          <item row="0" column="2">
+          <item row="2" column="2">
            <widget class="QLineEdit" name="fixedImageFile"/>
           </item>
-          <item row="0" column="3">
+          <item row="2" column="3">
            <widget class="QPushButton" name="fixedImageButton">
             <property name="text">
              <string>Select...</string>
             </property>
            </widget>
           </item>
-          <item row="1" column="1">
+          <item row="3" column="1">
            <widget class="QLabel" name="label_7">
             <property name="text">
              <string>Segmented Image</string>
             </property>
            </widget>
           </item>
-          <item row="1" column="2">
+          <item row="3" column="2">
            <widget class="QLineEdit" name="outputImageFile">
             <property name="text">
              <string/>
             </property>
            </widget>
           </item>
-          <item row="1" column="3">
+          <item row="3" column="3">
            <widget class="QPushButton" name="outputImageButton">
             <property name="text">
              <string>Select...</string>
             </property>
-           </widget>
-          </item>
-         </layout>
-        </item>
-        <item>
-         <layout class="QHBoxLayout" name="_5">
-          <item>
-           <widget class="QLabel" name="label_2">
-            <property name="text">
-             <string>Output Prefix</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QLineEdit" name="outputPrefix"/>
-          </item>
-          <item>
-           <widget class="QLabel" name="label_3">
-            <property name="text">
-             <string>Output Suffix</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QLineEdit" name="outputSuffix"/>
-          </item>
-          <item>
-           <spacer name="horizontalSpacer_8">
-            <property name="orientation">
-             <enum>Qt::Horizontal</enum>
-            </property>
-            <property name="sizeHint" stdset="0">
-             <size>
-              <width>40</width>
-              <height>20</height>
-             </size>
-            </property>
-           </spacer>
-          </item>
-          <item>
-           <widget class="QLabel" name="outputImageTypeLabel">
-            <property name="text">
-             <string>Output Image Format</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QComboBox" name="outputImageType">
-            <item>
-             <property name="text">
-              <string>tif</string>
-             </property>
-            </item>
-            <item>
-             <property name="text">
-              <string>bmp</string>
-             </property>
-            </item>
-            <item>
-             <property name="text">
-              <string>jpeg</string>
-             </property>
-            </item>
-            <item>
-             <property name="text">
-              <string>png</string>
-             </property>
-            </item>
            </widget>
           </item>
          </layout>
@@ -744,6 +708,13 @@
          </layout>
         </item>
         <item>
+         <widget class="QCheckBox" name="processFolder">
+          <property name="text">
+           <string>Process Folder</string>
+          </property>
+         </widget>
+        </item>
+        <item>
          <layout class="QGridLayout" name="gridLayout_3">
           <item row="0" column="1">
            <widget class="QLabel" name="label_5">
@@ -781,6 +752,74 @@
             <property name="text">
              <string>Output Folder</string>
             </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+        <item>
+         <layout class="QHBoxLayout" name="_5">
+          <item>
+           <widget class="QLabel" name="label_2">
+            <property name="text">
+             <string>Output Prefix</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLineEdit" name="outputPrefix"/>
+          </item>
+          <item>
+           <widget class="QLabel" name="label_3">
+            <property name="text">
+             <string>Output Suffix</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLineEdit" name="outputSuffix"/>
+          </item>
+          <item>
+           <spacer name="horizontalSpacer_8">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>40</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+          <item>
+           <widget class="QLabel" name="outputImageTypeLabel">
+            <property name="text">
+             <string>Output Image Format</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QComboBox" name="outputImageType">
+            <item>
+             <property name="text">
+              <string>tif</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>bmp</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>jpeg</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>png</string>
+             </property>
+            </item>
            </widget>
           </item>
          </layout>
@@ -882,26 +921,6 @@
          </layout>
         </item>
         <item>
-         <widget class="QLabel" name="label_4">
-          <property name="font">
-           <font>
-            <weight>75</weight>
-            <bold>true</bold>
-           </font>
-          </property>
-          <property name="text">
-           <string>EM/MPM Inputs. Use the &quot;Plugins&quot; menu to change Image Processing Type</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QCheckBox" name="processFolder">
-          <property name="text">
-           <string>Process Folder</string>
-          </property>
-         </widget>
-        </item>
-        <item>
          <widget class="QListView" name="fileListView">
           <property name="alternatingRowColors">
            <bool>true</bool>
@@ -915,6 +934,33 @@
       </widget>
      </widget>
     </item>
+    <item>
+     <layout class="QHBoxLayout" name="horizontalLayout_7">
+      <property name="sizeConstraint">
+       <enum>QLayout::SetMinimumSize</enum>
+      </property>
+      <item>
+       <spacer name="horizontalSpacer_10">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>40</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+      <item>
+       <widget class="QPushButton" name="processBtn">
+        <property name="text">
+         <string>Segment</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
    </layout>
   </widget>
   <widget class="QMenuBar" name="menubar">
@@ -922,7 +968,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>836</width>
+     <width>983</width>
      <height>22</height>
     </rect>
    </property>
@@ -932,31 +978,34 @@
     </property>
     <widget class="QMenu" name="menu_FixedRecentFiles">
      <property name="title">
-      <string>Fixed Recent Files</string>
+      <string>Recent Files</string>
      </property>
      <addaction name="separator"/>
     </widget>
     <widget class="QMenu" name="menu_MovingRecentFiles">
      <property name="title">
-      <string>Moving Recent Files</string>
+      <string>Segmented Recent Files</string>
      </property>
      <addaction name="separator"/>
     </widget>
-    <addaction name="actionOpenFixedImage"/>
-    <addaction name="actionOpenMovingImage"/>
+    <addaction name="actionOpenBaseImage"/>
+    <addaction name="actionOpenOverlayImage"/>
     <addaction name="menu_FixedRecentFiles"/>
     <addaction name="menu_MovingRecentFiles"/>
     <addaction name="separator"/>
-    <addaction name="actionSave_Canvas"/>
+    <addaction name="actionSaveCanvas"/>
     <addaction name="actionAbout"/>
     <addaction name="actionExit"/>
+    <addaction name="separator"/>
+    <addaction name="actionClose"/>
+    <addaction name="separator"/>
    </widget>
    <addaction name="menuFile"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
-  <action name="actionOpenFixedImage">
+  <action name="actionOpenBaseImage">
    <property name="text">
-    <string>Open Fixed Image</string>
+    <string>Open Image</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+O</string>
@@ -967,7 +1016,7 @@
     <string>About...</string>
    </property>
   </action>
-  <action name="actionSave_Canvas">
+  <action name="actionSaveCanvas">
    <property name="text">
     <string>Save Canvas...</string>
    </property>
@@ -980,14 +1029,17 @@
     <string>Ctrl+Q</string>
    </property>
   </action>
-  <action name="actionOpenMovingImage">
+  <action name="actionOpenOverlayImage">
    <property name="text">
-    <string>Open Moving Image</string>
+    <string>Open Segmented Image</string>
    </property>
   </action>
   <action name="actionClose">
    <property name="text">
     <string>Close</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+W</string>
    </property>
   </action>
  </widget>
@@ -996,6 +1048,7 @@
    <class>QwtPlot</class>
    <extends>QFrame</extends>
    <header>qwt_plot.h</header>
+   <container>1</container>
   </customwidget>
   <customwidget>
    <class>EMMPMGraphicsView</class>

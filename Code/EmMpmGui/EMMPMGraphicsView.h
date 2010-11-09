@@ -28,8 +28,8 @@
  * USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 
-#ifndef QFSDROPPABLEGRAPHICSVIEW_H_
-#define QFSDROPPABLEGRAPHICSVIEW_H_
+#ifndef _EMMPM_GRAPHICS_VIEW_H_
+#define _EMMPM_GRAPHICS_VIEW_H_
 
 #include <iostream>
 #include <QtGui/QGraphicsView>
@@ -40,12 +40,22 @@ class UserInitAreaTableModel;
 class UserInitArea;
 class EmMpmGui;
 
+namespace EmMpm_Constants {
+
+enum ImageDisplayType {
+  OriginalImage = 0,
+  SegmentedImage,
+  CompositedImage,
+};
+
+}
 
 class EMMPMGraphicsView : public QGraphicsView
 {
     Q_OBJECT
 
   public:
+
     EMMPMGraphicsView( QWidget *parent = NULL);
 
     void setUserInitAreaTableModel(UserInitAreaTableModel* userInitAreaTableModel)
@@ -77,67 +87,59 @@ class EMMPMGraphicsView : public QGraphicsView
     void mouseMoveEvent(QMouseEvent *);
     void mouseReleaseEvent(QMouseEvent *);
 
+    void setBaseImage(QImage image);
+    QImage getBaseImage();
 
-    QImage getCurrentImage();
+    void setOverlayImage(QImage image);
+    QImage getOverlayImage();
 
+    QImage getCompositedImage();
 
-
+    void loadBaseImageFile(const QString &filename);
+    void loadOverlayImageFile(const QString &filename);
 
   public slots:
-    void zoomIn() { scale(1.1, 1.1); }
-    void zoomOut() { scale(1.0/1.1, 1.0/1.1); }
+    void zoomIn();
+    void zoomOut();
 
-    void fitToWindow()
-    {
-      QRectF r = scene()->sceneRect();
-      fitInView(r, Qt::KeepAspectRatio);
-    }
+    void fitToWindow();
 
-    void setZoomIndex(int index)
-    {
-      if (index == 3)
-      {
-        resetMatrix();
-        resetTransform();
-      }
-      else
-      {
-        resetMatrix();
-        resetTransform();
-        scale(m_ZoomFactors[index], m_ZoomFactors[index]);
-      }
-    }
+    void setZoomIndex(int index);
 
-    //TODO Need to implement setCompositeMode(int)
-    void setCompositeMode(int mode) {
-      std::cout << "TODO:// Need to implement setCompositeMode(int)" << std::endl;
-    }
+    void setImageDisplayType(int displayType);
 
-    void addUserInitArea(bool b) {
-      m_AddUserInitArea = b;
-    }
+    void setCompositeMode(int mode);
 
+    void addUserInitArea(bool b);
 
   signals:
-   void fireImageFileLoaded(const QString &filename);
+   void fireBaseImageFileLoaded(const QString &filename);
+   void fireOverlayImageFileLoaded(const QString &filename);
    void fireUserInitAreaAdded(UserInitArea* uia);
 
   protected:
-    void loadImageFile(const QString &filename);
+
     void addNewInitArea(const QPolygonF &box);
 
   private:
    QGraphicsItem* m_ImageGraphicsItem;
+   QImage         m_BaseImage;
+   QImage         m_OverlayImage;
+   QImage         m_CompositedImage;
+
    bool           m_AddUserInitArea;
    QRubberBand*   m_RubberBand;
    QPoint         m_MouseClickOrigin;
    float          m_ZoomFactors[10];
    UserInitAreaTableModel* m_UserInitAreaTableModel;
-   QImage         m_CurrentImage;
-   EmMpmGui*     m_MainGui;
+
+   EmMpmGui*      m_MainGui;
+   EmMpm_Constants::ImageDisplayType           m_ImageDisplayType;
+   bool           m_ShowOverlayImage;
+   QPainter::CompositionMode m_composition_mode;
 
    EMMPMGraphicsView(const EMMPMGraphicsView&); // Copy Constructor Not Implemented
    void operator=(const EMMPMGraphicsView&); // Operator '=' Not Implemented
 };
 
-#endif /* QFSDROPPABLEGRAPHICSVIEW_H_ */
+#endif /* _EMMPM_GRAPHICS_VIEW_H_ */

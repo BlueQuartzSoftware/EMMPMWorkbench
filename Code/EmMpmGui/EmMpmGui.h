@@ -43,6 +43,8 @@
 
 //-- UIC generated Header
 #include <ui_EmMpmGui.h>
+
+
 class UserInitArea;
 class UserInitAreaTableModel;
 class QwtPlotZoomer;
@@ -50,56 +52,184 @@ class QwtPlotPicker;
 class QwtPlotPanner;
 class QwtPlotGrid;
 class QwtPlotCurve;
+class EMMPMTask;
 
-//class HistogramItem;
+#include "IPHelper/plugins/QImageProcessingInputFrame.h"
 
-class EmMpmGui : public QMainWindow, private Ui::EmMpmGui
+class EmMpmGui :  public QMainWindow, private Ui::EmMpmGui
 {
 
     Q_OBJECT;
 
+
   public:
     EmMpmGui(QWidget *parent = 0);
     virtual ~EmMpmGui();
+    void initWithFile(const QString imageFile, QString mountImage);
 
 
+    int processInputs(QObject* parentGUI);
+
+    /**
+     * @brief Reads the Preferences from the users pref file
+     */
+    void readSettings();
+
+    /**
+     * @brief Writes the preferences to the users pref file
+     */
+    void writeSettings();
+
+    typedef QPair<QString, QString>        InputOutputFilePair;
+    typedef QList<InputOutputFilePair>     InputOutputFilePairList;
+
+    MXA_INSTANCE_PROPERTY(QString, CurrentImageFile)
+    MXA_INSTANCE_PROPERTY(QString, CurrentProcessedFile)
+    MXA_INSTANCE_PROPERTY(QSortFilterProxyModel*, ProxyModel)
+    MXA_INSTANCE_PROPERTY(QList<QWidget* >, WidgetList)
+    MXA_INSTANCE_PROPERTY(bool, OutputExistsCheck)
+    MXA_INSTANCE_PROPERTY(ProcessQueueController*, QueueController)
+    MXA_INSTANCE_PROPERTY(ProcessQueueDialog*, QueueDialog)
+    MXA_INSTANCE_PROPERTY(QString, OpenDialogLastDirectory)
+    MXA_INSTANCE_PROPERTY(InputOutputFilePairList, InputOutputFilePairList)
+
+
+  signals:
+    void cancelTask();
+    void cancelProcessQueue();
 
   public slots:
 
-    void imageFileLoaded(const QString &filename);
+  // Manual hookup slots to get signals from the graphics view
+    void baseImageFileLoaded(const QString &filename);
+    void overlayImageFileLoaded(const QString &filename);
     void userInitAreaAdded(UserInitArea* uia);
     void deleteUserInitArea(UserInitArea* uia);
     void userInitAreaUpdated(UserInitArea* uia);
     void on_fitToWindow_clicked();
 
 
+  protected slots:
+  //Manual Hookup Menu Actions
+    void on_actionOpenBaseImage_triggered(); // Open a Data File
+    void on_actionOpenOverlayImage_triggered();
+    void on_actionSaveCanvas_triggered();
+    void on_actionAbout_triggered();
+    void on_actionExit_triggered();
+    void on_actionClose_triggered();
 
-  private slots:
 
-  void on_actionClose_triggered();
+
+    /* slots for the buttons in the GUI */
+    void on_processBtn_clicked();
+
+    /* slots for the buttons in the GUI */
+    void on_compositeModeCB_currentIndexChanged();
+    void on_imageDisplayCombo_currentIndexChanged();
+
+    /**
+     * @brief Qt Slot that fires in response to a click on a "Recent File' Menu entry.
+     */
+    void openRecentBaseImageFile();
+
+    /**
+     * @brief Updates the QMenu 'Recent Files' with the latest list of files. This
+     * should be connected to the Signal QRecentFileList->fileListChanged
+     * @param file The newly added file.
+     */
+    void updateBaseRecentFileList(const QString &file);
+
+    // -----------------------------------------------------------------------------
+    //  Input Tab Widgets
+    // -----------------------------------------------------------------------------
+    void on_fixedImageButton_clicked();
+    void on_outputImageButton_clicked();
+
+    void on_processFolder_stateChanged(int state  );
+    void on_sourceDirectoryBtn_clicked();
+    void on_outputDirectoryBtn_clicked();
+
+    void on_fixedImageFile_textChanged(const QString &string);
+    void on_outputImageFile_textChanged(const QString & text);
+    void on_sourceDirectoryLE_textChanged(const QString & text);
+    void on_outputDirectoryLE_textChanged(const QString & text);
+
+    void on_filterPatternLineEdit_textChanged();
+
+    void on_outputPrefix_textChanged();
+    void on_outputSuffix_textChanged();
+    void on_outputImageType_currentIndexChanged(int index);
+
+    // Over rides from Parent Class
+    /* Slots to receive events from the ProcessQueueController */
+    void queueControllerFinished();
 
   protected:
+
+    void addProcess(EMMPMTask* name);
     /**
-     * @brief Implements the CloseEvent to Quit the application and write settings
-     * to the preference file
+    * @brief Implements the CloseEvent to Quit the application and write settings
+    * to the preference file
+    */
+   void closeEvent(QCloseEvent *event);
+
+
+   /**
+    * @brief Initializes some of the GUI elements with selections or other GUI related items
+    */
+   void setupGui();
+
+   /**
+    * @brief Checks the currently open file for changes that need to be saved
+    * @return
+    */
+   qint32 checkDirtyDocument();
+
+   /**
+    * @brief Enables or Disables all the widgets in a list
+    * @param b
+    */
+   void setWidgetListEnabled(bool b);
+
+   /**
+    * @brief Verifies that a path exists on the file system.
+    * @param outFilePath The file path to check
+    * @param lineEdit The QLineEdit object to modify visuals of (Usually by placing a red line around the QLineEdit widget)
+    */
+   bool verifyPathExists(QString outFilePath, QLineEdit* lineEdit);
+
+   /**
+    * @brief Verifies that a parent path exists on the file system.
+    * @param outFilePath The parent file path to check
+    * @param lineEdit The QLineEdit object to modify visuals of (Usually by placing a red line around the QLineEdit widget)
+    */
+   bool verifyOutputPathParentExists(QString outFilePath, QLineEdit* lineEdit);
+
+
+   void populateFileTable(QLineEdit* sourceDirectoryLE, QListView *fileListView);
+
+    /**
+     * @brief Opens an Image file
+     * @param imageFile The path to the image file to open.
      */
-    void closeEvent(QCloseEvent *event);
+    void openBaseImageFile(QString imageFile);
 
-  /**
-   * @brief Initializes some of the GUI elements with selections or other GUI related items
-   */
-  void setupGui();
+    void openOverlayImage(QString mountImage);
 
-  void plotImageHistogram();
+    qint32 initImageViews();
 
+    void plotImageHistogram();
 
+    QStringList generateInputFileList();
 
   private:
-  QString                     m_OpenDialogLastDirectory;
-  QString                     m_CurrentImageFile;
+//  QString                     m_OpenDialogLastDirectory;
+//  QString                     m_BaseImageFile;
+//  QString                     m_OverlayImageFile;
 
-  QList<UserInitArea*>                 m_UserInitAreas;
-  UserInitAreaTableModel*         m_UserInitAreaTableModel;
+//  QList<QWidget*>             m_WidgetList;
+  QList<UserInitArea*>        m_UserInitAreas;
+  UserInitAreaTableModel*     m_UserInitAreaTableModel;
 
 
   QwtPlotZoomer* m_zoomer;
