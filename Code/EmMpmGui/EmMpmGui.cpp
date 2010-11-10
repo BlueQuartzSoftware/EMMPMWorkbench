@@ -326,6 +326,9 @@ void EmMpmGui::setupGui()
   QObject::connect(com3, SIGNAL(activated(const QString &)), this, SLOT(on_outputDirectoryLE_textChanged(const QString &)));
 
 
+  m_QueueDialog = new ProcessQueueDialog(this);
+  m_QueueDialog->setVisible(false);
+
   // Configure the Histogram Plot
   m_HistogramPlot->setCanvasBackground(QColor(Qt::white));
   m_HistogramPlot->setTitle("Histogram");
@@ -360,7 +363,56 @@ void EmMpmGui::setupGui()
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
-int EmMpmGui::processInputs(QObject* parentGUI)
+char* EmMpmGui::copyStringToNewBuffer(const QString &fname)
+{
+  std::string::size_type size = fname.size() + 1;
+  char* buf = NULL;
+  if (size > 1)
+  {
+    buf = (char*)malloc(size);
+    ::memset(buf, 0, size);
+    strncpy(buf, fname.toAscii().constData(), size - 1);
+  }
+  return buf;
+}
+
+// -----------------------------------------------------------------------------
+//
+// -----------------------------------------------------------------------------
+void EmMpmGui::copyGrayValues( EMMPM_Inputs* inputs)
+{
+  QList<UserInitArea*> uias = m_UserInitAreaTableModel->getUserInitAreas();
+  int size = uias.count();
+  UserInitArea* uia = NULL;
+  for (int r = 0; r < size; ++r)
+  {
+    uia = uias[r];
+    inputs->grayTable[uia->getEmMpmClass()] = uia->getEmMpmGrayLevel();
+  }
+}
+
+// -----------------------------------------------------------------------------
+//
+// -----------------------------------------------------------------------------
+void EmMpmGui::copyInitCoords( EMMPM_Inputs* inputs)
+{
+  QList<UserInitArea*> uias = m_UserInitAreaTableModel->getUserInitAreas();
+  int size = uias.count();
+  UserInitArea* uia = NULL;
+  unsigned int* cPtr = inputs->initCoords[0];
+  for (int r = 0; r < size; ++r)
+  {
+    uia = uias[r];
+    cPtr = inputs->initCoords[uia->getEmMpmClass()];
+    uia->getUpperLeft( cPtr[0], cPtr[1]);
+    uia->getLowerRight( cPtr[2], cPtr[3] );
+  }
+}
+
+// -----------------------------------------------------------------------------
+//
+// -----------------------------------------------------------------------------
+void EmMpmGui::on_processBtn_clicked()
 {
 
   /* If the 'processFolder' checkbox is checked then we need to check for some
@@ -371,19 +423,19 @@ int EmMpmGui::processInputs(QObject* parentGUI)
     if (this->sourceDirectoryLE->text().isEmpty() == true)
     {
       QMessageBox::critical(this, tr("Input Parameter Error"), tr("Source Directory must be set."), QMessageBox::Ok);
-      return -1;
+      return;
     }
 
     if (this->outputDirectoryLE->text().isEmpty() == true)
     {
       QMessageBox::critical(this, tr("Output Parameter Error"), tr("Output Directory must be set."), QMessageBox::Ok);
-      return -1;
+      return;
     }
 
     if (this->fileListView->model()->rowCount() == 0)
     {
       QMessageBox::critical(this, tr("Parameter Error"), tr("No image files are available in the file list view."), QMessageBox::Ok);
-      return -1;
+      return;
     }
 
     QDir outputDir(this->outputDirectoryLE->text());
@@ -393,7 +445,7 @@ int EmMpmGui::processInputs(QObject* parentGUI)
       if (ok == false)
       {
         QMessageBox::critical(this, tr("Output Directory Creation"), tr("The output directory could not be created."), QMessageBox::Ok);
-        return -1;
+        return;
       }
     }
 
@@ -404,13 +456,13 @@ int EmMpmGui::processInputs(QObject* parentGUI)
     if (fi.exists() == false)
     {
       QMessageBox::critical(this, tr("Fixed Image File Error"), tr("Fixed Image does not exist. Please check the path."), QMessageBox::Ok);
-      return -1;
+      return;
     }
 
     if (outputImageFile->text().isEmpty() == true)
     {
       QMessageBox::critical(this, tr("Output Image File Error"), tr("Please select a file name for the registered image to be saved as."), QMessageBox::Ok);
-      return -1;
+      return;
     }
     QFile file(outputImageFile->text());
     if (file.exists() == true)
@@ -419,7 +471,7 @@ int EmMpmGui::processInputs(QObject* parentGUI)
           | QMessageBox::Default, QMessageBox::Yes, QMessageBox::Cancel);
       if (ret == QMessageBox::Cancel)
       {
-        return -1;
+        return;
       }
       else if (ret == QMessageBox::Yes)
       {
@@ -437,7 +489,7 @@ int EmMpmGui::processInputs(QObject* parentGUI)
         else // The user clicked cancel from the save file dialog
 
         {
-          return -1;
+          return;
         }
       }
     }
@@ -458,23 +510,44 @@ int EmMpmGui::processInputs(QObject* parentGUI)
   {
 
     EMMPMTask* task = new EMMPMTask(NULL);
-    task->setBeta(m_Beta->text().toFloat(&ok));
-    task->setGamma(m_Gamma->text().toFloat(&ok));
-    task->setEmIterations(m_EmIterations->value());
-    task->setMpmIterations(m_MpmIterations->value());
-    task->setNumberOfClasses(m_NumClasses->value());
-    if (useSimulatedAnnealing->isChecked())
+    EMMPM_Inputs* inputs = task->getEMMPM_Inputs();
+    EMMPM_Files* files = task->getEMMPM_Files();
+   // EMMPM_Update* update = task->getEMMPM_Update();
+
+    inputs->emIterations = m_EmIterations->value();
+    inputs->mpmIterations = m_MpmIterations->value();
+    inputs->beta = m_Beta->text().toFloat(&ok);
+    inputs->gamma = m_Gamma->text().toFloat(&ok);
+    inputs->classes = m_NumClasses->value();
+    inputs->simulatedAnnealing = (useSimulatedAnnealing->isChecked()) ? 1 : 0;
+
+    if (m_UserInitAreaTableModel->rowCount() == 0)
     {
-      task->useSimulatedAnnealing();
+      inputs->initType = EMMPM_BASIC_INITIALIZATION;
+      int n = inputs->classes - 1;
+      for (int value = 0; value < inputs->classes; ++value)
+      {
+       inputs->grayTable[value] = value * 255 / n;
+      }
     }
-    task->setInputFilePath(fixedImageFile->text());
-    task->setOutputFilePath(outputImageFile->text());
-    filepairs.append(InputOutputFilePair(task->getInputFilePath(), task->getOutputFilePath()));
+    else
+    {
+      inputs->initType = EMMPM_PIXEL_AREA_INITIALIZATION;
+      copyGrayValues(inputs);
+      copyInitCoords(inputs);
+    }
+
+    files->input_file_name = copyStringToNewBuffer(fixedImageFile->text());
+    files->output_file_name = copyStringToNewBuffer(outputImageFile->text());
+
+
+
     queueController->addTask(static_cast<QThread* > (task));
     this->addProcess(task);
   }
   else
   {
+#if 0
     QStringList fileList = generateInputFileList();
     int32_t count = fileList.count();
     for (int32_t i = 0; i < count; ++i)
@@ -506,7 +579,7 @@ int EmMpmGui::processInputs(QObject* parentGUI)
       queueController->addTask(static_cast<QThread* > (task));
       this->addProcess(task);
     }
-
+#endif
   }
   setInputOutputFilePairList(filepairs);
 
@@ -515,15 +588,14 @@ int EmMpmGui::processInputs(QObject* parentGUI)
   // When the QueueController finishes it will signal the QueueController to 'quit', thus stopping the thread
   connect(queueController, SIGNAL(finished()), this, SLOT(queueControllerFinished()));
 
-  connect(queueController, SIGNAL(started()), parentGUI, SLOT(processingStarted()));
-  connect(queueController, SIGNAL(finished()), parentGUI, SLOT(processingFinished()));
+  connect(queueController, SIGNAL(started()), this, SLOT(processingStarted()));
+  connect(queueController, SIGNAL(finished()), this, SLOT(processingFinished()));
 
 //  getQueueDialog()->setParent(this);
   getQueueDialog()->setVisible(true);
 
   queueController->start();
 
-  return 0;
 }
 
 // -----------------------------------------------------------------------------
@@ -532,6 +604,33 @@ int EmMpmGui::processInputs(QObject* parentGUI)
 void EmMpmGui::addProcess(EMMPMTask* task)
 {
   getQueueDialog()->addProcess(task);
+}
+
+// -----------------------------------------------------------------------------
+//
+// -----------------------------------------------------------------------------
+void EmMpmGui::processingStarted()
+{
+  std::cout << "IPHelper::processingStarted()" << std::endl;
+  processBtn->setText("Cancel");
+  processBtn->setEnabled(false);
+  this->statusBar()->showMessage("Processing Images...");
+}
+
+
+// -----------------------------------------------------------------------------
+//
+// -----------------------------------------------------------------------------
+void EmMpmGui::processingFinished()
+{
+//  std::cout << "IPHelper::processingFinished()" << std::endl;
+  /* Code that cleans up anything from the processing */
+  processBtn->setText("Process");
+  processBtn->setEnabled(true);
+  this->statusBar()->showMessage("Processing Complete");
+
+  // Get the image files from the plugin
+
 }
 
 // -----------------------------------------------------------------------------
@@ -882,17 +981,6 @@ void EmMpmGui::openBaseImageFile(QString imageFile)
   QRecentFileList::instance()->addFile(imageFile);
   setWidgetListEnabled(true);
   updateBaseRecentFileList(imageFile);
-}
-
-
-
-
-// -----------------------------------------------------------------------------
-//
-// -----------------------------------------------------------------------------
-void EmMpmGui::on_processBtn_clicked()
-{
-  //TODO: Implement this
 }
 
 

@@ -39,7 +39,7 @@
 #include <QtGui/QWidget>
 #include <QtGui/QGraphicsScene>
 
-
+#include <emmpm/public/EMMPM_Structures.h>
 
 //-- UIC generated Header
 #include <ui_EmMpmGui.h>
@@ -53,6 +53,7 @@ class QwtPlotPanner;
 class QwtPlotGrid;
 class QwtPlotCurve;
 class EMMPMTask;
+
 
 #include "IPHelper/plugins/QImageProcessingInputFrame.h"
 
@@ -93,8 +94,11 @@ class EmMpmGui :  public QMainWindow, private Ui::EmMpmGui
     MXA_INSTANCE_PROPERTY(QString, OpenDialogLastDirectory)
     MXA_INSTANCE_PROPERTY(InputOutputFilePairList, InputOutputFilePairList)
 
+    char* copyStringToNewBuffer(const QString &fname);
+    void copyGrayValues( EMMPM_Inputs* inputs);
+    void copyInitCoords( EMMPM_Inputs* inputs);
 
-  signals:
+    signals:
     void cancelTask();
     void cancelProcessQueue();
 
@@ -163,7 +167,9 @@ class EmMpmGui :  public QMainWindow, private Ui::EmMpmGui
     // Over rides from Parent Class
     /* Slots to receive events from the ProcessQueueController */
     void queueControllerFinished();
-
+    // These slots get called when the plugin starts and finishes processing
+    void processingStarted();
+    void processingFinished();
   protected:
 
     void addProcess(EMMPMTask* name);
@@ -223,11 +229,7 @@ class EmMpmGui :  public QMainWindow, private Ui::EmMpmGui
     QStringList generateInputFileList();
 
   private:
-//  QString                     m_OpenDialogLastDirectory;
-//  QString                     m_BaseImageFile;
-//  QString                     m_OverlayImageFile;
 
-//  QList<QWidget*>             m_WidgetList;
   QList<UserInitArea*>        m_UserInitAreas;
   UserInitAreaTableModel*     m_UserInitAreaTableModel;
 

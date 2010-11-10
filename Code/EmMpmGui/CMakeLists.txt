@@ -69,8 +69,7 @@ SET( EmMpmGui_SRCS
   ${EmMpmGui_SOURCE_DIR}/UserInitAreaTableModel.cpp
   ${EmMpmGui_SOURCE_DIR}/UserInitAreaDialog.cpp
   ${EmMpmGui_SOURCE_DIR}/EMMPMTask.cpp
-  
-  
+  ${PROJECT_CODE_DIR}/AIM/Common/AIMImage.cpp
 )
 
 # another list, this time it includes all header files that should 
@@ -82,7 +81,7 @@ SET( EmMpmGui_MOC_HDRS
   ${EmMpmGui_SOURCE_DIR}/UserInitAreaTableModel.h
   ${EmMpmGui_SOURCE_DIR}/UserInitAreaDialog.h
   ${EmMpmGui_SOURCE_DIR}/EMMPMTask.h
-  ${PROJECT_CODE_DIR}/AIM/Common/AIMImage.cpp
+
 )
 cmp_IDE_SOURCE_PROPERTIES(EmMpmGui "${EmMpmGui_MOC_HDRS}" "${EmMpmGui_SRCS}" "0")
 
@@ -164,6 +163,7 @@ TARGET_LINK_LIBRARIES(EmMpmGui
                       ${QT_LIBRARIES}
                       QtSupport
                       ${QWT_LIBRARIES}
+                      ${EMMPM_LIBRARIES}
 )
 
 

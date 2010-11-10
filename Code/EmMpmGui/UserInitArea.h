@@ -67,6 +67,13 @@ public:
     void setColor(QColor color);
     QColor getColor() { return m_Color; }
 
+    void setUpperLeft(unsigned int x, unsigned int y);
+    void getUpperLeft(unsigned int &x, unsigned int &y);
+
+    void setLowerRight(unsigned int x, unsigned int y);
+    void getLowerRight(unsigned int &x, unsigned int &y);
+
+
  signals:
 
   void fireUserInitAreaUpdated(UserInitArea*);
@@ -100,6 +107,8 @@ private:
     float ctrlPointSize;
     int m_GrayLevel;
     int m_Class;
+    int m_UpperLeft[2];
+    int m_LowerRight[2];
     QColor m_Color;
 };
 

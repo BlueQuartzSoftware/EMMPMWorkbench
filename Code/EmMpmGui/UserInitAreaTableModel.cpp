@@ -127,6 +127,7 @@ QVariant UserInitAreaTableModel::data(const QModelIndex &index, qint32 role) con
       QString s = QString::number(b.x()+p.x());
       s.append(", ");
       s.append(QString::number(b.y()+p.y()));
+      uia->setUpperLeft(b.x()+p.x(), b.y()+p.y());
       return QVariant(s);
     }
     else if (col == 3) // BOTTOM RIGHT CORNER
@@ -134,6 +135,7 @@ QVariant UserInitAreaTableModel::data(const QModelIndex &index, qint32 role) con
       QString s = QString::number(b.x()+p.x() + b.width());
       s.append(", ");
       s.append(QString::number(b.y()+p.y() + b.height()));
+      uia->setLowerRight(b.x()+p.x() + b.width(), b.y()+p.y() + b.height());
       return QVariant(s);
     }
     else if (col == 1)

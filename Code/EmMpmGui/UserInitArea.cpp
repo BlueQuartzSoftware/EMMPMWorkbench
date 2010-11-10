@@ -71,6 +71,28 @@ UserInitArea::~UserInitArea()
 
 }
 
+void UserInitArea::setUpperLeft(unsigned int x, unsigned int y)
+{
+   m_UpperLeft[0] = x;
+   m_UpperLeft[1] = y;
+}
+void UserInitArea::getUpperLeft(unsigned int &x, unsigned int &y)
+{
+  x = m_UpperLeft[0];
+  y = m_UpperLeft[1];
+}
+
+void UserInitArea::setLowerRight(unsigned int x, unsigned int y)
+{
+  m_LowerRight[0] = x;
+  m_LowerRight[1] = y;
+}
+void UserInitArea::getLowerRight(unsigned int &x, unsigned int &y)
+{
+  x = m_LowerRight[0];
+  y = m_LowerRight[1];
+}
+
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------

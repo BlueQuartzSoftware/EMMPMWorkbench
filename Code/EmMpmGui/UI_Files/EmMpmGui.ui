@@ -30,7 +30,7 @@
     <item>
      <widget class="QTabWidget" name="tabWidget">
       <property name="currentIndex">
-       <number>1</number>
+       <number>0</number>
       </property>
       <widget class="QWidget" name="tab">
        <attribute name="title">
@@ -309,6 +309,9 @@
             <property name="horizontalScrollMode">
              <enum>QAbstractItemView::ScrollPerPixel</enum>
             </property>
+            <attribute name="horizontalHeaderStretchLastSection">
+             <bool>false</bool>
+            </attribute>
             <attribute name="horizontalHeaderStretchLastSection">
              <bool>false</bool>
             </attribute>
