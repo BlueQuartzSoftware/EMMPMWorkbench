@@ -73,6 +73,8 @@
 #include <qwt_plot_panner.h>
 #include <qwt_plot_curve.h>
 
+#include <emmpm/common/utilities/InitializationFunctions.h>
+
 //
 #include "EmMpmGuiVersion.h"
 #include "UserInitAreaTableModel.h"
@@ -379,7 +381,7 @@ char* EmMpmGui::copyStringToNewBuffer(const QString &fname)
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
-void EmMpmGui::copyGrayValues( EMMPM_Inputs* inputs)
+void EmMpmGui::copyGrayValues( EMMPM_Data* inputs)
 {
   QList<UserInitArea*> uias = m_UserInitAreaTableModel->getUserInitAreas();
   int size = uias.count();
@@ -394,7 +396,7 @@ void EmMpmGui::copyGrayValues( EMMPM_Inputs* inputs)
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
-void EmMpmGui::copyInitCoords( EMMPM_Inputs* inputs)
+void EmMpmGui::copyInitCoords( EMMPM_Data* inputs)
 {
   QList<UserInitArea*> uias = m_UserInitAreaTableModel->getUserInitAreas();
   int size = uias.count();
@@ -510,38 +512,36 @@ void EmMpmGui::on_processBtn_clicked()
   {
 
     EMMPMTask* task = new EMMPMTask(NULL);
-    EMMPM_Inputs* inputs = task->getEMMPM_Inputs();
-    EMMPM_Files* files = task->getEMMPM_Files();
-   // EMMPM_Update* update = task->getEMMPM_Update();
+    EMMPM_Data* data = task->getEMMPM_Data();
 
-    inputs->emIterations = m_EmIterations->value();
-    inputs->mpmIterations = m_MpmIterations->value();
-    inputs->beta = m_Beta->text().toFloat(&ok);
-    inputs->gamma = m_Gamma->text().toFloat(&ok);
-    inputs->classes = m_NumClasses->value();
-    inputs->simulatedAnnealing = (useSimulatedAnnealing->isChecked()) ? 1 : 0;
+    data->emIterations = m_EmIterations->value();
+    data->mpmIterations = m_MpmIterations->value();
+    data->in_beta = m_Beta->text().toFloat(&ok);
+    data->in_gamma = m_Gamma->text().toFloat(&ok);
+    data->classes = m_NumClasses->value();
+    data->simulatedAnnealing = (useSimulatedAnnealing->isChecked()) ? 1 : 0;
 
     if (m_UserInitAreaTableModel->rowCount() == 0)
     {
-      inputs->initType = EMMPM_BASIC_INITIALIZATION;
-      int n = inputs->classes - 1;
-      for (int value = 0; value < inputs->classes; ++value)
+      data->initType = EMMPM_BASIC_INITIALIZATION;
+      int n = data->classes - 1;
+      for (int value = 0; value < data->classes; ++value)
       {
-       inputs->grayTable[value] = value * 255 / n;
+        data->grayTable[value] = value * 255 / n;
       }
     }
     else
     {
-      inputs->initType = EMMPM_PIXEL_AREA_INITIALIZATION;
-      copyGrayValues(inputs);
-      copyInitCoords(inputs);
+      data->initType = EMMPM_USER_DEFINED_AREA_INITIALIZATION;
+      copyGrayValues(data);
+      copyInitCoords(data);
     }
 
-    files->input_file_name = copyStringToNewBuffer(fixedImageFile->text());
-    files->output_file_name = copyStringToNewBuffer(outputImageFile->text());
+    data->input_file_name = copyStringToNewBuffer(fixedImageFile->text());
+    data->output_file_name = copyStringToNewBuffer(outputImageFile->text());
 
-
-
+    task->setInputFilePath(fixedImageFile->text());
+    task->setOutputFilePath(outputImageFile->text());
     queueController->addTask(static_cast<QThread* > (task));
     this->addProcess(task);
   }
@@ -611,7 +611,7 @@ void EmMpmGui::addProcess(EMMPMTask* task)
 // -----------------------------------------------------------------------------
 void EmMpmGui::processingStarted()
 {
-  std::cout << "IPHelper::processingStarted()" << std::endl;
+//  std::cout << "EmMpmGui::processingStarted()" << std::endl;
   processBtn->setText("Cancel");
   processBtn->setEnabled(false);
   this->statusBar()->showMessage("Processing Images...");
@@ -1121,7 +1121,7 @@ void EmMpmGui::openOverlayImage(QString processedImage)
 // -----------------------------------------------------------------------------
 void EmMpmGui::baseImageFileLoaded(const QString &filename)
 {
-  std::cout << "Loaded Image file " << filename.toStdString() << std::endl;
+ // std::cout << "Loaded Image file " << filename.toStdString() << std::endl;
   this->setWindowFilePath(filename);
   imageDisplayCombo->setCurrentIndex(EmMpm_Constants::OriginalImage);
   fixedImageFile->setText(filename);
@@ -1133,7 +1133,7 @@ void EmMpmGui::baseImageFileLoaded(const QString &filename)
 // -----------------------------------------------------------------------------
 void EmMpmGui::overlayImageFileLoaded(const QString &filename)
 {
-  std::cout << "EmMpmGui::overlayImageFileLoaded" << std::endl;
+//  std::cout << "EmMpmGui::overlayImageFileLoaded" << std::endl;
   imageDisplayCombo->setCurrentIndex(EmMpm_Constants::SegmentedImage);
   outputImageFile->setText(filename);
 }
@@ -1290,6 +1290,11 @@ void EmMpmGui::deleteUserInitArea(UserInitArea* uia)
   curve->detach();
   delete curve; // Clean up the memory
   m_HistogramPlot->replot();
+  m_NumClasses->setValue(userInitAreas.size()-1);
+  if (userInitAreas.size()-1 == 0)
+  {
+    m_NumClasses->setEnabled(true);
+  }
 }
 
 // -----------------------------------------------------------------------------
@@ -1310,6 +1315,11 @@ void EmMpmGui::userInitAreaAdded(UserInitArea* uia)
   // the table model
   QList<UserInitArea*> userInitAreas = m_UserInitAreaTableModel->getUserInitAreas();
   int row = userInitAreas.indexOf(uia, 0);
+  m_NumClasses->setValue(userInitAreas.size());
+  if (userInitAreas.size() != 0)
+  {
+    m_NumClasses->setEnabled(false);
+  }
 
   m_UIAGaussians.insert(row, curve);
 

@@ -95,8 +95,8 @@ class EmMpmGui :  public QMainWindow, private Ui::EmMpmGui
     MXA_INSTANCE_PROPERTY(InputOutputFilePairList, InputOutputFilePairList)
 
     char* copyStringToNewBuffer(const QString &fname);
-    void copyGrayValues( EMMPM_Inputs* inputs);
-    void copyInitCoords( EMMPM_Inputs* inputs);
+    void copyGrayValues( EMMPM_Data* inputs);
+    void copyInitCoords( EMMPM_Data* inputs);
 
     signals:
     void cancelTask();

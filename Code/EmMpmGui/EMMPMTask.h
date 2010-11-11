@@ -44,9 +44,9 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef _EMMPM_TASK_H_
 #define _EMMPM_TASK_H_
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <math.h>
+//#include <stdio.h>
+//#include <stdlib.h>
+//#include <math.h>
 
 #include <QtCore/QObject>
 #include <QtCore/QThread>
@@ -58,10 +58,10 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "emmpm/public/EMMPM_Structures.h"
 #include "emmpm/public/EMMPM.h"
 
-#define PI  3.14159265358979323846
-#define MAX_CLASSES 15
+// #define PI  3.14159265358979323846
+// #define MAX_CLASSES 15
 
-#define MAXPRIME  2147483647       /*  MAXPRIME = (2^31)-1     */
+// #define MAXPRIME  2147483647       /*  MAXPRIME = (2^31)-1     */
 
 #define UPDATE_PROGRESS(m, p)\
   emit progressTextChanged( (m) );\
@@ -84,17 +84,17 @@ class EMMPMTask : public ProcessQueueTask
     EMMPMTask(QObject* parent = 0);
     virtual ~EMMPMTask();
 
-    static void EMMPMUpdate_CallBackWrapper(EMMPM_Update* update);
+    static void EMMPMUpdate_CallBackWrapper(EMMPM_Data* data);
 
-    EMMPM_Files* getEMMPM_Files();
-    EMMPM_Inputs* getEMMPM_Inputs();
+    EMMPM_Data* getEMMPM_Data();
+
 
     virtual void run();
 
   private:
 
-    EMMPM_Files* m_files;
-    EMMPM_Inputs* m_inputs;
+    EMMPM_Data* m_data;
+    EMMPM_CallbackFunctions* m_callbacks;
 
     AIMImage::Pointer m_OriginalImage;
     AIMImage::Pointer m_SegmentedImage;
