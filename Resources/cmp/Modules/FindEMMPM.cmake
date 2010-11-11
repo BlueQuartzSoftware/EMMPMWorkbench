@@ -90,7 +90,7 @@ SET (EMMPM_BIN_SEARCH_DIRS
 )
 
 FIND_PATH(EMMPM_INCLUDE_DIR 
-  NAMES emmpm/EMMPM.h
+  NAMES emmpm/public/EMMPM.h
   PATHS ${EMMPM_INCLUDE_SEARCH_DIRS}
   NO_DEFAULT_PATH
 )
@@ -154,7 +154,6 @@ IF(NOT EMMPM_FOUND)
     MESSAGE(STATUS "${EMMPM_DIR_MESSAGE}")
   ELSE(NOT EMMPM_FIND_QUIETLY)
     IF(EMMPM_FIND_REQUIRED)
-      # MESSAGE(FATAL_ERROR "${EMMPM_DIR_MESSAGE}")
       MESSAGE(FATAL_ERROR "EM/MPM was NOT found and is Required by this project")
     ENDIF(EMMPM_FIND_REQUIRED)
   ENDIF(NOT EMMPM_FIND_QUIETLY)
@@ -171,7 +170,7 @@ ENDIF(EMMPM_DEBUG)
 IF (EMMPM_FOUND)
   INCLUDE(CheckSymbolExists)
   #############################################
-  # Find out if EMMPM was build using dll's
+  # Find out if EMMPM was built using dll's
   #############################################
   # Save required variable
   SET(CMAKE_REQUIRED_INCLUDES_SAVE ${CMAKE_REQUIRED_INCLUDES})
