@@ -87,6 +87,7 @@ export PATH=$CMAKE_INSTALL/bin:$PATH
 echo "export CMAKE_INSTALL=$SDK_INSTALL/cmake-2.8.3" >  $SDK_INSTALL/initvars.sh
 echo "export PATH=\$CMAKE_INSTALL/bin:\$PATH" >>  $SDK_INSTALL/initvars.sh
 
+#------------------------------------------------------------------------------
 # We now need MXABoost on the system
 cd $SDK_SOURCE
 # Remove any previous MXABoost
@@ -102,7 +103,7 @@ export BOOST_ROOT=$SDK_INSTALL/MXABoost-1.44
 echo "export BOOST_ROOT=$SDK_INSTALL/MXABoost-1.44" >> $SDK_INSTALL/initvars.sh
 
 
-
+#------------------------------------------------------------------------------
 cd $SDK_SOURCE
 # Remove any previous Qwt
 rm -rf Qwt
@@ -128,6 +129,7 @@ make install
 export QWT_INSTALL=$SDK_INSTALL/Qwt
 echo "export QWT_INSTALL=$SDK_INSTALL/Qwt" >> $SDK_INSTALL/initvars.sh
 
+#------------------------------------------------------------------------------
 # Pull Down ITK and compile/Install it
 cd $SDK_SOURCE
 DOWNLOAD_ARGS="-o InsightToolkit-3.20.0.tar.gz"
@@ -141,7 +143,8 @@ make -j $PARALLEL_BUILD install
 export ITK_DIR=$SDK_INSTALL/ITK-3.20.0/lib/InsightToolkit
 echo "export ITK_DIR=$SDK_INSTALL/ITK-3.20.0/lib/InsightToolkit" >> $SDK_INSTALL/initvars.sh
 
-
+#------------------------------------------------------------------------------
+# Compile libTiff
 cd $SDK_SOURCE
 # Remove any previous tiff
 rm -rf tiff
@@ -167,10 +170,13 @@ make install
 export TIFF_INSTALL=$SDK_INSTALL/tiff
 echo "export TIFF_INSTALL=$SDK_INSTALL/tiff" >> $SDK_INSTALL/initvars.sh
 
+
+#------------------------------------------------------------------------------
+# Compile the emmpm Library
 cd $SDK_SOURCE
 # Remove any previous emmpm
 rm -rf emmpm
-git clone --recursive git://scm.bluequartz.net/eim/emmpm.git tiff
+git clone --recursive git://scm.bluequartz.net/eim/emmpm.git emmpm
 cd emmpme
 mkdir Build
 cd Build
@@ -192,6 +198,8 @@ make install
 export EMMPM_INSTALL=$SDK_INSTALL/emmpm
 echo "export EMMPM_INSTALL=$SDK_INSTALL/emmpm" >> $SDK_INSTALL/initvars.sh
 
+#------------------------------------------------------------------------------
+# Compile the IPHelper
 # Pull Down the IPHelper Source and compile it
 cd $SDK_SOURCE
 # Remove any previous IPHelper
