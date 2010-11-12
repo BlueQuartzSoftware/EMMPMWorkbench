@@ -48,6 +48,7 @@
 #include "emmpm/common/utilities/random.h"
 #include "emmpm/common/utilities/allocate.h"
 #include "emmpm/common/utilities/InitializationFunctions.h"
+#include "emmpm/common/utilities/ProgressFunctions.h"
 #include "emmpm/common/io/EMTiffIO.h"
 
 QMutex EMMPMTask_CallBackWrapperMutex;
@@ -74,12 +75,12 @@ void EMMPMTask::EMMPMUpdate_CallBackWrapper(EMMPM_Data* data)
   mySelf->progressTextChanged(QString::number(data->progress));
 
   // Check to make sure we are at the end of an em loop
-  if (data->currentMPMLoop == data->mpmIterations - 1 && NULL != data->outputImage)
+  if (  data->inside_mpm_loop == 0 && NULL != data->outputImage)
   {
     // std::cout << "EM Loop: " << data->currentEMLoop << std::endl;
     char buff[256];
     memset(buff, 0, 256);
-    snprintf(buff, 256, "/tmp/emmpm_out_%d.tif", data->currentEMLoop);
+    snprintf(buff, 256, "/tmp/GUI_emmpm_out_%d.tif", data->currentEMLoop);
 
     int err = writeGrayScaleImage(buff, data->rows, data->columns, "Intermediate Image", data->outputImage);
     if (err < 0)
@@ -87,10 +88,10 @@ void EMMPMTask::EMMPMUpdate_CallBackWrapper(EMMPM_Data* data)
       std::cout << "Error writing intermediate tiff image." << std::endl;
     }
 
- //   std::cout << "Class\tMu\tSigma" << std::endl;
+    std::cout << "Class\tMu\tSigma" << std::endl;
     for (int l = 0; l < data->classes; l++)
     {
-      //    std::cout << l << "\t" << data->m[l] << "\t" << data->v[l] << "\t" << std::endl;
+       std::cout << l << "\t" << data->m[l] << "\t" << data->v[l] << "\t" << std::endl;
     }
 
     float hist[MAX_CLASSES][256];
@@ -108,7 +109,7 @@ void EMMPMTask::EMMPMUpdate_CallBackWrapper(EMMPM_Data* data)
     }
 
     memset(buff, 0, 256);
-    snprintf(buff, 256, "/tmp/emmpm_hist_%d.csv", data->currentEMLoop);
+    snprintf(buff, 256, "/tmp/GUI_emmpm_hist_%d.csv", data->currentEMLoop);
     std::ofstream file(buff, std::ios::out | std::ios::binary);
     if (file.is_open())
     {
@@ -150,7 +151,7 @@ EMMPM_Data* EMMPMTask::getEMMPM_Data()
 // -----------------------------------------------------------------------------
 EMMPMTask::~EMMPMTask()
 {
-  std::cout << "EMMPMTask::~EMMPMTask()" << std::endl;
+  //  std::cout << "EMMPMTask::~EMMPMTask()" << std::endl;
 
   EMMPM_FreeDataStructure(m_data);
   EMMPM_FreeCallbackFunctionStructure(m_callbacks);
@@ -189,6 +190,7 @@ void EMMPMTask::run()
 
   // Set the Update Stats Callback function
   m_callbacks->EMMPM_ProgressStatsFunc = EMMPMTask::EMMPMUpdate_CallBackWrapper;
+ // m_callbacks->EMMPM_ProgressFunc = &EMMPM_PrintfProgress;
 
   // Run the EM/MPM algorithm on the input image
   EMMPM_Execute(m_data, m_callbacks);

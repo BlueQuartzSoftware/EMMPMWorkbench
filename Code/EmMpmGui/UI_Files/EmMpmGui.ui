@@ -30,7 +30,7 @@
     <item>
      <widget class="QTabWidget" name="tabWidget">
       <property name="currentIndex">
-       <number>0</number>
+       <number>1</number>
       </property>
       <widget class="QWidget" name="tab">
        <attribute name="title">
@@ -712,6 +712,9 @@
         </item>
         <item>
          <widget class="QCheckBox" name="processFolder">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
           <property name="text">
            <string>Process Folder</string>
           </property>

@@ -139,9 +139,9 @@ endif()
 
 # add_subdirectory(${PROJECT_CODE_DIR}/AIM ${PROJECT_BINARY_DIR}/AIMLib)
 add_subdirectory(${PROJECT_CODE_DIR}/QtSupport ${PROJECT_BINARY_DIR}/QtSupport)
-add_subdirectory(${PROJECT_CODE_DIR}/MXA ${PROJECT_BINARY_DIR}/MXA)
+# add_subdirectory(${PROJECT_CODE_DIR}/MXA ${PROJECT_BINARY_DIR}/MXA)
 # add_subdirectory(${PROJECT_CODE_DIR}/AngReader ${PROJECT_BINARY_DIR}/AngReader)
-set (MXADATAMODEL_INCLUDE_DIRS ${PROJECT_CODE_DIR})
+# set (MXADATAMODEL_INCLUDE_DIRS ${PROJECT_CODE_DIR})
 
 #add_subdirectory(${PROJECT_CODE_DIR}/MIApp ${PROJECT_BINARY_DIR}/Applications/MIApp)
 add_subdirectory(${PROJECT_CODE_DIR}/EmMpmGui ${PROJECT_BINARY_DIR}/Applications/EmMpmGui)

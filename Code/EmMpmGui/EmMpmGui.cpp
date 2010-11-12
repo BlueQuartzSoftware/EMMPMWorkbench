@@ -510,17 +510,14 @@ void EmMpmGui::on_processBtn_clicked()
 
   if (this->processFolder->isChecked() == false)
   {
-
     EMMPMTask* task = new EMMPMTask(NULL);
     EMMPM_Data* data = task->getEMMPM_Data();
-
     data->emIterations = m_EmIterations->value();
     data->mpmIterations = m_MpmIterations->value();
     data->in_beta = m_Beta->text().toFloat(&ok);
     data->in_gamma = m_Gamma->text().toFloat(&ok);
     data->classes = m_NumClasses->value();
     data->simulatedAnnealing = (useSimulatedAnnealing->isChecked()) ? 1 : 0;
-
     if (m_UserInitAreaTableModel->rowCount() == 0)
     {
       data->initType = EMMPM_BASIC_INITIALIZATION;
@@ -536,10 +533,8 @@ void EmMpmGui::on_processBtn_clicked()
       copyGrayValues(data);
       copyInitCoords(data);
     }
-
     data->input_file_name = copyStringToNewBuffer(fixedImageFile->text());
     data->output_file_name = copyStringToNewBuffer(outputImageFile->text());
-
     task->setInputFilePath(fixedImageFile->text());
     task->setOutputFilePath(outputImageFile->text());
     queueController->addTask(static_cast<QThread* > (task));
@@ -547,22 +542,29 @@ void EmMpmGui::on_processBtn_clicked()
   }
   else
   {
-#if 0
     QStringList fileList = generateInputFileList();
     int32_t count = fileList.count();
     for (int32_t i = 0; i < count; ++i)
     {
       //  std::cout << "Adding input file:" << fileList.at(i).toStdString() << std::endl;
       EMMPMTask* task = new EMMPMTask(NULL);
-      task->setBeta(m_Beta->text().toFloat(&ok));
-      task->setGamma(m_Gamma->text().toFloat(&ok));
-      task->setEmIterations(m_EmIterations->value());
-      task->setMpmIterations(m_MpmIterations->value());
-      task->setNumberOfClasses(m_NumClasses->value());
-      if (useSimulatedAnnealing->isChecked())
+      EMMPM_Data* data = task->getEMMPM_Data();
+      data->emIterations = m_EmIterations->value();
+      data->mpmIterations = m_MpmIterations->value();
+      data->in_beta = m_Beta->text().toFloat(&ok);
+      data->in_gamma = m_Gamma->text().toFloat(&ok);
+      data->classes = m_NumClasses->value();
+      data->simulatedAnnealing = (useSimulatedAnnealing->isChecked()) ? 1 : 0;
+      if (m_UserInitAreaTableModel->rowCount() == 0)
       {
-        task->useSimulatedAnnealing();
+        data->initType = EMMPM_BASIC_INITIALIZATION;
+        int n = data->classes - 1;
+        for (int value = 0; value < data->classes; ++value)
+        {
+          data->grayTable[value] = value * 255 / n;
+        }
       }
+
       task->setInputFilePath(sourceDirectoryLE->text() + QDir::separator() + fileList.at(i));
       QFileInfo fileInfo(fileList.at(i));
       QString basename = fileInfo.completeBaseName();
@@ -575,11 +577,15 @@ void EmMpmGui::on_processBtn_clicked()
       filepath.append(".");
       filepath.append(outputImageType->currentText());
       task->setOutputFilePath(filepath);
+
+      data->input_file_name = copyStringToNewBuffer(task->getInputFilePath());
+      data->output_file_name = copyStringToNewBuffer(task->getOutputFilePath());
+
       filepairs.append(InputOutputFilePair(task->getInputFilePath(), task->getOutputFilePath()));
       queueController->addTask(static_cast<QThread* > (task));
       this->addProcess(task);
     }
-#endif
+
   }
   setInputOutputFilePairList(filepairs);
 

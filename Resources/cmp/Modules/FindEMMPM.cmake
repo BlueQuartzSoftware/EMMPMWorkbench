@@ -75,7 +75,7 @@ ENDMACRO (_adjust_lib_var_names)
   
   
 #MESSAGE (STATUS "Finding EM/MPM library and headers..." )
-SET (EMMPM_DEBUG 1)
+#SET (EMMPM_DEBUG 1)
 
 SET(EMMPM_INCLUDE_SEARCH_DIRS
   $ENV{EMMPM_INSTALL}/include
