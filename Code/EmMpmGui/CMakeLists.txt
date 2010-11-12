@@ -35,6 +35,15 @@ else()
 endif()
 
 # ------------------------------------------------------------------------------
+#  Tiff Library Section
+# ------------------------------------------------------------------------------
+FIND_PACKAGE(Tiff)
+IF (NOT TIFF_FOUND)
+      MESSAGE (FATAL_ERROR " Tiff Library was NOT Found and is needed.")
+ENDIF (NOT TIFF_FOUND)
+INCLUDE_DIRECTORIES(${TIFF_INCLUDE_DIRS})
+
+# ------------------------------------------------------------------------------
 #  EM/MPM Library Section
 # ------------------------------------------------------------------------------
 find_package(EMMPM)
@@ -163,6 +172,7 @@ TARGET_LINK_LIBRARIES(EmMpmGui
                       ${QT_LIBRARIES}
                       QtSupport
                       ${QWT_LIBRARIES}
+                      ${TIFF_LIBRARIES}
                       ${EMMPM_LIBRARIES}
 )
 
