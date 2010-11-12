@@ -18,7 +18,7 @@
 # You can simply 'source "initvars.sh" any time to get the exports.
 
 # If you want to force another directory then change where "SDK_ROOT" points to.
-SDK_ROOT=`pwd`
+SDK_ROOT=/home/mjackson
 SDK_SOURCE=$SDK_ROOT/Workspace
 SDK_INSTALL=$SDK_ROOT/Toolkits
 
@@ -71,6 +71,11 @@ if [ "$CURL" != "" ]; then
   DOWNLOAD_PROG=$CURL
   DOWNLOAD_ARGS="-o cmake-2.8.3.tar.gz"
 fi
+
+if [ "0" == "1" ]
+then
+
+
 
 #Download and Compile CMake
 $DOWNLOAD_PROG "http://www.cmake.org/files/v2.8/cmake-2.8.3.tar.gz" $DOWNLOAD_ARGS
@@ -143,6 +148,11 @@ make -j $PARALLEL_BUILD install
 export ITK_DIR=$SDK_INSTALL/ITK-3.20.0/lib/InsightToolkit
 echo "export ITK_DIR=$SDK_INSTALL/ITK-3.20.0/lib/InsightToolkit" >> $SDK_INSTALL/initvars.sh
 
+
+fi
+
+
+
 #------------------------------------------------------------------------------
 # Compile libTiff
 cd $SDK_SOURCE
@@ -177,7 +187,7 @@ cd $SDK_SOURCE
 # Remove any previous emmpm
 rm -rf emmpm
 git clone --recursive git://scm.bluequartz.net/eim/emmpm.git emmpm
-cd emmpme
+cd emmpm
 mkdir Build
 cd Build
 # On OS X we need to set the "install_name" correctly on Libraries that will get used which is
@@ -203,8 +213,8 @@ echo "export EMMPM_INSTALL=$SDK_INSTALL/emmpm" >> $SDK_INSTALL/initvars.sh
 # Pull Down the IPHelper Source and compile it
 cd $SDK_SOURCE
 # Remove any previous IPHelper
-rm -rf IPHelper
-git clone git://scm.bluequartz.net/eim/iphelper.git IPHelper
+#rm -rf IPHelper
+#git clone git://scm.bluequartz.net/eim/iphelper.git IPHelper
 cd IPHelper
 git checkout user_init
 mkdir Build
