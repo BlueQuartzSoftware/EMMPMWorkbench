@@ -99,7 +99,7 @@ IF(NOT QWT_FOUND)
   ENDIF(NOT QWT_FIND_QUIETLY)
 ENDIF(NOT QWT_FOUND)
 
-IF (true)
+IF (QWT_FOUND)
   INCLUDE(CheckSymbolExists)
   #############################################
   # Find out if QWT was build using dll's

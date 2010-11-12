@@ -82,7 +82,7 @@ void EMMPMTask::EMMPMUpdate_CallBackWrapper(EMMPM_Data* data)
     memset(buff, 0, 256);
     snprintf(buff, 256, "/tmp/GUI_emmpm_out_%d.tif", data->currentEMLoop);
 
-    int err = writeGrayScaleImage(buff, data->rows, data->columns, "Intermediate Image", data->outputImage);
+    int err = EMMPM_WriteGrayScaleImage(buff, data->rows, data->columns, "Intermediate Image", data->outputImage);
     if (err < 0)
     {
       std::cout << "Error writing intermediate tiff image." << std::endl;

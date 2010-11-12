@@ -345,7 +345,8 @@ endmacro(FindQt4Plugins pluginlist)
 #-- Copy all the dependent DLLs into the current build directory so that the test
 #-- can run.
 MACRO (CMP_COPY_DEPENDENT_LIBRARIES mxa_lib_list)
-    #message(STATUS "CMP_COPY_DEPENDENT_LIBRARIES: ${mxa_lib_list}")
+ # message(STATUS "#--------------------------------------------")
+ # message(STATUS "CMP_COPY_DEPENDENT_LIBRARIES: ${mxa_lib_list}")
   set (mxa_lib_list ${mxa_lib_list})
   SET (TYPES Debug Release)
   if (MSVC)
@@ -357,22 +358,22 @@ MACRO (CMP_COPY_DEPENDENT_LIBRARIES mxa_lib_list)
     FOREACH(lib ${mxa_lib_list})
     
       STRING(TOUPPER ${lib} upperlib)
-     # message(STATUS "upperlib: ${upperlib}")
-     # message(STATUS "${upperlib}_IS_SHARED: ${${upperlib}_IS_SHARED}")
+    #  message(STATUS "upperlib: ${upperlib}")
+    #  message(STATUS "${upperlib}_IS_SHARED: ${${upperlib}_IS_SHARED}")
       if (${upperlib}_IS_SHARED)
         FOREACH(BTYPE ${TYPES} )
-        #  message(STATUS "Looking for ${BTYPE} DLL Version of ${lib_name}")
+      #    message(STATUS "Looking for ${BTYPE} DLL Version of ${lib}")
           STRING(TOUPPER ${BTYPE} TYPE)        
           get_filename_component(lib_path ${${upperlib}_LIBRARY_${TYPE}} PATH)
           get_filename_component(lib_name ${${upperlib}_LIBRARY_${TYPE}} NAME_WE)
-         # message(STATUS "lib_path: ${lib_path}")
-         # message(STATUS "lib_name: ${lib_name}")
+       #   message(STATUS "lib_path: ${lib_path}")
+       #   message(STATUS "lib_name: ${lib_name}")
           
           find_file(${upperlib}_LIBRARY_DLL_${TYPE}
                         NAMES ${lib_name}.dll
                         PATHS  ${lib_path}/../bin ${lib_path}/.. ${lib_path}/
                         NO_DEFAULT_PATH )
-         # message(STATUS "${upperlib}_LIBRARY_DLL_${TYPE}: ${${upperlib}_LIBRARY_DLL_${TYPE}}")
+      #    message(STATUS "${upperlib}_LIBRARY_DLL_${TYPE}: ${${upperlib}_LIBRARY_DLL_${TYPE}}")
           mark_as_advanced(${upperlib}_LIBRARY_DLL_${TYPE})
           if ( ${${upperlib}_LIBRARY_DLL_${TYPE}} STREQUAL  "${upperlib}_LIBRARY_DLL_${TYPE}-NOTFOUND")
             message(FATAL_ERROR "According to how ${upperlib}_LIBRARY_${TYPE} was found the library should"
@@ -382,7 +383,7 @@ MACRO (CMP_COPY_DEPENDENT_LIBRARIES mxa_lib_list)
 
          # SET(${upperlib}_LIBRARY_DLL_${TYPE} "${${upperlib}_LIBRARY_DLL_${TYPE}}/${lib_name}.dll" CACHE FILEPATH "The path to the DLL Portion of the library" FORCE)
          # message(STATUS "${upperlib}_LIBRARY_DLL_${TYPE}: ${${upperlib}_LIBRARY_DLL_${TYPE}}")
-         # message(STATUS "Generating Copy Rule for DLL File for ${upperlib}_LIBRARY_${TYPE}")
+         # message(STATUS "Generating Copy Rule for DLL File for  ${${upperlib}_LIBRARY_DLL_${TYPE}}")
           ADD_CUSTOM_TARGET(ZZ_${upperlib}_DLL_${TYPE}-Copy ALL 
                       COMMAND ${CMAKE_COMMAND} -E copy_if_different ${${upperlib}_LIBRARY_DLL_${TYPE}}
                       ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${BTYPE}/ 

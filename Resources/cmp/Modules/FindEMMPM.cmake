@@ -20,62 +20,9 @@
 #  EMMPM_RESOURCES_DIR - The directory where supporting cmake files and other files can be found
 
 # Look for the header file.
-
-############################################
-#
-# Check the existence of the libraries.
-#
-############################################
-# This macro was taken directly from the FindQt4.cmake file that is included
-# with the CMake distribution. This is NOT my work. All work was done by the
-# original authors of the FindQt4.cmake file. Only minor modifications were
-# made to remove references to Qt and make this file more generally applicable
-#########################################################################
-
-MACRO (_adjust_lib_var_names basename)
-  IF (${basename}_INCLUDE_DIR)
-
-  # if only the release version was found, set the debug variable also to the release version
-  IF (${basename}_LIBRARY_RELEASE AND NOT ${basename}_LIBRARY_DEBUG)
-    SET(${basename}_LIBRARY_DEBUG ${${basename}_LIBRARY_RELEASE})
-    SET(${basename}_LIBRARY       ${${basename}_LIBRARY_RELEASE})
-    SET(${basename}_LIBRARIES     ${${basename}_LIBRARY_RELEASE})
-  ENDIF (${basename}_LIBRARY_RELEASE AND NOT ${basename}_LIBRARY_DEBUG)
-
-  # if only the debug version was found, set the release variable also to the debug version
-  IF (${basename}_LIBRARY_DEBUG AND NOT ${basename}_LIBRARY_RELEASE)
-    SET(${basename}_LIBRARY_RELEASE ${${basename}_LIBRARY_DEBUG})
-    SET(${basename}_LIBRARY         ${${basename}_LIBRARY_DEBUG})
-    SET(${basename}_LIBRARIES       ${${basename}_LIBRARY_DEBUG})
-  ENDIF (${basename}_LIBRARY_DEBUG AND NOT ${basename}_LIBRARY_RELEASE)
-  IF (${basename}_LIBRARY_DEBUG AND ${basename}_LIBRARY_RELEASE)
-    # if the generator supports configuration types then set
-    # optimized and debug libraries, or if the CMAKE_BUILD_TYPE has a value
-    IF (CMAKE_CONFIGURATION_TYPES OR CMAKE_BUILD_TYPE)
-      SET(${basename}_LIBRARY       optimized ${${basename}_LIBRARY_RELEASE} debug ${${basename}_LIBRARY_DEBUG})
-    ELSE(CMAKE_CONFIGURATION_TYPES OR CMAKE_BUILD_TYPE)
-      # if there are no configuration types and CMAKE_BUILD_TYPE has no value
-      # then just use the release libraries
-      SET(${basename}_LIBRARY       ${${basename}_LIBRARY_RELEASE} )
-    ENDIF(CMAKE_CONFIGURATION_TYPES OR CMAKE_BUILD_TYPE)
-    SET(${basename}_LIBRARIES       optimized ${${basename}_LIBRARY_RELEASE} debug ${${basename}_LIBRARY_DEBUG})
-  ENDIF (${basename}_LIBRARY_DEBUG AND ${basename}_LIBRARY_RELEASE)
-
-  SET(${basename}_LIBRARY ${${basename}_LIBRARY} CACHE FILEPATH "The ${basename} library")
-
-  IF (${basename}_LIBRARY)
-    SET(${basename}_FOUND 1)
-  ENDIF (${basename}_LIBRARY)
-
-ENDIF (${basename}_INCLUDE_DIR )
-
-  # Make variables changeble to the advanced user
-  MARK_AS_ADVANCED(${basename}_LIBRARY ${basename}_LIBRARY_RELEASE ${basename}_LIBRARY_DEBUG ${basename}_INCLUDE_DIR )
-ENDMACRO (_adjust_lib_var_names)
-  
-  
-#MESSAGE (STATUS "Finding EM/MPM library and headers..." )
-#SET (EMMPM_DEBUG 1)
+ 
+# MESSAGE (STATUS "Finding EM/MPM library and headers..." )
+# SET (EMMPM_DEBUG 1)
 
 SET(EMMPM_INCLUDE_SEARCH_DIRS
   $ENV{EMMPM_INSTALL}/include
@@ -122,7 +69,23 @@ FIND_LIBRARY(EMMPM_LIBRARY_RELEASE
   NO_DEFAULT_PATH
   )
  
-_adjust_lib_var_names(EMMPM)
+
+
+SET (EMMPM_PROG_NAME "emmpm")
+IF (WIN32)
+    SET (EMMPM_PROG_NAME "emmpm.exe")
+ENDIF(WIN32)
+
+FIND_PROGRAM(EMMPM_PROG
+    NAMES ${EMMPM_PROG_NAME}
+    PATHS ${EMMPM_BIN_SEARCH_DIRS} 
+    NO_DEFAULT_PATH
+)
+MARK_AS_ADVANCED(EMMPM_PROG)
+
+# include the macro to adjust libraries
+INCLUDE (${CMP_MODULES_SOURCE_DIR}/cmpAdjustLibVars.cmake)
+cmp_ADJUST_LIB_VARS(EMMPM)
 
 # MESSAGE( STATUS "EMMPM_LIBRARY: ${EMMPM_LIBRARY}")
 
@@ -140,6 +103,11 @@ IF(EMMPM_INCLUDE_DIR AND EMMPM_LIBRARY)
     SET(EMMPM_LIB_DIR ${EMMPM_LIBRARY_PATH})
     SET(EMMPM_BIN_DIR ${EMMPM_LIBRARY_PATH})
   ENDIF(EMMPM_LIBRARY_DEBUG)
+  IF (EMMPM_PROG)
+    GET_FILENAME_COMPONENT(EMMPM_BIN_PATH ${EMMPM_PROG} PATH)
+    SET(EMMPM_BIN_PATH  ${EMMPM_BIN_PATH})
+  ENDIF (EMMPM_PROG)
+  
 ELSE(EMMPM_INCLUDE_DIR AND EMMPM_LIBRARY)
   SET(EMMPM_FOUND 0)
   SET(EMMPM_LIBRARIES)
@@ -180,9 +148,9 @@ IF (EMMPM_FOUND)
 
   CHECK_SYMBOL_EXISTS(EMMPM_BUILT_AS_DYNAMIC_LIB "emmpm/common/EMMPMConfiguration.h" HAVE_EMMPM_DLL)
 
-    IF (HAVE_EMMPM_DLL STREQUAL "TRUE")
-        SET (HAVE_EMMPM_DLL "1")
-    ENDIF (HAVE_EMMPM_DLL STREQUAL "TRUE")
+  IF (HAVE_EMMPM_DLL STREQUAL "1")
+    SET (EMMPM_IS_SHARED 1 CACHE INTERNAL "EMMPM Built as DLL or Shared Library")
+  ENDIF (HAVE_EMMPM_DLL STREQUAL "1")
 
   # Restore CMAKE_REQUIRED_INCLUDES and CMAKE_REQUIRED_FLAGS variables
   SET(CMAKE_REQUIRED_INCLUDES ${CMAKE_REQUIRED_INCLUDES_SAVE})
@@ -190,4 +158,4 @@ IF (EMMPM_FOUND)
   #
   #############################################
 
-ENDIF (EMMPM_FOUND)
+ENDIF ()
