@@ -28,6 +28,16 @@ PARALLEL_BUILD=2
 
 HOST_SYSTEM=`uname`
 
+# Adjust these to "0" if you want to skip those compilations. The default is to build
+# everything.
+BUILD_CMAKE="1"
+BUILD_MXABOOST="1"
+BUILD_QWT="1"
+BUILD_ITK="1"
+BUILD_TIFF="1"
+BUILD_EMMPM="1"
+BUILD_IPHELPER="1"
+
 
 GIT=`type -P git`
 if [ $GIT == "" ]
@@ -72,7 +82,7 @@ if [ "$CURL" != "" ]; then
   DOWNLOAD_ARGS="-o cmake-2.8.3.tar.gz"
 fi
 
-if [ "0" == "1" ]
+if [ "$BUILD_CMAKE" == "1" ]
 then
 
 
@@ -91,7 +101,10 @@ export PATH=$CMAKE_INSTALL/bin:$PATH
 
 echo "export CMAKE_INSTALL=$SDK_INSTALL/cmake-2.8.3" >  $SDK_INSTALL/initvars.sh
 echo "export PATH=\$CMAKE_INSTALL/bin:\$PATH" >>  $SDK_INSTALL/initvars.sh
+fi
 
+if [ "$BUILD_MXABOOST" == "1" ]
+then
 #------------------------------------------------------------------------------
 # We now need MXABoost on the system
 cd $SDK_SOURCE
@@ -106,8 +119,12 @@ cmake -DBOOST_INCLUDE_INSTALL_DIR=include/boost-1_44 -DBOOST_LIB_INSTALL_DIR=lib
 make -j $PARALLEL_BUILD install
 export BOOST_ROOT=$SDK_INSTALL/MXABoost-1.44
 echo "export BOOST_ROOT=$SDK_INSTALL/MXABoost-1.44" >> $SDK_INSTALL/initvars.sh
+fi
 
 
+
+if [ "$BUILD_QWT" == "1" ]
+then
 #------------------------------------------------------------------------------
 cd $SDK_SOURCE
 # Remove any previous Qwt
@@ -133,7 +150,11 @@ make -j $PARALLEL_BUILD
 make install
 export QWT_INSTALL=$SDK_INSTALL/Qwt
 echo "export QWT_INSTALL=$SDK_INSTALL/Qwt" >> $SDK_INSTALL/initvars.sh
+fi
 
+
+if [ "$BUILD_ITK" == "1" ]
+then
 #------------------------------------------------------------------------------
 # Pull Down ITK and compile/Install it
 cd $SDK_SOURCE
@@ -147,12 +168,11 @@ cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=$SDK_INSTALL/ITK-3.20.0 
 make -j $PARALLEL_BUILD install
 export ITK_DIR=$SDK_INSTALL/ITK-3.20.0/lib/InsightToolkit
 echo "export ITK_DIR=$SDK_INSTALL/ITK-3.20.0/lib/InsightToolkit" >> $SDK_INSTALL/initvars.sh
-
-
 fi
 
 
-
+if [ "$BUILD_TIFF" == "1" ]
+then
 #------------------------------------------------------------------------------
 # Compile libTiff
 cd $SDK_SOURCE
@@ -179,8 +199,11 @@ make -j $PARALLEL_BUILD
 make install
 export TIFF_INSTALL=$SDK_INSTALL/tiff
 echo "export TIFF_INSTALL=$SDK_INSTALL/tiff" >> $SDK_INSTALL/initvars.sh
+fi
 
 
+if [ "$BUILD_EMMPM" == "1" ]
+then
 #------------------------------------------------------------------------------
 # Compile the emmpm Library
 cd $SDK_SOURCE
@@ -207,6 +230,8 @@ make -j $PARALLEL_BUILD
 make install
 export EMMPM_INSTALL=$SDK_INSTALL/emmpm
 echo "export EMMPM_INSTALL=$SDK_INSTALL/emmpm" >> $SDK_INSTALL/initvars.sh
+fi
+
 
 #------------------------------------------------------------------------------
 # Compile the IPHelper
