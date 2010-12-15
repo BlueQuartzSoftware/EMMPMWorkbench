@@ -19,18 +19,22 @@
 # ------------------ START FIND HDF5 LIBS --------------------------------------
 SET (HDF5_FOUND "NO")
 SET (HDF5_HL_FOUND "NO")
-SET (HDF5_INSTALL  $ENV{HDF5_INSTALL})
+
+# Only set HDF5_INSTALL to the environment variable if it is blank
+if ("${HDF5_INSTALL}" STREQUAL "")
+    SET (HDF5_INSTALL  $ENV{HDF5_INSTALL})
+endif()
 
 SET(HDF5_INCLUDE_SEARCH_DIRS
-  $ENV{HDF5_INSTALL}/include
+  ${HDF5_INSTALL}/include
 )
 
 SET (HDF5_LIB_SEARCH_DIRS
-  $ENV{HDF5_INSTALL}/lib
+  ${HDF5_INSTALL}/lib
 )
 
 SET (HDF5_BIN_SEARCH_DIRS
-  $ENV{HDF5_INSTALL}/bin
+  ${HDF5_INSTALL}/bin
 )
 
 # -- Find the Include directory for HDF5
