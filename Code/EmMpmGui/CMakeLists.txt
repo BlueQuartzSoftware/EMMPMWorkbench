@@ -167,8 +167,8 @@ IF(Q_WS_WIN)
 ENDIF(Q_WS_WIN)
 
 # ---------- Build the Viewer Application  ----------------------
-ADD_EXECUTABLE( EmMpmGui ${GUI_TYPE} ${${PROJECT_NAME}_PROJECT_SRCS} )
-TARGET_LINK_LIBRARIES(EmMpmGui
+ADD_EXECUTABLE( ${PROJECT_NAME} ${GUI_TYPE} ${${PROJECT_NAME}_PROJECT_SRCS} )
+TARGET_LINK_LIBRARIES(${PROJECT_NAME}
                       ${QT_LIBRARIES}
                       QtSupport
                       ${QWT_LIBRARIES}
@@ -177,7 +177,18 @@ TARGET_LINK_LIBRARIES(EmMpmGui
 )
 
 
-cmp_InstallationSupport(EmMpmGui ${EXE_DEBUG_EXTENSION} ${${PROJECT_NAME}_BINARY_DIR} "1")
+# --------------------------------------------------------------------
+# Setup our installation rules
+set(AppNeedsPlugins "0")
+cmp_InstallationSupport(${PROJECT_NAME} 
+                        ${EXE_DEBUG_EXTENSION} 
+                        ${${PROJECT_NAME}_BINARY_DIR} 
+                        "${AppNeedsPlugins}" 
+                        "${PROJECT_INSTALL_EXECUTABLES}"
+                        "Applications"
+                        "."
+                        "${CMP_LIB_SEARCH_DIRS}"
+                        )
 
 
 

@@ -6,11 +6,27 @@
 #//
 #///////////////////////////////////////////////////////////////////////////////
 
-
 # ------------------------------------------------------------------------------ 
 # This CMake code sets up for CPack to be used to generate native installers
 # ------------------------------------------------------------------------------
-INCLUDE (${CMP_INSTALLATION_SUPPORT_SOURCE_DIR}/InstallMSVCLibraries.cmake)
+if (MSVC)
+    # Skip the install rules, we only want to gather a list of the system libraries
+    SET(CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS_SKIP 1)
+    #SET(CMAKE_INSTALL_DEBUG_LIBRARIES OFF)
+    
+    # Gather the list of system level runtime libraries
+    INCLUDE (InstallRequiredSystemLibraries)
+    
+    # Our own Install rule for Release builds of the MSVC runtime libs
+    IF (CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS)
+      INSTALL(FILES ${CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS}
+        DESTINATION ./
+        PERMISSIONS OWNER_WRITE OWNER_READ OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ
+        COMPONENT Applications
+        CONFIGURATIONS Release)
+    ENDIF (CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS)
+endif()
+
 SET(CPACK_PACKAGE_DESCRIPTION_SUMMARY "GUI Application that runs various image processing algorithms through a plugin interface.")
 SET(CPACK_PACKAGE_VENDOR "BlueQuartz Software, Michael A. Jackson")
 SET(CPACK_PACKAGE_DESCRIPTION_FILE "${PROJECT_BINARY_DIR}/ReadMe.txt")
@@ -19,25 +35,24 @@ SET(CPACK_PACKAGE_VERSION_MAJOR ${IPHelper_VER_MAJOR})
 SET(CPACK_PACKAGE_VERSION_MINOR ${IPHelper_VER_MINOR})
 SET(CPACK_PACKAGE_VERSION_PATCH ${IPHelper_VER_PATCH})
 SET(CPACK_PACKAGE_VERSION ${IPHelper_VERSION})
-SET(CPACK_COMPONENTS_ALL Applications)
-set(CPACK_COMPONENT_APPLICATIONS_DISPLAY_NAME "Applications")
-set(CPACK_COMPONENT_APPLICATIONS_DESCRIPTION  "The Gui Versions of the IPHelper Software Tools Suite")
-set(CPACK_COMPONENT_APPLICATIONS_REQUIRED 1)
+#SET(CPACK_COMPONENTS_ALL Applications)
+#set(CPACK_COMPONENT_APPLICATIONS_DISPLAY_NAME "Applications")
+#set(CPACK_COMPONENT_APPLICATIONS_DESCRIPTION  "The Gui Versions of the IPHelper Software Tools Suite")
+#set(CPACK_COMPONENT_APPLICATIONS_REQUIRED 1)
 set(CPACK_PACKAGE_EXECUTABLES
-    IPHelper IPHelper
+    IPHelper IPHelper EmMpmGui EmMpmGui
 )
 
 IF (APPLE)
-  set(CPACK_PACKAGE_FILE_NAME "${PROJECT_NAME}-OSX")
+    set(CPACK_PACKAGE_FILE_NAME "${PROJECT_NAME}-${IPHelper_VERSION}-OSX")
 elseif(WIN32)
-	if ( ${CMAKE_SIZEOF_VOID_P} EQUAL 8)
-	
-		set(CPACK_PACKAGE_FILE_NAME "${PROJECT_NAME}-Win64")
-	else()
-		set(CPACK_PACKAGE_FILE_NAME "${PROJECT_NAME}-Win32")
-	endif()
+    if ( "${CMAKE_SIZEOF_VOID_P}" EQUAL "8" )
+        set(CPACK_PACKAGE_FILE_NAME "${PROJECT_NAME}-${IPHelper_VERSION}-Win64")
+    else()
+        set(CPACK_PACKAGE_FILE_NAME "${PROJECT_NAME}-${IPHelper_VERSION}-Win32")
+    endif()
 else()
-  set(CPACK_PACKAGE_FILE_NAME "${PROJECT_NAME}-${CMAKE_SYSTEM_NAME}")
+  set(CPACK_PACKAGE_FILE_NAME "${PROJECT_NAME}-${IPHelper_VERSION}-${CMAKE_SYSTEM_NAME}")
 endif()
 # Create an NSID based installer for Windows Systems
 IF(WIN32 AND NOT UNIX)
