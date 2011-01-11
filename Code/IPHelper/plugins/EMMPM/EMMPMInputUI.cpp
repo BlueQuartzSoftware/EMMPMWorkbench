@@ -57,7 +57,7 @@
 // Our Own Includes
 #include "EMMPMTask.h"
 
-#include "IPHelper/Common/IPHelperVersion.h"
+#include "EIMApps/Common/EIMAppsVersion.h"
 
 #define READ_STRING_SETTING(prefs, var, emptyValue)\
   var->setText( prefs->value(#var).toString() );\
@@ -277,7 +277,7 @@ int EMMPMInputUI::processInputs(QObject* parentGUI)
   ProcessQueueController* queueController = new ProcessQueueController(this);
   setQueueController(queueController);
   bool ok;
-  
+
   InputOutputFilePairList filepairs;
 
   if (this->processFolder->isChecked() == false)
@@ -343,7 +343,7 @@ int EMMPMInputUI::processInputs(QObject* parentGUI)
 
   connect(queueController, SIGNAL(started()), parentGUI, SLOT(processingStarted()));
   connect(queueController, SIGNAL(finished()), parentGUI, SLOT(processingFinished()));
-  
+
 //  getQueueDialog()->setParent(this);
   getQueueDialog()->setVisible(true);
 
