@@ -65,8 +65,8 @@ include_directories( ${PROJECT_CODE_DIR}/EmMpmGui )
 include_directories( ${PROJECT_CODE_DIR}/QtSupport )
 
 include_directories( ${EmMpmGui_BINARY_DIR} )
-include_directories( ${IPHelper_BINARY_DIR}/MXA)
-include_directories( ${IPHelper_BINARY_DIR}/QtSupport )
+include_directories( ${EIMApps_BINARY_DIR}/MXA)
+include_directories( ${EIMApps_BINARY_DIR}/QtSupport )
  
 # --------------------------------------------------------------------
 # Set up all the source codes
@@ -140,7 +140,7 @@ SET (${PROJECT_NAME}_PROJECT_SRCS
 set (PluginListFile ${EmMpmGui_BINARY_DIR}/plugins.txt)
 set (LibDirSearchFile ${EmMpmGui_BINARY_DIR}/libsearchdirs.txt)
 file(WRITE ${PluginListFile} "")
-file(WRITE ${LibDirSearchFile} "${IPHelper_BINARY_DIR}/Bin/plugins;")
+file(WRITE ${LibDirSearchFile} "${EIMApps_BINARY_DIR}/Bin/plugins;")
 
 # Find all the Qt Plugins after which we should have some more variables to our disposal
 FindQt4Plugins("qgif;qjpeg;qtiff" "${PluginListFile}" "${LibDirSearchFile}" "imageformats")
@@ -152,12 +152,12 @@ file(READ ${LibDirSearchFile} PLUGIN_SEARCH_DIRS)
 #-- Set up OS X Application Bundle properties
 #-- This file have tools for OS X Bunlde creation and configuration
 INCLUDE (${CMP_OSX_TOOLS_SOURCE_DIR}/OSX_BundleTools.cmake)
-SET (EXE_DEBUG_EXTENSION "_debug")
+
 IF(APPLE)
  SET(GUI_TYPE MACOSX_BUNDLE)
- ConfigureMacOSXBundlePlist(EmMpmGui ${EXE_DEBUG_EXTENSION} 
+ ConfigureMacOSXBundlePlist(${PROJECT_NAME} ${EXE_DEBUG_EXTENSION} 
                             ${PROJECT_RESOURCES_DIR}/icons/icns/EmMpmGui.icns
-                            ${IPHelper_VERSION}  )
+                            ${EIMApps_VERSION}  )
 ENDIF (APPLE)
 
 IF(Q_WS_WIN)
@@ -177,9 +177,16 @@ TARGET_LINK_LIBRARIES(${PROJECT_NAME}
 )
 
 
+
+# Clear the file first otherwise we get duplicates
+file(WRITE ${PROJECT_BINARY_DIR}/Qt_Plugins.txt "")
+FindQt4Plugins("qgif;qjpeg;qtiff" "${PROJECT_BINARY_DIR}/Qt_Plugins.txt" 
+                "${PROJECT_BINARY_DIR}/LibSearchDirs.txt" 
+                "imageformats" )
 # --------------------------------------------------------------------
 # Setup our installation rules
-set(AppNeedsPlugins "0")
+set(AppNeedsPlugins "1")                
+#message(STATUS "CMP_LIB_SEARCH_DIRS: ${CMP_LIB_SEARCH_DIRS}")
 cmp_InstallationSupport(${PROJECT_NAME} 
                         ${EXE_DEBUG_EXTENSION} 
                         ${${PROJECT_NAME}_BINARY_DIR} 
@@ -188,7 +195,7 @@ cmp_InstallationSupport(${PROJECT_NAME}
                         "Applications"
                         "."
                         "${CMP_LIB_SEARCH_DIRS}"
+                        "${PROJECT_BINARY_DIR}/Qt_Plugins.txt"
                         )
-
 
 

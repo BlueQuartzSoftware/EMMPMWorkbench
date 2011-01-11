@@ -61,7 +61,7 @@
 #include "QtSupport/ProcessQueueDialog.h"
 
 
-#include "IPHelper/Common/IPHelperVersion.h"
+#include "EIMApps/Common/EIMAppsVersion.h"
 
 #include "IPHelper/plugins/QImageProcessingInterface.h"
 
@@ -468,10 +468,10 @@ void IPHelperApp::openFile(QString imageFile)
 // -----------------------------------------------------------------------------
 void IPHelperApp::on_aboutBtn_clicked()
 {
-  ApplicationAboutBoxDialog about(IPHelper::LicenseList, this);
+  ApplicationAboutBoxDialog about(EIMApps::LicenseList, this);
   QString an = QCoreApplication::applicationName();
   QString version("");
-  version.append(IPHelper::Version::PackageComplete.c_str());
+  version.append(EIMApps::Version::PackageComplete.c_str());
   about.setApplicationInfo(an, version);
   about.exec();
 }

@@ -55,6 +55,13 @@ class ProcessQueueDialog;
 class ProcessQueueController;
 class QImageProcessingInterface;
 
+/**
+ * @class IPHelperApp IPHelperApp.h IPHelper/Application/IPHelperApp.h
+ * @brief
+ * @author Michael A. Jackson for BlueQuartz Software
+ * @date Jan 10, 2011
+ * @version 1.0
+ */
 class IPHelperApp : public QMainWindow, private Ui::IPHelperApp
 {
   Q_OBJECT;

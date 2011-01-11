@@ -28,8 +28,8 @@ include_directories(${PROJECT_SOURCE_DIR} ${PROJECT_BINARY_DIR} ${PROJECT_SOURCE
 include_directories(${PROJECT_CODE_DIR} )
 include_directories(${PROJECT_CODE_DIR}/QtSupport )
 
-include_directories(${IPHelper_BINARY_DIR})
-include_directories(${IPHelper_BINARY_DIR}/QtSupport)
+include_directories(${EIMApps_BINARY_DIR})
+include_directories(${EIMApps_BINARY_DIR}/QtSupport)
 
 set (EMMPMPlugin_HDRS
     ${PROJECT_SOURCE_DIR}/EMMPMPlugin.h
@@ -62,7 +62,7 @@ cmp_IDE_SOURCE_PROPERTIES("Generated" "${EMMPMPlugin_Generated_UI_HDRS}" "${EMMP
 
 # ---------- Setup output Directories -------------------------
 if(NOT MSVC)
-  SET (CMAKE_LIBRARY_OUTPUT_DIRECTORY  ${IPHelper_BINARY_DIR}/Bin/plugins  )
+  SET (CMAKE_LIBRARY_OUTPUT_DIRECTORY  ${EIMApps_BINARY_DIR}/Bin/plugins  )
 endif()
 add_library(EMMPMPlugin MODULE ${EMMPMPlugin_PROJECT_SRCS})
 target_link_libraries(EMMPMPlugin 
@@ -72,7 +72,8 @@ target_link_libraries(EMMPMPlugin
                     ${ITK_LIBRARIES} 
                     QtSupport 
                     AIMLib )
-PluginProperties(EMMPMPlugin "_debug" "${IPHelper_VERSION}" "${IPHelper_BINARY_DIR}")
+PluginProperties(EMMPMPlugin "_debug" "${EIMApps_VERSION}" 
+                "${IPHelper_BINARY_DIR}" "IPHelper_Plugins.txt")
 if (NOT MSVC)
-  SET (CMAKE_LIBRARY_OUTPUT_DIRECTORY  ${IPHelper_BINARY_DIR}/Bin  )
+  SET (CMAKE_LIBRARY_OUTPUT_DIRECTORY  ${EIMApps_BINARY_DIR}/Bin  )
 endif()

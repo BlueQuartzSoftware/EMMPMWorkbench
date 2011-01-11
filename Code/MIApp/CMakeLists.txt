@@ -109,7 +109,7 @@ SET (${PROJECT_NAME}_PROJECT_SRCS
 set (PluginListFile ${QMIApp_BINARY_DIR}/plugins.txt)
 set (LibDirSearchFile ${QMIApp_BINARY_DIR}/libsearchdirs.txt)
 file(WRITE ${PluginListFile} "")
-file(WRITE ${LibDirSearchFile} "${IPHelper_BINARY_DIR}/Bin/plugins;")
+file(WRITE ${LibDirSearchFile} "${EIMApps_BINARY_DIR}/Bin/plugins;")
 
 # Find all the Qt Plugins after which we should have some more variables to our disposal
 FindQt4Plugins("qgif;qjpeg;qtiff" "${PluginListFile}" "${LibDirSearchFile}" "imageformats")
@@ -126,7 +126,7 @@ IF(APPLE)
  SET(GUI_TYPE MACOSX_BUNDLE)
  ConfigureMacOSXBundlePlist(QMIApp ${EXE_DEBUG_EXTENSION} 
                             ${PROJECT_RESOURCES_DIR}/icons/icns/QMIApp.icns
-                            ${IPHelper_VERSION}  )
+                            ${EIMApps_VERSION}  )
 ENDIF (APPLE)
 
 IF(Q_WS_WIN)

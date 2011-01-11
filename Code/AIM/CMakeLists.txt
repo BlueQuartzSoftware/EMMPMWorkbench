@@ -33,7 +33,23 @@ include_directories(${AIMLib_BINARY_DIR}/..)
 add_definitions(-DQT_CORE_LIB)
 
 
-add_library(AIMLib STATIC ${Project_SRCS})
-target_link_libraries(AIMLib ${ITK_LIBRARIES} ${QT_QTCORE_LIBRARY})
+add_library(${PROJECT_NAME} ${LIB_TYPE} ${Project_SRCS})
+target_link_libraries(${PROJECT_NAME} ${ITK_LIBRARIES} ${QT_QTCORE_LIBRARY})
 
-LibraryProperties( AIMLib ${EXE_DEBUG_EXTENSION})
+LibraryProperties( ${PROJECT_NAME} ${EXE_DEBUG_EXTENSION})
+set(install_dir "tools")
+set(lib_install_dir "lib")
+if (WIN32)
+    set (install_dir ".")
+    set(lib_install_dir "")
+endif()
+
+if (BUILD_SHARED_LIBS)
+    INSTALL(TARGETS ${PROJECT_NAME} 
+        COMPONENT Applications
+        RUNTIME DESTINATION ${install_dir}
+        LIBRARY DESTINATION ${lib_install_dir}
+        ARCHIVE DESTINATION ${lib_install_dir}       
+        BUNDLE DESTINATION "."
+    ) 
+endif() 
