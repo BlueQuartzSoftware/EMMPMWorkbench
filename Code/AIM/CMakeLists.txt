@@ -17,6 +17,16 @@ else()
     message(FATAL_ERROR "Qt 4 is Needed for this project.")
 endif(QT4_FOUND)
 
+# Set this export symbol so classes are properly exported on Windows
+SET (${PROJECT_NAME}_BUILT_AS_DYNAMIC_LIB)
+IF (BUILD_SHARED_LIBS)
+    SET (${PROJECT_NAME}_BUILT_AS_DYNAMIC_LIB 1)
+    IF (WIN32)
+        ADD_DEFINITIONS("-D${PROJECT_NAME}_BUILT_AS_DYNAMIC_LIB")
+    ENDIF (WIN32)
+ENDIF (BUILD_SHARED_LIBS)
+
+
 set (Project_SRCS "")
 
 Macro(MXACompileDir DirName)

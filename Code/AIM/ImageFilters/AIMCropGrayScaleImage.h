@@ -39,6 +39,7 @@
 
 #include <AIM/Common/AIMImage.h>
 #include <AIM/ImageFilters/AIMImageFilter.h>
+#include "AIM/Common/AIMLibExport.h"
 
 /**
 * @class AIMCropGrayScaleImage AIMCropGrayScaleImage.h AIM/ImageFilters/AIMCropGrayScaleImage.h
@@ -47,7 +48,7 @@
 * @date Mar 19, 2009
 * @version 1.0
 */
-class AIMCropGrayScaleImage : public AIMImageFilter
+class AIMLib_EXPORT AIMCropGrayScaleImage : public AIMImageFilter
 {
   public:
     /**

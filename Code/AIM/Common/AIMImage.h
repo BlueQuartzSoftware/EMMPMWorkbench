@@ -34,6 +34,7 @@
 
 #include "MXA/MXATypes.h"
 #include "MXA/Common/MXASetGetMacros.h"
+#include "AIM/Common/AIMLibExport.h"
 
 /**
 * @class AIMImage AIMImage.h AIM/Common/AIMImage.h
@@ -42,7 +43,7 @@
 * @date Nov 5, 2009
 * @version 1.0
 */
-class AIMImage
+class AIMLib_EXPORT AIMImage
 {
   public:
 

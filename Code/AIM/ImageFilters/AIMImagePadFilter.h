@@ -33,6 +33,7 @@
 
 #include "AIM/Common/AIMImage.h"
 #include "AIM/ImageFilters/AIMImageFilter.h"
+#include "AIM/Common/AIMLibExport.h"
 
 /**
 * @class AIMImagePadFilter AIMImagePadFilter.h AIM/ImageFilters/AIMImagePadFilter.h
@@ -42,7 +43,7 @@
 * @date July 06, 2010
 * @version 1.0
 */
-class AIMImagePadFilter : public AIMImageFilter
+class AIMLib_EXPORT AIMImagePadFilter : public AIMImageFilter
 {
   public:
     /**

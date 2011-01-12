@@ -34,6 +34,8 @@
 #include <itkImportImageFilter.h>
 #include <itkExtractImageFilter.h>
 
+#include "AIM/Common/AIMLibExport.h"
+
 namespace AIM
 {
 namespace ImageFilters
@@ -54,7 +56,7 @@ typedef itk::Image<PixelType, AIM::ImageFilters::Dimension> OutputImageType;
 * @date Mar 19, 2009
 * @version 1.0
 */
-class AIMImageFilter
+class AIMLib_EXPORT AIMImageFilter
 {
   public:
     AIMImageFilter();
