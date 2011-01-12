@@ -16,6 +16,7 @@ cmpGenerateVersionString ( ${EmMpmGui_BINARY_DIR}/EmMpmGuiVersion.h "EmMpm_Gui" 
 if(QT4_FOUND)
     include( ${QT_USE_FILE} )
     CMP_COPY_QT4_RUNTIME_LIBRARIES( "QtSvg;QtScript" )
+    CMP_QT_LIBRARIES_INSTALL_RULES("QtSvg;QtScript" ".")
 else()
     message(FATAL_ERROR "Qt 4 is Needed for this project.")
 endif(QT4_FOUND)
@@ -30,6 +31,7 @@ find_package(Qwt)
 if (QWT_FOUND)
     include_directories(${QWT_INCLUDE_DIR})
     CMP_COPY_DEPENDENT_LIBRARIES("qwt")
+    CMP_LIBRARIES_INSTALL_RULES("qwt" ".")
 else()
     message(FATAL_ERROR "Qwt is required for this project")
 endif()
@@ -50,6 +52,7 @@ find_package(EMMPM)
 if (EMMPM_FOUND)
     include_directories(${EMMPM_INCLUDE_DIR})
     CMP_COPY_DEPENDENT_LIBRARIES("EMMPM")
+    CMP_LIBRARIES_INSTALL_RULES("EMMPM" ".")
 else()
     message(FATAL_ERROR "EMMPM is required for this project")
 endif()
@@ -137,36 +140,23 @@ SET (${PROJECT_NAME}_PROJECT_SRCS
   ${Generated_MOC_SRCS}
 )
 
-if (0)
-    set (PluginListFile ${EmMpmGui_BINARY_DIR}/plugins.txt)
-    set (LibDirSearchFile ${EmMpmGui_BINARY_DIR}/libsearchdirs.txt)
-    file(WRITE ${PluginListFile} "")
-    file(WRITE ${LibDirSearchFile} "${EIMApps_BINARY_DIR}/Bin/plugins;")
-    
-    # Find all the Qt Plugins after which we should have some more variables to our disposal
-    FindQt4Plugins("qgif;qjpeg;qtiff" "${PluginListFile}" "${LibDirSearchFile}" "imageformats")
-    
-    file(READ ${PluginListFile}  COMPLETE_PLUGIN_LIST)
-    file(READ ${LibDirSearchFile} PLUGIN_SEARCH_DIRS)
-endif()
-
-
 #-- Set up OS X Application Bundle properties
 #-- This file have tools for OS X Bunlde creation and configuration
-INCLUDE (${CMP_OSX_TOOLS_SOURCE_DIR}/OSX_BundleTools.cmake)
+#INCLUDE (${CMP_OSX_TOOLS_SOURCE_DIR}/OSX_BundleTools.cmake)
 
 IF(APPLE)
- SET(GUI_TYPE MACOSX_BUNDLE)
+# SET(GUI_TYPE MACOSX_BUNDLE)
 # ConfigureMacOSXBundlePlist(${PROJECT_NAME} ${EXE_DEBUG_EXTENSION} 
 #                            ${PROJECT_RESOURCES_DIR}/icons/icns/EmMpmGui.icns
 #                            ${EIMApps_VERSION}  )
-
+    set(APPLICATION_ICON ${PROJECT_RESOURCES_DIR}/icons/icns/${PROJECT_NAME}.icns)
 ENDIF (APPLE)
 
 IF(Q_WS_WIN)
-    include_directories(${PROJECT_RESOURCES_DIR}/icons/ico)
-    configure_file(${PROJECT_RESOURCES_DIR}/icons/ico/IconResource.rc.in ${${PROJECT_NAME}_BINARY_DIR}/${PROJECT_NAME}.rc)
-    SET (${PROJECT_NAME}_PROJECT_SRCS ${${PROJECT_NAME}_PROJECT_SRCS} ${${PROJECT_NAME}_BINARY_DIR}/${PROJECT_NAME}.rc) 
+#    include_directories(${PROJECT_RESOURCES_DIR}/icons/ico)
+#    configure_file(${PROJECT_RESOURCES_DIR}/icons/ico/IconResource.rc.in ${${PROJECT_NAME}_BINARY_DIR}/${PROJECT_NAME}.rc)
+#    SET (${PROJECT_NAME}_PROJECT_SRCS ${${PROJECT_NAME}_PROJECT_SRCS} ${${PROJECT_NAME}_BINARY_DIR}/${PROJECT_NAME}.rc) 
+    set(APPLICATION_ICON ${PROJECT_RESOURCES_DIR}/icons/ico/${PROJECT_NAME}.ico)
 ENDIF(Q_WS_WIN)
 
 # Clear the file first otherwise we get duplicates
@@ -175,14 +165,13 @@ FindQt4Plugins("qgif;qjpeg;qtiff" "${PROJECT_BINARY_DIR}/Qt_Plugins.txt"
                 "${PROJECT_BINARY_DIR}/LibSearchDirs.txt" 
                 "imageformats" )
 
-if (NOT APPLE)
+if (0)
 # ---------- Build the Viewer Application  ----------------------
 ADD_EXECUTABLE( ${PROJECT_NAME} ${GUI_TYPE} ${${PROJECT_NAME}_PROJECT_SRCS} )
 TARGET_LINK_LIBRARIES(${PROJECT_NAME}
                       ${QT_LIBRARIES}
                       QtSupport
                       ${QWT_LIBRARIES}
-                      ${TIFF_LIBRARIES}
                       ${EMMPM_LIBRARIES}
 )
 
@@ -207,7 +196,7 @@ else()
         TARGET ${PROJECT_NAME}
         SOURCES ${${PROJECT_NAME}_PROJECT_SRCS}
         DEBUG_EXTENSION ${EXE_DEBUG_EXTENSION}
-        ICON_FILE  ${PROJECT_RESOURCES_DIR}/icons/icns/${PROJECT_NAME}.icns
+        ICON_FILE  ${APPLICATION_ICON}
         VERSION_MAJOR ${EIMApps_VER_MAJOR}
         VERSION_MINOR ${EIMApps_VER_MINOR}
         VERSION_PATCH ${EIMApps_VER_PATCH}

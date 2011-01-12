@@ -96,21 +96,24 @@ SET (${PROJECT_NAME}_PROJECT_SRCS
 
 #-- Set up OS X Application Bundle properties
 #-- This file have tools for OS X Bunlde creation and configuration
-INCLUDE (${CMP_OSX_TOOLS_SOURCE_DIR}/OSX_BundleTools.cmake)
+#INCLUDE (${CMP_OSX_TOOLS_SOURCE_DIR}/OSX_BundleTools.cmake)
 
-#IF(APPLE)
+IF(APPLE)
 # SET(GUI_TYPE MACOSX_BUNDLE)
 # ConfigureMacOSXBundlePlist(${PROJECT_NAME} ${EXE_DEBUG_EXTENSION} 
 #                            ${PROJECT_RESOURCES_DIR}/icons/icns/IPHelperApp.icns
 #                            ${EIMApps_VERSION} )
-#ENDIF (APPLE)
+    set(APPLICATION_ICON ${PROJECT_RESOURCES_DIR}/icons/icns/${PROJECT_NAME}.icns)
+ENDIF (APPLE)
 
 IF(Q_WS_WIN)
-    include_directories(${PROJECT_RESOURCES_DIR}/icons/ico)
-    configure_file(${PROJECT_RESOURCES_DIR}/icons/ico/IconResource.rc.in ${IPHelperApp_BINARY_DIR}/IPHelperApp.rc)
-    SET (IPHelperApp_PROJECT_SRCS ${IPHelperApp_PROJECT_SRCS} ${IPHelperApp_BINARY_DIR}/IPHelperApp.rc) 
-    cmp_IDE_SOURCE_PROPERTIES ("ConfiguredFiles" "${IPHelperApp_BINARY_DIR}/IPHelperApp.rc" "${QRC_LICENSE_FILES};${IPHelperApp_BINARY_DIR}/IPHelperApp.rc" "0")
-    cmp_IDE_SOURCE_PROPERTIES( "ConfiguredFiles" "${EIMApps_BINARY_DIR}/${PROJECT_PREFIX}/Common/${PROJECT_PREFIX}Version.h;${EIMApps_BINARY_DIR}/${PROJECT_PREFIX}/Common/${PROJECT_PREFIX}Configuration.h" "${EIMApps_BINARY_DIR}/${PROJECT_PREFIX}/Common/${PROJECT_PREFIX}Types.h" "0") 
+  #  include_directories(${PROJECT_RESOURCES_DIR}/icons/ico)
+  #  configure_file(${PROJECT_RESOURCES_DIR}/icons/ico/IconResource.rc.in
+  #                 ${IPHelperApp_BINARY_DIR}/IPHelperApp.rc)
+  #  SET (IPHelperApp_PROJECT_SRCS ${IPHelperApp_PROJECT_SRCS} ${IPHelperApp_BINARY_DIR}/IPHelperApp.rc) 
+  #  cmp_IDE_SOURCE_PROPERTIES ("ConfiguredFiles" "${IPHelperApp_BINARY_DIR}/IPHelperApp.rc" "${QRC_LICENSE_FILES};${IPHelperApp_BINARY_DIR}/IPHelperApp.rc" "0")
+  #  cmp_IDE_SOURCE_PROPERTIES( "ConfiguredFiles" "${EIMApps_BINARY_DIR}/${PROJECT_PREFIX}/Common/${PROJECT_PREFIX}Version.h;${EIMApps_BINARY_DIR}/${PROJECT_PREFIX}/Common/${PROJECT_PREFIX}Configuration.h" "${EIMApps_BINARY_DIR}/${PROJECT_PREFIX}/Common/${PROJECT_PREFIX}Types.h" "0") 
+    set(APPLICATION_ICON ${PROJECT_RESOURCES_DIR}/icons/ico/IPHelperApp.ico)
 ENDIF(Q_WS_WIN)
 
 # Clear the file first otherwise we get duplicates
@@ -119,7 +122,7 @@ FindQt4Plugins("qgif;qjpeg;qtiff" "${PROJECT_BINARY_DIR}/Qt_Plugins.txt"
                 "${PROJECT_BINARY_DIR}/LibSearchDirs.txt" 
                 "imageformats" )
                 
-if (NOT APPLE)
+if (0)
     # ---------- Build the Viewer Application  ----------------------
     ADD_EXECUTABLE( ${PROJECT_NAME} ${GUI_TYPE} ${IPHelperApp_PROJECT_SRCS} )
     TARGET_LINK_LIBRARIES( ${PROJECT_NAME}
@@ -151,7 +154,7 @@ else()
         TARGET ${PROJECT_NAME}
         SOURCES ${${PROJECT_NAME}_PROJECT_SRCS}
         DEBUG_EXTENSION ${EXE_DEBUG_EXTENSION}
-        ICON_FILE  ${PROJECT_RESOURCES_DIR}/icons/icns/${PROJECT_NAME}.icns
+        ICON_FILE       ${APPLICATION_ICON}
         VERSION_MAJOR ${EIMApps_VER_MAJOR}
         VERSION_MINOR ${EIMApps_VER_MINOR}
         VERSION_PATCH ${EIMApps_VER_PATCH}
