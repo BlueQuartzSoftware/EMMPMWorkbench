@@ -175,7 +175,8 @@ endif()
 
 # --------------------------------------------------------------------
 # Option to Compile the Enhanced EM/MPM Qt Base GUI application
-option(EIMApps_BUILD_EMMPM_GUI "Build the EM/MPM GUI Application" OFF)
+option(EIMApps_BUILD_EMMPM_GUI "Build the EM/MPM GUI Application" ON)
+
 if (EIMApps_BUILD_EMMPM_GUI)
     add_subdirectory(${PROJECT_CODE_DIR}/EmMpmGui ${PROJECT_BINARY_DIR}/Applications/EmMpmGui)
 endif()

@@ -98,7 +98,6 @@ SET (${PROJECT_NAME}_PROJECT_SRCS
 #-- This file have tools for OS X Bunlde creation and configuration
 INCLUDE (${CMP_OSX_TOOLS_SOURCE_DIR}/OSX_BundleTools.cmake)
 
-
 #IF(APPLE)
 # SET(GUI_TYPE MACOSX_BUNDLE)
 # ConfigureMacOSXBundlePlist(${PROJECT_NAME} ${EXE_DEBUG_EXTENSION} 
@@ -129,12 +128,12 @@ if (NOT APPLE)
                             AIMLib
                             QtSupport
                             MXADataModel)
-    
-    
-    # --------------------------------------------------------------------
-    # Setup our installation rules               
-    set(AppNeedsPlugins "1")
-    cmp_InstallationSupport(${PROJECT_NAME} 
+
+# --------------------------------------------------------------------
+# Setup our installation rules               
+set(AppNeedsPlugins "1")
+cmp_InstallationSupport(${PROJECT_NAME} 
+
                         ${EXE_DEBUG_EXTENSION} 
                         ${${PROJECT_NAME}_BINARY_DIR} 
                         "${AppNeedsPlugins}" 
@@ -144,6 +143,7 @@ if (NOT APPLE)
                         "${CMP_LIB_SEARCH_DIRS}"
                         "${PROJECT_BINARY_DIR}/Qt_Plugins.txt;${IPHelper_BINARY_DIR}/IPHelper_Plugins.txt"
                         )             
+
 else()
     file(READ ${PROJECT_BINARY_DIR}/Qt_Plugins.txt QT_PLUGINS)
     file(READ ${PROJECT_BINARY_DIR}/IPHelper_Plugins.txt IPHELPER_PLUGINS)
@@ -165,3 +165,4 @@ else()
         )             
                         
 endif()
+

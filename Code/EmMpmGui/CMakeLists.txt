@@ -150,6 +150,7 @@ if (0)
     file(READ ${LibDirSearchFile} PLUGIN_SEARCH_DIRS)
 endif()
 
+
 #-- Set up OS X Application Bundle properties
 #-- This file have tools for OS X Bunlde creation and configuration
 INCLUDE (${CMP_OSX_TOOLS_SOURCE_DIR}/OSX_BundleTools.cmake)
@@ -159,6 +160,7 @@ IF(APPLE)
 # ConfigureMacOSXBundlePlist(${PROJECT_NAME} ${EXE_DEBUG_EXTENSION} 
 #                            ${PROJECT_RESOURCES_DIR}/icons/icns/EmMpmGui.icns
 #                            ${EIMApps_VERSION}  )
+
 ENDIF (APPLE)
 
 IF(Q_WS_WIN)
@@ -218,5 +220,4 @@ else()
         INSTALL_DEST  "."
         )   
 endif()
-
 
