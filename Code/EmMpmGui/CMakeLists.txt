@@ -140,22 +140,11 @@ SET (${PROJECT_NAME}_PROJECT_SRCS
   ${Generated_MOC_SRCS}
 )
 
-#-- Set up OS X Application Bundle properties
-#-- This file have tools for OS X Bunlde creation and configuration
-#INCLUDE (${CMP_OSX_TOOLS_SOURCE_DIR}/OSX_BundleTools.cmake)
-
 IF(APPLE)
-# SET(GUI_TYPE MACOSX_BUNDLE)
-# ConfigureMacOSXBundlePlist(${PROJECT_NAME} ${EXE_DEBUG_EXTENSION} 
-#                            ${PROJECT_RESOURCES_DIR}/icons/icns/EmMpmGui.icns
-#                            ${EIMApps_VERSION}  )
     set(APPLICATION_ICON ${PROJECT_RESOURCES_DIR}/icons/icns/${PROJECT_NAME}.icns)
 ENDIF (APPLE)
 
 IF(Q_WS_WIN)
-#    include_directories(${PROJECT_RESOURCES_DIR}/icons/ico)
-#    configure_file(${PROJECT_RESOURCES_DIR}/icons/ico/IconResource.rc.in ${${PROJECT_NAME}_BINARY_DIR}/${PROJECT_NAME}.rc)
-#    SET (${PROJECT_NAME}_PROJECT_SRCS ${${PROJECT_NAME}_PROJECT_SRCS} ${${PROJECT_NAME}_BINARY_DIR}/${PROJECT_NAME}.rc) 
     set(APPLICATION_ICON ${PROJECT_RESOURCES_DIR}/icons/ico/${PROJECT_NAME}.ico)
 ENDIF(Q_WS_WIN)
 
@@ -164,49 +153,22 @@ file(WRITE ${PROJECT_BINARY_DIR}/Qt_Plugins.txt "")
 FindQt4Plugins("qgif;qjpeg;qtiff" "${PROJECT_BINARY_DIR}/Qt_Plugins.txt" 
                 "${PROJECT_BINARY_DIR}/LibSearchDirs.txt" 
                 "imageformats" )
-
-if (0)
-# ---------- Build the Viewer Application  ----------------------
-ADD_EXECUTABLE( ${PROJECT_NAME} ${GUI_TYPE} ${${PROJECT_NAME}_PROJECT_SRCS} )
-TARGET_LINK_LIBRARIES(${PROJECT_NAME}
-                      ${QT_LIBRARIES}
-                      QtSupport
-                      ${QWT_LIBRARIES}
-                      ${EMMPM_LIBRARIES}
-)
-
-# --------------------------------------------------------------------
-# Setup our installation rules
-set(AppNeedsPlugins "1")                
-#message(STATUS "CMP_LIB_SEARCH_DIRS: ${CMP_LIB_SEARCH_DIRS}")
-cmp_InstallationSupport(${PROJECT_NAME} 
-                        ${EXE_DEBUG_EXTENSION} 
-                        ${${PROJECT_NAME}_BINARY_DIR} 
-                        "${AppNeedsPlugins}" 
-                        "${PROJECT_INSTALL_EXECUTABLES}"
-                        "Applications"
-                        "."
-                        "${CMP_LIB_SEARCH_DIRS}"
-                        "${PROJECT_BINARY_DIR}/Qt_Plugins.txt"
-                        )
-else()
-    file(READ ${PROJECT_BINARY_DIR}/Qt_Plugins.txt QT_PLUGINS)
-  #  file(READ ${PROJECT_BINARY_DIR}/${PROJECT_NAME}_Plugins.txt OTHER_PLUGINS)
-    BuildQtAppBundle(
-        TARGET ${PROJECT_NAME}
-        SOURCES ${${PROJECT_NAME}_PROJECT_SRCS}
-        DEBUG_EXTENSION ${EXE_DEBUG_EXTENSION}
-        ICON_FILE  ${APPLICATION_ICON}
-        VERSION_MAJOR ${EIMApps_VER_MAJOR}
-        VERSION_MINOR ${EIMApps_VER_MINOR}
-        VERSION_PATCH ${EIMApps_VER_PATCH}
-        BINARY_DIR    ${${PROJECT_NAME}_BINARY_DIR}
-        LINK_LIBRARIES ${QT_LIBRARIES} QtSupport ${QWT_LIBRARIES} ${TIFF_LIBRARIES} ${EMMPM_LIBRARIES}
-        LIB_SEARCH_DIRS ${CMAKE_LIBRARY_OUTPUT_DIRECTORY} ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
-        QT_PLUGINS    ${QT_PLUGINS}
+                
+file(READ ${PROJECT_BINARY_DIR}/Qt_Plugins.txt QT_PLUGINS)
+BuildQtAppBundle(
+    TARGET ${PROJECT_NAME}
+    SOURCES ${${PROJECT_NAME}_PROJECT_SRCS}
+    DEBUG_EXTENSION ${EXE_DEBUG_EXTENSION}
+    ICON_FILE  ${APPLICATION_ICON}
+    VERSION_MAJOR ${EIMApps_VER_MAJOR}
+    VERSION_MINOR ${EIMApps_VER_MINOR}
+    VERSION_PATCH ${EIMApps_VER_PATCH}
+    BINARY_DIR    ${${PROJECT_NAME}_BINARY_DIR}
+    LINK_LIBRARIES ${QT_LIBRARIES} QtSupport ${QWT_LIBRARIES} ${TIFF_LIBRARIES} ${EMMPM_LIBRARIES}
+    LIB_SEARCH_DIRS ${CMAKE_LIBRARY_OUTPUT_DIRECTORY} ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
+    QT_PLUGINS    ${QT_PLUGINS}
 #        OTHER_PLUGINS ${OTHER_PLUGINS}
-        COMPONENT     Applications
-        INSTALL_DEST  "."
-        )   
-endif()
+    COMPONENT     Applications
+    INSTALL_DEST  "."
+)   
 

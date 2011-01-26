@@ -33,7 +33,7 @@
 #include <iostream>
 #include <sstream>
 #include <limits>
-
+#include <fstream>
 
 //-- Qt Includes
 #include <QtCore/QPluginLoader>
@@ -72,8 +72,13 @@
 #include <qwt_plot_zoomer.h>
 #include <qwt_plot_panner.h>
 #include <qwt_plot_curve.h>
+#include <qwt_plot_marker.h>
 
 #include <emmpm/common/utilities/InitializationFunctions.h>
+#include <emmpm/common/utilities/ProgressFunctions.h>
+#include <emmpm/common/io/EMTiffIO.h>
+#include <emmpm/public/EMMPM_Structures.h>
+#include <emmpm/public/EMMPM.h>
 
 //
 #include "EmMpmGuiVersion.h"
@@ -187,7 +192,7 @@ void EmMpmGui::readSettings()
   READ_SETTING(prefs, m_NumClasses, ok, i, 2, Int);
   READ_BOOL_SETTING(prefs, useSimulatedAnnealing, true);
   READ_BOOL_SETTING(prefs, processFolder, false);
-  READ_STRING_SETTING(prefs, fixedImageFile, "");
+  READ_STRING_SETTING(prefs, inputImageFilePath, "");
   READ_STRING_SETTING(prefs, outputImageFile, "");
   READ_STRING_SETTING(prefs, sourceDirectoryLE, "");
   READ_STRING_SETTING(prefs, outputDirectoryLE, "");
@@ -220,7 +225,7 @@ void EmMpmGui::writeSettings()
   WRITE_SETTING(prefs, m_NumClasses);
   WRITE_BOOL_SETTING(prefs, useSimulatedAnnealing, useSimulatedAnnealing->isChecked());
   WRITE_BOOL_SETTING(prefs, processFolder, processFolder->isChecked());
-  WRITE_STRING_SETTING(prefs, fixedImageFile);
+  WRITE_STRING_SETTING(prefs, inputImageFilePath);
   WRITE_STRING_SETTING(prefs, outputImageFile);
   WRITE_STRING_SETTING(prefs, sourceDirectoryLE);
   WRITE_STRING_SETTING(prefs, outputDirectoryLE);
@@ -312,8 +317,8 @@ void EmMpmGui::setupGui()
           m_GraphicsView, SLOT(setImageDisplayType(int)));
 
   QFileCompleter* com = new QFileCompleter(this, false);
-  fixedImageFile->setCompleter(com);
-  QObject::connect(com, SIGNAL(activated(const QString &)), this, SLOT(on_fixedImageFile_textChanged(const QString &)));
+  inputImageFilePath->setCompleter(com);
+  QObject::connect(com, SIGNAL(activated(const QString &)), this, SLOT(on_inputImageFilePath_textChanged(const QString &)));
 
   QFileCompleter* com4 = new QFileCompleter(this, false);
   outputImageFile->setCompleter(com4);
@@ -414,6 +419,98 @@ void EmMpmGui::copyInitCoords( EMMPM_Data* inputs)
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
+void EmMpmGui::copyIntializationValues(EMMPM_Data* inputs)
+{
+  QList<UserInitArea*> uias = m_UserInitAreaTableModel->getUserInitAreas();
+  int size = uias.count();
+  UserInitArea* uia = NULL;
+  for (int r = 0; r < size; ++r)
+  {
+    uia = uias[r];
+    inputs->m[r] = uia->getMu();
+    inputs->v[r] = uia->getSigma();
+ //   std::cout << "Initializing with Mu:" << inputs->m[r] << "  Sigma: " << inputs->v[r] << std::endl;
+  }
+}
+
+// -----------------------------------------------------------------------------
+//
+// -----------------------------------------------------------------------------
+void EmMpmGui::copyGammaValues(EMMPM_Data* inputs)
+{
+  QList<UserInitArea*> uias = m_UserInitAreaTableModel->getUserInitAreas();
+  int size = uias.count();
+  UserInitArea* uia = NULL;
+  for (int r = 0; r < size; ++r)
+  {
+    uia = uias[r];
+    inputs->w_gamma[r] = uia->getGamma();
+ //   std::cout << "Initializing with Gamma:" << inputs->w_gamma[r] << std::endl;
+  }
+
+}
+
+// -----------------------------------------------------------------------------
+//
+// -----------------------------------------------------------------------------
+void EMMPMUpdateStats(EMMPM_Data* data)
+{
+  // Check to make sure we are at the end of an em loop
+  if ( data->inside_mpm_loop == 0 && NULL != data->outputImage)
+  {
+    char buff[256];
+    memset(buff, 0, 256);
+    snprintf(buff, 256, "/tmp/emmpm_out_%d.tif", data->currentEMLoop);
+    int err = EMMPM_WriteGrayScaleImage(buff, data->rows, data->columns, "Intermediate Image", data->outputImage);
+    if (err < 0)
+    {
+      std::cout << "Error writing intermediate tiff image." << std::endl;
+    }
+
+    std::cout << "Class\tMu\tSigma" << std::endl;
+    for (int l = 0; l < data->classes; l++)
+    {
+      //    snprintf(msgbuff, 256, "%d\t%.3f\t%.3f", l, data->m[l], data->v[l]);
+      //    EMMPM_ShowProgress(msgbuff, data->progress);
+      std::cout << l << "\t" << data->m[l] << "\t" << data->v[l] << "\t" << std::endl;
+    }
+
+    double hist[EMMPM_MAX_CLASSES][256];
+    // Generate a gaussian curve for each class based off the mu and sigma for that class
+    for (int c = 0; c < data->classes; ++c)
+    {
+      double mu = data->m[c];
+      double sig = data->v[c];
+      double twoSigSqrd = sig * sig * 2.0f;
+      double constant = 1.0f / (sig * sqrtf(2.0f * PI));
+      for (size_t x = 0; x < 256; ++x)
+      {
+        hist[c][x] = constant * exp(-1.0f * ((x - mu) * (x - mu)) / (twoSigSqrd));
+      }
+    }
+
+    memset(buff, 0, 256);
+    snprintf(buff, 256, "/tmp/emmpm_hist_%d.csv", data->currentEMLoop);
+    std::ofstream file(buff, std::ios::out | std::ios::binary);
+    if (file.is_open())
+    {
+      for (size_t x = 0; x < 256; ++x)
+      {
+        file << x;
+        for (int c = 0; c < data->classes; ++c)
+        {
+          file << ", " << hist[c][x];
+        }
+        file << std::endl;
+      }
+    }
+  }
+
+}
+
+// -----------------------------------------------------------------------------
+//
+// -----------------------------------------------------------------------------
 void EmMpmGui::on_processBtn_clicked()
 {
 
@@ -454,7 +551,7 @@ void EmMpmGui::on_processBtn_clicked()
   }
   else
   {
-    QFileInfo fi(fixedImageFile->text());
+    QFileInfo fi(inputImageFilePath->text());
     if (fi.exists() == false)
     {
       QMessageBox::critical(this, tr("Fixed Image File Error"), tr("Fixed Image does not exist. Please check the path."), QMessageBox::Ok);
@@ -512,10 +609,13 @@ void EmMpmGui::on_processBtn_clicked()
   {
     EMMPMTask* task = new EMMPMTask(NULL);
     EMMPM_Data* data = task->getEMMPM_Data();
-    data->emIterations = m_EmIterations->value();
-    data->mpmIterations = m_MpmIterations->value();
     data->in_beta = m_Beta->text().toFloat(&ok);
-    data->in_gamma = m_Gamma->text().toFloat(&ok);
+    //data->in_gamma = m_Gamma->text().toFloat(&ok);
+    for(int i = 0; i < EMMPM_MAX_CLASSES; i++) {
+      data->w_gamma[i] =  m_Gamma->text().toFloat(&ok);
+    }
+    data->mpmIterations = m_MpmIterations->value();
+    data->emIterations = m_EmIterations->value();
     data->classes = m_NumClasses->value();
     data->simulatedAnnealing = (useSimulatedAnnealing->isChecked()) ? 1 : 0;
     if (m_UserInitAreaTableModel->rowCount() == 0)
@@ -529,13 +629,15 @@ void EmMpmGui::on_processBtn_clicked()
     }
     else
     {
-      data->initType = EMMPM_USER_DEFINED_AREA_INITIALIZATION;
+      data->initType = EMMPM_MANUAL_INITIALIZATION;
       copyGrayValues(data);
       copyInitCoords(data);
+      copyIntializationValues(data);
+      copyGammaValues(data);
     }
-    data->input_file_name = copyStringToNewBuffer(fixedImageFile->text());
+    data->input_file_name = copyStringToNewBuffer(inputImageFilePath->text());
     data->output_file_name = copyStringToNewBuffer(outputImageFile->text());
-    task->setInputFilePath(fixedImageFile->text());
+    task->setInputFilePath(inputImageFilePath->text());
     task->setOutputFilePath(outputImageFile->text());
     queueController->addTask(static_cast<QThread* > (task));
     this->addProcess(task);
@@ -552,7 +654,10 @@ void EmMpmGui::on_processBtn_clicked()
       data->emIterations = m_EmIterations->value();
       data->mpmIterations = m_MpmIterations->value();
       data->in_beta = m_Beta->text().toFloat(&ok);
-      data->in_gamma = m_Gamma->text().toFloat(&ok);
+      //data->in_gamma = m_Gamma->text().toFloat(&ok);
+      for(int j = 0; j < EMMPM_MAX_CLASSES; j++) {
+        data->w_gamma[j] =  m_Gamma->text().toFloat(&ok);
+      }
       data->classes = m_NumClasses->value();
       data->simulatedAnnealing = (useSimulatedAnnealing->isChecked()) ? 1 : 0;
       if (m_UserInitAreaTableModel->rowCount() == 0)
@@ -563,6 +668,14 @@ void EmMpmGui::on_processBtn_clicked()
         {
           data->grayTable[value] = value * 255 / n;
         }
+      }
+      else
+      {
+        data->initType = EMMPM_MANUAL_INITIALIZATION;
+        copyGrayValues(data);
+        copyInitCoords(data);
+        copyIntializationValues(data);
+        copyGammaValues(data);
       }
 
       task->setInputFilePath(sourceDirectoryLE->text() + QDir::separator() + fileList.at(i));
@@ -631,7 +744,7 @@ void EmMpmGui::processingFinished()
 {
 //  std::cout << "IPHelper::processingFinished()" << std::endl;
   /* Code that cleans up anything from the processing */
-  processBtn->setText("Process");
+  processBtn->setText("Segment");
   processBtn->setEnabled(true);
   this->statusBar()->showMessage("Processing Complete");
 
@@ -647,8 +760,9 @@ void EmMpmGui::queueControllerFinished()
   getQueueDialog()->setVisible(false);
   if (this->processFolder->isChecked() == false)
   {
-    setCurrentImageFile (fixedImageFile->text());
+    setCurrentImageFile (inputImageFilePath->text());
     setCurrentProcessedFile(outputImageFile->text());
+    m_GraphicsView->loadOverlayImageFile(outputImageFile->text());
   }
   else
   {
@@ -700,8 +814,8 @@ void EmMpmGui::on_processFolder_stateChanged(int state)
   outputImageTypeLabel->setEnabled(enabled);
   outputImageType->setEnabled(enabled);
 
-  fixedImageFile->setEnabled(!enabled);
-  fixedImageButton->setEnabled(!enabled);
+  inputImageFilePath->setEnabled(!enabled);
+  inputImageFilePathBtn->setEnabled(!enabled);
 
   outputImageFile->setEnabled(!enabled);
   outputImageButton->setEnabled(!enabled);
@@ -785,7 +899,7 @@ void EmMpmGui::on_outputDirectoryBtn_clicked()
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
-void EmMpmGui::on_fixedImageButton_clicked()
+void EmMpmGui::on_inputImageFilePathBtn_clicked()
 {
   //std::cout << "on_actionOpen_triggered" << std::endl;
   QString imageFile =
@@ -795,7 +909,7 @@ void EmMpmGui::on_fixedImageButton_clicked()
   {
     return;
   }
-  fixedImageFile->setText(imageFile);
+  inputImageFilePath->setText(imageFile);
 }
 
 // -----------------------------------------------------------------------------
@@ -826,9 +940,10 @@ void EmMpmGui::on_outputImageButton_clicked()
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
-void EmMpmGui::on_fixedImageFile_textChanged(const QString & text)
+void EmMpmGui::on_inputImageFilePath_textChanged(const QString & text)
 {
-  verifyPathExists(fixedImageFile->text(), fixedImageFile);
+  verifyPathExists(inputImageFilePath->text(), inputImageFilePath);
+  openBaseImageFile(text);
 }
 
 // -----------------------------------------------------------------------------
@@ -1130,7 +1245,7 @@ void EmMpmGui::baseImageFileLoaded(const QString &filename)
  // std::cout << "Loaded Image file " << filename.toStdString() << std::endl;
   this->setWindowFilePath(filename);
   imageDisplayCombo->setCurrentIndex(EmMpm_Constants::OriginalImage);
-  fixedImageFile->setText(filename);
+  inputImageFilePath->setText(filename);
   plotImageHistogram();
 }
 
@@ -1225,8 +1340,8 @@ void EmMpmGui::userInitAreaUpdated(UserInitArea* uia)
 
   double mu, sig;
   mu = 0.0;
-  sig = 10.0;
-
+  sig = 0.0;
+  //Calculate Mu
   for (qint32 y = yStart; y < yEnd; y++)
   {
     for (qint32 x = xStart; x < xEnd; x++)
@@ -1237,8 +1352,26 @@ void EmMpmGui::userInitAreaUpdated(UserInitArea* uia)
       mu += gray;
     }
   }
-  mu /= (yEnd - yStart)*(xEnd - xStart);
+  mu /= ((yEnd - yStart)*(xEnd - xStart));
+  uia->setMu(mu);
 
+  // Calculate Sigma
+  for (qint32 y = yStart; y < yEnd; y++)
+  {
+    for (qint32 x = xStart; x < xEnd; x++)
+    {
+      index = (y * width) + x;
+      rgbPixel = image.pixel(x, y);
+      gray = qGray(rgbPixel);
+      sig += (gray-mu)*(gray-mu);
+    }
+  }
+  sig /= ((yEnd - yStart)*(xEnd - xStart));
+  sig = sqrt(sig);
+  uia->setSigma(sig);
+
+  m_UserInitAreaTableModel->updateUserInitArea(uia);
+#if 0
   // Generate the Histogram Bins
   const int numValues = 256;
   QwtArray<double > intervals(numValues);
@@ -1256,6 +1389,17 @@ void EmMpmGui::userInitAreaUpdated(UserInitArea* uia)
     if (values[x] > max) { max = values[x]; max_index = x; }
   }
 
+
+
+  // Locate our curve object by getting the row from the TableModel that corresponds
+  // to the UIA object that was passed in
+  QList<UserInitArea*> userInitAreas = m_UserInitAreaTableModel->getUserInitAreas();
+  int row = userInitAreas.indexOf(uia, 0);
+  QwtPlotCurve* curve = m_UIAGaussians[row];
+  curve->setData(intervals, values);
+  QColor c = uia->getColor();
+  curve->setPen(QPen(c));
+
   // Draw a single vertical line centered on the average gray value
   double binSize = m_histogram->y( max_index );
   for (size_t x = 0; x < 256; ++x)
@@ -1268,15 +1412,28 @@ void EmMpmGui::userInitAreaUpdated(UserInitArea* uia)
       values[x] = 0;
     }
   }
-
-  // Locate our curve object by getting the row from the TableModel that corresponds
-  // to the UIA object that was passed in
+#endif
+  const int numValues = 256;
+  QwtArray<double> values(numValues);
+  float twoSigSqrd = sig * sig * 2.0f;
+  float constant = 1.0 / (sig * sqrtf(2.0f * M_PI));
+  size_t max_index = 0;
+  for (size_t x = 0; x < 256; ++x)
+  {
+    values[x] = constant * exp(-1.0f * ((x - mu) * (x - mu)) / (twoSigSqrd));
+    if (values[x] > max) { max = values[x]; max_index = x; }
+  }
   QList<UserInitArea*> userInitAreas = m_UserInitAreaTableModel->getUserInitAreas();
   int row = userInitAreas.indexOf(uia, 0);
-  QwtPlotCurve* curve = m_UIAGaussians[row];
-  curve->setData(intervals, values);
+
+  QwtPlotMarker* marker = m_UIAMarkers[row];
+  marker->attach(m_HistogramPlot);
+  marker->setLabelAlignment(Qt::AlignLeft | Qt::AlignBottom);
+  marker->setLabelOrientation(Qt::Vertical);
+  marker->setLineStyle(QwtPlotMarker::VLine);
   QColor c = uia->getColor();
-  curve->setPen(QPen(c));
+  marker->setLinePen(QPen(c));
+  marker->setXValue(max_index);
 
  // m_HistogramPlot->setAxisScale(QwtPlot::yLeft, 0.0, 10000);
   m_HistogramPlot->setAxisScale(QwtPlot::xBottom, 0.0, 255.0);
@@ -1291,8 +1448,13 @@ void EmMpmGui::deleteUserInitArea(UserInitArea* uia)
 {
   QList<UserInitArea*> userInitAreas = m_UserInitAreaTableModel->getUserInitAreas();
   int row = userInitAreas.indexOf(uia, 0);
+#if 0
   QwtPlotCurve* curve = m_UIAGaussians[row];
   m_UIAGaussians.removeAll(curve);
+#else
+  QwtPlotMarker* curve = m_UIAMarkers[row];
+  m_UIAMarkers.removeAll(curve);
+#endif
   curve->detach();
   delete curve; // Clean up the memory
   m_HistogramPlot->replot();
@@ -1300,6 +1462,7 @@ void EmMpmGui::deleteUserInitArea(UserInitArea* uia)
   if (userInitAreas.size()-1 == 0)
   {
     m_NumClasses->setEnabled(true);
+    m_Gamma->setEnabled(true);
   }
 }
 
@@ -1311,10 +1474,17 @@ void EmMpmGui::userInitAreaAdded(UserInitArea* uia)
 //  std::cout << "EmMpmGui::userInitAreaAdded(UserInitArea* uia)" << std::endl;
   if (NULL == uia) { return; }
   addUserInitArea->toggle();
-  QwtPlotCurve* curve = new QwtPlotCurve("User Init Area");
-  curve->setRenderHint(QwtPlotItem::RenderAntialiased);
   QColor color = uia->getColor();
+#if 0
+  QwtPlotCurve* curve = new QwtPlotCurve("User Init Area");
   curve->setPen(QPen(color));
+#else
+  QwtPlotMarker* curve = new QwtPlotMarker();
+  curve->setLinePen(color);
+#endif
+  curve->setRenderHint(QwtPlotItem::RenderAntialiased);
+
+
   curve->attach(m_HistogramPlot);
 
   // Figure out the proper row to insert the curve object to keep it in sync with
@@ -1325,9 +1495,14 @@ void EmMpmGui::userInitAreaAdded(UserInitArea* uia)
   if (userInitAreas.size() != 0)
   {
     m_NumClasses->setEnabled(false);
+    m_Gamma->setEnabled(false);
   }
 
+#if 0
   m_UIAGaussians.insert(row, curve);
+#else
+  m_UIAMarkers.insert(row, curve);
+#endif
 
   // Now update the curve with the initial data
   userInitAreaUpdated(uia);

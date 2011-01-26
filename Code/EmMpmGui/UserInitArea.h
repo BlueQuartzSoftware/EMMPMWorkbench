@@ -73,6 +73,16 @@ public:
     void setLowerRight(unsigned int x, unsigned int y);
     void getLowerRight(unsigned int &x, unsigned int &y);
 
+    void setMu(double mu);
+    double getMu();
+
+    void setSigma(double sigma);
+    double getSigma();
+
+    void setGamma(double g);
+    double getGamma();
+
+
 
  signals:
 
@@ -110,6 +120,9 @@ private:
     int m_UpperLeft[2];
     int m_LowerRight[2];
     QColor m_Color;
+    double m_Mu;
+    double m_Sigma;
+    double m_Gamma;
 };
 
 

@@ -60,6 +60,9 @@ QGraphicsPolygonItem(polygon, parent)
   m_GrayLevel = 255 - (255/16 * userIndex);
   m_Color.setRgb(25, 25, 255, 150);
   m_Class = userIndex;
+  m_Mu = 1.0;
+  m_Sigma = 0.1;
+  m_Gamma = 1.0;
   setBrush(QBrush(m_Color));
 }
 
@@ -92,6 +95,43 @@ void UserInitArea::getLowerRight(unsigned int &x, unsigned int &y)
   x = m_LowerRight[0];
   y = m_LowerRight[1];
 }
+
+
+// -----------------------------------------------------------------------------
+//
+// -----------------------------------------------------------------------------
+void UserInitArea::setMu(double mu)
+{
+   m_Mu = mu;
+}
+
+
+double UserInitArea::getMu()
+{
+  return m_Mu;
+}
+
+
+void UserInitArea::setSigma(double sigma)
+{
+  m_Sigma = sigma;
+}
+
+double UserInitArea::getSigma()
+{
+  return m_Sigma;
+}
+
+void UserInitArea::setGamma(double g)
+{
+  m_Gamma = g;
+}
+
+double UserInitArea::getGamma()
+{
+  return m_Gamma;
+}
+
 
 // -----------------------------------------------------------------------------
 //

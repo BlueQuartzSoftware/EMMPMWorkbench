@@ -42,7 +42,7 @@
 /**
  * @class ProcessQueueTask ProcessQueueTask.h QtSupport/ProcessQueueTask.h
  * @brief This class is a QThread derived class which is meant to be subclassed
- * by the developer and code implemented that the developer would like run on a
+ * by the developer and code implemented that the developer would run on a
  * separate thread. The developer should implement the "run()" method in their own
  * class which contains the code to be executed. When the code is complete the developer
  * should call the 'emit finished()' just before exiting the 'run' method. This way

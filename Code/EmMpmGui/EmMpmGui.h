@@ -52,6 +52,7 @@ class QwtPlotPicker;
 class QwtPlotPanner;
 class QwtPlotGrid;
 class QwtPlotCurve;
+class QwtPlotMarker;
 class EMMPMTask;
 
 
@@ -97,6 +98,9 @@ class EmMpmGui :  public QMainWindow, private Ui::EmMpmGui
     char* copyStringToNewBuffer(const QString &fname);
     void copyGrayValues( EMMPM_Data* inputs);
     void copyInitCoords( EMMPM_Data* inputs);
+    void copyIntializationValues(EMMPM_Data* inputs);
+    void copyGammaValues(EMMPM_Data* inputs);
+
 
     signals:
     void cancelTask();
@@ -146,14 +150,14 @@ class EmMpmGui :  public QMainWindow, private Ui::EmMpmGui
     // -----------------------------------------------------------------------------
     //  Input Tab Widgets
     // -----------------------------------------------------------------------------
-    void on_fixedImageButton_clicked();
+    void on_inputImageFilePathBtn_clicked();
     void on_outputImageButton_clicked();
 
     void on_processFolder_stateChanged(int state  );
     void on_sourceDirectoryBtn_clicked();
     void on_outputDirectoryBtn_clicked();
 
-    void on_fixedImageFile_textChanged(const QString &string);
+    void on_inputImageFilePath_textChanged(const QString &string);
     void on_outputImageFile_textChanged(const QString & text);
     void on_sourceDirectoryLE_textChanged(const QString & text);
     void on_outputDirectoryLE_textChanged(const QString & text);
@@ -240,7 +244,8 @@ class EmMpmGui :  public QMainWindow, private Ui::EmMpmGui
   QwtPlotGrid*   m_grid;
 
   QwtPlotCurve*  m_histogram;
-  QList<QwtPlotCurve*>  m_UIAGaussians;
+//  QList<QwtPlotCurve*>  m_UIAGaussians;
+  QList<QwtPlotMarker*>  m_UIAMarkers;
 
   EmMpmGui(const EmMpmGui&); // Copy Constructor Not Implemented
   void operator=(const EmMpmGui&); // Operator '=' Not Implemented

@@ -145,7 +145,7 @@ AIMImage::Pointer QImageProcessingInputFrame::loadImage(QString filePath)
     {
       QString m("Error loading image from ");
       m.append(filePath);
-      qDebug(m.toAscii());
+//      qDebug(m);
       return aimImage;
     }
     QVector<QRgb> colorTable(256);

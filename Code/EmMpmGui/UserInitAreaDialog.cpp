@@ -41,12 +41,18 @@ m_uia(uia)
 
   m_GrayLevel->setValue(uia->getEmMpmGrayLevel());
   m_Class->setValue(uia->getEmMpmClass());
+  bool ok = false;
+  m_Mu->setText(QString::number(uia->getMu()));
+  m_Sigma->setText(QString::number(uia->getSigma()));
+  m_Gamma->setValue(uia->getGamma());
 
 
   connect(m_GrayLevel, SIGNAL(valueChanged(int)),
           uia, SLOT(setEmMpmGrayLevel(int)), Qt::QueuedConnection);
   connect(m_Class, SIGNAL(valueChanged(int)),
           uia, SLOT(setEmMpmClass(int)), Qt::QueuedConnection);
+  connect(m_Gamma, SIGNAL(valueChanged(double)),
+          uia, SLOT(setGamma(double)), Qt::QueuedConnection);
 }
 
 // -----------------------------------------------------------------------------

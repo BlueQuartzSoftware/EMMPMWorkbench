@@ -170,7 +170,7 @@ void EMMPMGraphicsView::dropEvent(QDropEvent *event)
       fName = urlList[0].toLocalFile(); // convert first QUrl to local path
       info.setFile( fName ); // information about file
       QString ext = info.suffix().toLower();
-      if (ext.compare("tif") == 0\
+      if (ext.compare("tif") == 0
           || ext.compare("tiff") == 0
           || ext.compare("jpg") == 0
           || ext.compare("jpeg") == 0
@@ -198,31 +198,25 @@ QImage EMMPMGraphicsView::getCompositedImage()
 void EMMPMGraphicsView::setImageDisplayType(int displayType)
 {
   m_ImageDisplayType = (EmMpm_Constants::ImageDisplayType)displayType;
-  QImage base;
-  QImage overlay;
-  if (displayType == EmMpm_Constants::OriginalImage)
-  {
-    base = m_BaseImage;
-  }
-  else if (displayType == EmMpm_Constants::SegmentedImage)
-  {
-    base = m_OverlayImage;
-  }
-  else if (displayType == EmMpm_Constants::CompositedImage)
-  {
-    base = m_BaseImage;
-    overlay = m_OverlayImage;
-  }
-
   QPainter painter;
   QImage paintImage(m_BaseImage.size(), QImage::Format_ARGB32_Premultiplied);
   QPoint point(0, 0);
   painter.begin(&paintImage);
   painter.setPen(Qt::NoPen);
-
-  if (overlay.isNull() == false) { painter.drawImage(point, overlay); }
-  painter.setCompositionMode(m_composition_mode);
-  painter.drawImage(point, base);
+  if (displayType == EmMpm_Constants::OriginalImage)
+  {
+    painter.drawImage(point, m_BaseImage);
+  }
+  else if (displayType == EmMpm_Constants::SegmentedImage)
+  {
+    painter.drawImage(point, m_OverlayImage);
+  }
+  else if (displayType == EmMpm_Constants::CompositedImage)
+  {
+    painter.drawImage(point, m_BaseImage);
+    painter.setCompositionMode(m_composition_mode);
+    painter.drawImage(point, m_OverlayImage);
+  }
   painter.end();
   m_CompositedImage = paintImage;
 
@@ -327,10 +321,26 @@ QImage EMMPMGraphicsView::getBaseImage()
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
+//void EMMPMGraphicsView::setBaseImage(QImage image)
+//{
+//  m_BaseImage = image;
+//}
+
+// -----------------------------------------------------------------------------
+//
+// -----------------------------------------------------------------------------
 QImage EMMPMGraphicsView::getOverlayImage()
 {
   return m_OverlayImage;
 }
+
+// -----------------------------------------------------------------------------
+//
+// -----------------------------------------------------------------------------
+//void EMMPMGraphicsView::setOverlayImage(QImage image)
+//{
+//  m_OverlayImage = image;
+//}
 
 // -----------------------------------------------------------------------------
 //

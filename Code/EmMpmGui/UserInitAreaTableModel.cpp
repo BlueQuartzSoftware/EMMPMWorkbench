@@ -36,7 +36,7 @@
 // -----------------------------------------------------------------------------
 UserInitAreaTableModel::UserInitAreaTableModel(QObject* parent) :
 QAbstractTableModel(parent),
-m_column_count(4)
+m_column_count(7)
 {
 
 
@@ -146,6 +146,18 @@ QVariant UserInitAreaTableModel::data(const QModelIndex &index, qint32 role) con
     {
       return QVariant(QString::number(uia->getEmMpmClass()));
     }
+    else if (col == 4)
+    {
+      return QVariant(uia->getMu());
+    }
+    else if (col == 5)
+    {
+      return QVariant(uia->getSigma());
+    }
+    else if (col == 6)
+    {
+      return QVariant(uia->getGamma());
+    }
   }
 
   return QVariant();
@@ -162,6 +174,9 @@ QVariant  UserInitAreaTableModel::headerData ( int section, Qt::Orientation orie
     else if (section == 1) return QVariant(QString("Gray Value"));
     else if (section == 2) return QVariant(QString("Upper Left"));
     else if (section == 3) return QVariant(QString("Lower Right"));
+    else if (section == 4) return QVariant(QString("Mu"));
+    else if (section == 5) return QVariant(QString("Sigma"));
+    else if (section == 6) return QVariant(QString("Gamma"));
 
   }
   return QVariant();

@@ -93,26 +93,11 @@ SET (${PROJECT_NAME}_PROJECT_SRCS
     ${Generated_MOC_SRCS}
 )
 
-
-#-- Set up OS X Application Bundle properties
-#-- This file have tools for OS X Bunlde creation and configuration
-#INCLUDE (${CMP_OSX_TOOLS_SOURCE_DIR}/OSX_BundleTools.cmake)
-
 IF(APPLE)
-# SET(GUI_TYPE MACOSX_BUNDLE)
-# ConfigureMacOSXBundlePlist(${PROJECT_NAME} ${EXE_DEBUG_EXTENSION} 
-#                            ${PROJECT_RESOURCES_DIR}/icons/icns/IPHelperApp.icns
-#                            ${EIMApps_VERSION} )
     set(APPLICATION_ICON ${PROJECT_RESOURCES_DIR}/icons/icns/${PROJECT_NAME}.icns)
 ENDIF (APPLE)
 
 IF(Q_WS_WIN)
-  #  include_directories(${PROJECT_RESOURCES_DIR}/icons/ico)
-  #  configure_file(${PROJECT_RESOURCES_DIR}/icons/ico/IconResource.rc.in
-  #                 ${IPHelperApp_BINARY_DIR}/IPHelperApp.rc)
-  #  SET (IPHelperApp_PROJECT_SRCS ${IPHelperApp_PROJECT_SRCS} ${IPHelperApp_BINARY_DIR}/IPHelperApp.rc) 
-  #  cmp_IDE_SOURCE_PROPERTIES ("ConfiguredFiles" "${IPHelperApp_BINARY_DIR}/IPHelperApp.rc" "${QRC_LICENSE_FILES};${IPHelperApp_BINARY_DIR}/IPHelperApp.rc" "0")
-  #  cmp_IDE_SOURCE_PROPERTIES( "ConfiguredFiles" "${EIMApps_BINARY_DIR}/${PROJECT_PREFIX}/Common/${PROJECT_PREFIX}Version.h;${EIMApps_BINARY_DIR}/${PROJECT_PREFIX}/Common/${PROJECT_PREFIX}Configuration.h" "${EIMApps_BINARY_DIR}/${PROJECT_PREFIX}/Common/${PROJECT_PREFIX}Types.h" "0") 
     set(APPLICATION_ICON ${PROJECT_RESOURCES_DIR}/icons/ico/IPHelperApp.ico)
 ENDIF(Q_WS_WIN)
 
@@ -122,50 +107,23 @@ FindQt4Plugins("qgif;qjpeg;qtiff" "${PROJECT_BINARY_DIR}/Qt_Plugins.txt"
                 "${PROJECT_BINARY_DIR}/LibSearchDirs.txt" 
                 "imageformats" )
                 
-if (0)
-    # ---------- Build the Viewer Application  ----------------------
-    ADD_EXECUTABLE( ${PROJECT_NAME} ${GUI_TYPE} ${IPHelperApp_PROJECT_SRCS} )
-    TARGET_LINK_LIBRARIES( ${PROJECT_NAME}
-                            ${QT_LIBRARIES}
-                            ${ITK_LIBRARIES}
-                            AIMLib
-                            QtSupport
-                            MXADataModel)
+file(READ ${PROJECT_BINARY_DIR}/Qt_Plugins.txt QT_PLUGINS)
+file(READ ${PROJECT_BINARY_DIR}/IPHelper_Plugins.txt IPHELPER_PLUGINS)
+BuildQtAppBundle(
+    TARGET ${PROJECT_NAME}
+    SOURCES ${${PROJECT_NAME}_PROJECT_SRCS}
+    DEBUG_EXTENSION ${EXE_DEBUG_EXTENSION}
+    ICON_FILE       ${APPLICATION_ICON}
+    VERSION_MAJOR ${EIMApps_VER_MAJOR}
+    VERSION_MINOR ${EIMApps_VER_MINOR}
+    VERSION_PATCH ${EIMApps_VER_PATCH}
+    BINARY_DIR    ${${PROJECT_NAME}_BINARY_DIR}
+    LINK_LIBRARIES ${QT_LIBRARIES} ${ITK_LIBRARIES} AIMLib QtSupport MXADataModel
+    LIB_SEARCH_DIRS ${CMAKE_LIBRARY_OUTPUT_DIRECTORY} ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
+    QT_PLUGINS    ${QT_PLUGINS}
+    OTHER_PLUGINS ${IPHELPER_PLUGINS}
+    COMPONENT     Applications
+    INSTALL_DEST  "."
+    )             
 
-# --------------------------------------------------------------------
-# Setup our installation rules               
-set(AppNeedsPlugins "1")
-cmp_InstallationSupport(${PROJECT_NAME} 
-
-                        ${EXE_DEBUG_EXTENSION} 
-                        ${${PROJECT_NAME}_BINARY_DIR} 
-                        "${AppNeedsPlugins}" 
-                        "${PROJECT_INSTALL_EXECUTABLES}"
-                        "Applications"
-                        "."
-                        "${CMP_LIB_SEARCH_DIRS}"
-                        "${PROJECT_BINARY_DIR}/Qt_Plugins.txt;${IPHelper_BINARY_DIR}/IPHelper_Plugins.txt"
-                        )             
-
-else()
-    file(READ ${PROJECT_BINARY_DIR}/Qt_Plugins.txt QT_PLUGINS)
-    file(READ ${PROJECT_BINARY_DIR}/IPHelper_Plugins.txt IPHELPER_PLUGINS)
-    BuildQtAppBundle(
-        TARGET ${PROJECT_NAME}
-        SOURCES ${${PROJECT_NAME}_PROJECT_SRCS}
-        DEBUG_EXTENSION ${EXE_DEBUG_EXTENSION}
-        ICON_FILE       ${APPLICATION_ICON}
-        VERSION_MAJOR ${EIMApps_VER_MAJOR}
-        VERSION_MINOR ${EIMApps_VER_MINOR}
-        VERSION_PATCH ${EIMApps_VER_PATCH}
-        BINARY_DIR    ${${PROJECT_NAME}_BINARY_DIR}
-        LINK_LIBRARIES ${QT_LIBRARIES} ${ITK_LIBRARIES} AIMLib QtSupport MXADataModel
-        LIB_SEARCH_DIRS ${CMAKE_LIBRARY_OUTPUT_DIRECTORY} ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
-        QT_PLUGINS    ${QT_PLUGINS}
-        OTHER_PLUGINS ${IPHELPER_PLUGINS}
-        COMPONENT     Applications
-        INSTALL_DEST  "."
-        )             
-                        
-endif()
 

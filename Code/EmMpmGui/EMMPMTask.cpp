@@ -50,6 +50,7 @@
 #include "emmpm/common/utilities/InitializationFunctions.h"
 #include "emmpm/common/utilities/ProgressFunctions.h"
 #include "emmpm/common/io/EMTiffIO.h"
+#include "AIM/Common/AIMArray.hpp"
 
 QMutex EMMPMTask_CallBackWrapperMutex;
 
@@ -74,6 +75,7 @@ void EMMPMTask::EMMPMUpdate_CallBackWrapper(EMMPM_Data* data)
   emit
   mySelf->progressTextChanged(QString::number(data->progress));
 
+#if 0
   // Check to make sure we are at the end of an em loop
   if (  data->inside_mpm_loop == 0 && NULL != data->outputImage)
   {
@@ -94,7 +96,7 @@ void EMMPMTask::EMMPMUpdate_CallBackWrapper(EMMPM_Data* data)
        std::cout << l << "\t" << data->m[l] << "\t" << data->v[l] << "\t" << std::endl;
     }
 
-    float hist[MAX_CLASSES][256];
+    float hist[EMMPM_MAX_CLASSES][256];
     // Generate a gaussian curve for each class based off the mu and sigma for that class
     for (int c = 0; c < data->classes; ++c)
     {
@@ -124,7 +126,7 @@ void EMMPMTask::EMMPMUpdate_CallBackWrapper(EMMPM_Data* data)
       }
     }
   }
-
+#endif
 }
 
 // -----------------------------------------------------------------------------
@@ -141,20 +143,20 @@ EMMPMTask::EMMPMTask(QObject* parent) :
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
-EMMPM_Data* EMMPMTask::getEMMPM_Data()
-{
-  return m_data;
-}
-
-// -----------------------------------------------------------------------------
-//
-// -----------------------------------------------------------------------------
 EMMPMTask::~EMMPMTask()
 {
   //  std::cout << "EMMPMTask::~EMMPMTask()" << std::endl;
 
   EMMPM_FreeDataStructure(m_data);
   EMMPM_FreeCallbackFunctionStructure(m_callbacks);
+}
+
+// -----------------------------------------------------------------------------
+//
+// -----------------------------------------------------------------------------
+EMMPM_Data* EMMPMTask::getEMMPM_Data()
+{
+  return m_data;
 }
 
 // -----------------------------------------------------------------------------
@@ -167,6 +169,48 @@ void EMMPMTask::run()
   this->setInputFilePath(QString(m_data->input_file_name));
   this->setOutputFilePath(QString(m_data->output_file_name));
   // Get our input image from the Image IO functions
+  QImage image = QImage(m_data->input_file_name);
+  qint32 height = image.height();
+  qint32 width = image.width();
+  AIMArray<unsigned char>::Pointer inImageBufferPtr = AIMArray<unsigned char>::New();
+  quint8* inImage = inImageBufferPtr->allocateDataArray(width*height, true);
+  if (NULL == inImage)
+  {
+    return;
+  }
+
+  m_data->rows = height;
+  m_data->columns = width;
+  m_data->channels = 1;
+  // Copy the QImage into the AIMImage object, converting to gray scale as we go.
+  QRgb rgbPixel;
+  int gray;
+  qint32 index;
+  for (qint32 y = 0; y<height; y++) {
+    for (qint32 x = 0; x<width; x++) {
+      index = (y *  width) + x;
+      rgbPixel = image.pixel(x, y);
+      gray = qGray(rgbPixel);
+      inImage[index] = static_cast<unsigned char>(gray);
+    }
+  }
+  m_data->inputImage = inImage;
+
+  // EMMPM_WriteGrayScaleImage("/tmp/TEST_INPUT_IMAGE.tif", m_data->rows, m_data->columns, "Input image as read by QImage", m_data->inputImage);
+
+
+  // Allocate our own output image buffer;
+  AIMArray<unsigned char>::Pointer outImageBufferPtr = AIMArray<unsigned char>::New();
+  quint8* outImagePtr = outImageBufferPtr->allocateDataArray(width*height, true);
+  if (NULL == outImagePtr)
+  {
+    return;
+  }
+  m_data->outputImage = outImagePtr;
+  ::memset(m_data->outputImage, 128, width*height);
+
+
+#if 0
   int err = EMMPM_ReadInputImage(m_data, m_callbacks);
   if (err < 0)
   {
@@ -174,6 +218,7 @@ void EMMPMTask::run()
     taskFinished(this);
     return;
   }
+#endif
 
   // Set the initialization function based on the command line arguments
   switch(m_data->initType)
@@ -184,6 +229,8 @@ void EMMPMTask::run()
     case EMMPM_BASIC_INITIALIZATION:
       m_callbacks->EMMPM_InitializationFunc = EMMPM_BasicInitialization;
       break;
+    case EMMPM_MANUAL_INITIALIZATION:
+      m_callbacks->EMMPM_InitializationFunc = EMMPM_ManualInitialization;
     default:
       break;
   }
@@ -195,13 +242,34 @@ void EMMPMTask::run()
   // Run the EM/MPM algorithm on the input image
   EMMPM_Execute(m_data, m_callbacks);
 
+  // Set the inputimage pointer to NULL so it does not get freed twice
+  m_data->inputImage = NULL;
+
+  QImage outQImage(m_data->outputImage, width, height, width, QImage::Format_Indexed8);
+  m_data->outputImage = NULL; // set this to NULL so it does not get freed twice.
+  QVector<QRgb> colorTable(256);
+  for (quint32 i = 0; i < 256; ++i)
+  {
+    colorTable[i] = qRgb(i, i, i);
+  }
+  outQImage.setColorTable(colorTable);
+  bool success = outQImage.save(m_data->output_file_name);
+  if (false == success)
+  {
+    UPDATE_PROGRESS(QString("EM/MPM Error Writing Output Image"), 100); emit
+    emit taskFinished(this);
+    return;
+  }
+
+#if 0
   err = EMMPM_WriteOutputImage(m_data, m_callbacks);
   if (err < 0)
   {
     UPDATE_PROGRESS(QString("EM/MPM Error Writing Output Image"), 100); emit
-    taskFinished(this);
+    emit taskFinished(this);
     return;
   }
+#endif
 
   UPDATE_PROGRESS(QString("Ending Segmentation"), 0);
   emit taskFinished(this);
