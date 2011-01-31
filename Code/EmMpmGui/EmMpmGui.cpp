@@ -192,7 +192,7 @@ void EmMpmGui::readSettings()
   READ_SETTING(prefs, m_NumClasses, ok, i, 2, Int);
   READ_BOOL_SETTING(prefs, useSimulatedAnnealing, true);
   READ_BOOL_SETTING(prefs, processFolder, false);
-  READ_STRING_SETTING(prefs, inputImageFilePath, "");
+ // READ_STRING_SETTING(prefs, inputImageFilePath, "");
   READ_STRING_SETTING(prefs, outputImageFile, "");
   READ_STRING_SETTING(prefs, sourceDirectoryLE, "");
   READ_STRING_SETTING(prefs, outputDirectoryLE, "");
@@ -333,7 +333,7 @@ void EmMpmGui::setupGui()
   QObject::connect(com3, SIGNAL(activated(const QString &)), this, SLOT(on_outputDirectoryLE_textChanged(const QString &)));
 
 
-  m_QueueDialog = new ProcessQueueDialog(this);
+  m_QueueDialog = new ProcessQueueDialog();
   m_QueueDialog->setVisible(false);
 
   // Configure the Histogram Plot
@@ -640,6 +640,8 @@ void EmMpmGui::on_processBtn_clicked()
     task->setInputFilePath(inputImageFilePath->text());
     task->setOutputFilePath(outputImageFile->text());
     queueController->addTask(static_cast<QThread* > (task));
+    connect(task, SIGNAL(updateImageAvailable(QImage)),
+            m_GraphicsView, SLOT(setOverlayImage(QImage)));
     this->addProcess(task);
   }
   else
@@ -696,6 +698,11 @@ void EmMpmGui::on_processBtn_clicked()
 
       filepairs.append(InputOutputFilePair(task->getInputFilePath(), task->getOutputFilePath()));
       queueController->addTask(static_cast<QThread* > (task));
+      if (i == 0)
+      {
+        connect(task, SIGNAL(updateImageAvailable(QImage)),
+                m_GraphicsView, SLOT(setOverlayImage(QImage)));
+      }
       this->addProcess(task);
     }
 
@@ -789,7 +796,6 @@ void EmMpmGui::queueControllerFinished()
   getQueueController()->deleteLater();
   setQueueController(NULL);
 }
-
 
 // -----------------------------------------------------------------------------
 //

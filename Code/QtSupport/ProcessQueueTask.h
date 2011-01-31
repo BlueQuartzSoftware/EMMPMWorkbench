@@ -103,6 +103,13 @@ class ProcessQueueTask : public QThread
        */
       void taskFinished(QObject *o);
 
+
+      /**
+       * @brief Sends an intermediate image to another thread or process via signal
+       * @param image
+       */
+      void updateImageAvailable(QImage image);
+
     public slots:
 
       /**

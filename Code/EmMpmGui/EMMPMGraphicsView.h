@@ -112,6 +112,8 @@ class EMMPMGraphicsView : public QGraphicsView
 
     void addUserInitArea(bool b);
 
+    void setOverlayImage(QImage image);
+
   signals:
    void fireBaseImageFileLoaded(const QString &filename);
    void fireOverlayImageFileLoaded(const QString &filename);

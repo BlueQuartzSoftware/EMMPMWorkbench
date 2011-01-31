@@ -75,6 +75,33 @@ void EMMPMTask::EMMPMUpdate_CallBackWrapper(EMMPM_Data* data)
   emit
   mySelf->progressTextChanged(QString::number(data->progress));
 
+  // Check to make sure we are at the end of an em loop
+  if (  data->inside_mpm_loop == 0 && NULL != data->outputImage)
+  {
+
+    QImage image = QImage(data->columns, data->rows, QImage::Format_Indexed8);
+    if (image.isNull() == true)
+    {
+      return;
+    }
+    QVector<QRgb > colorTable(256);
+    for (quint32 i = 0; i < 256; ++i)
+    {
+      colorTable[i] = qRgb(i, i, i);
+    }
+    image.setColorTable(colorTable);
+    size_t index = 0;
+    for (int y = 0; y < data->rows; ++y)
+    {
+      for (int x = 0; x < data->columns; ++x)
+      {
+        image.setPixel(x, y, data->outputImage[index]);
+        ++index;
+      }
+    }
+    emit mySelf->updateImageAvailable(image);
+  }
+
 #if 0
   // Check to make sure we are at the end of an em loop
   if (  data->inside_mpm_loop == 0 && NULL != data->outputImage)

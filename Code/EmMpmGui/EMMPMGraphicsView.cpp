@@ -308,6 +308,35 @@ void EMMPMGraphicsView::loadOverlayImageFile(const QString &filename)
   emit fireOverlayImageFileLoaded(filename);
 }
 
+// -----------------------------------------------------------------------------
+//
+// -----------------------------------------------------------------------------
+void EMMPMGraphicsView::setOverlayImage(QImage image)
+{
+  m_OverlayImage = image;
+  QGraphicsScene* gScene = scene();
+  if (gScene == NULL)
+  {
+    gScene = new QGraphicsScene(this);
+    setScene(gScene);
+  }
+
+  // If the GraphicsScene Item does not exist yet lets make one. This would happen
+  // if the user loads a segmented image first.
+  if (NULL == m_ImageGraphicsItem) {
+    m_ImageGraphicsItem = gScene->addPixmap(QPixmap::fromImage(m_OverlayImage));
+  }
+  m_ImageGraphicsItem->setAcceptDrops(true);
+  m_ImageGraphicsItem->setZValue(-1);
+  QRectF rect = m_ImageGraphicsItem->boundingRect();
+  gScene->setSceneRect(rect);
+  centerOn(m_ImageGraphicsItem);
+
+  m_ImageDisplayType = EmMpm_Constants::SegmentedImage;
+
+  setImageDisplayType(m_ImageDisplayType);
+
+}
 
 
 // -----------------------------------------------------------------------------
