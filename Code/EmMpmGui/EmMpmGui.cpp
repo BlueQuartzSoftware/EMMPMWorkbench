@@ -74,9 +74,9 @@
 #include <qwt_plot_curve.h>
 #include <qwt_plot_marker.h>
 
-#include <emmpm/common/utilities/InitializationFunctions.h>
-#include <emmpm/common/utilities/ProgressFunctions.h>
-#include <emmpm/common/io/EMTiffIO.h>
+#include <emmpm/public/InitializationFunctions.h>
+#include <emmpm/public/ProgressFunctions.h>
+#include <emmpm/tiff/EMTiffIO.h>
 #include <emmpm/public/EMMPM_Structures.h>
 #include <emmpm/public/EMMPM.h>
 
@@ -482,7 +482,7 @@ void EMMPMUpdateStats(EMMPM_Data* data)
       double mu = data->m[c];
       double sig = data->v[c];
       double twoSigSqrd = sig * sig * 2.0f;
-      double constant = 1.0f / (sig * sqrtf(2.0f * PI));
+      double constant = 1.0f / (sig * sqrtf(2.0f * M_PI));
       for (size_t x = 0; x < 256; ++x)
       {
         hist[c][x] = constant * exp(-1.0f * ((x - mu) * (x - mu)) / (twoSigSqrd));
@@ -566,8 +566,11 @@ void EmMpmGui::on_processBtn_clicked()
     QFile file(outputImageFile->text());
     if (file.exists() == true)
     {
-      int ret = QMessageBox::warning(this, tr("QEM/MPM"), tr("The Output File Already Exists\nDo you want to over write the existing file?"), QMessageBox::No
-          | QMessageBox::Default, QMessageBox::Yes, QMessageBox::Cancel);
+      int ret = QMessageBox::warning(this, tr("QEM/MPM"),
+                                     tr("The Output File Already Exists\nDo you want to over write the existing file?"),
+                                     QMessageBox::No | QMessageBox::Default,
+                                     QMessageBox::Yes,
+                                     QMessageBox::Cancel);
       if (ret == QMessageBox::Cancel)
       {
         return;
@@ -620,7 +623,7 @@ void EmMpmGui::on_processBtn_clicked()
     data->simulatedAnnealing = (useSimulatedAnnealing->isChecked()) ? 1 : 0;
     if (m_UserInitAreaTableModel->rowCount() == 0)
     {
-      data->initType = EMMPM_BASIC_INITIALIZATION;
+      data->initType = EMMPM_Basic;
       int n = data->classes - 1;
       for (int value = 0; value < data->classes; ++value)
       {
@@ -629,7 +632,7 @@ void EmMpmGui::on_processBtn_clicked()
     }
     else
     {
-      data->initType = EMMPM_MANUAL_INITIALIZATION;
+      data->initType = EMMPM_Manual;
       copyGrayValues(data);
       copyInitCoords(data);
       copyIntializationValues(data);
@@ -664,7 +667,7 @@ void EmMpmGui::on_processBtn_clicked()
       data->simulatedAnnealing = (useSimulatedAnnealing->isChecked()) ? 1 : 0;
       if (m_UserInitAreaTableModel->rowCount() == 0)
       {
-        data->initType = EMMPM_BASIC_INITIALIZATION;
+        data->initType = EMMPM_Basic;
         int n = data->classes - 1;
         for (int value = 0; value < data->classes; ++value)
         {
@@ -673,7 +676,7 @@ void EmMpmGui::on_processBtn_clicked()
       }
       else
       {
-        data->initType = EMMPM_MANUAL_INITIALIZATION;
+        data->initType = EMMPM_Manual;
         copyGrayValues(data);
         copyInitCoords(data);
         copyIntializationValues(data);

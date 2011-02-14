@@ -45,11 +45,11 @@
 
 //-- EMMPMLib Includes
 #include "emmpm/public/EMMPM.h"
-#include "emmpm/common/utilities/random.h"
-#include "emmpm/common/utilities/allocate.h"
-#include "emmpm/common/utilities/InitializationFunctions.h"
-#include "emmpm/common/utilities/ProgressFunctions.h"
-#include "emmpm/common/io/EMTiffIO.h"
+#include "emmpm/common/random.h"
+
+#include "emmpm/public/InitializationFunctions.h"
+#include "emmpm/public/ProgressFunctions.h"
+#include "emmpm/tiff/EMTiffIO.h"
 #include "AIM/Common/AIMArray.hpp"
 
 QMutex EMMPMTask_CallBackWrapperMutex;
@@ -162,7 +162,7 @@ void EMMPMTask::EMMPMUpdate_CallBackWrapper(EMMPM_Data* data)
 EMMPMTask::EMMPMTask(QObject* parent) :
   ProcessQueueTask(parent)
 {
-  m_data = EMMPM_AllocateDataStructure();
+  m_data = EMMPM_CreateDataStructure();
   m_data->userData = this;
   m_callbacks = EMMPM_AllocateCallbackFunctionStructure();
 }
@@ -208,7 +208,7 @@ void EMMPMTask::run()
 
   m_data->rows = height;
   m_data->columns = width;
-  m_data->channels = 1;
+  m_data->dims = 1;
   // Copy the QImage into the AIMImage object, converting to gray scale as we go.
   QRgb rgbPixel;
   int gray;
@@ -250,14 +250,15 @@ void EMMPMTask::run()
   // Set the initialization function based on the command line arguments
   switch(m_data->initType)
   {
-    case EMMPM_USER_DEFINED_AREA_INITIALIZATION:
+    case EMMPM_UserInitArea:
       m_callbacks->EMMPM_InitializationFunc = EMMPM_UserDefinedAreasInitialization;
       break;
-    case EMMPM_BASIC_INITIALIZATION:
+    case EMMPM_Basic:
       m_callbacks->EMMPM_InitializationFunc = EMMPM_BasicInitialization;
       break;
-    case EMMPM_MANUAL_INITIALIZATION:
-      m_callbacks->EMMPM_InitializationFunc = EMMPM_ManualInitialization;
+    case EMMPM_CurvaturePenalty:
+      m_callbacks->EMMPM_InitializationFunc = EMMPM_CurvatureInitialization;
+      break;
     default:
       break;
   }
@@ -267,7 +268,7 @@ void EMMPMTask::run()
  // m_callbacks->EMMPM_ProgressFunc = &EMMPM_PrintfProgress;
 
   // Run the EM/MPM algorithm on the input image
-  EMMPM_Execute(m_data, m_callbacks);
+  EMMPM_Run(m_data, m_callbacks);
 
   // Set the inputimage pointer to NULL so it does not get freed twice
   m_data->inputImage = NULL;
