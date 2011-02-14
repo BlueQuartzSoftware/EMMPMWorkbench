@@ -223,6 +223,10 @@ void EMMPMTask::run()
   }
   m_data->inputImage = inImage;
 
+  // Forcing everything to grayscale
+  m_data->dims = 1;
+  m_data->inputImageChannels = 1;
+
   // EMMPM_WriteGrayScaleImage("/tmp/TEST_INPUT_IMAGE.tif", m_data->rows, m_data->columns, "Input image as read by QImage", m_data->inputImage);
 
 
@@ -265,7 +269,15 @@ void EMMPMTask::run()
 
   // Set the Update Stats Callback function
   m_callbacks->EMMPM_ProgressStatsFunc = EMMPMTask::EMMPMUpdate_CallBackWrapper;
- // m_callbacks->EMMPM_ProgressFunc = &EMMPM_PrintfProgress;
+
+  // Allocate all the memory here
+  int err = EMMPM_AllocateDataStructureMemory(m_data);
+  if (err)
+  {
+    UPDATE_PROGRESS(QString("Error allocating memory for the EMMPM Data Structure"), 0);
+    emit taskFinished(this);
+    return;
+  }
 
   // Run the EM/MPM algorithm on the input image
   EMMPM_Run(m_data, m_callbacks);

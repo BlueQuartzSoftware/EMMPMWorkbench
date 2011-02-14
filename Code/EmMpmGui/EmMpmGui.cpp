@@ -638,6 +638,10 @@ void EmMpmGui::on_processBtn_clicked()
       copyIntializationValues(data);
       copyGammaValues(data);
     }
+    data->useCurvaturePenalty = (useCuravturePenalty->isChecked()) ? 1 : 0;
+    data->beta_e = curvatureBetaE->value();
+    data->beta_c = curvatureBetaC->value();
+    data->r_max = curvatureRMax->value();
     data->input_file_name = copyStringToNewBuffer(inputImageFilePath->text());
     data->output_file_name = copyStringToNewBuffer(outputImageFile->text());
     task->setInputFilePath(inputImageFilePath->text());
@@ -682,6 +686,10 @@ void EmMpmGui::on_processBtn_clicked()
         copyIntializationValues(data);
         copyGammaValues(data);
       }
+      data->useCurvaturePenalty = (useCuravturePenalty->isChecked()) ? 1 : 0;
+      data->beta_e = curvatureBetaE->value();
+      data->beta_c = curvatureBetaC->value();
+      data->r_max = curvatureRMax->value();
 
       task->setInputFilePath(sourceDirectoryLE->text() + QDir::separator() + fileList.at(i));
       QFileInfo fileInfo(fileList.at(i));
@@ -951,8 +959,10 @@ void EmMpmGui::on_outputImageButton_clicked()
 // -----------------------------------------------------------------------------
 void EmMpmGui::on_inputImageFilePath_textChanged(const QString & text)
 {
-  verifyPathExists(inputImageFilePath->text(), inputImageFilePath);
-  openBaseImageFile(text);
+  if (verifyPathExists(inputImageFilePath->text(), inputImageFilePath))
+  {
+    openBaseImageFile(text);
+  }
 }
 
 // -----------------------------------------------------------------------------
