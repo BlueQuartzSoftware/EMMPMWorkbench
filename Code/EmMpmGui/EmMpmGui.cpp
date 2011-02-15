@@ -142,6 +142,7 @@ m_OpenDialogLastDirectory("~/")
   connect(recentFileList, SIGNAL (fileListChanged(const QString &)), this, SLOT(updateBaseRecentFileList(const QString &)));
   // Get out initial Recent File List
   this->updateBaseRecentFileList(QString::null);
+  qRegisterMetaType<QVector<double> >("QVector<double>");
 }
 
 // -----------------------------------------------------------------------------
@@ -657,6 +658,11 @@ void EmMpmGui::on_processBtn_clicked()
     queueController->addTask(static_cast<QThread* > (task));
     connect(task, SIGNAL(updateImageAvailable(QImage)),
             m_GraphicsView, SLOT(setOverlayImage(QImage)));
+
+    connect(task, SIGNAL(histogramsAboutToBeUpdated()),
+            this, SLOT(clearProcessHistograms()));
+    connect(task, SIGNAL(updateHistogramAvailable(QVector<double>)),
+            this, SLOT(addProcessHistogram(QVector<double>)));
     this->addProcess(task);
   }
   else
@@ -1276,6 +1282,7 @@ void EmMpmGui::baseImageFileLoaded(const QString &filename)
   this->setWindowFilePath(filename);
   imageDisplayCombo->setCurrentIndex(EmMpm_Constants::OriginalImage);
   inputImageFilePath->setText(filename);
+  clearProcessHistograms();
   plotImageHistogram();
 }
 
@@ -1343,8 +1350,70 @@ void EmMpmGui::plotImageHistogram()
   yAxisMax->setValue(max);
   yAxisMin->setValue(0.0);
 
+  updateHistogramAxis();
+}
+
+// -----------------------------------------------------------------------------
+//
+// -----------------------------------------------------------------------------
+void EmMpmGui::clearProcessHistograms()
+{
+  // Clear any curves from the QwtPlot object
+  if (NULL != m_histogram) {
+    m_histogram->detach();
+    delete m_histogram;
+    m_histogram = NULL;
+  }
+
+  //Loop over each entry in the table
+  QwtPlotCurve* curve = NULL;
+
+  // Delete all the current histograms
+  qint32 nRows = m_PlotCurves.count();
+  for (qint32 r = nRows - 1; r >= 0; --r)
+  {
+    curve = m_PlotCurves[r];
+    curve->detach();
+    m_PlotCurves.remove(r);
+    delete curve;
+  }
+  yAxisMax->setRange(0.0, 0.0);
+}
+
+// -----------------------------------------------------------------------------
+//
+// -----------------------------------------------------------------------------
+void EmMpmGui::addProcessHistogram(QVector<double> data)
+{
+  std::cout << "EmMpmGui::setProcessHistograms..... " << std::endl;
+  QwtPlotCurve* curve = NULL;
+  const int numValues = 256;
+  double max = 0;
+  // Generate the Histogram Bins (X Axis)
+  QwtArray<double > intervals(numValues);
+  for (int i = 0; i < numValues; ++i)
+  {
+    intervals[i] = (double)i;
+    if (data[i] > max) { max = data[i]; }
+  }
+  QwtArray<double > values(numValues);
+
+  if (max > yAxisMax->maximum() ) {
+  yAxisMax->setRange(0.0, max);
+  yAxisMax->setValue(max);
+  }
+  std::cout << "   max: " << max << std::endl;
+  curve = new QwtPlotCurve("");
+  curve->setRenderHint(QwtPlotItem::RenderAntialiased);
+  curve->setPen(QPen(Qt::red, 0, Qt::SolidLine));
+  curve->attach(m_HistogramPlot);
+  m_PlotCurves.append(curve);
+
+
+  curve->setData(intervals, data);
 
   updateHistogramAxis();
+
 }
 
 // -----------------------------------------------------------------------------

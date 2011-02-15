@@ -110,6 +110,17 @@ class ProcessQueueTask : public QThread
        */
       void updateImageAvailable(QImage image);
 
+      /**
+       *
+       */
+      void histogramsAboutToBeUpdated();
+
+      /**
+       *
+       * @param values
+       */
+      void updateHistogramAvailable(QVector<double> values);
+
     public slots:
 
       /**

@@ -179,6 +179,11 @@ class EmMpmGui :  public QMainWindow, private Ui::EmMpmGui
     // These slots get called when the plugin starts and finishes processing
     void processingStarted();
     void processingFinished();
+
+
+    void clearProcessHistograms();
+    void addProcessHistogram(QVector<double> data);
+
   protected:
 
     void addProcess(EMMPMTask* name);
@@ -249,7 +254,7 @@ class EmMpmGui :  public QMainWindow, private Ui::EmMpmGui
   QwtPlotGrid*   m_grid;
 
   QwtPlotCurve*  m_histogram;
-//  QList<QwtPlotCurve*>  m_UIAGaussians;
+  QVector<QwtPlotCurve*>  m_PlotCurves;
   QList<QwtPlotMarker*>  m_UIAMarkers;
 
   EmMpmGui(const EmMpmGui&); // Copy Constructor Not Implemented

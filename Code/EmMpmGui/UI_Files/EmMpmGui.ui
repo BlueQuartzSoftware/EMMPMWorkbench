@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1044</width>
+    <width>1095</width>
     <height>768</height>
    </rect>
   </property>
@@ -1175,7 +1175,11 @@
                 </widget>
                </item>
                <item>
-                <widget class="QDoubleSpinBox" name="xAxisMin"/>
+                <widget class="QDoubleSpinBox" name="xAxisMin">
+                 <property name="decimals">
+                  <number>6</number>
+                 </property>
+                </widget>
                </item>
                <item>
                 <widget class="QLabel" name="label_25">
@@ -1186,6 +1190,9 @@
                </item>
                <item>
                 <widget class="QDoubleSpinBox" name="xAxisMax">
+                 <property name="decimals">
+                  <number>6</number>
+                 </property>
                  <property name="maximum">
                   <double>256.000000000000000</double>
                  </property>
@@ -1215,7 +1222,11 @@
                 </widget>
                </item>
                <item>
-                <widget class="QDoubleSpinBox" name="yAxisMin"/>
+                <widget class="QDoubleSpinBox" name="yAxisMin">
+                 <property name="decimals">
+                  <number>6</number>
+                 </property>
+                </widget>
                </item>
                <item>
                 <widget class="QLabel" name="label_27">
@@ -1225,7 +1236,11 @@
                 </widget>
                </item>
                <item>
-                <widget class="QDoubleSpinBox" name="yAxisMax"/>
+                <widget class="QDoubleSpinBox" name="yAxisMax">
+                 <property name="decimals">
+                  <number>6</number>
+                 </property>
+                </widget>
                </item>
                <item>
                 <spacer name="horizontalSpacer_7">
@@ -1327,7 +1342,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1044</width>
+     <width>1095</width>
      <height>22</height>
     </rect>
    </property>

@@ -78,7 +78,6 @@ void EMMPMTask::EMMPMUpdate_CallBackWrapper(EMMPM_Data* data)
   // Check to make sure we are at the end of an em loop
   if (  data->inside_mpm_loop == 0 && NULL != data->outputImage)
   {
-
     QImage image = QImage(data->columns, data->rows, QImage::Format_Indexed8);
     if (image.isNull() == true)
     {
@@ -100,6 +99,24 @@ void EMMPMTask::EMMPMUpdate_CallBackWrapper(EMMPM_Data* data)
       }
     }
     emit mySelf->updateImageAvailable(image);
+
+    size_t histIdx = 0;
+    emit mySelf->histogramsAboutToBeUpdated();
+
+    for (int d = 0; d < data->dims; ++d)
+    {
+      for (int l = 0; l < data->classes; ++l)
+      {
+        histIdx = (256*data->classes*d) + (256*l);
+        QVector<double> values(256);
+        ::memcpy(values.data(), &(data->histograms[histIdx]), 256*sizeof(double));
+        emit mySelf->updateHistogramAvailable(values);
+      }
+    }
+
+
+
+
   }
 
 #if 0
