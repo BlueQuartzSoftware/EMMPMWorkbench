@@ -101,6 +101,7 @@ class EmMpmGui :  public QMainWindow, private Ui::EmMpmGui
     void copyIntializationValues(EMMPM_Data* inputs);
     void copyGammaValues(EMMPM_Data* inputs);
 
+    void updateHistogramAxis();
 
     signals:
     void cancelTask();
@@ -127,6 +128,10 @@ class EmMpmGui :  public QMainWindow, private Ui::EmMpmGui
     void on_actionClose_triggered();
 
 
+    void on_xAxisMin_valueChanged(double d);
+    void on_xAxisMax_valueChanged(double d);
+    void on_yAxisMin_valueChanged(double d);
+    void on_yAxisMax_valueChanged(double d);
 
     /* slots for the buttons in the GUI */
     void on_processBtn_clicked();

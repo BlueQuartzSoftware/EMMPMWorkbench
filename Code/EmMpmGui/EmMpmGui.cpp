@@ -608,12 +608,15 @@ void EmMpmGui::on_processBtn_clicked()
 
   InputOutputFilePairList filepairs;
 
+ //   Need to get the size of the image in order to properly set the m_data->cols, rows, dims
+ //    and imagechannels so we can allocate all the memory properly
+
   if (this->processFolder->isChecked() == false)
   {
     EMMPMTask* task = new EMMPMTask(NULL);
     EMMPM_Data* data = task->getEMMPM_Data();
     data->in_beta = m_Beta->text().toFloat(&ok);
-    //data->in_gamma = m_Gamma->text().toFloat(&ok);
+
     for(int i = 0; i < EMMPM_MAX_CLASSES; i++) {
       data->w_gamma[i] =  m_Gamma->text().toFloat(&ok);
     }
@@ -621,6 +624,7 @@ void EmMpmGui::on_processBtn_clicked()
     data->emIterations = m_EmIterations->value();
     data->classes = m_NumClasses->value();
     data->simulatedAnnealing = (useSimulatedAnnealing->isChecked()) ? 1 : 0;
+    data->dims = 1; // FORCING A GRAY SCALE IMAGE TO BE USED
     if (m_UserInitAreaTableModel->rowCount() == 0)
     {
       data->initType = EMMPM_Basic;
@@ -633,6 +637,9 @@ void EmMpmGui::on_processBtn_clicked()
     else
     {
       data->initType = EMMPM_Manual;
+      // Allocate memory to hold the values
+      data->m = (double*)malloc(data->classes * data->dims * sizeof(double));
+      data->v = (double*)malloc(data->classes * data->dims * sizeof(double));
       copyGrayValues(data);
       copyInitCoords(data);
       copyIntializationValues(data);
@@ -642,6 +649,7 @@ void EmMpmGui::on_processBtn_clicked()
     data->beta_e = curvatureBetaE->value();
     data->beta_c = curvatureBetaC->value();
     data->r_max = curvatureRMax->value();
+    data->ccostLoopDelay = ccostLoopDelay->value();
     data->input_file_name = copyStringToNewBuffer(inputImageFilePath->text());
     data->output_file_name = copyStringToNewBuffer(outputImageFile->text());
     task->setInputFilePath(inputImageFilePath->text());
@@ -663,7 +671,7 @@ void EmMpmGui::on_processBtn_clicked()
       data->emIterations = m_EmIterations->value();
       data->mpmIterations = m_MpmIterations->value();
       data->in_beta = m_Beta->text().toFloat(&ok);
-      //data->in_gamma = m_Gamma->text().toFloat(&ok);
+      data->dims = 1; // FORCING A GRAY SCALE IMAGE TO BE USED
       for(int j = 0; j < EMMPM_MAX_CLASSES; j++) {
         data->w_gamma[j] =  m_Gamma->text().toFloat(&ok);
       }
@@ -681,6 +689,9 @@ void EmMpmGui::on_processBtn_clicked()
       else
       {
         data->initType = EMMPM_Manual;
+        // Allocate memory to hold the values
+        data->m = (double*)malloc(data->classes * data->dims * sizeof(double));
+        data->v = (double*)malloc(data->classes * data->dims * sizeof(double));
         copyGrayValues(data);
         copyInitCoords(data);
         copyIntializationValues(data);
@@ -690,7 +701,7 @@ void EmMpmGui::on_processBtn_clicked()
       data->beta_e = curvatureBetaE->value();
       data->beta_c = curvatureBetaC->value();
       data->r_max = curvatureRMax->value();
-
+      data->ccostLoopDelay = ccostLoopDelay->value();
       task->setInputFilePath(sourceDirectoryLE->text() + QDir::separator() + fileList.at(i));
       QFileInfo fileInfo(fileList.at(i));
       QString basename = fileInfo.completeBaseName();
@@ -1323,9 +1334,17 @@ void EmMpmGui::plotImageHistogram()
   }
   m_histogram->setData(intervals, values);
 
-  m_HistogramPlot->setAxisScale(QwtPlot::yLeft, 0.0, max);
-  m_HistogramPlot->setAxisScale(QwtPlot::xBottom, 0.0, 255.0);
-  m_HistogramPlot->replot();
+  xAxisMax->setRange(0.0, 256);
+  xAxisMin->setRange(0.0, 256);
+  yAxisMax->setRange(0.0, max);
+  yAxisMin->setRange(0.0, max);
+  xAxisMax->setValue(256);
+  xAxisMin->setValue(0.0);
+  yAxisMax->setValue(max);
+  yAxisMin->setValue(0.0);
+
+
+  updateHistogramAxis();
 }
 
 // -----------------------------------------------------------------------------
@@ -1577,3 +1596,49 @@ QStringList EmMpmGui::generateInputFileList()
   }
   return list;
 }
+
+// -----------------------------------------------------------------------------
+//
+// -----------------------------------------------------------------------------
+void EmMpmGui::updateHistogramAxis()
+{
+   m_HistogramPlot->setAxisScale(QwtPlot::yLeft, yAxisMin->value(), yAxisMax->value());
+   m_HistogramPlot->setAxisScale(QwtPlot::xBottom, xAxisMin->value(), xAxisMax->value());
+   m_HistogramPlot->replot();
+}
+
+
+// -----------------------------------------------------------------------------
+//
+// -----------------------------------------------------------------------------
+void EmMpmGui::on_yAxisMax_valueChanged(double d)
+{
+  updateHistogramAxis();
+}
+
+// -----------------------------------------------------------------------------
+//
+// -----------------------------------------------------------------------------
+void EmMpmGui::on_yAxisMin_valueChanged(double d)
+{
+  updateHistogramAxis();
+}
+
+// -----------------------------------------------------------------------------
+//
+// -----------------------------------------------------------------------------
+void EmMpmGui::on_xAxisMax_valueChanged(double d)
+{
+  updateHistogramAxis();
+}
+
+// -----------------------------------------------------------------------------
+//
+// -----------------------------------------------------------------------------
+void EmMpmGui::on_xAxisMin_valueChanged(double d)
+{
+  updateHistogramAxis();
+}
+
+
+
