@@ -206,6 +206,17 @@ EMMPM_Data* EMMPMTask::getEMMPM_Data()
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
+void EMMPMTask::cancel()
+{
+  if (NULL != m_data)
+  {
+    m_data->cancel = 1;
+  }
+}
+
+// -----------------------------------------------------------------------------
+//
+// -----------------------------------------------------------------------------
 void EMMPMTask::run()
 {
   UPDATE_PROGRESS(QString("Starting Segmentation"), 0);
@@ -279,6 +290,9 @@ void EMMPMTask::run()
       break;
     case EMMPM_CurvaturePenalty:
       m_callbacks->EMMPM_InitializationFunc = EMMPM_CurvatureInitialization;
+      break;
+    case EMMPM_Manual:
+      m_callbacks->EMMPM_InitializationFunc = EMMPM_ManualInitialization;
       break;
     default:
       break;

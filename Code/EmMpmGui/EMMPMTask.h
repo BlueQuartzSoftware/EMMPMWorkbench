@@ -91,7 +91,12 @@ class EMMPMTask : public ProcessQueueTask
 
     virtual void run();
 
+  public slots:
 
+    /**
+     * @brief Slot to receive a signal to cancel the operation
+     */
+    void cancel();
 
   private:
 

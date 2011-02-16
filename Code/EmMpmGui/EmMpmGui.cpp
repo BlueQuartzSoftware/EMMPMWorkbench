@@ -1315,6 +1315,7 @@ void EmMpmGui::plotImageHistogram()
 
   qint32 height = image.height();
   qint32 width = image.width();
+  float totalPixels = height * width;
   QRgb rgbPixel;
   int gray;
   qint32 index;
@@ -1332,15 +1333,22 @@ void EmMpmGui::plotImageHistogram()
     }
   }
 
+  max = 0.0;
+  for (int i = 0; i < 256; ++i)
+  {
+    values[i] = values[i] / totalPixels;
+    if (values[i] > max) { max = values[i]; }
+  }
   if (NULL == m_histogram)
   {
     m_histogram = new QwtPlotCurve("Original Image");
     m_histogram->setRenderHint(QwtPlotItem::RenderAntialiased);
-    m_histogram->setPen(QPen(Qt::red));
+    m_histogram->setPen(QPen(Qt::blue));
     m_histogram->attach(m_HistogramPlot);
   }
   m_histogram->setData(intervals, values);
 
+#if 1
   xAxisMax->setRange(0.0, 256);
   xAxisMin->setRange(0.0, 256);
   yAxisMax->setRange(0.0, max);
@@ -1349,6 +1357,8 @@ void EmMpmGui::plotImageHistogram()
   xAxisMin->setValue(0.0);
   yAxisMax->setValue(max);
   yAxisMin->setValue(0.0);
+#endif
+
 
   updateHistogramAxis();
 }
@@ -1359,11 +1369,15 @@ void EmMpmGui::plotImageHistogram()
 void EmMpmGui::clearProcessHistograms()
 {
   // Clear any curves from the QwtPlot object
-  if (NULL != m_histogram) {
+#if 0
+  if (NULL != m_histogram)
+  {
     m_histogram->detach();
     delete m_histogram;
     m_histogram = NULL;
   }
+#endif
+
 
   //Loop over each entry in the table
   QwtPlotCurve* curve = NULL;
@@ -1385,7 +1399,7 @@ void EmMpmGui::clearProcessHistograms()
 // -----------------------------------------------------------------------------
 void EmMpmGui::addProcessHistogram(QVector<double> data)
 {
-  std::cout << "EmMpmGui::setProcessHistograms..... " << std::endl;
+  //std::cout << "EmMpmGui::setProcessHistograms..... " << std::endl;
   QwtPlotCurve* curve = NULL;
   const int numValues = 256;
   double max = 0;
