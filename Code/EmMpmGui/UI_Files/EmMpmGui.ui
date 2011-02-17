@@ -442,6 +442,9 @@
        </widget>
       </item>
       <item>
+       <widget class="ProcessQueueDialog" name="m_QueueDialog" native="true"/>
+      </item>
+      <item>
        <spacer name="verticalSpacer">
         <property name="orientation">
          <enum>Qt::Vertical</enum>
@@ -501,7 +504,7 @@
     <item>
      <widget class="QTabWidget" name="tabWidget">
       <property name="currentIndex">
-       <number>1</number>
+       <number>0</number>
       </property>
       <widget class="QWidget" name="tab_2">
        <attribute name="title">
@@ -1343,16 +1346,6 @@
                 <bool>false</bool>
                </attribute>
               </widget>
-             </item>
-            </layout>
-           </widget>
-           <widget class="QWidget" name="tab_5">
-            <attribute name="title">
-             <string>Progress</string>
-            </attribute>
-            <layout class="QVBoxLayout" name="verticalLayout_2">
-             <item>
-              <widget class="ProcessQueueDialog" name="m_QueueDialog" native="true"/>
              </item>
             </layout>
            </widget>
