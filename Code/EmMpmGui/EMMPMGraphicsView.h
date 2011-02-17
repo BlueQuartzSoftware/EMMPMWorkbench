@@ -98,9 +98,14 @@ class EMMPMGraphicsView : public QGraphicsView
     void loadBaseImageFile(const QString &filename);
     void loadOverlayImageFile(const QString &filename);
 
+    QImage& blend(QImage& src, QImage& dst, float opacity);
+
+
   public slots:
     void zoomIn();
     void zoomOut();
+
+    void setOverlayTransparency(float f);
 
     void fitToWindow();
 
@@ -139,6 +144,7 @@ class EMMPMGraphicsView : public QGraphicsView
    EmMpm_Constants::ImageDisplayType           m_ImageDisplayType;
    bool           m_ShowOverlayImage;
    QPainter::CompositionMode m_composition_mode;
+   float          m_OverlayTransparency;
 
    EMMPMGraphicsView(const EMMPMGraphicsView&); // Copy Constructor Not Implemented
    void operator=(const EMMPMGraphicsView&); // Operator '=' Not Implemented

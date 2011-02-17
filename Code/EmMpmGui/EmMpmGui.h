@@ -92,7 +92,7 @@ class EmMpmGui :  public QMainWindow, private Ui::EmMpmGui
     MXA_INSTANCE_PROPERTY(QList<QWidget* >, WidgetList)
     MXA_INSTANCE_PROPERTY(bool, OutputExistsCheck)
     MXA_INSTANCE_PROPERTY(ProcessQueueController*, QueueController)
-    MXA_INSTANCE_PROPERTY(ProcessQueueDialog*, QueueDialog)
+  //  MXA_INSTANCE_PROPERTY(ProcessQueueDialog*, QueueDialog)
     MXA_INSTANCE_PROPERTY(QString, OpenDialogLastDirectory)
     MXA_INSTANCE_PROPERTY(InputOutputFilePairList, InputOutputFilePairList)
 
@@ -118,6 +118,8 @@ class EmMpmGui :  public QMainWindow, private Ui::EmMpmGui
     void userInitAreaUpdated(UserInitArea* uia);
     void userInitAreaSelected(UserInitArea* uia);
     void on_fitToWindow_clicked();
+    void on_transparency_valueChanged(int value);
+
 
 
   protected slots:

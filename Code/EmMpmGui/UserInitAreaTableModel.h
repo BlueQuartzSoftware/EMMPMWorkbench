@@ -31,9 +31,14 @@
 #ifndef USERINITAREATABLEMODEL_H_
 #define USERINITAREATABLEMODEL_H_
 
+#include <QtCore/QVector>
+#include <QtCore/QVariant>
+#include <QtGui/QColor>
 #include <QtCore/QAbstractTableModel>
 
 #include "UserInitArea.h"
+
+class QAbstractItemDelegate;
 
 
 class UserInitAreaTableModel : public QAbstractTableModel

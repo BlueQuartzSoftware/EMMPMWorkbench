@@ -31,6 +31,11 @@
 #include <iostream>
 #include "UserInitAreaTableModel.h"
 
+#include <QApplication>
+#include <QtGui/QAbstractItemDelegate>
+
+#include "UserInitAreaItemDelegate.h"
+
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
@@ -62,37 +67,14 @@ Qt::ItemFlags UserInitAreaTableModel::flags(const QModelIndex &index) const
   Qt::ItemFlags theFlags = QAbstractTableModel::flags(index);
   if (index.isValid())
   {
-    theFlags |= Qt::ItemIsEditable | Qt::ItemIsSelectable | Qt::ItemIsEnabled;
+    theFlags |= Qt::ItemIsEnabled;
 
     int col = index.column();
-    if (col == Class)
-    {
-      theFlags = Qt::ItemIsEnabled;
-    }
-    else if (col == GrayValue)
+    if (col == Class || col == GrayValue || col == Gamma)
     {
       theFlags = Qt::ItemIsEditable | Qt::ItemIsSelectable | Qt::ItemIsEnabled;
     }
-    else if (col == UpperLeft)
-    {
-      theFlags = Qt::ItemIsEnabled;
-    }
-    else if (col == LowerRight)
-    {
-      theFlags = Qt::ItemIsEnabled;
-    }
-    else if (col == Mu)
-    {
-      theFlags = Qt::ItemIsEnabled;
-    }
-    else if (col == Sigma)
-    {
-      theFlags = Qt::ItemIsEnabled;
-    }
-    else if (col == Gamma)
-    {
-      theFlags = Qt::ItemIsEditable | Qt::ItemIsSelectable | Qt::ItemIsEnabled;
-    }
+
   }
   return theFlags;
 }
@@ -108,10 +90,58 @@ QVariant UserInitAreaTableModel::data(const QModelIndex &index, qint32 role) con
     return QVariant();
   }
 
-  if (role == Qt::TextAlignmentRole) {
+  if (role == Qt::SizeHintRole)
+  {
+#if 0
+    QStyleOptionComboBox comboBox;
+
+    switch(index.column())
+    {
+      case Class:
+      {
+        comboBox.currentText = QString("101");
+        const QString header = headerData(Class, Qt::Horizontal, Qt::DisplayRole).toString();
+        if (header.length() > comboBox.currentText.length()) comboBox.currentText = header;
+        break;
+      }
+      case Average:
+      {
+        comboBox.currentText = QString("10001");
+        const QString header = headerData(Class, Qt::Horizontal, Qt::DisplayRole).toString();
+        if (header.length() > comboBox.currentText.length()) comboBox.currentText = header;
+        break;
+      }
+      case StdDev:
+      {
+        comboBox.currentText = QString("10001");
+        const QString header = headerData(Class, Qt::Horizontal, Qt::DisplayRole).toString();
+        if (header.length() > comboBox.currentText.length()) comboBox.currentText = header;
+        break;
+      }
+      case LineColor:
+      {
+        comboBox.currentText = QString("Dark Blue      ");
+        const QString header = headerData(Class, Qt::Horizontal, Qt::DisplayRole).toString();
+        if (header.length() > comboBox.currentText.length())
+        {
+          comboBox.currentText = header;
+        }
+        break;
+      }
+      default:
+      Q_ASSERT(false);
+    }
+    QFontMetrics fontMetrics(data(index, Qt::FontRole) .value<QFont > ());
+    comboBox.fontMetrics = fontMetrics;
+    QSize size(fontMetrics.width(comboBox.currentText), fontMetrics.height());
+    return qApp->style()->sizeFromContents(QStyle::CT_ComboBox, &comboBox, size);
+#endif
+
+  }
+  else if (role == Qt::TextAlignmentRole) {
     return int(Qt::AlignRight | Qt::AlignVCenter);
   }
-  else if (role == Qt::DisplayRole)
+  else if (role == Qt::DisplayRole || role == Qt::EditRole)
   {
     UserInitArea* uia = m_UserInitAreas.at(index.row());
     if (NULL == uia)
@@ -120,50 +150,177 @@ QVariant UserInitAreaTableModel::data(const QModelIndex &index, qint32 role) con
     }
     QPoint p = uia->pos().toPoint();
     QRect b = uia->boundingRect().toAlignedRect();
-
+    QString s;
 
     int col = index.column();
-    if (col == 2) // TOP LEFT CORNER
+    switch(col)
     {
-      QString s = QString::number(b.x()+p.x());
-      s.append(", ");
-      s.append(QString::number(b.y()+p.y()));
-      uia->setUpperLeft(b.x()+p.x(), b.y()+p.y());
-      return QVariant(s);
+      case UserInitAreaTableModel::Class:
+        return QVariant(uia->getEmMpmClass());
+      case UserInitAreaTableModel::GrayValue:
+        return QVariant(uia->getEmMpmGrayLevel());
+      case UserInitAreaTableModel::UpperLeft:
+        s = QString::number(b.x() + p.x());
+        s.append(", ");
+        s.append(QString::number(b.y() + p.y()));
+        uia->setUpperLeft(b.x() + p.x(), b.y() + p.y());
+        return QVariant(s);
+      case UserInitAreaTableModel::LowerRight:
+        s = QString::number(b.x() + p.x() + b.width());
+        s.append(", ");
+        s.append(QString::number(b.y() + p.y() + b.height()));
+        uia->setLowerRight(b.x() + p.x() + b.width(), b.y() + p.y() + b.height());
+        return QVariant(s);
+      case UserInitAreaTableModel::Mu:
+        return QVariant(uia->getMu());
+      case UserInitAreaTableModel::Sigma:
+        return QVariant(uia->getSigma());
+      case UserInitAreaTableModel::Gamma:
+        return QVariant(uia->getGamma());
+      default:
+        break;
     }
-    else if (col == 3) // BOTTOM RIGHT CORNER
-    {
-      QString s = QString::number(b.x()+p.x() + b.width());
-      s.append(", ");
-      s.append(QString::number(b.y()+p.y() + b.height()));
-      uia->setLowerRight(b.x()+p.x() + b.width(), b.y()+p.y() + b.height());
-      return QVariant(s);
-    }
-    else if (col == 1)
-    {
-      return QVariant(QString::number(uia->getEmMpmGrayLevel()));
-    }
-    else if (col == 0)
-    {
-      return QVariant(QString::number(uia->getEmMpmClass()));
-    }
-    else if (col == 4)
-    {
-      return QVariant(uia->getMu());
-    }
-    else if (col == 5)
-    {
-      return QVariant(uia->getSigma());
-    }
-    else if (col == 6)
-    {
-      return QVariant(uia->getGamma());
-    }
-  }
 
+  }
   return QVariant();
 }
 
+// -----------------------------------------------------------------------------
+//
+// -----------------------------------------------------------------------------
+QVariant  UserInitAreaTableModel::headerData ( int section, Qt::Orientation orientation, int role ) const
+{
+  if (orientation == Qt::Horizontal && role == Qt::DisplayRole)
+  {
+    switch(section)
+    {
+      case Class: return QVariant(QString("Class"));
+      case GrayValue: return QVariant(QString("Gray Value"));
+      case UpperLeft: return QVariant(QString("Upper Left"));
+      case LowerRight: return QVariant(QString("Lower Right"));
+      case Mu: return QVariant(QString("Mu"));
+      case Sigma: return QVariant(QString("Sigma"));
+      case Gamma: return QVariant(QString("Gamma"));
+      default:
+        break;
+    }
+  }
+  return QVariant();
+}
+
+// -----------------------------------------------------------------------------
+//
+// -----------------------------------------------------------------------------
+int UserInitAreaTableModel::rowCount(const QModelIndex &index) const
+{
+  return m_UserInitAreas.count();
+}
+
+// -----------------------------------------------------------------------------
+//
+// -----------------------------------------------------------------------------
+int UserInitAreaTableModel::columnCount(const QModelIndex &index) const
+{
+  return index.isValid() ? 0 : m_ColumnCount;
+}
+
+
+// -----------------------------------------------------------------------------
+//
+// -----------------------------------------------------------------------------
+bool UserInitAreaTableModel::setData(const QModelIndex & index, const QVariant & value, int role)
+{
+  // std::cout << "SGLogNormalTableModel::setData " << value.toString().toStdString() << std::endl;
+  if (!index.isValid()
+      || role != Qt::EditRole
+      || index.row() < 0
+      || index.row() >= m_UserInitAreas.count()
+      || index.column() < 0
+      || index.column() >= m_ColumnCount)
+  {
+    return false;
+  }
+  bool ok;
+  qint32 row = index.row();
+  qint32 col = index.column();
+  if (row >= rowCount(index))
+  {
+    return false;
+  }
+  switch(col)
+  {
+    case UserInitAreaTableModel::Class:
+      m_UserInitAreas.at(row)->setEmMpmClass(value.toInt(&ok));
+      break;
+    case UserInitAreaTableModel::GrayValue:
+      m_UserInitAreas.at(row)->setEmMpmGrayLevel(value.toInt(&ok));
+      break;
+    case UserInitAreaTableModel::UpperLeft:
+      break;
+    case UserInitAreaTableModel::LowerRight:
+      break;
+    case UserInitAreaTableModel::Mu:
+      break;
+    case UserInitAreaTableModel::Sigma:
+      break;
+    case UserInitAreaTableModel::Gamma:
+      m_UserInitAreas.at(row)->setGamma(value.toDouble(&ok));
+      break;
+    default:
+      Q_ASSERT(false);
+  }
+  emit dataChanged(index, index);
+  return true;
+}
+
+// -----------------------------------------------------------------------------
+//
+// -----------------------------------------------------------------------------
+bool UserInitAreaTableModel::insertRows(int row, int count, const QModelIndex& index)
+{
+  if (true) return false;
+
+  // This is basically disabled at this point
+  qint32 binNum = 0;
+  double avg = 1.0;
+  double stdDev = 0.25;
+  QString c("blue");
+
+  beginInsertRows(QModelIndex(), row, row + count - 1);
+  for (int i = 0; i < count; ++i)
+  {
+    // Create a new UserInitArea object
+    m_RowCount = m_UserInitAreas.count();
+  }
+  endInsertRows();
+  emit dataChanged(index, index);
+  return true;
+}
+
+// -----------------------------------------------------------------------------
+//
+// -----------------------------------------------------------------------------
+bool UserInitAreaTableModel::removeRows(int row, int count, const QModelIndex& index)
+{
+
+  // This is basically disabled for now.
+  if (true) return false;
+
+
+  if (count < 1)
+  {
+    return true;
+  } // No Rows to remove
+  beginRemoveRows(QModelIndex(), row, row + count - 1);
+  for (int i = 0; i < count; ++i)
+  {
+    // Remove the UIA Object Pointer
+    m_RowCount = m_UserInitAreas.count();
+  }
+  endRemoveRows();
+  emit dataChanged(index, index);
+  return true;
+}
 
 // -----------------------------------------------------------------------------
 //
@@ -194,37 +351,13 @@ void UserInitAreaTableModel::updateUserInitArea(UserInitArea* uia)
   emit dataChanged(index0, index1);
 }
 
-// -----------------------------------------------------------------------------
-//
-// -----------------------------------------------------------------------------
-int UserInitAreaTableModel::rowCount(const QModelIndex &index) const
-{
-  return m_UserInitAreas.count();
-}
+
 
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
-int UserInitAreaTableModel::columnCount(const QModelIndex &index) const
+QAbstractItemDelegate* UserInitAreaTableModel::getItemDelegate()
 {
-  return m_ColumnCount;
+  return new UserInitAreaItemDelegate;
 }
 
-// -----------------------------------------------------------------------------
-//
-// -----------------------------------------------------------------------------
-QVariant  UserInitAreaTableModel::headerData ( int section, Qt::Orientation orientation, int role ) const
-{
-  if (orientation == Qt::Horizontal && role == Qt::DisplayRole)
-  {
-    if (section == 0) return QVariant(QString("Class"));
-    else if (section == 1) return QVariant(QString("Gray Value"));
-    else if (section == 2) return QVariant(QString("Upper Left"));
-    else if (section == 3) return QVariant(QString("Lower Right"));
-    else if (section == 4) return QVariant(QString("Mu"));
-    else if (section == 5) return QVariant(QString("Sigma"));
-    else if (section == 6) return QVariant(QString("Gamma"));
-
-  }
-  return QVariant();
-}

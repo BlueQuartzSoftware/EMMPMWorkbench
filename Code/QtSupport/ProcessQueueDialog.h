@@ -35,7 +35,7 @@
 
 #include "ProcessQueueTask.h"
 #include <QtCore/QMap>
-#include <QtGui/QDialog>
+#include <QtGui/QWidget>
 
 
 /**
@@ -46,7 +46,7 @@
  * @date Jul 26, 2010
  * @version 1.0
  */
-class ProcessQueueDialog : public QDialog, private Ui::ProcessQueueDialog
+class ProcessQueueDialog : public QWidget, private Ui::ProcessQueueDialog
 {
     Q_OBJECT
   public:

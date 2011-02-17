@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1095</width>
-    <height>747</height>
+    <width>1024</width>
+    <height>740</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -1032,14 +1032,20 @@
              </widget>
             </item>
             <item>
-             <widget class="QLabel" name="label">
-              <property name="text">
-               <string>Composite Mode</string>
-              </property>
-             </widget>
+             <widget class="QComboBox" name="compositeModeCB"/>
             </item>
             <item>
-             <widget class="QComboBox" name="compositeModeCB"/>
+             <widget class="QSlider" name="transparency">
+              <property name="maximum">
+               <number>255</number>
+              </property>
+              <property name="value">
+               <number>255</number>
+              </property>
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
+              </property>
+             </widget>
             </item>
            </layout>
           </item>
@@ -1072,7 +1078,7 @@
            <property name="midLineWidth">
             <number>1</number>
            </property>
-           <layout class="QVBoxLayout" name="verticalLayout_2">
+           <layout class="QHBoxLayout" name="horizontalLayout_4">
             <property name="spacing">
              <number>0</number>
             </property>
@@ -1340,6 +1346,16 @@
              </item>
             </layout>
            </widget>
+           <widget class="QWidget" name="tab_5">
+            <attribute name="title">
+             <string>Progress</string>
+            </attribute>
+            <layout class="QVBoxLayout" name="verticalLayout_2">
+             <item>
+              <widget class="ProcessQueueDialog" name="m_QueueDialog" native="true"/>
+             </item>
+            </layout>
+           </widget>
           </widget>
          </widget>
         </item>
@@ -1354,7 +1370,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1095</width>
+     <width>1024</width>
      <height>22</height>
     </rect>
    </property>
@@ -1440,6 +1456,12 @@
    <class>EMMPMGraphicsView</class>
    <extends>QWidget</extends>
    <header location="global">EMMPMGraphicsView.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>ProcessQueueDialog</class>
+   <extends>QWidget</extends>
+   <header location="global">ProcessQueueDialog.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

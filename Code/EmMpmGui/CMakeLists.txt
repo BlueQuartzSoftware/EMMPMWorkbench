@@ -94,6 +94,7 @@ SET( EmMpmGui_MOC_HDRS
   ${EmMpmGui_SOURCE_DIR}/UserInitArea.h
   ${EmMpmGui_SOURCE_DIR}/UserInitAreaTableModel.h
   ${EmMpmGui_SOURCE_DIR}/UserInitAreaDialog.h
+  ${EmMpmGui_SOURCE_DIR}/UserInitAreaItemDelegate.h
   ${EmMpmGui_SOURCE_DIR}/EMMPMTask.h
 
 )

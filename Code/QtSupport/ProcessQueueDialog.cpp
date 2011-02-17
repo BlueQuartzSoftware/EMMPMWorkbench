@@ -38,7 +38,7 @@
 //
 // -----------------------------------------------------------------------------
 ProcessQueueDialog::ProcessQueueDialog(QWidget *parent) :
-QDialog(parent)
+QWidget(parent)
 {
   setupUi(this);
 }

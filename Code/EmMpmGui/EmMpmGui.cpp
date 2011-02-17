@@ -126,7 +126,6 @@ m_histogram(NULL),
 m_ProxyModel(NULL),
 m_OutputExistsCheck(false),
 m_QueueController(NULL),
-m_QueueDialog(NULL),
 #if defined(Q_WS_WIN)
 m_OpenDialogLastDirectory("C:\\")
 #else
@@ -262,8 +261,8 @@ void EmMpmGui::setupGui()
   compositeModeCB->insertItem(8, "Color Burn");
   compositeModeCB->insertItem(9, "Hard Light");
   compositeModeCB->insertItem(10, "Soft Light");
+  compositeModeCB->insertItem(11, "Source Over");
 #if 0
-  compositeModeCB->insertItem(11, "Source");
   compositeModeCB->insertItem(12, "Destination");
   compositeModeCB->insertItem(13, "Source Over");
   compositeModeCB->insertItem(14, "Destination Over");
@@ -289,6 +288,8 @@ void EmMpmGui::setupGui()
   m_UserInitAreaTableModel = new UserInitAreaTableModel;
   m_GraphicsView->setUserInitAreaTableModel(m_UserInitAreaTableModel);
   m_UserInitTable->setModel(m_UserInitAreaTableModel);
+  QAbstractItemDelegate* aid = m_UserInitAreaTableModel->getItemDelegate();
+  m_UserInitTable->setItemDelegate(aid);
   headerView->show();
 
 
@@ -340,7 +341,7 @@ void EmMpmGui::setupGui()
   QObject::connect(com3, SIGNAL(activated(const QString &)), this, SLOT(on_outputDirectoryLE_textChanged(const QString &)));
 
 
-  m_QueueDialog = new ProcessQueueDialog();
+ // m_QueueDialog = new ProcessQueueDialog(this);
   m_QueueDialog->setVisible(false);
 
   // Configure the Histogram Plot
@@ -604,7 +605,7 @@ void EmMpmGui::on_processBtn_clicked()
     }
   }
 
-  getQueueDialog()->clearTable();
+  m_QueueDialog->clearTable();
   if (getQueueController() != NULL)
   {
     getQueueController()->deleteLater();
@@ -752,7 +753,9 @@ void EmMpmGui::on_processBtn_clicked()
   connect(queueController, SIGNAL(finished()), this, SLOT(processingFinished()));
 
 //  getQueueDialog()->setParent(this);
-  getQueueDialog()->setVisible(true);
+  m_QueueDialog->setVisible(true);
+
+  m_QueueDialog;
 
   queueController->start();
 
@@ -763,7 +766,7 @@ void EmMpmGui::on_processBtn_clicked()
 // -----------------------------------------------------------------------------
 void EmMpmGui::addProcess(EMMPMTask* task)
 {
-  getQueueDialog()->addProcess(task);
+  m_QueueDialog->addProcess(task);
 }
 
 // -----------------------------------------------------------------------------
@@ -798,7 +801,7 @@ void EmMpmGui::processingFinished()
 // -----------------------------------------------------------------------------
 void EmMpmGui::queueControllerFinished()
 {
-  getQueueDialog()->setVisible(false);
+  m_QueueDialog->setVisible(false);
   if (this->processFolder->isChecked() == false)
   {
     setCurrentImageFile (inputImageFilePath->text());
@@ -1754,4 +1757,13 @@ void EmMpmGui::on_xAxisMin_textEdited(const QString &s)
 }
 
 
+
+// -----------------------------------------------------------------------------
+//
+// -----------------------------------------------------------------------------
+void EmMpmGui::on_transparency_valueChanged(int value)
+{
+  float f = (float)value/255.0;
+  m_GraphicsView->setOverlayTransparency(f);
+}
 

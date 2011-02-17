@@ -72,6 +72,16 @@ EMMPMGraphicsView::EMMPMGraphicsView(QWidget *parent)
   m_RubberBand = NULL;
   m_ImageDisplayType = EmMpm_Constants::OriginalImage;
   m_composition_mode = QPainter::CompositionMode_Exclusion;
+  m_OverlayTransparency = 1.0f; // Fully opaque
+}
+
+// -----------------------------------------------------------------------------
+//
+// -----------------------------------------------------------------------------
+void EMMPMGraphicsView::setOverlayTransparency(float f)
+{
+  m_OverlayTransparency = f;
+  setImageDisplayType(m_ImageDisplayType);
 }
 
 // -----------------------------------------------------------------------------
@@ -192,6 +202,235 @@ QImage EMMPMGraphicsView::getCompositedImage()
   return m_CompositedImage;
 }
 
+// Nice and fast direct pixel manipulation
+QImage& EMMPMGraphicsView::blend(QImage& src, QImage& dst, float opacity)
+{
+    if (src.width() <= 0 || src.height() <= 0)
+        return dst;
+    if (dst.width() <= 0 || dst.height() <= 0)
+        return dst;
+
+    if (src.width() != dst.width() || src.height() != dst.height()) {
+#ifndef NDEBUG
+        std::cerr << "WARNING: KImageEffect::blend : src and destination images are not the same size\n";
+#endif
+        return dst;
+    }
+
+    if (opacity < 0.0 || opacity > 1.0) {
+#ifndef NDEBUG
+        std::cerr << "WARNING: KImageEffect::blend : invalid opacity. Range [0, 1]\n";
+#endif
+        return dst;
+    }
+
+    if (src.depth() != 32) src = src.convertToFormat(QImage::Format_ARGB32);
+    if (dst.depth() != 32) dst = dst.convertToFormat(QImage::Format_ARGB32);
+
+    int pixels = src.width() * src.height();
+
+#ifdef USE_SSE2_INLINE_ASM
+    if ( KCPUInfo::haveExtension( KCPUInfo::IntelSSE2 ) && pixels > 16 ) {
+        Q_UINT16 alpha = Q_UINT16( opacity * 256.0 );
+        KIE8Pack packedalpha = { { alpha, alpha, alpha, 0,
+                                   alpha, alpha, alpha, 0 } };
+
+        // Prepare the XMM6 and XMM7 registers for unpacking and blending
+        __asm__ __volatile__(
+        "pxor      %%xmm7, %%xmm7\n\t" // Zero out XMM7 for unpacking
+        "movdqu      (%0), %%xmm6\n\t" // Set up alpha * 256 in XMM6
+        : : "r"(&packedalpha), "m"(packedalpha) );
+
+        Q_UINT32 *data1 = reinterpret_cast<Q_UINT32*>( src.bits() );
+        Q_UINT32 *data2 = reinterpret_cast<Q_UINT32*>( dst.bits() );
+
+        // Check how many pixels we need to process to achieve 16 byte alignment
+        int offset = (16 - (Q_UINT32( data2 ) & 0x0f)) / 4;
+
+        // The main loop processes 4 pixels / iteration
+        int remainder = (pixels - offset) % 4;
+        pixels -= remainder;
+
+        // Alignment loop
+        for ( int i = 0; i < offset; i++ ) {
+            __asm__ __volatile__(
+            "movd       (%1,%2,4),    %%xmm1\n\t"  // Load one dst pixel to XMM1
+            "punpcklbw     %%xmm7,    %%xmm1\n\t"  // Unpack the pixel
+            "movd       (%0,%2,4),    %%xmm0\n\t"  // Load one src pixel to XMM0
+            "punpcklbw     %%xmm7,    %%xmm0\n\t"  // Unpack the pixel
+            "psubw         %%xmm1,    %%xmm0\n\t"  // Subtract dst from src
+            "pmullw        %%xmm6,    %%xmm0\n\t"  // Multiply the result with alpha * 256
+            "psllw             $8,    %%xmm1\n\t"  // Multiply dst with 256
+            "paddw         %%xmm1,    %%xmm0\n\t"  // Add dst to result
+            "psrlw             $8,    %%xmm0\n\t"  // Divide by 256
+            "packuswb      %%xmm1,    %%xmm0\n\t"  // Pack the pixel to a dword
+            "movd          %%xmm0, (%1,%2,4)\n\t"  // Write the pixel to the image
+            : : "r"(data1), "r"(data2), "r"(i) );
+        }
+
+        // Main loop
+        for ( int i = offset; i < pixels; i += 4 ) {
+            __asm__ __volatile__(
+            // Load 4 src pixels to XMM0 and XMM2 and 4 dst pixels to XMM1 and XMM3
+            "movq       (%0,%2,4),    %%xmm0\n\t"  // Load two src pixels to XMM0
+            "movq       (%1,%2,4),    %%xmm1\n\t"  // Load two dst pixels to XMM1
+            "movq      8(%0,%2,4),    %%xmm2\n\t"  // Load two src pixels to XMM2
+            "movq      8(%1,%2,4),    %%xmm3\n\t"  // Load two dst pixels to XMM3
+
+            // Prefetch the pixels for the iteration after the next one
+            "prefetchnta 32(%0,%2,4)        \n\t"
+            "prefetchnta 32(%1,%2,4)        \n\t"
+
+            // Blend the first two pixels
+            "punpcklbw     %%xmm7,    %%xmm1\n\t"  // Unpack the dst pixels
+            "punpcklbw     %%xmm7,    %%xmm0\n\t"  // Unpack the src pixels
+            "psubw         %%xmm1,    %%xmm0\n\t"  // Subtract dst from src
+            "pmullw        %%xmm6,    %%xmm0\n\t"  // Multiply the result with alpha * 256
+            "psllw             $8,    %%xmm1\n\t"  // Multiply dst with 256
+            "paddw         %%xmm1,    %%xmm0\n\t"  // Add dst to the result
+            "psrlw             $8,    %%xmm0\n\t"  // Divide by 256
+
+            // Blend the next two pixels
+            "punpcklbw     %%xmm7,    %%xmm3\n\t"  // Unpack the dst pixels
+            "punpcklbw     %%xmm7,    %%xmm2\n\t"  // Unpack the src pixels
+            "psubw         %%xmm3,    %%xmm2\n\t"  // Subtract dst from src
+            "pmullw        %%xmm6,    %%xmm2\n\t"  // Multiply the result with alpha * 256
+            "psllw             $8,    %%xmm3\n\t"  // Multiply dst with 256
+            "paddw         %%xmm3,    %%xmm2\n\t"  // Add dst to the result
+            "psrlw             $8,    %%xmm2\n\t"  // Divide by 256
+
+            // Write the pixels back to the image
+            "packuswb      %%xmm2,    %%xmm0\n\t"  // Pack the pixels to a double qword
+            "movdqa        %%xmm0, (%1,%2,4)\n\t"  // Store the pixels
+            : : "r"(data1), "r"(data2), "r"(i) );
+        }
+
+        // Cleanup loop
+        for ( int i = pixels; i < pixels + remainder; i++ ) {
+            __asm__ __volatile__(
+            "movd       (%1,%2,4),    %%xmm1\n\t"  // Load one dst pixel to XMM1
+            "punpcklbw     %%xmm7,    %%xmm1\n\t"  // Unpack the pixel
+            "movd       (%0,%2,4),    %%xmm0\n\t"  // Load one src pixel to XMM0
+            "punpcklbw     %%xmm7,    %%xmm0\n\t"  // Unpack the pixel
+            "psubw         %%xmm1,    %%xmm0\n\t"  // Subtract dst from src
+            "pmullw        %%xmm6,    %%xmm0\n\t"  // Multiply the result with alpha * 256
+            "psllw             $8,    %%xmm1\n\t"  // Multiply dst with 256
+            "paddw         %%xmm1,    %%xmm0\n\t"  // Add dst to result
+            "psrlw             $8,    %%xmm0\n\t"  // Divide by 256
+            "packuswb      %%xmm1,    %%xmm0\n\t"  // Pack the pixel to a dword
+            "movd          %%xmm0, (%1,%2,4)\n\t"  // Write the pixel to the image
+            : : "r"(data1), "r"(data2), "r"(i) );
+        }
+    } else
+#endif // USE_SSE2_INLINE_ASM
+
+#ifdef USE_MMX_INLINE_ASM
+    if ( KCPUInfo::haveExtension( KCPUInfo::IntelMMX ) && pixels > 1 ) {
+        Q_UINT16 alpha = Q_UINT16( opacity * 256.0 );
+        KIE4Pack packedalpha = { { alpha, alpha, alpha, 0 } };
+
+        // Prepare the MM6 and MM7 registers for blending and unpacking
+        __asm__ __volatile__(
+        "pxor       %%mm7,   %%mm7\n\t"      // Zero out MM7 for unpacking
+        "movq        (%0),   %%mm6\n\t"      // Set up alpha * 256 in MM6
+        : : "r"(&packedalpha), "m"(packedalpha) );
+
+        Q_UINT32 *data1 = reinterpret_cast<Q_UINT32*>( src.bits() );
+        Q_UINT32 *data2 = reinterpret_cast<Q_UINT32*>( dst.bits() );
+
+        // The main loop processes 2 pixels / iteration
+        int remainder = pixels % 2;
+        pixels -= remainder;
+
+        // Main loop
+        for ( int i = 0; i < pixels; i += 2 ) {
+            __asm__ __volatile__(
+            // Load 2 src pixels to MM0 and MM2 and 2 dst pixels to MM1 and MM3
+            "movd        (%0,%2,4),     %%mm0\n\t"  // Load the 1st src pixel to MM0
+            "movd        (%1,%2,4),     %%mm1\n\t"  // Load the 1st dst pixel to MM1
+            "movd       4(%0,%2,4),     %%mm2\n\t"  // Load the 2nd src pixel to MM2
+            "movd       4(%1,%2,4),     %%mm3\n\t"  // Load the 2nd dst pixel to MM3
+
+            // Blend the first pixel
+            "punpcklbw       %%mm7,     %%mm0\n\t"  // Unpack the src pixel
+            "punpcklbw       %%mm7,     %%mm1\n\t"  // Unpack the dst pixel
+            "psubw           %%mm1,     %%mm0\n\t"  // Subtract dst from src
+            "pmullw          %%mm6,     %%mm0\n\t"  // Multiply the result with alpha * 256
+            "psllw              $8,     %%mm1\n\t"  // Multiply dst with 256
+            "paddw           %%mm1,     %%mm0\n\t"  // Add dst to the result
+            "psrlw              $8,     %%mm0\n\t"  // Divide by 256
+
+            // Blend the second pixel
+            "punpcklbw       %%mm7,     %%mm2\n\t"  // Unpack the src pixel
+            "punpcklbw       %%mm7,     %%mm3\n\t"  // Unpack the dst pixel
+            "psubw           %%mm3,     %%mm2\n\t"  // Subtract dst from src
+            "pmullw          %%mm6,     %%mm2\n\t"  // Multiply the result with alpha * 256
+            "psllw              $8,     %%mm3\n\t"  // Multiply dst with 256
+            "paddw           %%mm3,     %%mm2\n\t"  // Add dst to the result
+            "psrlw              $8,     %%mm2\n\t"  // Divide by 256
+
+            // Write the pixels back to the image
+            "packuswb        %%mm2,     %%mm0\n\t"  // Pack the pixels to a qword
+            "movq            %%mm0, (%1,%2,4)\n\t"  // Store the pixels
+            : : "r"(data1), "r"(data2), "r"(i) );
+        }
+
+        // Blend the remaining pixel (if there is one)
+        if ( remainder ) {
+             __asm__ __volatile__(
+            "movd             (%0),     %%mm0\n\t"  // Load one src pixel to MM0
+            "punpcklbw       %%mm7,     %%mm0\n\t"  // Unpack the src pixel
+            "movd             (%1),     %%mm1\n\t"  // Load one dst pixel to MM1
+            "punpcklbw       %%mm7,     %%mm1\n\t"  // Unpack the dst pixel
+            "psubw           %%mm1,     %%mm0\n\t"  // Subtract dst from src
+            "pmullw          %%mm6,     %%mm0\n\t"  // Multiply the result with alpha * 256
+            "psllw              $8,     %%mm1\n\t"  // Multiply dst with 256
+            "paddw           %%mm1,     %%mm0\n\t"  // Add dst to result
+            "psrlw              $8,     %%mm0\n\t"  // Divide by 256
+            "packuswb        %%mm0,     %%mm0\n\t"  // Pack the pixel to a dword
+            "movd            %%mm0,      (%1)\n\t"  // Write the pixel to the image
+            : : "r"(data1 + pixels), "r"(data2 + pixels) );
+        }
+
+        // Empty the MMX state
+        __asm__ __volatile__("emms");
+    } else
+#endif // USE_MMX_INLINE_ASM
+
+    {
+#ifdef WORDS_BIGENDIAN   // ARGB (skip alpha)
+        register unsigned char *data1 = (unsigned char *)dst.bits() + 1;
+        register unsigned char *data2 = (unsigned char *)src.bits() + 1;
+#else                    // BGRA
+        register unsigned char *data1 = (unsigned char *)dst.bits();
+        register unsigned char *data2 = (unsigned char *)src.bits();
+#endif
+
+        for (register int i=0; i<pixels; i++)
+        {
+#ifdef WORDS_BIGENDIAN
+            *data1 += (unsigned char)((*(data2++) - *data1) * opacity);
+            data1++;
+            *data1 += (unsigned char)((*(data2++) - *data1) * opacity);
+            data1++;
+            *data1 += (unsigned char)((*(data2++) - *data1) * opacity);
+            data1++;
+#else
+            *data1 += (unsigned char)((*(data2++) - *data1) * opacity);
+            data1++;
+            *data1 += (unsigned char)((*(data2++) - *data1) * opacity);
+            data1++;
+            *data1 += (unsigned char)((*(data2++) - *data1) * opacity);
+            data1++;
+#endif
+            data1++; // skip alpha
+            data2++;
+        }
+    }
+
+    return dst;
+}
+
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
@@ -213,9 +452,19 @@ void EMMPMGraphicsView::setImageDisplayType(int displayType)
   }
   else if (displayType == EmMpm_Constants::CompositedImage)
   {
-    painter.drawImage(point, m_BaseImage);
-    painter.setCompositionMode(m_composition_mode);
-    painter.drawImage(point, m_OverlayImage);
+
+    if (m_composition_mode == QPainter::CompositionMode_SourceOver)
+    {
+      QImage img = m_OverlayImage.copy(0, 0, m_OverlayImage.width(), m_OverlayImage.height());
+      img = blend(m_BaseImage, img, m_OverlayTransparency);
+      painter.drawImage(point, img);
+    }
+    else
+    {
+      painter.drawImage(point, m_BaseImage);
+      painter.setCompositionMode(m_composition_mode);
+      painter.drawImage(point, m_OverlayImage);
+    }
   }
   painter.end();
   m_CompositedImage = paintImage;
@@ -242,6 +491,8 @@ void EMMPMGraphicsView::loadBaseImageFile(const QString &filename)
     colorTable[i] = qRgb(i, i, i);
   }
   m_BaseImage.setColorTable(colorTable);
+
+  m_BaseImage.convertToFormat(QImage::Format_ARGB32_Premultiplied);
 
   QGraphicsScene* gScene = scene();
   if (gScene == NULL)
@@ -281,7 +532,7 @@ void EMMPMGraphicsView::loadOverlayImageFile(const QString &filename)
     colorTable[i] = qRgb(i, i, i);
   }
   m_OverlayImage.setColorTable(colorTable);
-
+  m_OverlayImage.convertToFormat(QImage::Format_ARGB32_Premultiplied);
 
   QGraphicsScene* gScene = scene();
   if (gScene == NULL)
@@ -314,6 +565,9 @@ void EMMPMGraphicsView::loadOverlayImageFile(const QString &filename)
 void EMMPMGraphicsView::setOverlayImage(QImage image)
 {
   m_OverlayImage = image;
+// Convert to an Premultiplied Image for faster rendering
+  m_OverlayImage.convertToFormat(QImage::Format_ARGB32_Premultiplied);
+
   QGraphicsScene* gScene = scene();
   if (gScene == NULL)
   {
@@ -500,10 +754,11 @@ void EMMPMGraphicsView::setCompositeMode(int mode) {
     case 8: m_composition_mode = QPainter::CompositionMode_ColorBurn; break;
     case 9: m_composition_mode = QPainter::CompositionMode_HardLight; break;
     case 10: m_composition_mode = QPainter::CompositionMode_SoftLight; break;
+    case 11: m_composition_mode = QPainter::CompositionMode_SourceOver; break;
 
-    case 11: m_composition_mode = QPainter::CompositionMode_Source; break;
+
     case 12: m_composition_mode = QPainter::CompositionMode_Destination; break;
-    case 13: m_composition_mode = QPainter::CompositionMode_SourceOver; break;
+    case 13: m_composition_mode = QPainter::CompositionMode_Source; break;
     case 14: m_composition_mode = QPainter::CompositionMode_DestinationOver; break;
     case 15: m_composition_mode = QPainter::CompositionMode_SourceIn; break;
     case 16: m_composition_mode = QPainter::CompositionMode_DestinationIn; break;
