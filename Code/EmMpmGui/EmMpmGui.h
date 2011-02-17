@@ -38,6 +38,7 @@
 #include <QtGui/QMainWindow>
 #include <QtGui/QWidget>
 #include <QtGui/QGraphicsScene>
+#include <QtGui/QDoubleValidator>
 
 #include <emmpm/public/EMMPM_Structures.h>
 
@@ -115,6 +116,7 @@ class EmMpmGui :  public QMainWindow, private Ui::EmMpmGui
     void userInitAreaAdded(UserInitArea* uia);
     void deleteUserInitArea(UserInitArea* uia);
     void userInitAreaUpdated(UserInitArea* uia);
+    void userInitAreaSelected(UserInitArea* uia);
     void on_fitToWindow_clicked();
 
 
@@ -128,10 +130,10 @@ class EmMpmGui :  public QMainWindow, private Ui::EmMpmGui
     void on_actionClose_triggered();
 
 
-    void on_xAxisMin_valueChanged(double d);
-    void on_xAxisMax_valueChanged(double d);
-    void on_yAxisMin_valueChanged(double d);
-    void on_yAxisMax_valueChanged(double d);
+    void on_xAxisMin_textEdited(const QString &s);
+    void on_xAxisMax_textEdited(const QString &s);
+    void on_yAxisMin_textEdited(const QString &s);
+    void on_yAxisMax_textEdited(const QString &s);
 
     /* slots for the buttons in the GUI */
     void on_processBtn_clicked();
@@ -244,18 +246,23 @@ class EmMpmGui :  public QMainWindow, private Ui::EmMpmGui
 
   private:
 
-  QList<UserInitArea*>        m_UserInitAreas;
   UserInitAreaTableModel*     m_UserInitAreaTableModel;
-
+  qint32                      m_CurrentHistogramClass;
 
   QwtPlotZoomer* m_zoomer;
   QwtPlotPicker* m_picker;
   QwtPlotPanner* m_panner;
   QwtPlotGrid*   m_grid;
 
-  QwtPlotCurve*  m_histogram;
-  QVector<QwtPlotCurve*>  m_PlotCurves;
-  QList<QwtPlotMarker*>  m_UIAMarkers;
+  QDoubleValidator* m_XAxisMinValidator;
+  QDoubleValidator* m_XAxisMaxValidator;
+  QDoubleValidator* m_YAxisMinValidator;
+  QDoubleValidator* m_YAxisMaxValidator;
+
+
+  QwtPlotCurve*           m_histogram;
+  QList<QwtPlotCurve*>    m_Gaussians;
+  // QList<QwtPlotMarker*>   m_UIAMarkers;
 
   EmMpmGui(const EmMpmGui&); // Copy Constructor Not Implemented
   void operator=(const EmMpmGui&); // Operator '=' Not Implemented

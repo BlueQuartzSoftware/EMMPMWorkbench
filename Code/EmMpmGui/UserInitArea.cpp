@@ -278,6 +278,29 @@ void UserInitArea::deleteSelectedItems(QGraphicsScene *scene)
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
+void UserInitArea::deleteAllUserInitAreas(QGraphicsScene* scene)
+{
+  if (!scene)
+      return;
+  QList<QGraphicsItem *> selected;
+  selected = scene->items();
+
+  foreach (QGraphicsItem *item, selected)
+  {
+    UserInitArea *itemBase = qgraphicsitem_cast<UserInitArea *>(item);
+    if (itemBase)
+    {
+      emit itemBase->fireUserInitAreaAboutToDelete(itemBase);
+      emit itemBase->fireUserInitAreaDeleted(itemBase);
+      delete itemBase;
+    }
+  }
+
+}
+
+// -----------------------------------------------------------------------------
+//
+// -----------------------------------------------------------------------------
 void UserInitArea::growSelectedItems(QGraphicsScene *scene)
 {
     if (!scene)

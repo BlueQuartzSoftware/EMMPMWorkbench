@@ -82,7 +82,7 @@ public:
     void setGamma(double g);
     double getGamma();
 
-
+  static void deleteAllUserInitAreas(QGraphicsScene* scene);
 
  signals:
 

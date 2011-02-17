@@ -435,12 +435,12 @@ void EMMPMGraphicsView::setEmMpmGui(EmMpmGui* gui)
 // -----------------------------------------------------------------------------
 void EMMPMGraphicsView::addNewInitArea(const QPolygonF &polygon)
 {
-  QGraphicsScene* gScene = scene();
-  if (gScene == NULL)
-  {
-    gScene = new QGraphicsScene(this);
-    setScene(gScene);
-  }
+//  QGraphicsScene* gScene = scene();
+//  if (gScene == NULL)
+//  {
+//    gScene = new QGraphicsScene(this);
+//    setScene(gScene);
+//  }
   QRectF brect = polygon.boundingRect();
 
   UserInitArea* userInitArea = new UserInitArea(m_UserInitAreaTableModel->rowCount(), brect);
@@ -469,6 +469,8 @@ void EMMPMGraphicsView::addNewInitArea(const QPolygonF &polygon)
              m_MainGui, SLOT(deleteUserInitArea(UserInitArea*)) );
     connect (userInitArea, SIGNAL(fireUserInitAreaDeleted(UserInitArea*)),
              m_UserInitAreaTableModel, SLOT(deleteUserInitArea(UserInitArea*)));
+    connect (userInitArea, SIGNAL(fireUserInitAreaSelected(UserInitArea*)),
+             m_MainGui, SLOT(userInitAreaSelected(UserInitArea*)), Qt::QueuedConnection);
 
     emit fireUserInitAreaAdded(userInitArea);
   }

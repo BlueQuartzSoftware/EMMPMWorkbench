@@ -292,6 +292,12 @@ void EmMpmGui::setupGui()
   headerView->show();
 
 
+  m_XAxisMinValidator = new QDoubleValidator(xAxisMin);
+  m_XAxisMaxValidator = new QDoubleValidator(xAxisMax);
+  m_YAxisMinValidator = new QDoubleValidator(yAxisMin);
+  m_XAxisMaxValidator = new QDoubleValidator(yAxisMax);
+
+
 
   connect (m_GraphicsView, SIGNAL(fireBaseImageFileLoaded(const QString &)),
            this, SLOT(baseImageFileLoaded(const QString &)), Qt::QueuedConnection);
@@ -339,7 +345,7 @@ void EmMpmGui::setupGui()
 
   // Configure the Histogram Plot
   m_HistogramPlot->setCanvasBackground(QColor(Qt::white));
-  m_HistogramPlot->setTitle("Histogram");
+  m_HistogramPlot->setTitle("Image Histogram");
   //  m_HistogramPlot->setAxisTitle(QwtPlot::xBottom, "Gray Scale Value");
   m_grid = new QwtPlotGrid;
   m_grid->enableXMin(true);
@@ -1132,6 +1138,12 @@ void EmMpmGui::openBaseImageFile(QString imageFile)
   {
     return;
   }
+  // Clear out any Gaussians that were created
+  //clearProcessHistograms();
+
+  // Delete all the User Init Areas from the Scene
+  UserInitArea::deleteAllUserInitAreas(m_GraphicsView->scene());
+
   m_GraphicsView->loadBaseImageFile(imageFile);
 
   // Tell the RecentFileList to update itself then broadcast those changes.
@@ -1333,6 +1345,7 @@ void EmMpmGui::plotImageHistogram()
     }
   }
 
+  // Normalize the bin counts by the total number of pixels
   max = 0.0;
   for (int i = 0; i < 256; ++i)
   {
@@ -1343,55 +1356,37 @@ void EmMpmGui::plotImageHistogram()
   {
     m_histogram = new QwtPlotCurve("Original Image");
     m_histogram->setRenderHint(QwtPlotItem::RenderAntialiased);
-    m_histogram->setPen(QPen(Qt::blue));
+    m_histogram->setPen(QPen(Qt::blue, 2, Qt::SolidLine));
     m_histogram->attach(m_HistogramPlot);
   }
   m_histogram->setData(intervals, values);
 
-#if 1
-  xAxisMax->setRange(0.0, 256);
-  xAxisMin->setRange(0.0, 256);
-  yAxisMax->setRange(0.0, max);
-  yAxisMin->setRange(0.0, max);
-  xAxisMax->setValue(256);
-  xAxisMin->setValue(0.0);
-  yAxisMax->setValue(max);
-  yAxisMin->setValue(0.0);
-#endif
-
+  xAxisMax->setText(QString("256"));
+  xAxisMin->setText(QString("0.0"));
+  yAxisMax->setText(QString::number(max));
+  yAxisMin->setText(QString("0.0"));
 
   updateHistogramAxis();
 }
-
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
 void EmMpmGui::clearProcessHistograms()
 {
-  // Clear any curves from the QwtPlot object
-#if 0
-  if (NULL != m_histogram)
-  {
-    m_histogram->detach();
-    delete m_histogram;
-    m_histogram = NULL;
-  }
-#endif
-
-
   //Loop over each entry in the table
   QwtPlotCurve* curve = NULL;
 
   // Delete all the current histograms
-  qint32 nRows = m_PlotCurves.count();
+  qint32 nRows = m_Gaussians.count();
   for (qint32 r = nRows - 1; r >= 0; --r)
   {
-    curve = m_PlotCurves[r];
+    curve = m_Gaussians[r];
     curve->detach();
-    m_PlotCurves.remove(r);
+    m_Gaussians.removeAt(r);
     delete curve;
   }
-  yAxisMax->setRange(0.0, 0.0);
+  // This is an internal variable to keep track of the class number
+  m_CurrentHistogramClass = 0;
 }
 
 // -----------------------------------------------------------------------------
@@ -1401,7 +1396,7 @@ void EmMpmGui::addProcessHistogram(QVector<double> data)
 {
   //std::cout << "EmMpmGui::setProcessHistograms..... " << std::endl;
   QwtPlotCurve* curve = NULL;
-  const int numValues = 256;
+  const int numValues = data.size();
   double max = 0;
   // Generate the Histogram Bins (X Axis)
   QwtArray<double > intervals(numValues);
@@ -1410,24 +1405,43 @@ void EmMpmGui::addProcessHistogram(QVector<double> data)
     intervals[i] = (double)i;
     if (data[i] > max) { max = data[i]; }
   }
-  QwtArray<double > values(numValues);
 
-  if (max > yAxisMax->maximum() ) {
-  yAxisMax->setRange(0.0, max);
-  yAxisMax->setValue(max);
+  QPen pen(Qt::red, 2, Qt::SolidLine);
+  //pen.setWidth(2);
+  QList<UserInitArea*> uias = m_UserInitAreaTableModel->getUserInitAreas();
+  if (uias.size() > 0) {
+    QColor c = uias.at(m_CurrentHistogramClass)->getColor();
+    pen.setColor(c);
   }
-  std::cout << "   max: " << max << std::endl;
+
+  // Create a new Plot Curve object
   curve = new QwtPlotCurve("");
   curve->setRenderHint(QwtPlotItem::RenderAntialiased);
-  curve->setPen(QPen(Qt::red, 0, Qt::SolidLine));
+  curve->setPen(pen);
   curve->attach(m_HistogramPlot);
-  m_PlotCurves.append(curve);
+  m_Gaussians.append(curve);
 
 
   curve->setData(intervals, data);
 
   updateHistogramAxis();
+  ++m_CurrentHistogramClass;
+}
 
+// -----------------------------------------------------------------------------
+//
+// -----------------------------------------------------------------------------
+void EmMpmGui::userInitAreaSelected(UserInitArea* uia)
+{
+  if (NULL == uia)
+  {
+    return;
+  }
+  QList<UserInitArea*> userInitAreas = m_UserInitAreaTableModel->getUserInitAreas();
+  int row = userInitAreas.indexOf(uia, 0);
+
+  QModelIndex index = m_UserInitAreaTableModel->index(row, 0);
+  m_UserInitTable->selectRow(row);
 }
 
 // -----------------------------------------------------------------------------
@@ -1492,48 +1506,51 @@ void EmMpmGui::userInitAreaUpdated(UserInitArea* uia)
   uia->setSigma(sig);
 
   m_UserInitAreaTableModel->updateUserInitArea(uia);
-#if 0
+  //TODO: Add in code to automatically select the row in the table.
+
+#if 1
   // Generate the Histogram Bins
   const int numValues = 256;
-  QwtArray<double > intervals(numValues);
+  QwtArray<double> intervals(numValues);
   for (int i = 0; i < numValues; ++i)
   {
     intervals[i] = (double)i;
   }
-  QwtArray<double > values(numValues);
+  QwtArray<double> values(numValues);
+  float sqrt2pi = sqrtf(2.0f * M_PI);
   float twoSigSqrd = sig * sig * 2.0f;
-  float constant = 1.0 / (sig * sqrtf(2.0f * M_PI));
+  float constant = 1.0f / (sig * sqrt2pi);
   size_t max_index = 0;
   for (size_t x = 0; x < 256; ++x)
   {
     values[x] = constant * exp(-1.0f * ((x - mu) * (x - mu)) / (twoSigSqrd));
-    if (values[x] > max) { max = values[x]; max_index = x; }
+    if (values[x] > max)
+    {
+      max = values[x];
+      max_index = x;
+    }
   }
 
-
+  // Get the Y Value from the Image Histogram based on the array index of the max value
+  double binSize = m_histogram->y( max_index );
+  // Now rescale all the Y Values for this Gaussian so that the peak of the gaussian
+  // coincides with the local peak of the Image Histogram
+  for (size_t x = 0; x < 256; ++x)
+  {
+    values[x] = (values[x]/max) * binSize;
+  }
 
   // Locate our curve object by getting the row from the TableModel that corresponds
   // to the UIA object that was passed in
   QList<UserInitArea*> userInitAreas = m_UserInitAreaTableModel->getUserInitAreas();
   int row = userInitAreas.indexOf(uia, 0);
-  QwtPlotCurve* curve = m_UIAGaussians[row];
+  QwtPlotCurve* curve = m_Gaussians[row];
   curve->setData(intervals, values);
   QColor c = uia->getColor();
   curve->setPen(QPen(c));
 
-  // Draw a single vertical line centered on the average gray value
-  double binSize = m_histogram->y( max_index );
-  for (size_t x = 0; x < 256; ++x)
-  {
-    if (x == max_index) {
-      values[x] = (values[x]/max) * binSize;
-    }
-    else
-    {
-      values[x] = 0;
-    }
-  }
-#endif
+
+#else
   const int numValues = 256;
   QwtArray<double> values(numValues);
   float twoSigSqrd = sig * sig * 2.0f;
@@ -1542,7 +1559,11 @@ void EmMpmGui::userInitAreaUpdated(UserInitArea* uia)
   for (size_t x = 0; x < 256; ++x)
   {
     values[x] = constant * exp(-1.0f * ((x - mu) * (x - mu)) / (twoSigSqrd));
-    if (values[x] > max) { max = values[x]; max_index = x; }
+    if (values[x] > max)
+    {
+      max = values[x];
+      max_index = x;
+    }
   }
   QList<UserInitArea*> userInitAreas = m_UserInitAreaTableModel->getUserInitAreas();
   int row = userInitAreas.indexOf(uia, 0);
@@ -1556,8 +1577,9 @@ void EmMpmGui::userInitAreaUpdated(UserInitArea* uia)
   marker->setLinePen(QPen(c));
   marker->setXValue(max_index);
 
+#endif
  // m_HistogramPlot->setAxisScale(QwtPlot::yLeft, 0.0, 10000);
-  m_HistogramPlot->setAxisScale(QwtPlot::xBottom, 0.0, 255.0);
+ // m_HistogramPlot->setAxisScale(QwtPlot::xBottom, 0.0, 255.0);
   m_HistogramPlot->replot();
 
 }
@@ -1569,9 +1591,9 @@ void EmMpmGui::deleteUserInitArea(UserInitArea* uia)
 {
   QList<UserInitArea*> userInitAreas = m_UserInitAreaTableModel->getUserInitAreas();
   int row = userInitAreas.indexOf(uia, 0);
-#if 0
-  QwtPlotCurve* curve = m_UIAGaussians[row];
-  m_UIAGaussians.removeAll(curve);
+#if 1
+  QwtPlotCurve* curve = m_Gaussians[row];
+  m_Gaussians.removeAll(curve);
 #else
   QwtPlotMarker* curve = m_UIAMarkers[row];
   m_UIAMarkers.removeAll(curve);
@@ -1596,7 +1618,7 @@ void EmMpmGui::userInitAreaAdded(UserInitArea* uia)
   if (NULL == uia) { return; }
   addUserInitArea->toggle();
   QColor color = uia->getColor();
-#if 0
+#if 1
   QwtPlotCurve* curve = new QwtPlotCurve("User Init Area");
   curve->setPen(QPen(color));
 #else
@@ -1619,8 +1641,8 @@ void EmMpmGui::userInitAreaAdded(UserInitArea* uia)
     m_Gamma->setEnabled(false);
   }
 
-#if 0
-  m_UIAGaussians.insert(row, curve);
+#if 1
+  m_Gaussians.insert(row, curve);
 #else
   m_UIAMarkers.insert(row, curve);
 #endif
@@ -1685,16 +1707,24 @@ QStringList EmMpmGui::generateInputFileList()
 // -----------------------------------------------------------------------------
 void EmMpmGui::updateHistogramAxis()
 {
-   m_HistogramPlot->setAxisScale(QwtPlot::yLeft, yAxisMin->value(), yAxisMax->value());
-   m_HistogramPlot->setAxisScale(QwtPlot::xBottom, xAxisMin->value(), xAxisMax->value());
-   m_HistogramPlot->replot();
+  double min, max;
+  bool ok = false;
+  min = yAxisMin->text().toDouble(&ok);
+  max = yAxisMax->text().toDouble(&ok);
+
+  m_HistogramPlot->setAxisScale(QwtPlot::yLeft, min, max);
+
+  min = xAxisMin->text().toDouble(&ok);
+  max = xAxisMax->text().toDouble(&ok);
+  m_HistogramPlot->setAxisScale(QwtPlot::xBottom, min, max);
+  m_HistogramPlot->replot();
 }
 
 
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
-void EmMpmGui::on_yAxisMax_valueChanged(double d)
+void EmMpmGui::on_yAxisMax_textEdited(const QString &s)
 {
   updateHistogramAxis();
 }
@@ -1702,7 +1732,7 @@ void EmMpmGui::on_yAxisMax_valueChanged(double d)
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
-void EmMpmGui::on_yAxisMin_valueChanged(double d)
+void EmMpmGui::on_yAxisMin_textEdited(const QString &s)
 {
   updateHistogramAxis();
 }
@@ -1710,7 +1740,7 @@ void EmMpmGui::on_yAxisMin_valueChanged(double d)
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
-void EmMpmGui::on_xAxisMax_valueChanged(double d)
+void EmMpmGui::on_xAxisMax_textEdited(const QString &s)
 {
   updateHistogramAxis();
 }
@@ -1718,7 +1748,7 @@ void EmMpmGui::on_xAxisMax_valueChanged(double d)
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
-void EmMpmGui::on_xAxisMin_valueChanged(double d)
+void EmMpmGui::on_xAxisMin_textEdited(const QString &s)
 {
   updateHistogramAxis();
 }

@@ -35,23 +35,52 @@
 
 #include "UserInitArea.h"
 
-/*
- *
- */
+
 class UserInitAreaTableModel : public QAbstractTableModel
 {
     Q_OBJECT;
   public:
+    enum ColumnIndexes
+    {
+      Class = 0,
+      GrayValue,
+      UpperLeft,
+      LowerRight,
+      Mu,
+      Sigma,
+      Gamma,
+      ColumnCount
+    };
+
     UserInitAreaTableModel(QObject* parent = 0);
     virtual ~UserInitAreaTableModel();
 
-
-
-  public:
+    Qt::ItemFlags flags(const QModelIndex &index) const;
+    QVariant  data ( const QModelIndex & index, int role = Qt::DisplayRole ) const;
+    QVariant headerData(int section, Qt::Orientation orientation,
+                        int role=Qt::DisplayRole) const;
     int rowCount ( const QModelIndex & parent = QModelIndex() ) const;
     int  columnCount ( const QModelIndex & parent = QModelIndex() ) const;
-    QVariant  data ( const QModelIndex & index, int role = Qt::DisplayRole ) const;
-    QVariant  headerData ( int section, Qt::Orientation orientation, int role = Qt::DisplayRole ) const;
+
+    bool setData(const QModelIndex &index, const QVariant &value,
+        int role=Qt::EditRole);
+
+    /**
+     *
+     * @param col
+     * @param orientation
+     * @param data
+     * @param role
+     * @return
+     */
+    bool setHeaderData(int col, Qt::Orientation orientation, const QVariant& data, int role=Qt::EditRole)
+    { return false;}
+
+    bool insertRows(int row, int count, const QModelIndex &parent=QModelIndex());
+    bool removeRows(int row, int count, const QModelIndex &parent=QModelIndex());
+
+    QAbstractItemDelegate* getItemDelegate();
+
 
     const QList<UserInitArea*>& getUserInitAreas() { return m_UserInitAreas; }
 
@@ -66,9 +95,13 @@ class UserInitAreaTableModel : public QAbstractTableModel
 
 
   private:
+    int m_ColumnCount;
+    int m_RowCount;
     QList<UserInitArea*> m_UserInitAreas;
-    int m_column_count;
 
+
+    UserInitAreaTableModel(const UserInitAreaTableModel&); // Copy Constructor Not Implemented
+    void operator=(const UserInitAreaTableModel&); // Operator '=' Not Implemented
 
 };
 

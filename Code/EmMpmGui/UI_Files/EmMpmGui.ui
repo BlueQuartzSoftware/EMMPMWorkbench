@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1095</width>
-    <height>768</height>
+    <height>747</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -1175,9 +1175,12 @@
                 </widget>
                </item>
                <item>
-                <widget class="QDoubleSpinBox" name="xAxisMin">
-                 <property name="decimals">
-                  <number>6</number>
+                <widget class="QLineEdit" name="xAxisMin">
+                 <property name="maximumSize">
+                  <size>
+                   <width>16777215</width>
+                   <height>16777215</height>
+                  </size>
                  </property>
                 </widget>
                </item>
@@ -1189,12 +1192,12 @@
                 </widget>
                </item>
                <item>
-                <widget class="QDoubleSpinBox" name="xAxisMax">
-                 <property name="decimals">
-                  <number>6</number>
-                 </property>
-                 <property name="maximum">
-                  <double>256.000000000000000</double>
+                <widget class="QLineEdit" name="xAxisMax">
+                 <property name="maximumSize">
+                  <size>
+                   <width>16777215</width>
+                   <height>16777215</height>
+                  </size>
                  </property>
                 </widget>
                </item>
@@ -1208,7 +1211,7 @@
                  </property>
                  <property name="sizeHint" stdset="0">
                   <size>
-                   <width>16</width>
+                   <width>32</width>
                    <height>20</height>
                   </size>
                  </property>
@@ -1222,9 +1225,12 @@
                 </widget>
                </item>
                <item>
-                <widget class="QDoubleSpinBox" name="yAxisMin">
-                 <property name="decimals">
-                  <number>6</number>
+                <widget class="QLineEdit" name="yAxisMin">
+                 <property name="maximumSize">
+                  <size>
+                   <width>16777215</width>
+                   <height>16777215</height>
+                  </size>
                  </property>
                 </widget>
                </item>
@@ -1236,9 +1242,12 @@
                 </widget>
                </item>
                <item>
-                <widget class="QDoubleSpinBox" name="yAxisMax">
-                 <property name="decimals">
-                  <number>6</number>
+                <widget class="QLineEdit" name="yAxisMax">
+                 <property name="maximumSize">
+                  <size>
+                   <width>16777215</width>
+                   <height>16777215</height>
+                  </size>
                  </property>
                 </widget>
                </item>
@@ -1310,13 +1319,16 @@
                 <enum>QAbstractItemView::SingleSelection</enum>
                </property>
                <property name="selectionBehavior">
-                <enum>QAbstractItemView::SelectItems</enum>
+                <enum>QAbstractItemView::SelectRows</enum>
                </property>
                <property name="verticalScrollMode">
                 <enum>QAbstractItemView::ScrollPerPixel</enum>
                </property>
                <property name="horizontalScrollMode">
                 <enum>QAbstractItemView::ScrollPerPixel</enum>
+               </property>
+               <property name="cornerButtonEnabled">
+                <bool>false</bool>
                </property>
                <attribute name="horizontalHeaderStretchLastSection">
                 <bool>false</bool>

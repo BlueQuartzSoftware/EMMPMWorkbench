@@ -36,10 +36,9 @@
 // -----------------------------------------------------------------------------
 UserInitAreaTableModel::UserInitAreaTableModel(QObject* parent) :
 QAbstractTableModel(parent),
-m_column_count(7)
+m_RowCount(0)
 {
-
-
+  m_ColumnCount = ColumnCount;
 }
 
 // -----------------------------------------------------------------------------
@@ -53,47 +52,49 @@ UserInitAreaTableModel::~UserInitAreaTableModel()
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
-void UserInitAreaTableModel::addUserInitArea(UserInitArea* uia)
+Qt::ItemFlags UserInitAreaTableModel::flags(const QModelIndex &index) const
 {
-  m_UserInitAreas.push_back(uia);
-  emit layoutChanged();
+  //  std::cout << "SGLogNormalTableModel::flags" << std::endl;
+  if (!index.isValid())
+  {
+    return Qt::NoItemFlags;
+  }
+  Qt::ItemFlags theFlags = QAbstractTableModel::flags(index);
+  if (index.isValid())
+  {
+    theFlags |= Qt::ItemIsEditable | Qt::ItemIsSelectable | Qt::ItemIsEnabled;
 
-}
-
-// -----------------------------------------------------------------------------
-//
-// -----------------------------------------------------------------------------
-void UserInitAreaTableModel::deleteUserInitArea(UserInitArea* uia)
-{
-  m_UserInitAreas.removeAll(uia);
-  emit layoutChanged();
-}
-
-// -----------------------------------------------------------------------------
-//
-// -----------------------------------------------------------------------------
-void UserInitAreaTableModel::updateUserInitArea(UserInitArea* uia)
-{
-  int row = m_UserInitAreas.indexOf(uia, 0);
-  QModelIndex index0 = createIndex(row, 0);
-  QModelIndex index1 = createIndex(row, m_column_count);
-  emit dataChanged(index0, index1);
-}
-
-// -----------------------------------------------------------------------------
-//
-// -----------------------------------------------------------------------------
-int UserInitAreaTableModel::rowCount(const QModelIndex &index) const
-{
-  return m_UserInitAreas.count();
-}
-
-// -----------------------------------------------------------------------------
-//
-// -----------------------------------------------------------------------------
-int UserInitAreaTableModel::columnCount(const QModelIndex &index) const
-{
-  return m_column_count;
+    int col = index.column();
+    if (col == Class)
+    {
+      theFlags = Qt::ItemIsEnabled;
+    }
+    else if (col == GrayValue)
+    {
+      theFlags = Qt::ItemIsEditable | Qt::ItemIsSelectable | Qt::ItemIsEnabled;
+    }
+    else if (col == UpperLeft)
+    {
+      theFlags = Qt::ItemIsEnabled;
+    }
+    else if (col == LowerRight)
+    {
+      theFlags = Qt::ItemIsEnabled;
+    }
+    else if (col == Mu)
+    {
+      theFlags = Qt::ItemIsEnabled;
+    }
+    else if (col == Sigma)
+    {
+      theFlags = Qt::ItemIsEnabled;
+    }
+    else if (col == Gamma)
+    {
+      theFlags = Qt::ItemIsEditable | Qt::ItemIsSelectable | Qt::ItemIsEnabled;
+    }
+  }
+  return theFlags;
 }
 
 // -----------------------------------------------------------------------------
@@ -161,6 +162,52 @@ QVariant UserInitAreaTableModel::data(const QModelIndex &index, qint32 role) con
   }
 
   return QVariant();
+}
+
+
+// -----------------------------------------------------------------------------
+//
+// -----------------------------------------------------------------------------
+void UserInitAreaTableModel::addUserInitArea(UserInitArea* uia)
+{
+  m_UserInitAreas.push_back(uia);
+  emit layoutChanged();
+}
+
+// -----------------------------------------------------------------------------
+//
+// -----------------------------------------------------------------------------
+void UserInitAreaTableModel::deleteUserInitArea(UserInitArea* uia)
+{
+  m_UserInitAreas.removeAll(uia);
+  emit layoutChanged();
+}
+
+// -----------------------------------------------------------------------------
+//
+// -----------------------------------------------------------------------------
+void UserInitAreaTableModel::updateUserInitArea(UserInitArea* uia)
+{
+  int row = m_UserInitAreas.indexOf(uia, 0);
+  QModelIndex index0 = createIndex(row, 0);
+  QModelIndex index1 = createIndex(row, m_ColumnCount);
+  emit dataChanged(index0, index1);
+}
+
+// -----------------------------------------------------------------------------
+//
+// -----------------------------------------------------------------------------
+int UserInitAreaTableModel::rowCount(const QModelIndex &index) const
+{
+  return m_UserInitAreas.count();
+}
+
+// -----------------------------------------------------------------------------
+//
+// -----------------------------------------------------------------------------
+int UserInitAreaTableModel::columnCount(const QModelIndex &index) const
+{
+  return m_ColumnCount;
 }
 
 // -----------------------------------------------------------------------------
