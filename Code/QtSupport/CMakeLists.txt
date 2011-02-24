@@ -25,6 +25,7 @@ set (QtSupport_SRCS
     ${QtSupport_SOURCE_DIR}/ProcessQueueController.cpp
     ${QtSupport_SOURCE_DIR}/ProcessQueueTask.cpp
     ${QtSupport_SOURCE_DIR}/ColorComboPicker.cpp
+    ${QtSupport_SOURCE_DIR}/QFSDropLineEdit.cpp
 )
 set (QtSupport_HDRS
     ${QtSupport_SOURCE_DIR}/ApplicationAboutBoxDialog.h
@@ -36,6 +37,7 @@ set (QtSupport_HDRS
     ${QtSupport_SOURCE_DIR}/ProcessQueueController.h
     ${QtSupport_SOURCE_DIR}/ProcessQueueTask.h
     ${QtSupport_SOURCE_DIR}/ColorComboPicker.h
+    ${QtSupport_SOURCE_DIR}/QFSDropLineEdit.h
 )
 cmp_IDE_SOURCE_PROPERTIES("QtSupport" "${QtSupport_HDRS}" "${QtSupport_SRCS}" "0")
 

@@ -261,7 +261,7 @@ void EmMpmGui::setupGui()
   compositeModeCB->insertItem(8, "Color Burn");
   compositeModeCB->insertItem(9, "Hard Light");
   compositeModeCB->insertItem(10, "Soft Light");
-  compositeModeCB->insertItem(11, "Source Over");
+  compositeModeCB->insertItem(11, "Alpha Blend");
 #if 0
   compositeModeCB->insertItem(12, "Destination");
   compositeModeCB->insertItem(13, "Source Over");
@@ -280,6 +280,7 @@ void EmMpmGui::setupGui()
   compositeModeCB->setCurrentIndex(0);
   compositeModeCB->blockSignals(false);
   compositeModeCB->setEnabled(false);
+  userInitTab->setEnabled(false);
 
 
   QHeaderView* headerView = new QHeaderView(Qt::Horizontal, m_UserInitTable);
@@ -354,6 +355,15 @@ void EmMpmGui::setupGui()
   m_grid->setMajPen(QPen(Qt::gray, 0, Qt::SolidLine));
   m_grid->setMinPen(QPen(Qt::lightGray, 0, Qt::DotLine));
 //  m_grid->attach(m_HistogramPlot);
+
+  // setup the Widget List
+  m_WidgetList << m_NumClasses << m_EmIterations << m_MpmIterations << m_Beta << m_Gamma;
+  m_WidgetList << enableUserDefinedAreas << useSimulatedAnnealing << useCuravturePenalty;
+  setWidgetListEnabled(false);
+
+  m_ImageWidgets << zoomIn << zoomOut << fitToWindow << zoomCB << imageDisplayCombo;
+  setImageWidgetsEnabled(false);
+
 
 #if 0
   m_zoomer = new QwtPlotZoomer(QwtPlot::xBottom, QwtPlot::yLeft, m_HistogramPlot->canvas());
@@ -776,7 +786,7 @@ void EmMpmGui::processingStarted()
 {
 //  std::cout << "EmMpmGui::processingStarted()" << std::endl;
   processBtn->setText("Cancel");
-  processBtn->setEnabled(false);
+  processBtn->setVisible(false);
   this->statusBar()->showMessage("Processing Images...");
 }
 
@@ -789,7 +799,7 @@ void EmMpmGui::processingFinished()
 //  std::cout << "IPHelper::processingFinished()" << std::endl;
   /* Code that cleans up anything from the processing */
   processBtn->setText("Segment");
-  processBtn->setEnabled(true);
+  processBtn->setVisible(true);
   this->statusBar()->showMessage("Processing Complete");
 
   // Get the image files from the plugin
@@ -1028,7 +1038,16 @@ void EmMpmGui::on_imageDisplayCombo_currentIndexChanged()
   else
   {
     compositeModeCB->setEnabled(false);
+    transparency->setEnabled(false);
   }
+}
+
+// -----------------------------------------------------------------------------
+//
+// -----------------------------------------------------------------------------
+void EmMpmGui::on_enableUserDefinedAreas_clicked(bool b)
+{
+  userInitTab->setEnabled(b);
 }
 
 // -----------------------------------------------------------------------------
@@ -1038,6 +1057,14 @@ void EmMpmGui::on_compositeModeCB_currentIndexChanged()
 {
   int index = compositeModeCB->currentIndex();
   m_GraphicsView->setCompositeMode(index);
+  if (index == 11)
+  {
+    transparency->setEnabled(true);
+  }
+  else
+  {
+    transparency->setEnabled(false);
+  }
 }
 
 
@@ -1047,6 +1074,17 @@ void EmMpmGui::on_compositeModeCB_currentIndexChanged()
 void EmMpmGui::setWidgetListEnabled(bool b)
 {
   foreach (QWidget* w, m_WidgetList)
+  {
+    w->setEnabled(b);
+  }
+}
+
+// -----------------------------------------------------------------------------
+//
+// -----------------------------------------------------------------------------
+void EmMpmGui::setImageWidgetsEnabled(bool b)
+{
+  foreach (QWidget* w, m_ImageWidgets)
   {
     w->setEnabled(b);
   }
@@ -1152,8 +1190,10 @@ void EmMpmGui::openBaseImageFile(QString imageFile)
   // Tell the RecentFileList to update itself then broadcast those changes.
   QRecentFileList::instance()->addFile(imageFile);
   setWidgetListEnabled(true);
+  setImageWidgetsEnabled(true);
   updateBaseRecentFileList(imageFile);
 }
+
 
 
 // -----------------------------------------------------------------------------
@@ -1409,7 +1449,7 @@ void EmMpmGui::addProcessHistogram(QVector<double> data)
     if (data[i] > max) { max = data[i]; }
   }
 
-  QPen pen(Qt::red, 2, Qt::SolidLine);
+  QPen pen(Qt::red, 1, Qt::SolidLine);
   //pen.setWidth(2);
   QList<UserInitArea*> uias = m_UserInitAreaTableModel->getUserInitAreas();
   if (uias.size() > 0) {
@@ -1476,7 +1516,7 @@ void EmMpmGui::userInitAreaUpdated(UserInitArea* uia)
   int yStart = b.y() + p.y();
   int yEnd = b.y() + p.y() + b.height();
 
-  double mu, sig;
+  double mu, sig, stdDev;
   mu = 0.0;
   sig = 0.0;
   //Calculate Mu
@@ -1505,13 +1545,13 @@ void EmMpmGui::userInitAreaUpdated(UserInitArea* uia)
     }
   }
   sig /= ((yEnd - yStart)*(xEnd - xStart));
+  //Calculate Std Dev (Squart Root of Sigma)
   sig = sqrt(sig);
   uia->setSigma(sig);
 
   m_UserInitAreaTableModel->updateUserInitArea(uia);
   //TODO: Add in code to automatically select the row in the table.
 
-#if 1
   // Generate the Histogram Bins
   const int numValues = 256;
   QwtArray<double> intervals(numValues);
@@ -1552,37 +1592,6 @@ void EmMpmGui::userInitAreaUpdated(UserInitArea* uia)
   QColor c = uia->getColor();
   curve->setPen(QPen(c));
 
-
-#else
-  const int numValues = 256;
-  QwtArray<double> values(numValues);
-  float twoSigSqrd = sig * sig * 2.0f;
-  float constant = 1.0 / (sig * sqrtf(2.0f * M_PI));
-  size_t max_index = 0;
-  for (size_t x = 0; x < 256; ++x)
-  {
-    values[x] = constant * exp(-1.0f * ((x - mu) * (x - mu)) / (twoSigSqrd));
-    if (values[x] > max)
-    {
-      max = values[x];
-      max_index = x;
-    }
-  }
-  QList<UserInitArea*> userInitAreas = m_UserInitAreaTableModel->getUserInitAreas();
-  int row = userInitAreas.indexOf(uia, 0);
-
-  QwtPlotMarker* marker = m_UIAMarkers[row];
-  marker->attach(m_HistogramPlot);
-  marker->setLabelAlignment(Qt::AlignLeft | Qt::AlignBottom);
-  marker->setLabelOrientation(Qt::Vertical);
-  marker->setLineStyle(QwtPlotMarker::VLine);
-  QColor c = uia->getColor();
-  marker->setLinePen(QPen(c));
-  marker->setXValue(max_index);
-
-#endif
- // m_HistogramPlot->setAxisScale(QwtPlot::yLeft, 0.0, 10000);
- // m_HistogramPlot->setAxisScale(QwtPlot::xBottom, 0.0, 255.0);
   m_HistogramPlot->replot();
 
 }

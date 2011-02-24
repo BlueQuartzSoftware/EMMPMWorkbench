@@ -173,7 +173,7 @@ QVariant UserInitAreaTableModel::data(const QModelIndex &index, qint32 role) con
         return QVariant(s);
       case UserInitAreaTableModel::Mu:
         return QVariant(uia->getMu());
-      case UserInitAreaTableModel::Sigma:
+      case UserInitAreaTableModel::StdDev:
         return QVariant(uia->getSigma());
       case UserInitAreaTableModel::Gamma:
         return QVariant(uia->getGamma());
@@ -198,8 +198,8 @@ QVariant  UserInitAreaTableModel::headerData ( int section, Qt::Orientation orie
       case GrayValue: return QVariant(QString("Gray Value"));
       case UpperLeft: return QVariant(QString("Upper Left"));
       case LowerRight: return QVariant(QString("Lower Right"));
-      case Mu: return QVariant(QString("Mu"));
-      case Sigma: return QVariant(QString("Sigma"));
+      case Mu: return QVariant(QString("Mean"));
+      case StdDev: return QVariant(QString("Standard Dev"));
       case Gamma: return QVariant(QString("Gamma"));
       default:
         break;
@@ -261,7 +261,7 @@ bool UserInitAreaTableModel::setData(const QModelIndex & index, const QVariant &
       break;
     case UserInitAreaTableModel::Mu:
       break;
-    case UserInitAreaTableModel::Sigma:
+    case UserInitAreaTableModel::StdDev:
       break;
     case UserInitAreaTableModel::Gamma:
       m_UserInitAreas.at(row)->setGamma(value.toDouble(&ok));

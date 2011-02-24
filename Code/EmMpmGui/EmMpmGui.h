@@ -90,6 +90,7 @@ class EmMpmGui :  public QMainWindow, private Ui::EmMpmGui
     MXA_INSTANCE_PROPERTY(QString, CurrentProcessedFile)
     MXA_INSTANCE_PROPERTY(QSortFilterProxyModel*, ProxyModel)
     MXA_INSTANCE_PROPERTY(QList<QWidget* >, WidgetList)
+    MXA_INSTANCE_PROPERTY(QList<QWidget*>, ImageWidgets)
     MXA_INSTANCE_PROPERTY(bool, OutputExistsCheck)
     MXA_INSTANCE_PROPERTY(ProcessQueueController*, QueueController)
   //  MXA_INSTANCE_PROPERTY(ProcessQueueDialog*, QueueDialog)
@@ -117,8 +118,7 @@ class EmMpmGui :  public QMainWindow, private Ui::EmMpmGui
     void deleteUserInitArea(UserInitArea* uia);
     void userInitAreaUpdated(UserInitArea* uia);
     void userInitAreaSelected(UserInitArea* uia);
-    void on_fitToWindow_clicked();
-    void on_transparency_valueChanged(int value);
+
 
 
 
@@ -141,8 +141,11 @@ class EmMpmGui :  public QMainWindow, private Ui::EmMpmGui
     void on_processBtn_clicked();
 
     /* slots for the buttons in the GUI */
-    void on_compositeModeCB_currentIndexChanged();
     void on_imageDisplayCombo_currentIndexChanged();
+    void on_compositeModeCB_currentIndexChanged();
+    void on_fitToWindow_clicked();
+    void on_transparency_valueChanged(int value);
+    void on_enableUserDefinedAreas_clicked(bool b);
 
     /**
      * @brief Qt Slot that fires in response to a click on a "Recent File' Menu entry.
@@ -229,7 +232,11 @@ class EmMpmGui :  public QMainWindow, private Ui::EmMpmGui
     */
    bool verifyOutputPathParentExists(QString outFilePath, QLineEdit* lineEdit);
 
-
+   /**
+    * @brief
+    * @param sourceDirectoryLE
+    * @param fileListView
+    */
    void populateFileTable(QLineEdit* sourceDirectoryLE, QListView *fileListView);
 
     /**
@@ -245,6 +252,8 @@ class EmMpmGui :  public QMainWindow, private Ui::EmMpmGui
     void plotImageHistogram();
 
     QStringList generateInputFileList();
+
+    void setImageWidgetsEnabled(bool b);
 
   private:
 

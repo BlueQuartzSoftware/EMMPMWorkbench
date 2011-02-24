@@ -49,11 +49,11 @@ class UserInitAreaTableModel : public QAbstractTableModel
     {
       Class = 0,
       GrayValue,
+      Mu,
+      StdDev,
+      Gamma,
       UpperLeft,
       LowerRight,
-      Mu,
-      Sigma,
-      Gamma,
       ColumnCount
     };
 
