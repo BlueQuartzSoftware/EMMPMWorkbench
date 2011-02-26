@@ -643,7 +643,7 @@ void EmMpmGui::on_processBtn_clicked()
     data->classes = m_NumClasses->value();
     data->simulatedAnnealing = (useSimulatedAnnealing->isChecked()) ? 1 : 0;
     data->dims = 1; // FORCING A GRAY SCALE IMAGE TO BE USED
-    if (m_UserInitAreaTableModel->rowCount() == 0)
+    if (enableUserDefinedAreas->isChecked() == false)
     {
       data->initType = EMMPM_Basic;
       int n = data->classes - 1;
@@ -655,7 +655,7 @@ void EmMpmGui::on_processBtn_clicked()
     else
     {
       data->initType = EMMPM_Manual;
-      // Allocate memory to hold the values
+      // Allocate memory to hold the values - The EMMPM Task will free the memory
       data->m = (double*)malloc(data->classes * data->dims * sizeof(double));
       data->v = (double*)malloc(data->classes * data->dims * sizeof(double));
       copyGrayValues(data);
@@ -700,7 +700,7 @@ void EmMpmGui::on_processBtn_clicked()
       }
       data->classes = m_NumClasses->value();
       data->simulatedAnnealing = (useSimulatedAnnealing->isChecked()) ? 1 : 0;
-      if (m_UserInitAreaTableModel->rowCount() == 0)
+      if (enableUserDefinedAreas->isChecked() == false)
       {
         data->initType = EMMPM_Basic;
         int n = data->classes - 1;
@@ -712,7 +712,7 @@ void EmMpmGui::on_processBtn_clicked()
       else
       {
         data->initType = EMMPM_Manual;
-        // Allocate memory to hold the values
+        // Allocate memory to hold the values - EMMPMTask will free the memory
         data->m = (double*)malloc(data->classes * data->dims * sizeof(double));
         data->v = (double*)malloc(data->classes * data->dims * sizeof(double));
         copyGrayValues(data);

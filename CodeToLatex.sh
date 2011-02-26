@@ -44,7 +44,7 @@ echo "\par\nobreak\vspace{2 pt}}}" >> $texFile
 echo "\makeatother" >> $texFile
 echo "\def\thechapter       {\arabic{chapter}}" >> $texFile
 echo "% ------------------- Title and Author -----------------------------" >> $texFile
-echo "\title{Segmentation Tools Package}" >> $texFile
+echo "\title{Electronic Imaging in Microscopy Segmentation Tools Package}" >> $texFile
 echo "\author{Michael A. Jackson (BlueQuartz Software)}" >> $texFile
 echo "\begin{document}" >> $texFile
 echo "" >> $texFile
@@ -58,7 +58,8 @@ files=`find ./License -type f -name "*.license"`
 for file in $files;
 do
   echo "$file"
-  echo "\section{$file}" >> $texFile
+  f=${file//_/-}
+  echo "\section{$f}" >> $texFile
   echo "\begin{lstlisting}" >> $texFile
   cat $texFile $file > /tmp/textemp.tex
   mv /tmp/textemp.tex $texFile 
