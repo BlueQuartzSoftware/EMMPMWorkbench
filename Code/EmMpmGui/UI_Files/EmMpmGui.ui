@@ -1301,6 +1301,13 @@
                 </widget>
                </item>
                <item>
+                <widget class="QToolButton" name="clearTempHistograms">
+                 <property name="text">
+                  <string>Clear</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
                 <spacer name="horizontalSpacer_7">
                  <property name="orientation">
                   <enum>Qt::Horizontal</enum>

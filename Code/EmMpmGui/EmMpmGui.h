@@ -146,6 +146,10 @@ class EmMpmGui :  public QMainWindow, private Ui::EmMpmGui
     void on_fitToWindow_clicked();
     void on_transparency_valueChanged(int value);
     void on_enableUserDefinedAreas_clicked(bool b);
+    void on_clearTempHistograms_clicked();
+
+
+
 
     /**
      * @brief Qt Slot that fires in response to a click on a "Recent File' Menu entry.

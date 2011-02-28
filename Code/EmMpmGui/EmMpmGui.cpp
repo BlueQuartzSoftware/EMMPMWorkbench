@@ -359,6 +359,7 @@ void EmMpmGui::setupGui()
   // setup the Widget List
   m_WidgetList << m_NumClasses << m_EmIterations << m_MpmIterations << m_Beta << m_Gamma;
   m_WidgetList << enableUserDefinedAreas << useSimulatedAnnealing << useCuravturePenalty;
+  m_WidgetList << curvatureBetaC << curvatureBetaE << curvatureRMax << ccostLoopDelay;
   setWidgetListEnabled(false);
 
   m_ImageWidgets << zoomIn << zoomOut << fitToWindow << zoomCB << imageDisplayCombo;
@@ -654,7 +655,7 @@ void EmMpmGui::on_processBtn_clicked()
     }
     else
     {
-      data->initType = EMMPM_Manual;
+      data->initType = EMMPM_ManualInit;
       // Allocate memory to hold the values - The EMMPM Task will free the memory
       data->m = (double*)malloc(data->classes * data->dims * sizeof(double));
       data->v = (double*)malloc(data->classes * data->dims * sizeof(double));
@@ -711,7 +712,7 @@ void EmMpmGui::on_processBtn_clicked()
       }
       else
       {
-        data->initType = EMMPM_Manual;
+        data->initType = EMMPM_ManualInit;
         // Allocate memory to hold the values - EMMPMTask will free the memory
         data->m = (double*)malloc(data->classes * data->dims * sizeof(double));
         data->v = (double*)malloc(data->classes * data->dims * sizeof(double));
@@ -765,10 +766,7 @@ void EmMpmGui::on_processBtn_clicked()
 //  getQueueDialog()->setParent(this);
   m_QueueDialog->setVisible(true);
 
-  m_QueueDialog;
-
   queueController->start();
-
 }
 
 // -----------------------------------------------------------------------------
@@ -842,6 +840,13 @@ void EmMpmGui::queueControllerFinished()
 
   getQueueController()->deleteLater();
   setQueueController(NULL);
+
+  curvatureBetaC->setEnabled(useCuravturePenalty->isChecked());
+  curvatureBetaE->setEnabled(useCuravturePenalty->isChecked());
+  curvatureRMax->setEnabled(useCuravturePenalty->isChecked());
+  curvatureRMax->setEnabled(useCuravturePenalty->isChecked());
+  ccostLoopDelay->setEnabled(useCuravturePenalty->isChecked());
+
 }
 
 // -----------------------------------------------------------------------------
@@ -1034,6 +1039,10 @@ void EmMpmGui::on_imageDisplayCombo_currentIndexChanged()
   if (imageDisplayCombo->currentIndex() == EmMpm_Constants::CompositedImage)
   {
     compositeModeCB->setEnabled(true);
+    if (compositeModeCB->currentIndex() == 11)
+    {
+      transparency->setEnabled(true);
+    }
   }
   else
   {
@@ -1449,7 +1458,7 @@ void EmMpmGui::addProcessHistogram(QVector<double> data)
     if (data[i] > max) { max = data[i]; }
   }
 
-  QPen pen(Qt::red, 1, Qt::SolidLine);
+  QPen pen(Qt::red, 1.5, Qt::SolidLine);
   //pen.setWidth(2);
   QList<UserInitArea*> uias = m_UserInitAreaTableModel->getUserInitAreas();
   if (uias.size() > 0) {
@@ -1776,3 +1785,23 @@ void EmMpmGui::on_transparency_valueChanged(int value)
   m_GraphicsView->setOverlayTransparency(f);
 }
 
+
+// -----------------------------------------------------------------------------
+//
+// -----------------------------------------------------------------------------
+void EmMpmGui::on_clearTempHistograms_clicked()
+{
+  clearProcessHistograms();
+  plotImageHistogram();
+  if (enableUserDefinedAreas->isChecked() )
+  {
+    QList<UserInitArea*> uias = m_UserInitAreaTableModel->getUserInitAreas();
+    int size = uias.count();
+    UserInitArea* uia = NULL;
+    for (int r = 0; r < size; ++r)
+    {
+      uia = uias[r];
+      userInitAreaAdded(uia);
+    }
+  }
+}

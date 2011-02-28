@@ -291,7 +291,7 @@ void EMMPMTask::run()
     case EMMPM_CurvaturePenalty:
       m_callbacks->EMMPM_InitializationFunc = EMMPM_CurvatureInitialization;
       break;
-    case EMMPM_Manual:
+    case EMMPM_ManualInit:
       m_callbacks->EMMPM_InitializationFunc = EMMPM_ManualInitialization;
       break;
     default:
