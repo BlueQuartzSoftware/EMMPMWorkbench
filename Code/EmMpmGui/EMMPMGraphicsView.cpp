@@ -584,7 +584,7 @@ void EMMPMGraphicsView::setOverlayImage(QImage image)
   m_ImageGraphicsItem->setZValue(-1);
   QRectF rect = m_ImageGraphicsItem->boundingRect();
   gScene->setSceneRect(rect);
-  centerOn(m_ImageGraphicsItem);
+ // centerOn(m_ImageGraphicsItem);
 
   m_ImageDisplayType = EmMpm_Constants::SegmentedImage;
 
@@ -689,12 +689,6 @@ void EMMPMGraphicsView::setEmMpmGui(EmMpmGui* gui)
 // -----------------------------------------------------------------------------
 void EMMPMGraphicsView::addNewInitArea(const QPolygonF &polygon)
 {
-//  QGraphicsScene* gScene = scene();
-//  if (gScene == NULL)
-//  {
-//    gScene = new QGraphicsScene(this);
-//    setScene(gScene);
-//  }
   QRectF brect = polygon.boundingRect();
 
   UserInitArea* userInitArea = new UserInitArea(m_UserInitAreaTableModel->rowCount(), brect);
@@ -732,9 +726,7 @@ void EMMPMGraphicsView::addNewInitArea(const QPolygonF &polygon)
   {
     delete userInitArea;
   }
-
-
- }
+}
 
 // -----------------------------------------------------------------------------
 //
