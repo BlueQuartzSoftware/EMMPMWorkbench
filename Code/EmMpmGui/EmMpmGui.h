@@ -191,6 +191,8 @@ class EmMpmGui :  public QMainWindow, private Ui::EmMpmGui
 
     void clearProcessHistograms();
     void addProcessHistogram(QVector<double> data);
+    void updateCombinedGaussian();
+
 
   protected:
 
@@ -274,6 +276,9 @@ class EmMpmGui :  public QMainWindow, private Ui::EmMpmGui
 
   QwtPlotCurve*           m_histogram;
   QList<QwtPlotCurve*>    m_Gaussians;
+  QwtPlotCurve*           m_CombinedGaussians;
+  QList<QwtPlotCurve*>    m_ProcessGaussians;
+
   // QList<QwtPlotMarker*>   m_UIAMarkers;
 
   EmMpmGui(const EmMpmGui&); // Copy Constructor Not Implemented

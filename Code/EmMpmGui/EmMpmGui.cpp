@@ -64,6 +64,7 @@
 
 //-- Qwt Includes
 #include <qwt.h>
+#include <qwt_data.h>
 #include <qwt_plot.h>
 #include <qwt_plot_grid.h>
 #include <qwt_interval_data.h>
@@ -123,6 +124,7 @@ m_picker(NULL),
 m_panner(NULL),
 m_grid(NULL),
 m_histogram(NULL),
+m_CombinedGaussians(NULL),
 m_ProxyModel(NULL),
 m_OutputExistsCheck(false),
 m_QueueController(NULL),
@@ -1439,6 +1441,11 @@ void EmMpmGui::clearProcessHistograms()
   }
   // This is an internal variable to keep track of the class number
   m_CurrentHistogramClass = 0;
+  if (NULL != m_CombinedGaussians) {
+    m_CombinedGaussians->detach();
+    delete m_CombinedGaussians;
+    m_CombinedGaussians = NULL;
+  }
 }
 
 // -----------------------------------------------------------------------------
@@ -1458,7 +1465,7 @@ void EmMpmGui::addProcessHistogram(QVector<double> data)
     if (data[i] > max) { max = data[i]; }
   }
 
-  QPen pen(Qt::red, 1.5, Qt::SolidLine);
+  QPen pen(Qt::red, 1.0, Qt::SolidLine);
   //pen.setWidth(2);
   QList<UserInitArea*> uias = m_UserInitAreaTableModel->getUserInitAreas();
   if (uias.size() > 0) {
@@ -1472,12 +1479,12 @@ void EmMpmGui::addProcessHistogram(QVector<double> data)
   curve->setPen(pen);
   curve->attach(m_HistogramPlot);
   m_Gaussians.append(curve);
-
-
   curve->setData(intervals, data);
 
   updateHistogramAxis();
   ++m_CurrentHistogramClass;
+
+  updateCombinedGaussian();
 }
 
 // -----------------------------------------------------------------------------
@@ -1601,7 +1608,50 @@ void EmMpmGui::userInitAreaUpdated(UserInitArea* uia)
   QColor c = uia->getColor();
   curve->setPen(QPen(c));
 
+//Update the combine Gaussian Curve
+  updateCombinedGaussian();
+
+
   m_HistogramPlot->replot();
+
+}
+
+// -----------------------------------------------------------------------------
+//
+// -----------------------------------------------------------------------------
+void EmMpmGui::updateCombinedGaussian()
+{
+  if (m_CombinedGaussians == NULL)
+  {
+    m_CombinedGaussians = new QwtPlotCurve("Combined Gaussians");
+    m_CombinedGaussians->setPen(QPen(Qt::black, 1.0, Qt::SolidLine));
+    m_CombinedGaussians->attach(m_HistogramPlot);
+  }
+
+  const int numValues = 256;
+  QwtArray<double> intervals(numValues);
+  QwtArray<double> values(numValues);
+  for (int i = 0; i < numValues; ++i)
+  {
+    intervals[i] = (double)i;
+    values[i] = 0.0;
+  }
+
+
+  QwtPlotCurve* curve = NULL;
+  int count = m_Gaussians.size();
+  if (count < 2) { return; } // only one gaussian is the same as the user init gaussian and is meaningless
+  for (int c = 0; c < count; ++c)
+  {
+    curve = m_Gaussians[c];
+    QwtArrayData* data = static_cast<QwtArrayData*>(&(curve->data()));
+    for (size_t i = 0; i < numValues; ++i)
+    {
+      values[i] += data->y(i);
+    }
+  }
+
+  m_CombinedGaussians->setData(intervals, values);
 
 }
 
@@ -1804,7 +1854,7 @@ void EmMpmGui::on_clearTempHistograms_clicked()
       userInitAreaAdded(uia);
     }
   }
-  addUserInitArea->setDown(false);
+  addUserInitArea->setChecked(false);
 }
 
 
