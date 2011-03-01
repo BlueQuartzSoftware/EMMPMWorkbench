@@ -57,7 +57,7 @@ QGraphicsPolygonItem(polygon, parent)
   m_isResizing = false;
   m_CurrentResizeHandle = UserInitArea::NO_CTRL_POINT;
   ctrlPointSize = 7.0f;
-  m_GrayLevel = 255 - (255/16 * userIndex);
+  m_GrayLevel = 0 + (255/16 * userIndex);
   m_Color.setRgb(25, 25, 255, 150);
   m_Class = userIndex;
   m_Mu = 1.0;
