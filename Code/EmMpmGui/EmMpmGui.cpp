@@ -1804,4 +1804,8 @@ void EmMpmGui::on_clearTempHistograms_clicked()
       userInitAreaAdded(uia);
     }
   }
+  addUserInitArea->setDown(false);
 }
+
+
+
