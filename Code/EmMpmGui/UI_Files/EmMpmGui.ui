@@ -364,20 +364,6 @@
            </property>
           </widget>
          </item>
-         <item row="1" column="0">
-          <widget class="QLabel" name="label_19">
-           <property name="text">
-            <string>Use Curvature Penalty</string>
-           </property>
-          </widget>
-         </item>
-         <item row="1" column="1">
-          <widget class="QCheckBox" name="useCuravturePenalty">
-           <property name="text">
-            <string/>
-           </property>
-          </widget>
-         </item>
          <item row="2" column="0">
           <widget class="QLabel" name="label_20">
            <property name="enabled">
@@ -388,7 +374,7 @@
            </property>
           </widget>
          </item>
-         <item row="3" column="0">
+         <item row="4" column="0">
           <widget class="QLabel" name="label_21">
            <property name="enabled">
             <bool>false</bool>
@@ -399,7 +385,7 @@
           </widget>
          </item>
          <item row="2" column="1">
-          <widget class="QDoubleSpinBox" name="curvatureBetaE">
+          <widget class="QDoubleSpinBox" name="gradientBetaE">
            <property name="enabled">
             <bool>false</bool>
            </property>
@@ -407,11 +393,11 @@
             <double>9999.989999999999782</double>
            </property>
            <property name="value">
-            <double>1.500000000000000</double>
+            <double>1.000000000000000</double>
            </property>
           </widget>
          </item>
-         <item row="3" column="1">
+         <item row="4" column="1">
           <widget class="QDoubleSpinBox" name="curvatureBetaC">
            <property name="enabled">
             <bool>false</bool>
@@ -419,16 +405,22 @@
            <property name="maximum">
             <double>9999.989999999999782</double>
            </property>
+           <property name="value">
+            <double>1.000000000000000</double>
+           </property>
           </widget>
          </item>
-         <item row="4" column="1">
+         <item row="5" column="1">
           <widget class="QDoubleSpinBox" name="curvatureRMax">
            <property name="enabled">
             <bool>false</bool>
            </property>
+           <property name="value">
+            <double>1.000000000000000</double>
+           </property>
           </widget>
          </item>
-         <item row="4" column="0">
+         <item row="5" column="0">
           <widget class="QLabel" name="label_22">
            <property name="enabled">
             <bool>false</bool>
@@ -438,7 +430,7 @@
            </property>
           </widget>
          </item>
-         <item row="5" column="0">
+         <item row="6" column="0">
           <widget class="QLabel" name="label_23">
            <property name="enabled">
             <bool>false</bool>
@@ -448,13 +440,41 @@
            </property>
           </widget>
          </item>
-         <item row="5" column="1">
+         <item row="6" column="1">
           <widget class="QSpinBox" name="ccostLoopDelay">
            <property name="enabled">
             <bool>false</bool>
            </property>
            <property name="minimum">
             <number>1</number>
+           </property>
+          </widget>
+         </item>
+         <item row="3" column="0">
+          <widget class="QLabel" name="label_19">
+           <property name="text">
+            <string>Use Curvature Penalty</string>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="0">
+          <widget class="QLabel" name="gradientPenaltyLabel">
+           <property name="text">
+            <string>Use Gradient Penalty</string>
+           </property>
+          </widget>
+         </item>
+         <item row="3" column="1">
+          <widget class="QCheckBox" name="useCuravturePenalty">
+           <property name="text">
+            <string/>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="1">
+          <widget class="QCheckBox" name="useGradientPenalty">
+           <property name="text">
+            <string/>
            </property>
           </widget>
          </item>
@@ -531,7 +551,7 @@
     <item>
      <widget class="QTabWidget" name="tabWidget">
       <property name="currentIndex">
-       <number>0</number>
+       <number>1</number>
       </property>
       <widget class="QWidget" name="tab_2">
        <attribute name="title">
@@ -1514,8 +1534,7 @@
   <tabstop>m_Beta</tabstop>
   <tabstop>m_Gamma</tabstop>
   <tabstop>useSimulatedAnnealing</tabstop>
-  <tabstop>useCuravturePenalty</tabstop>
-  <tabstop>curvatureBetaE</tabstop>
+  <tabstop>gradientBetaE</tabstop>
   <tabstop>curvatureBetaC</tabstop>
   <tabstop>curvatureRMax</tabstop>
   <tabstop>inputImageFilePath</tabstop>
@@ -1551,48 +1570,16 @@
   <connection>
    <sender>useCuravturePenalty</sender>
    <signal>clicked(bool)</signal>
-   <receiver>curvatureBetaE</receiver>
-   <slot>setEnabled(bool)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>169</x>
-     <y>329</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>176</x>
-     <y>366</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>useCuravturePenalty</sender>
-   <signal>clicked(bool)</signal>
    <receiver>curvatureBetaC</receiver>
    <slot>setEnabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
      <x>187</x>
-     <y>329</y>
+     <y>397</y>
     </hint>
     <hint type="destinationlabel">
-     <x>190</x>
-     <y>392</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>useCuravturePenalty</sender>
-   <signal>clicked(bool)</signal>
-   <receiver>label_20</receiver>
-   <slot>setEnabled(bool)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>181</x>
-     <y>334</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>142</x>
-     <y>364</y>
+     <x>252</x>
+     <y>433</y>
     </hint>
    </hints>
   </connection>
@@ -1603,12 +1590,12 @@
    <slot>setEnabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>182</x>
-     <y>327</y>
+     <x>187</x>
+     <y>397</y>
     </hint>
     <hint type="destinationlabel">
-     <x>142</x>
-     <y>397</y>
+     <x>162</x>
+     <y>433</y>
     </hint>
    </hints>
   </connection>
@@ -1619,12 +1606,12 @@
    <slot>setEnabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>180</x>
-     <y>336</y>
+     <x>187</x>
+     <y>397</y>
     </hint>
     <hint type="destinationlabel">
-     <x>152</x>
-     <y>433</y>
+     <x>162</x>
+     <y>468</y>
     </hint>
    </hints>
   </connection>
@@ -1635,12 +1622,12 @@
    <slot>setEnabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>182</x>
-     <y>322</y>
+     <x>187</x>
+     <y>397</y>
     </hint>
     <hint type="destinationlabel">
-     <x>206</x>
-     <y>432</y>
+     <x>235</x>
+     <y>468</y>
     </hint>
    </hints>
   </connection>
@@ -1651,12 +1638,12 @@
    <slot>setEnabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>174</x>
-     <y>330</y>
+     <x>187</x>
+     <y>397</y>
     </hint>
     <hint type="destinationlabel">
-     <x>180</x>
-     <y>465</y>
+     <x>227</x>
+     <y>503</y>
     </hint>
    </hints>
   </connection>
@@ -1667,12 +1654,12 @@
    <slot>setEnabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>177</x>
-     <y>334</y>
+     <x>187</x>
+     <y>397</y>
     </hint>
     <hint type="destinationlabel">
-     <x>128</x>
-     <y>458</y>
+     <x>162</x>
+     <y>503</y>
     </hint>
    </hints>
   </connection>
@@ -1715,12 +1702,44 @@
    <slot>setDisabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>200</x>
-     <y>241</y>
+     <x>198</x>
+     <y>248</y>
     </hint>
     <hint type="destinationlabel">
      <x>227</x>
      <y>205</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>useGradientPenalty</sender>
+   <signal>clicked(bool)</signal>
+   <receiver>label_20</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>176</x>
+     <y>329</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>142</x>
+     <y>362</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>useGradientPenalty</sender>
+   <signal>clicked(bool)</signal>
+   <receiver>gradientBetaE</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>173</x>
+     <y>328</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>202</x>
+     <y>358</y>
     </hint>
    </hints>
   </connection>

@@ -360,8 +360,10 @@ void EmMpmGui::setupGui()
 
   // setup the Widget List
   m_WidgetList << m_NumClasses << m_EmIterations << m_MpmIterations << m_Beta << m_Gamma;
-  m_WidgetList << enableUserDefinedAreas << useSimulatedAnnealing << useCuravturePenalty;
-  m_WidgetList << curvatureBetaC << curvatureBetaE << curvatureRMax << ccostLoopDelay;
+  m_WidgetList << enableUserDefinedAreas << useSimulatedAnnealing;
+  m_WidgetList << useCuravturePenalty << useGradientPenalty;
+  m_WidgetList << curvatureBetaC << curvatureRMax << ccostLoopDelay;
+  m_WidgetList << gradientPenaltyLabel << gradientBetaE;
   setWidgetListEnabled(false);
 
   m_ImageWidgets << zoomIn << zoomOut << fitToWindow << zoomCB << imageDisplayCombo;
@@ -449,7 +451,7 @@ void EmMpmGui::copyIntializationValues(EMMPM_Data* inputs)
   {
     uia = uias[r];
     inputs->m[r] = uia->getMu();
-    inputs->v[r] = uia->getSigma();
+    inputs->v[r] = uia->getSigma() * uia->getSigma();
  //   std::cout << "Initializing with Mu:" << inputs->m[r] << "  Sigma: " << inputs->v[r] << std::endl;
   }
 }
@@ -667,10 +669,11 @@ void EmMpmGui::on_processBtn_clicked()
       copyGammaValues(data);
     }
     data->useCurvaturePenalty = (useCuravturePenalty->isChecked()) ? 1 : 0;
-    data->beta_e = curvatureBetaE->value();
-    data->beta_c = curvatureBetaC->value();
-    data->r_max = curvatureRMax->value();
-    data->ccostLoopDelay = ccostLoopDelay->value();
+    data->useGradientPenalty = (useGradientPenalty->isChecked()) ? 1 : 0;
+    data->beta_e = (useGradientPenalty->isChecked()) ? gradientBetaE->value() : 0.0;
+    data->beta_c = (useCuravturePenalty->isChecked()) ? curvatureBetaC->value() : 0.0;
+    data->r_max = (useCuravturePenalty->isChecked()) ? curvatureRMax->value() : 0.0;
+    data->ccostLoopDelay = (useCuravturePenalty->isChecked()) ? ccostLoopDelay->value() : m_MpmIterations->value() + 1;
     data->input_file_name = copyStringToNewBuffer(inputImageFilePath->text());
     data->output_file_name = copyStringToNewBuffer(outputImageFile->text());
     task->setInputFilePath(inputImageFilePath->text());
@@ -724,7 +727,7 @@ void EmMpmGui::on_processBtn_clicked()
         copyGammaValues(data);
       }
       data->useCurvaturePenalty = (useCuravturePenalty->isChecked()) ? 1 : 0;
-      data->beta_e = curvatureBetaE->value();
+      data->beta_e = gradientBetaE->value();
       data->beta_c = curvatureBetaC->value();
       data->r_max = curvatureRMax->value();
       data->ccostLoopDelay = ccostLoopDelay->value();
@@ -767,6 +770,8 @@ void EmMpmGui::on_processBtn_clicked()
 
 //  getQueueDialog()->setParent(this);
   m_QueueDialog->setVisible(true);
+
+  setWidgetListEnabled(false);
 
   queueController->start();
 }
@@ -843,12 +848,13 @@ void EmMpmGui::queueControllerFinished()
   getQueueController()->deleteLater();
   setQueueController(NULL);
 
+  /* Curvature Penalty Widgets */
   curvatureBetaC->setEnabled(useCuravturePenalty->isChecked());
-  curvatureBetaE->setEnabled(useCuravturePenalty->isChecked());
-  curvatureRMax->setEnabled(useCuravturePenalty->isChecked());
   curvatureRMax->setEnabled(useCuravturePenalty->isChecked());
   ccostLoopDelay->setEnabled(useCuravturePenalty->isChecked());
 
+  /* Gradient Penalty widgets  */
+  gradientBetaE->setEnabled(useGradientPenalty->isChecked());
 }
 
 // -----------------------------------------------------------------------------
@@ -1088,6 +1094,17 @@ void EmMpmGui::setWidgetListEnabled(bool b)
   {
     w->setEnabled(b);
   }
+
+  if (b == true) {
+    /* Curvature Penalty Widgets */
+    curvatureBetaC->setEnabled(useCuravturePenalty->isChecked());
+    curvatureRMax->setEnabled(useCuravturePenalty->isChecked());
+    ccostLoopDelay->setEnabled(useCuravturePenalty->isChecked());
+
+    /* Gradient Penalty widgets  */
+    gradientBetaE->setEnabled(useGradientPenalty->isChecked());
+  }
+
 }
 
 // -----------------------------------------------------------------------------
@@ -1561,7 +1578,7 @@ void EmMpmGui::userInitAreaUpdated(UserInitArea* uia)
     }
   }
   sig /= ((yEnd - yStart)*(xEnd - xStart));
-  //Calculate Std Dev (Squart Root of Sigma)
+  //Calculate Std Dev (Squart Root of Variance)
   sig = sqrt(sig);
   uia->setSigma(sig);
 
@@ -1856,6 +1873,4 @@ void EmMpmGui::on_clearTempHistograms_clicked()
   }
   addUserInitArea->setChecked(false);
 }
-
-
 

@@ -81,6 +81,13 @@ void ProcessQueueDialog::addProcess(ProcessQueueTask* task)
   this->processTableWidget->setCellWidget(rowCount, 0, label);
   this->processTableWidget->setCellWidget(rowCount, 1, progBar);
 
+//  QVBoxLayout* verticalLayout;
+//  verticalLayout = new QVBoxLayout(this);
+//  verticalLayout->setContentsMargins(0, 0, 0, 0);
+//  verticalLayout->addWidget(label);
+//  verticalLayout->addWidget(progBar);
+//  this->processTableWidget->setCellWidget(verticalLayout);
+
   connect(task, SIGNAL(progressValueChanged(int)), progBar, SLOT(setValue(int)));
   connect(task, SIGNAL(taskFinished(QObject*)), this, SLOT(removeRow(QObject*)));
   connect(cancelBtn, SIGNAL(clicked()), task, SLOT(cancel()));
