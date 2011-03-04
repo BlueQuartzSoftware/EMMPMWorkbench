@@ -9,6 +9,7 @@
 #include <iostream>
 #include <string>
 
+
 #include <MXA/Common/LogTime.h>
 #include <MXA/BMPIO/MXABmpIO.h>
 #define _TIFF_DATA_TYPEDEFS_ 1
@@ -67,11 +68,11 @@ int WriteGrayScaleTiff(unsigned char* raster, char* filename,
 
 
   memset(software, 0, 1024);
-  snprintf(software, 1024, "%s", TIFFLIB_VERSION_STR);
+  snprintf(software, 1024, "IPHelper BMP2Tiff: %s", TIFFLIB_VERSION_STR);
 
   err = TIFFSetField(out, TIFFTAG_SOFTWARE, software);
 
-  err = TIFFSetField(out, TIFFTAG_HOSTCOMPUTER, MXA_SYSTEM);
+  err = TIFFSetField(out, TIFFTAG_HOSTCOMPUTER, MXADATAMODEL_SYSTEM);
 
   // Write the information to the file
   area = (tsize_t)(width * height);
@@ -96,7 +97,8 @@ int main(int argc, char **argv)
     return EXIT_FAILURE;
   }
   MXABmpIO bmp;
-  LOAD_TEXTUREBMP_RESULT err = bmp.loadBMPData(argv[1], true);
+  LOAD_TEXTUREBMP_RESULT err = bmp.loadBMPData(argv[1], false);
+  bmp.convertToGrayscale();
   uint8_t* image = bmp.getImageData();
   int32_t width = bmp.getWidth();
   int32_t height = bmp.getHeight();

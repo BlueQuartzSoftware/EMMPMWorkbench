@@ -82,6 +82,8 @@ public:
     void setGamma(double g);
     double getGamma();
 
+    void setVisible(bool visible);
+
   static void deleteAllUserInitAreas(QGraphicsScene* scene);
 
  signals:
@@ -123,6 +125,7 @@ private:
     double m_Mu;
     double m_Sigma;
     double m_Gamma;
+    double m_Visible;
 };
 
 

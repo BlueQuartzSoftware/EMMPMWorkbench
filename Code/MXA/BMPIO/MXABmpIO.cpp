@@ -22,6 +22,26 @@
 //-- our own includes
 #include "MXABmpIO.h"
 
+
+#define PIXEL8_TO_GREYVALUE(pal, palIndex, out)\
+    r = pal[0][palIndex]; g = pal[1][palIndex]; b = pal[2][palIndex];\
+    if (r == b && r == g)\
+    { bitmapData[temp] = r; }\
+    else {\
+      R = r * 0.299; G = g * 0.587; B = b * 0.114;\
+      out = static_cast<unsigned char>(R + G + B);\
+    }
+
+#define PIXEL24_TO_GREYVALUE(in, out)\
+  r = in[0]; g = in[1]; b = in[2];\
+  if (r == g && r == b) \
+    out = r;\
+  else {\
+    R = r * 0.299; G = g * 0.587; B = b * 0.144;\
+    out = static_cast<unsigned char>(R + G + B);\
+  }
+
+
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
@@ -136,6 +156,7 @@ LOAD_TEXTUREBMP_RESULT MXABmpIO::readBitmapData()
   }
 }
 
+
 // -----------------------------------------------------------------------------
 // Load a 24-bit image. Cannot be encoded.
 LOAD_TEXTUREBMP_RESULT MXABmpIO::readBitmapData24Bit()
@@ -165,6 +186,8 @@ LOAD_TEXTUREBMP_RESULT MXABmpIO::readBitmapData24Bit()
   int targetRow = 0;
   char* buffPtr = (char*)buffer;
   float fTmp;
+  uint8_t r,g,b;
+  float R, G, B;
   for (int i = 0; i < height; i++)
   {
     //read a row of bytes
@@ -182,10 +205,7 @@ LOAD_TEXTUREBMP_RESULT MXABmpIO::readBitmapData24Bit()
       if (true == this->_convertToGrayScale)
       {
         temp = index + j;
-        fTmp = (float)(*(buffPtr++)) * 0.3f;
-        fTmp += (float)(*(buffPtr++)) * 0.59f;
-        fTmp +=(float)(*(buffPtr++)) * 0.11f;
-        bitmapData[temp] = (uint8_t)(fTmp);
+        PIXEL24_TO_GREYVALUE(buffPtr, bitmapData[temp])
       }
       else
       {
@@ -197,10 +217,6 @@ LOAD_TEXTUREBMP_RESULT MXABmpIO::readBitmapData24Bit()
         bitmapData[temp++] = green;
         bitmapData[temp] = blue;
       }
-
- //     bitmapData[index+j*3+2] = read8BitValue();
- //     bitmapData[index+j*3+1] = read8BitValue();
- //     bitmapData[index+j*3] = read8BitValue();
     }
 
     for (int k=(width*3)%4; k!=0 && k<4;k++)
@@ -222,11 +238,9 @@ LOAD_TEXTUREBMP_RESULT MXABmpIO::readBitmapData24Bit()
 // Read 8-bit image. Can be uncompressed or RLE-8 compressed.
 LOAD_TEXTUREBMP_RESULT MXABmpIO::readBitmapData8Bit()
 {
-
-
   int32_t temp = 0;
   int32_t index = 0;
-  uint8_t color = 0;
+  uint8_t palIndex = 0;
   int32_t componentNumBytes = 3;
   std::streamsize numBytes = width;
   int32_t offset = 0;
@@ -249,7 +263,8 @@ LOAD_TEXTUREBMP_RESULT MXABmpIO::readBitmapData8Bit()
     }
     uint8_t* bitmapData = (this->bitmapDataVec);
     int32_t widthByComponentNumBytes = componentNumBytes * width;
-
+    uint8_t r,g,b;
+    float R, G, B;
     // For each scan line
     int targetRow = 0;
     for (int i = 0;i < height; ++i)
@@ -262,20 +277,18 @@ LOAD_TEXTUREBMP_RESULT MXABmpIO::readBitmapData8Bit()
       index = targetRow * widthByComponentNumBytes;
       for (int j=0;j<width;j++)
       {
-        color = *buffPtr++;
+        palIndex = *buffPtr++;
         if (true == this->_convertToGrayScale)
         {
           temp = index + j;
-          bitmapData[temp] = (uint8_t)((float)(palette[0][color]) * 0.3f
-            + (float)(palette[1][color]) * 0.59f
-            + (float)(palette[2][color]) * 0.11f);
+          PIXEL8_TO_GREYVALUE(palette, palIndex, bitmapData[temp]);
         }
         else
         {
 		      temp = index + j * 3;
-          bitmapData[temp++] = palette[0][color];
-          bitmapData[temp++] = palette[1][color];
-          bitmapData[temp] = palette[2][color];
+          bitmapData[temp++] = palette[0][palIndex];
+          bitmapData[temp++] = palette[1][palIndex];
+          bitmapData[temp] = palette[2][palIndex];
         }
       }
 
@@ -332,10 +345,10 @@ LOAD_TEXTUREBMP_RESULT MXABmpIO::readBitmapData8Bit()
           {
             if (x>=width)
               return LOAD_TEXTUREBMP_ILLEGAL_FILE_FORMAT;
-            color = read8BitValue();
-            bitmapData[index+x*3] = palette[0][color];
-            bitmapData[index+x*3+1] = palette[1][color];
-            bitmapData[index+x*3+2] = palette[2][color];
+            palIndex = read8BitValue();
+            bitmapData[index+x*3] = palette[0][palIndex];
+            bitmapData[index+x*3+1] = palette[1][palIndex];
+            bitmapData[index+x*3+2] = palette[2][palIndex];
             x++;
           } // end for (int i=0; i<secondByte; i++)
 
@@ -772,12 +785,14 @@ void MXABmpIO::flipBitmap()
 void MXABmpIO::convertToGrayscale()
 {
   uint8_t* bitmapData = (this->bitmapDataVec);
+  uint8_t* ptr = NULL;
   //Uses the function Y = 0.3R + 0.59G + 0.11B
   if ( this->isGrayscale )
   {
     return;
   }
-
+  uint8_t r, g, b;
+  double R, B, G;
   uint8_t* grayscaleImage;
   int32_t element1, element2;
   uint8_t* grayscaleVec = new uint8_t[this->height * this->width];
@@ -788,9 +803,8 @@ void MXABmpIO::convertToGrayscale()
     {
       element1 = (row * width) + col;
       element2 = element1 * 3;
-      grayscaleImage[element1] = bitmapData[element2] * 0.299 +
-        bitmapData[element2 + 1] * 0.587 +
-        bitmapData[element2 + 2] * 0.114;
+      ptr = bitmapData + element2;
+      PIXEL24_TO_GREYVALUE(ptr, grayscaleImage[element1]);
     }
   }
   isGrayscale = true;

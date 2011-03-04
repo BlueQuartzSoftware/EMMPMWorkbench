@@ -1065,6 +1065,16 @@ void EmMpmGui::on_imageDisplayCombo_currentIndexChanged()
 void EmMpmGui::on_enableUserDefinedAreas_clicked(bool b)
 {
   userInitTab->setEnabled(b);
+
+  QList<UserInitArea*> uias = m_UserInitAreaTableModel->getUserInitAreas();
+  int size = uias.count();
+  UserInitArea* uia = NULL;
+  for (int r = 0; r < size; ++r)
+  {
+    uia = uias[r];
+    uia->setVisible(b);
+  }
+
 }
 
 // -----------------------------------------------------------------------------

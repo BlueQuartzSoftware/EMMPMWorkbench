@@ -63,6 +63,7 @@ QGraphicsPolygonItem(polygon, parent)
   m_Mu = 1.0;
   m_Sigma = 0.1;
   m_Gamma = 1.0;
+  m_Visible = true;
   setBrush(QBrush(m_Color));
 }
 
@@ -136,8 +137,18 @@ double UserInitArea::getGamma()
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
+void UserInitArea::setVisible(bool visible)
+{
+  m_Visible = visible;
+}
+
+// -----------------------------------------------------------------------------
+//
+// -----------------------------------------------------------------------------
 void UserInitArea::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget)
 {
+  if (m_Visible == false) { return; }
+
   painter->setRenderHint(QPainter::Antialiasing, true);
 
   if (option->state & QStyle::State_HasFocus)

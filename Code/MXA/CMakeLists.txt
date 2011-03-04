@@ -82,6 +82,6 @@ if (MXA_COMPILE_BMP2GRAYSCALETIFF)
     ENDIF (NOT TIFF_FOUND)
     INCLUDE_DIRECTORIES(${TIFF_INCLUDE_DIRS})
     add_executable(bmp2tiff Utilities/BmpToTiff.cpp)
-    target_link_libraries(bmp2tiff ${MXADATAMODEL_LIB_NAME} ${TIFF_LIBRARY})
+    target_link_libraries(bmp2tiff MXADataModel ${TIFF_LIBRARY})
 endif()
 
