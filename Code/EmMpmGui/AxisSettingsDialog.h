@@ -1,5 +1,5 @@
 /* ============================================================================
- * Copyright (c) 2010, Michael A. Jackson (BlueQuartz Software)
+ * Copyright (c) 2011, Michael A. Jackson (BlueQuartz Software)
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without modification,
@@ -28,40 +28,53 @@
  * USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 
-#ifndef USERINITAREADIALOG_H_
-#define USERINITAREADIALOG_H_
+#ifndef AXISSETTINGSDIALOG_H_
+#define AXISSETTINGSDIALOG_H_
+
 
 #include <QtGui/QDialog>
-#include <QtGui/QColor>
+#include <QtGui/QDoubleValidator>
 
 
 //-- UIC generated Header
-#include <ui_UserInitAreaDialog.h>
+#include <ui_AxisSettingsDialog.h>
 
-class UserInitArea;
+#define AXIS_GET_VALUE(w)\
+  void set##w(double value) {\
+    w->setText(QString::number(value)); }\
+  double get##w() { \
+    bool ok = false;\
+    return w->text().toDouble(&ok); }
 
-namespace UIA
-{
-  const static int Alpha = 155;
-}
 
-
-class UserInitAreaDialog : public QDialog, public Ui::UserInitAreaDialog
+class AxisSettingsDialog : public QDialog, public Ui::AxisSettingsDialog
 {
   Q_OBJECT;
 
   public:
-    UserInitAreaDialog( UserInitArea* uia, QWidget *parent = 0);
-    virtual ~UserInitAreaDialog();
+    AxisSettingsDialog(QWidget *parent = 0);
+    virtual ~AxisSettingsDialog();
+
+    AXIS_GET_VALUE(XAxisMin)
+    AXIS_GET_VALUE(XAxisMax)
+    AXIS_GET_VALUE(YAxisMin)
+    AXIS_GET_VALUE(YAxisMax)
 
   protected slots:
-    void on_colorPicker_currentIndexChanged(int index);
-
+    void on_XAxisMin_textEdited(const QString &s);
+    void on_XAxisMax_textEdited(const QString &s);
+    void on_YAxisMin_textEdited(const QString &s);
+    void on_YAxisMax_textEdited(const QString &s);
 
   private:
-    UserInitArea* m_uia;
-    UserInitAreaDialog(const UserInitAreaDialog&); // Copy Constructor Not Implemented
-    void operator=(const UserInitAreaDialog&); // Operator '=' Not Implemented
+    QDoubleValidator* m_XAxisMinValidator;
+    QDoubleValidator* m_XAxisMaxValidator;
+    QDoubleValidator* m_YAxisMinValidator;
+    QDoubleValidator* m_YAxisMaxValidator;
+
+
+    AxisSettingsDialog(const AxisSettingsDialog&); // Copy Constructor Not Implemented
+    void operator=(const AxisSettingsDialog&); // Operator '=' Not Implemented
 };
 
-#endif /* USERINITAREADIALOG_H_ */
+#endif /* AXISSETTINGSDIALOG_H_ */

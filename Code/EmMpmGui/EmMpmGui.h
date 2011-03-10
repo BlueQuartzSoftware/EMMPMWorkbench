@@ -38,7 +38,7 @@
 #include <QtGui/QMainWindow>
 #include <QtGui/QWidget>
 #include <QtGui/QGraphicsScene>
-#include <QtGui/QDoubleValidator>
+
 
 #include <emmpm/public/EMMPM_Structures.h>
 
@@ -55,6 +55,7 @@ class QwtPlotGrid;
 class QwtPlotCurve;
 class QwtPlotMarker;
 class EMMPMTask;
+class AxisSettingsDialog;
 
 
 #include "IPHelper/plugins/QImageProcessingInputFrame.h"
@@ -131,11 +132,7 @@ class EmMpmGui :  public QMainWindow, private Ui::EmMpmGui
     void on_actionExit_triggered();
     void on_actionClose_triggered();
 
-
-    void on_xAxisMin_textEdited(const QString &s);
-    void on_xAxisMax_textEdited(const QString &s);
-    void on_yAxisMin_textEdited(const QString &s);
-    void on_yAxisMax_textEdited(const QString &s);
+    void on_axisSettingsBtn_clicked();
 
     /* slots for the buttons in the GUI */
     void on_processBtn_clicked();
@@ -268,18 +265,11 @@ class EmMpmGui :  public QMainWindow, private Ui::EmMpmGui
   QwtPlotPanner* m_panner;
   QwtPlotGrid*   m_grid;
 
-  QDoubleValidator* m_XAxisMinValidator;
-  QDoubleValidator* m_XAxisMaxValidator;
-  QDoubleValidator* m_YAxisMinValidator;
-  QDoubleValidator* m_YAxisMaxValidator;
-
-
   QwtPlotCurve*           m_histogram;
   QList<QwtPlotCurve*>    m_Gaussians;
   QwtPlotCurve*           m_CombinedGaussians;
   QList<QwtPlotCurve*>    m_ProcessGaussians;
-
-  // QList<QwtPlotMarker*>   m_UIAMarkers;
+  AxisSettingsDialog*     m_AxisSettingsDialog;
 
   EmMpmGui(const EmMpmGui&); // Copy Constructor Not Implemented
   void operator=(const EmMpmGui&); // Operator '=' Not Implemented

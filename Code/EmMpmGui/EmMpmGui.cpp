@@ -70,6 +70,7 @@
 #include <qwt_interval_data.h>
 #include <qwt_painter.h>
 #include <qwt_scale_map.h>
+#include <qwt_scale_div.h>
 #include <qwt_plot_zoomer.h>
 #include <qwt_plot_panner.h>
 #include <qwt_plot_curve.h>
@@ -85,6 +86,7 @@
 #include "EmMpmGuiVersion.h"
 #include "UserInitAreaTableModel.h"
 #include "EMMPMTask.h"
+#include "AxisSettingsDialog.h"
 #include "License/LicenseFiles.h"
 
 #define READ_STRING_SETTING(prefs, var, emptyValue)\
@@ -249,6 +251,9 @@ void EmMpmGui::setupGui()
   resize(mySize);
 #endif
 
+  m_AxisSettingsDialog = new AxisSettingsDialog(this);
+  m_AxisSettingsDialog->setVisible(false);
+
   m_GraphicsView->setEmMpmGui(this);
   compositeModeCB->blockSignals(true);
 
@@ -282,7 +287,7 @@ void EmMpmGui::setupGui()
   compositeModeCB->setCurrentIndex(0);
   compositeModeCB->blockSignals(false);
   compositeModeCB->setEnabled(false);
-  userInitTab->setEnabled(false);
+ // userInitTab->setEnabled(false);
 
 
   QHeaderView* headerView = new QHeaderView(Qt::Horizontal, m_UserInitTable);
@@ -294,13 +299,6 @@ void EmMpmGui::setupGui()
   QAbstractItemDelegate* aid = m_UserInitAreaTableModel->getItemDelegate();
   m_UserInitTable->setItemDelegate(aid);
   headerView->show();
-
-
-  m_XAxisMinValidator = new QDoubleValidator(xAxisMin);
-  m_XAxisMaxValidator = new QDoubleValidator(xAxisMax);
-  m_YAxisMinValidator = new QDoubleValidator(yAxisMin);
-  m_XAxisMaxValidator = new QDoubleValidator(yAxisMax);
-
 
 
   connect (m_GraphicsView, SIGNAL(fireBaseImageFileLoaded(const QString &)),
@@ -368,7 +366,6 @@ void EmMpmGui::setupGui()
 
   m_ImageWidgets << zoomIn << zoomOut << fitToWindow << zoomCB << imageDisplayCombo;
   setImageWidgetsEnabled(false);
-
 
 #if 0
   m_zoomer = new QwtPlotZoomer(QwtPlot::xBottom, QwtPlot::yLeft, m_HistogramPlot->canvas());
@@ -1064,7 +1061,7 @@ void EmMpmGui::on_imageDisplayCombo_currentIndexChanged()
 // -----------------------------------------------------------------------------
 void EmMpmGui::on_enableUserDefinedAreas_clicked(bool b)
 {
-  userInitTab->setEnabled(b);
+ // userInitTab->setEnabled(b);
 
   QList<UserInitArea*> uias = m_UserInitAreaTableModel->getUserInitAreas();
   int size = uias.count();
@@ -1442,11 +1439,10 @@ void EmMpmGui::plotImageHistogram()
   }
   m_histogram->setData(intervals, values);
 
-  xAxisMax->setText(QString("256"));
-  xAxisMin->setText(QString("0.0"));
-  yAxisMax->setText(QString::number(max));
-  yAxisMin->setText(QString("0.0"));
-
+  m_AxisSettingsDialog->setXAxisMax(256.0);
+  m_AxisSettingsDialog->setXAxisMin(0.0);
+  m_AxisSettingsDialog->setYAxisMax(max);
+  m_AxisSettingsDialog->setYAxisMin(0.0);
   updateHistogramAxis();
 }
 // -----------------------------------------------------------------------------
@@ -1807,13 +1803,13 @@ void EmMpmGui::updateHistogramAxis()
 {
   double min, max;
   bool ok = false;
-  min = yAxisMin->text().toDouble(&ok);
-  max = yAxisMax->text().toDouble(&ok);
+  min = m_AxisSettingsDialog->getYAxisMin();
+  max = m_AxisSettingsDialog->getYAxisMax();
 
   m_HistogramPlot->setAxisScale(QwtPlot::yLeft, min, max);
 
-  min = xAxisMin->text().toDouble(&ok);
-  max = xAxisMax->text().toDouble(&ok);
+  min = m_AxisSettingsDialog->getXAxisMin();
+  max = m_AxisSettingsDialog->getXAxisMax();
   m_HistogramPlot->setAxisScale(QwtPlot::xBottom, min, max);
   m_HistogramPlot->replot();
 }
@@ -1822,35 +1818,22 @@ void EmMpmGui::updateHistogramAxis()
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
-void EmMpmGui::on_yAxisMax_textEdited(const QString &s)
+void EmMpmGui::on_axisSettingsBtn_clicked()
 {
-  updateHistogramAxis();
-}
 
-// -----------------------------------------------------------------------------
-//
-// -----------------------------------------------------------------------------
-void EmMpmGui::on_yAxisMin_textEdited(const QString &s)
-{
-  updateHistogramAxis();
-}
+  QwtScaleDiv* sd = m_HistogramPlot->axisScaleDiv(QwtPlot::yLeft);
+  m_AxisSettingsDialog->setYAxisMin(sd->lowerBound());
+  m_AxisSettingsDialog->setYAxisMax(sd->upperBound());
 
-// -----------------------------------------------------------------------------
-//
-// -----------------------------------------------------------------------------
-void EmMpmGui::on_xAxisMax_textEdited(const QString &s)
-{
-  updateHistogramAxis();
-}
+  sd = m_HistogramPlot->axisScaleDiv(QwtPlot::xBottom);
+    m_AxisSettingsDialog->setXAxisMin(sd->lowerBound());
+    m_AxisSettingsDialog->setXAxisMax(sd->upperBound());
 
-// -----------------------------------------------------------------------------
-//
-// -----------------------------------------------------------------------------
-void EmMpmGui::on_xAxisMin_textEdited(const QString &s)
-{
-  updateHistogramAxis();
+  int ok = m_AxisSettingsDialog->exec();
+  if (ok == 1) {
+    updateHistogramAxis();
+  }
 }
-
 
 
 // -----------------------------------------------------------------------------
