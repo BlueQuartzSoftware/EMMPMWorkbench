@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1022</width>
-    <height>700</height>
+    <width>873</width>
+    <height>560</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -45,7 +45,7 @@
     <item>
      <layout class="QVBoxLayout" name="verticalLayout_3">
       <property name="spacing">
-       <number>10</number>
+       <number>8</number>
       </property>
       <item>
        <widget class="QGroupBox" name="groupBox">
@@ -57,7 +57,7 @@
         </property>
         <property name="minimumSize">
          <size>
-          <width>270</width>
+          <width>225</width>
           <height>0</height>
          </size>
         </property>
@@ -338,6 +338,12 @@
           <verstretch>0</verstretch>
          </sizepolicy>
         </property>
+        <property name="minimumSize">
+         <size>
+          <width>225</width>
+          <height>0</height>
+         </size>
+        </property>
         <property name="title">
          <string>Options</string>
         </property>
@@ -500,7 +506,7 @@
         </property>
         <property name="minimumSize">
          <size>
-          <width>270</width>
+          <width>225</width>
           <height>0</height>
          </size>
         </property>
@@ -524,7 +530,7 @@
            </property>
            <property name="minimumSize">
             <size>
-             <width>260</width>
+             <width>215</width>
              <height>0</height>
             </size>
            </property>
@@ -536,24 +542,8 @@
       <item>
        <layout class="QHBoxLayout" name="horizontalLayout_7">
         <property name="sizeConstraint">
-         <enum>QLayout::SetMinimumSize</enum>
+         <enum>QLayout::SetMaximumSize</enum>
         </property>
-        <item>
-         <spacer name="horizontalSpacer_10">
-          <property name="orientation">
-           <enum>Qt::Horizontal</enum>
-          </property>
-          <property name="sizeType">
-           <enum>QSizePolicy::Preferred</enum>
-          </property>
-          <property name="sizeHint" stdset="0">
-           <size>
-            <width>40</width>
-            <height>20</height>
-           </size>
-          </property>
-         </spacer>
-        </item>
         <item>
          <widget class="QPushButton" name="processBtn">
           <property name="sizePolicy">
@@ -561,6 +551,12 @@
             <horstretch>0</horstretch>
             <verstretch>0</verstretch>
            </sizepolicy>
+          </property>
+          <property name="minimumSize">
+           <size>
+            <width>50</width>
+            <height>0</height>
+           </size>
           </property>
           <property name="maximumSize">
            <size>
@@ -583,7 +579,7 @@
           </property>
           <property name="minimumSize">
            <size>
-            <width>97</width>
+            <width>50</width>
             <height>0</height>
            </size>
           </property>
@@ -945,7 +941,7 @@
       </widget>
       <widget class="QWidget" name="inputImageTab">
        <attribute name="title">
-        <string>User Defined Areas</string>
+        <string>Image Display</string>
        </attribute>
        <layout class="QVBoxLayout" name="verticalLayout_5">
         <property name="spacing">
@@ -1173,6 +1169,9 @@
           <property name="orientation">
            <enum>Qt::Vertical</enum>
           </property>
+          <property name="handleWidth">
+           <number>6</number>
+          </property>
           <widget class="QFrame" name="frame">
            <property name="sizePolicy">
             <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
@@ -1273,7 +1272,7 @@
              <item row="2" column="3" colspan="7">
               <widget class="QwtPlot" name="m_HistogramPlot">
                <property name="sizePolicy">
-                <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+                <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
                  <horstretch>0</horstretch>
                  <verstretch>0</verstretch>
                 </sizepolicy>
@@ -1281,7 +1280,7 @@
                <property name="minimumSize">
                 <size>
                  <width>0</width>
-                 <height>0</height>
+                 <height>200</height>
                 </size>
                </property>
                <property name="contextMenuPolicy">
@@ -1377,8 +1376,8 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1022</width>
-     <height>22</height>
+     <width>873</width>
+     <height>21</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">

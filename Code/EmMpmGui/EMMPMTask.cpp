@@ -70,6 +70,10 @@ void EMMPMTask::EMMPMUpdate_CallBackWrapper(EMMPM_Data* data)
   // warning: <globalSHPTask> MUST point to an appropriate object!
   EMMPMTask* mySelf = static_cast<EMMPMTask* > (data->userData);
 
+//  float total = data->emIterations * data->mpmIterations;
+//  float current = data->currentEMLoop*data->mpmIterations + data->currentMPMLoop;
+//  data->progress = 100.0 * (current/total);
+
  // std::cout << "EMMPMUpdate_CallBackWrapper: Progress=" << data->progress << std::endl;
   emit
   mySelf->progressValueChanged((int)data->progress);
@@ -114,9 +118,6 @@ void EMMPMTask::EMMPMUpdate_CallBackWrapper(EMMPM_Data* data)
         emit mySelf->updateHistogramAvailable(values);
       }
     }
-
-
-
 
   }
 

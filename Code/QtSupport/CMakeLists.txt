@@ -51,6 +51,8 @@ SET( MXA_QT_UI_FILES
   ${QtSupport_SOURCE_DIR}/UI_Files/ProcessQueueDialog.ui
   ${QtSupport_SOURCE_DIR}/UI_Files/ApplicationAboutBoxDialog.ui
 )
+cmp_IDE_SOURCE_PROPERTIES( "QtSupport/UI_Files" "${MXA_QT_UI_FILES}" "" "0")
+
 
 
 # and finally any resource files

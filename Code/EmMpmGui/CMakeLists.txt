@@ -117,6 +117,7 @@ SET( EmMpmGui_UIS
  ${EmMpmGui_SOURCE_DIR}/UI_Files/UserInitAreaDialog.ui
  ${EmMpmGui_SOURCE_DIR}/UI_Files/AxisSettingsDialog.ui
 )
+cmp_IDE_SOURCE_PROPERTIES(EmMpmGui/UI_Files "${EmMpmGui_UIS}" "" "0")
 
 # and finally any resource files
 SET( EmMpmGui_RCS
@@ -133,7 +134,7 @@ QT4_WRAP_UI( Generated_UI_HDRS ${EmMpmGui_UIS} )
 QT4_WRAP_CPP( Generated_MOC_SRCS ${EmMpmGui_MOC_HDRS} )
 
 #-- Put the generated files into their own group for IDEs
-cmp_IDE_GENERATED_PROPERTIES(GuiAlignment/Generated "${Generated_UI_HDRS}" "${Generated_MOC_SRCS}")
+cmp_IDE_GENERATED_PROPERTIES(EmMpmGui/Generated "${Generated_UI_HDRS}" "${Generated_MOC_SRCS};${Generated_RC_SRCS}")
 
 
 # -- Finally set the Project Sources to include all the sources

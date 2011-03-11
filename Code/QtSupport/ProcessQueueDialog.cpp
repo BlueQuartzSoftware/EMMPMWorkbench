@@ -75,11 +75,17 @@ void ProcessQueueDialog::addProcess(ProcessQueueTask* task)
   QFileInfo fileInfo(task->getInputFilePath());
   progBar->setText(fileInfo.fileName());
 
-  QSizePolicy sizePolicy1(QSizePolicy::Preferred, QSizePolicy::Expanding);
+  QSizePolicy sizePolicy1(QSizePolicy::Preferred, QSizePolicy::Fixed);
   sizePolicy1.setHorizontalStretch(0);
-  sizePolicy1.setVerticalStretch(15);
+  sizePolicy1.setVerticalStretch(25);
   sizePolicy1.setHeightForWidth(progBar->sizePolicy().hasHeightForWidth());
   progBar->setSizePolicy(sizePolicy1);
+
+  progBar->setMinimumSize(QSize(1, 25));
+  QFont font;
+  font.setBold(true);
+  font.setWeight(75);
+  progBar->setFont(font);
 
  // this->processTableWidget->setRowCount(rowCount + 1);
  // this->processTableWidget->setCellWidget(rowCount, 1, progBar);

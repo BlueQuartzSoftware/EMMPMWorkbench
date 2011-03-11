@@ -84,9 +84,9 @@ class QProgressLabel : public QLabel
 
 
     public slots:
-     int setMaximum(int m) { m_Maximum = m; }
-     int setMinimum(int m) { m_Minimum = m; }
-     int setValue(int v)
+     void setMaximum(int m) { m_Maximum = m; }
+     void setMinimum(int m) { m_Minimum = m; }
+     void setValue(int v)
     {
      //  std::cout << "Setting Value: " << v << std::endl;
       m_Value = v;
