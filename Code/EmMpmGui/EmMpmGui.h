@@ -120,9 +120,6 @@ class EmMpmGui :  public QMainWindow, private Ui::EmMpmGui
     void userInitAreaUpdated(UserInitArea* uia);
     void userInitAreaSelected(UserInitArea* uia);
 
-
-
-
   protected slots:
   //Manual Hookup Menu Actions
     void on_actionOpenBaseImage_triggered(); // Open a Data File
@@ -136,6 +133,8 @@ class EmMpmGui :  public QMainWindow, private Ui::EmMpmGui
 
     /* slots for the buttons in the GUI */
     void on_processBtn_clicked();
+    void on_cancelBtn_clicked();
+
 
     /* slots for the buttons in the GUI */
     void on_imageDisplayCombo_currentIndexChanged();
@@ -190,8 +189,9 @@ class EmMpmGui :  public QMainWindow, private Ui::EmMpmGui
     void addProcessHistogram(QVector<double> data);
     void updateCombinedGaussian();
 
-
   protected:
+
+    EMMPMTask* newEmMpmTask( QString inputFile, QString outputFile, ProcessQueueController* queueController);
 
     void addProcess(EMMPMTask* name);
     /**
@@ -270,6 +270,7 @@ class EmMpmGui :  public QMainWindow, private Ui::EmMpmGui
   QwtPlotCurve*           m_CombinedGaussians;
   QList<QwtPlotCurve*>    m_ProcessGaussians;
   AxisSettingsDialog*     m_AxisSettingsDialog;
+  QMap<QObject*, QWidget*> m_TasksMap;
 
   EmMpmGui(const EmMpmGui&); // Copy Constructor Not Implemented
   void operator=(const EmMpmGui&); // Operator '=' Not Implemented

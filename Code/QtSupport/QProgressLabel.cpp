@@ -63,7 +63,6 @@ QProgressLabel::~QProgressLabel()
 // -----------------------------------------------------------------------------
 void QProgressLabel::paintEvent(QPaintEvent* event)
 {
-
   Q_UNUSED(event);
 
 //  m_color = Qt::blue;

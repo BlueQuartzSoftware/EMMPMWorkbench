@@ -65,7 +65,9 @@ void ProcessQueueDialog::clearTable()
 // -----------------------------------------------------------------------------
 void ProcessQueueDialog::addProcess(ProcessQueueTask* task)
 {
-//  qint32 rowCount = this->processTableWidget->rowCount();
+  verticalLayout->removeItem(verticalSpacer);
+
+
   QProgressLabel* progBar = new QProgressLabel(this);
   progBar->setRange(0, 100);
   progBar->setAlignment(Qt::AlignBottom);
@@ -73,13 +75,21 @@ void ProcessQueueDialog::addProcess(ProcessQueueTask* task)
   QFileInfo fileInfo(task->getInputFilePath());
   progBar->setText(fileInfo.fileName());
 
+  QSizePolicy sizePolicy1(QSizePolicy::Preferred, QSizePolicy::Expanding);
+  sizePolicy1.setHorizontalStretch(0);
+  sizePolicy1.setVerticalStretch(15);
+  sizePolicy1.setHeightForWidth(progBar->sizePolicy().hasHeightForWidth());
+  progBar->setSizePolicy(sizePolicy1);
+
  // this->processTableWidget->setRowCount(rowCount + 1);
  // this->processTableWidget->setCellWidget(rowCount, 1, progBar);
-  progBarLayout->addWidget(progBar);
+  verticalLayout->addWidget(progBar);
+
+  verticalLayout->addSpacerItem(verticalSpacer);
 
   connect(task, SIGNAL(progressValueChanged(int)), progBar, SLOT(setValue(int)));
   connect(task, SIGNAL(taskFinished(QObject*)), this, SLOT(removeRow(QObject*)));
-  connect(cancelBtn, SIGNAL(clicked()), task, SLOT(cancel()));
+ // connect(cancelBtn, SIGNAL(clicked()), task, SLOT(cancel()));
   m_TasksMap[task] = progBar;
 
  // processTableWidget->resizeColumnToContents(0);
@@ -94,9 +104,10 @@ void ProcessQueueDialog::addProcess(ProcessQueueTask* task)
 // -----------------------------------------------------------------------------
 void ProcessQueueDialog::removeRow(QObject* sender)
 {
- // std::cout << "ProcessQueueDialog::removeRow" << std::endl;
+  std::cout << "ProcessQueueDialog::removeRow" << std::endl;
   QWidget* widget = m_TasksMap[sender];
-  progBarLayout->removeWidget(widget);
-
+  verticalLayout->removeWidget(widget);
+  m_TasksMap.remove(sender);
+  delete widget;
 
 }

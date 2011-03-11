@@ -342,8 +342,11 @@ void EmMpmGui::setupGui()
   QObject::connect(com3, SIGNAL(activated(const QString &)), this, SLOT(on_outputDirectoryLE_textChanged(const QString &)));
 
 
- // m_QueueDialog = new ProcessQueueDialog(this);
-  m_QueueDialog->setVisible(false);
+//  m_QueueDialog->setVisible(false);
+  cancelBtn->setVisible(false);
+
+  // Hid the user init table by default
+  m_UserInitTable->hide();
 
   // Configure the Histogram Plot
   m_HistogramPlot->setCanvasBackground(QColor(Qt::white));
@@ -633,56 +636,16 @@ void EmMpmGui::on_processBtn_clicked()
 
   if (this->processFolder->isChecked() == false)
   {
-    EMMPMTask* task = new EMMPMTask(NULL);
-    EMMPM_Data* data = task->getEMMPM_Data();
-    data->in_beta = m_Beta->text().toFloat(&ok);
+    QString inputFile = inputImageFilePath->text();
+    QString outputFile = outputImageFile->text();
+    EMMPMTask* task = newEmMpmTask(inputFile, outputFile, queueController);
 
-    for(int i = 0; i < EMMPM_MAX_CLASSES; i++) {
-      data->w_gamma[i] =  m_Gamma->text().toFloat(&ok);
-    }
-    data->mpmIterations = m_MpmIterations->value();
-    data->emIterations = m_EmIterations->value();
-    data->classes = m_NumClasses->value();
-    data->simulatedAnnealing = (useSimulatedAnnealing->isChecked()) ? 1 : 0;
-    data->dims = 1; // FORCING A GRAY SCALE IMAGE TO BE USED
-    if (enableUserDefinedAreas->isChecked() == false)
-    {
-      data->initType = EMMPM_Basic;
-      int n = data->classes - 1;
-      for (int value = 0; value < data->classes; ++value)
-      {
-        data->grayTable[value] = value * 255 / n;
-      }
-    }
-    else
-    {
-      data->initType = EMMPM_ManualInit;
-      // Allocate memory to hold the values - The EMMPM Task will free the memory
-      data->m = (double*)malloc(data->classes * data->dims * sizeof(double));
-      data->v = (double*)malloc(data->classes * data->dims * sizeof(double));
-      copyGrayValues(data);
-      copyInitCoords(data);
-      copyIntializationValues(data);
-      copyGammaValues(data);
-    }
-    data->useCurvaturePenalty = (useCuravturePenalty->isChecked()) ? 1 : 0;
-    data->useGradientPenalty = (useGradientPenalty->isChecked()) ? 1 : 0;
-    data->beta_e = (useGradientPenalty->isChecked()) ? gradientBetaE->value() : 0.0;
-    data->beta_c = (useCuravturePenalty->isChecked()) ? curvatureBetaC->value() : 0.0;
-    data->r_max = (useCuravturePenalty->isChecked()) ? curvatureRMax->value() : 0.0;
-    data->ccostLoopDelay = (useCuravturePenalty->isChecked()) ? ccostLoopDelay->value() : m_MpmIterations->value() + 1;
-    data->input_file_name = copyStringToNewBuffer(inputImageFilePath->text());
-    data->output_file_name = copyStringToNewBuffer(outputImageFile->text());
-    task->setInputFilePath(inputImageFilePath->text());
-    task->setOutputFilePath(outputImageFile->text());
-    queueController->addTask(static_cast<QThread* > (task));
-    connect(task, SIGNAL(updateImageAvailable(QImage)),
-            m_GraphicsView, SLOT(setOverlayImage(QImage)));
+    queueController->addTask(static_cast<QThread*> (task));
+    connect(cancelBtn, SIGNAL(clicked()), task, SLOT(cancel()));
 
-    connect(task, SIGNAL(histogramsAboutToBeUpdated()),
-            this, SLOT(clearProcessHistograms()));
-    connect(task, SIGNAL(updateHistogramAvailable(QVector<double>)),
-            this, SLOT(addProcessHistogram(QVector<double>)));
+    connect(task, SIGNAL(updateImageAvailable(QImage)), m_GraphicsView, SLOT(setOverlayImage(QImage)));
+    connect(task, SIGNAL(histogramsAboutToBeUpdated()), this, SLOT(clearProcessHistograms()));
+    connect(task, SIGNAL(updateHistogramAvailable(QVector<double>)), this, SLOT(addProcessHistogram(QVector<double>)));
     this->addProcess(task);
   }
   else
@@ -691,65 +654,31 @@ void EmMpmGui::on_processBtn_clicked()
     int32_t count = fileList.count();
     for (int32_t i = 0; i < count; ++i)
     {
-      //  std::cout << "Adding input file:" << fileList.at(i).toStdString() << std::endl;
-      EMMPMTask* task = new EMMPMTask(NULL);
-      EMMPM_Data* data = task->getEMMPM_Data();
-      data->emIterations = m_EmIterations->value();
-      data->mpmIterations = m_MpmIterations->value();
-      data->in_beta = m_Beta->text().toFloat(&ok);
-      data->dims = 1; // FORCING A GRAY SCALE IMAGE TO BE USED
-      for(int j = 0; j < EMMPM_MAX_CLASSES; j++) {
-        data->w_gamma[j] =  m_Gamma->text().toFloat(&ok);
-      }
-      data->classes = m_NumClasses->value();
-      data->simulatedAnnealing = (useSimulatedAnnealing->isChecked()) ? 1 : 0;
-      if (enableUserDefinedAreas->isChecked() == false)
-      {
-        data->initType = EMMPM_Basic;
-        int n = data->classes - 1;
-        for (int value = 0; value < data->classes; ++value)
-        {
-          data->grayTable[value] = value * 255 / n;
-        }
-      }
-      else
-      {
-        data->initType = EMMPM_ManualInit;
-        // Allocate memory to hold the values - EMMPMTask will free the memory
-        data->m = (double*)malloc(data->classes * data->dims * sizeof(double));
-        data->v = (double*)malloc(data->classes * data->dims * sizeof(double));
-        copyGrayValues(data);
-        copyInitCoords(data);
-        copyIntializationValues(data);
-        copyGammaValues(data);
-      }
-      data->useCurvaturePenalty = (useCuravturePenalty->isChecked()) ? 1 : 0;
-      data->beta_e = gradientBetaE->value();
-      data->beta_c = curvatureBetaC->value();
-      data->r_max = curvatureRMax->value();
-      data->ccostLoopDelay = ccostLoopDelay->value();
-      task->setInputFilePath(sourceDirectoryLE->text() + QDir::separator() + fileList.at(i));
+      QString inputFile = (sourceDirectoryLE->text() + QDir::separator() + fileList.at(i));
+
       QFileInfo fileInfo(fileList.at(i));
       QString basename = fileInfo.completeBaseName();
       QString extension = fileInfo.suffix();
-      QString filepath = outputDirectoryLE->text();
-      filepath.append(QDir::separator());
-      filepath.append(outputPrefix->text());
-      filepath.append(basename);
-      filepath.append(outputSuffix->text());
-      filepath.append(".");
-      filepath.append(outputImageType->currentText());
-      task->setOutputFilePath(filepath);
+      QString outputFile = outputDirectoryLE->text();
+      outputFile.append(QDir::separator());
+      outputFile.append(outputPrefix->text());
+      outputFile.append(basename);
+      outputFile.append(outputSuffix->text());
+      outputFile.append(".");
+      outputFile.append(outputImageType->currentText());
 
-      data->input_file_name = copyStringToNewBuffer(task->getInputFilePath());
-      data->output_file_name = copyStringToNewBuffer(task->getOutputFilePath());
+      EMMPMTask* task = newEmMpmTask(inputFile, outputFile, queueController);
+      queueController->addTask(static_cast<QThread*> (task));
+      connect(cancelBtn, SIGNAL(clicked()), task, SLOT(cancel()));
 
       filepairs.append(InputOutputFilePair(task->getInputFilePath(), task->getOutputFilePath()));
       queueController->addTask(static_cast<QThread* > (task));
       if (i == 0)
       {
-        connect(task, SIGNAL(updateImageAvailable(QImage)),
-                m_GraphicsView, SLOT(setOverlayImage(QImage)));
+        connect(task, SIGNAL(updateImageAvailable(QImage)), m_GraphicsView, SLOT(setOverlayImage(QImage)));
+        connect(task, SIGNAL(histogramsAboutToBeUpdated()), this, SLOT(clearProcessHistograms()));
+        connect(task, SIGNAL(updateHistogramAvailable(QVector<double>)), this, SLOT(addProcessHistogram(QVector<double>)));
+
       }
       this->addProcess(task);
     }
@@ -766,12 +695,79 @@ void EmMpmGui::on_processBtn_clicked()
   connect(queueController, SIGNAL(finished()), this, SLOT(processingFinished()));
 
 //  getQueueDialog()->setParent(this);
-  m_QueueDialog->setVisible(true);
+//  m_QueueDialog->setVisible(true);
+  processBtn->setVisible(false);
+  cancelBtn->setVisible(true);
 
   setWidgetListEnabled(false);
 
   queueController->start();
 }
+
+// -----------------------------------------------------------------------------
+//
+// -----------------------------------------------------------------------------
+EMMPMTask* EmMpmGui::newEmMpmTask( QString inputFile, QString outputFile, ProcessQueueController* queueController)
+{
+  bool ok = false;
+  EMMPMTask* task = new EMMPMTask(NULL);
+  EMMPM_Data* data = task->getEMMPM_Data();
+
+  data->input_file_name = copyStringToNewBuffer(inputFile);
+  data->output_file_name = copyStringToNewBuffer(outputFile);
+  task->setInputFilePath(inputFile);
+  task->setOutputFilePath(outputFile);
+
+  data->in_beta = m_Beta->text().toFloat(&ok);
+
+  for (int i = 0; i < EMMPM_MAX_CLASSES; i++)
+  {
+    data->w_gamma[i] = m_Gamma->text().toFloat(&ok);
+  }
+  data->mpmIterations = m_MpmIterations->value();
+  data->emIterations = m_EmIterations->value();
+  data->classes = m_NumClasses->value();
+  data->simulatedAnnealing = (useSimulatedAnnealing->isChecked()) ? 1 : 0;
+  data->dims = 1; // FORCING A GRAY SCALE IMAGE TO BE USED
+  if (enableUserDefinedAreas->isChecked() == false)
+  {
+    data->initType = EMMPM_Basic;
+    int n = data->classes - 1;
+    for (int value = 0; value < data->classes; ++value)
+    {
+      data->grayTable[value] = value * 255 / n;
+    }
+  }
+  else
+  {
+    data->initType = EMMPM_ManualInit;
+    // Allocate memory to hold the values - The EMMPM Task will free the memory
+    data->m = (double*)malloc(data->classes * data->dims * sizeof(double));
+    data->v = (double*)malloc(data->classes * data->dims * sizeof(double));
+    copyGrayValues(data);
+    copyInitCoords(data);
+    copyIntializationValues(data);
+    copyGammaValues(data);
+  }
+  data->useCurvaturePenalty = (useCuravturePenalty->isChecked()) ? 1 : 0;
+  data->useGradientPenalty = (useGradientPenalty->isChecked()) ? 1 : 0;
+  data->beta_e = (useGradientPenalty->isChecked()) ? gradientBetaE->value() : 0.0;
+  data->beta_c = (useCuravturePenalty->isChecked()) ? curvatureBetaC->value() : 0.0;
+  data->r_max = (useCuravturePenalty->isChecked()) ? curvatureRMax->value() : 0.0;
+  data->ccostLoopDelay = (useCuravturePenalty->isChecked()) ? ccostLoopDelay->value() : m_MpmIterations->value() + 1;
+
+
+  return task;
+}
+
+// -----------------------------------------------------------------------------
+//
+// -----------------------------------------------------------------------------
+void EmMpmGui::on_cancelBtn_clicked()
+{
+  std::cout << "on_cancelBtn_clicked" << std::endl;
+}
+
 
 // -----------------------------------------------------------------------------
 //
@@ -802,10 +798,8 @@ void EmMpmGui::processingFinished()
   /* Code that cleans up anything from the processing */
   processBtn->setText("Segment");
   processBtn->setVisible(true);
+  cancelBtn->setVisible(false);
   this->statusBar()->showMessage("Processing Complete");
-
-  // Get the image files from the plugin
-
 }
 
 // -----------------------------------------------------------------------------
@@ -813,7 +807,7 @@ void EmMpmGui::processingFinished()
 // -----------------------------------------------------------------------------
 void EmMpmGui::queueControllerFinished()
 {
-  m_QueueDialog->setVisible(false);
+//  m_QueueDialog->setVisible(false);
   if (this->processFolder->isChecked() == false)
   {
     setCurrentImageFile (inputImageFilePath->text());
