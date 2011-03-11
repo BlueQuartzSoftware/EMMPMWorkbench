@@ -819,6 +819,8 @@ void EmMpmGui::queueControllerFinished()
     QStringList fileList = generateInputFileList();
 
     setCurrentImageFile (sourceDirectoryLE->text() + QDir::separator() + fileList.at(0) );
+    m_GraphicsView->loadBaseImageFile(m_CurrentImageFile);
+
     std::cout << "Setting current Image file: " << getCurrentImageFile().toStdString() << std::endl;
     QFileInfo fileInfo(fileList.at(0));
     QString basename = fileInfo.completeBaseName();
@@ -831,7 +833,8 @@ void EmMpmGui::queueControllerFinished()
     filepath.append(".");
     filepath.append(outputImageType->currentText());
     setCurrentProcessedFile(filepath);
-    std::cout << "Setting processed Image file: " << filepath.toStdString() << std::endl;
+    m_GraphicsView->loadOverlayImageFile(m_CurrentProcessedFile);
+  //  std::cout << "Setting processed Image file: " << filepath.toStdString() << std::endl;
   }
 
   setWidgetListEnabled(true);
