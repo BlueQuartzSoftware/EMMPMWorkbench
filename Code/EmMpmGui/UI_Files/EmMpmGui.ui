@@ -736,6 +736,13 @@
          </layout>
         </item>
         <item>
+         <widget class="Line" name="line_3">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+         </widget>
+        </item>
+        <item>
          <layout class="QHBoxLayout" name="_5">
           <item>
            <widget class="QLabel" name="label_2">
@@ -860,6 +867,13 @@
          </layout>
         </item>
         <item>
+         <widget class="Line" name="line_2">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+         </widget>
+        </item>
+        <item>
          <layout class="QHBoxLayout" name="_2">
           <item>
            <widget class="QLabel" name="label_13">
@@ -893,7 +907,7 @@
           <item>
            <widget class="QLabel" name="filterPatternLabel">
             <property name="text">
-             <string>File Name Filter: </string>
+             <string>Input File Name Filter </string>
             </property>
            </widget>
           </item>

@@ -200,7 +200,7 @@ void EmMpmGui::readSettings()
   READ_STRING_SETTING(prefs, outputImageFile, "");
   READ_STRING_SETTING(prefs, sourceDirectoryLE, "");
   READ_STRING_SETTING(prefs, outputDirectoryLE, "");
-  READ_STRING_SETTING(prefs, outputPrefix, "");
+  READ_STRING_SETTING(prefs, outputPrefix, "Segmented_");
   READ_STRING_SETTING(prefs, outputSuffix, "");
   prefs.endGroup();
   on_processFolder_stateChanged(processFolder->isChecked());
@@ -819,7 +819,9 @@ void EmMpmGui::queueControllerFinished()
     QStringList fileList = generateInputFileList();
 
     setCurrentImageFile (sourceDirectoryLE->text() + QDir::separator() + fileList.at(0) );
+    m_GraphicsView->blockSignals(true);   
     m_GraphicsView->loadBaseImageFile(m_CurrentImageFile);
+    m_GraphicsView->blockSignals(false);  
 
     std::cout << "Setting current Image file: " << getCurrentImageFile().toStdString() << std::endl;
     QFileInfo fileInfo(fileList.at(0));
@@ -836,7 +838,7 @@ void EmMpmGui::queueControllerFinished()
     m_GraphicsView->loadOverlayImageFile(m_CurrentProcessedFile);
   //  std::cout << "Setting processed Image file: " << filepath.toStdString() << std::endl;
   }
-
+  setWindowTitle(m_CurrentImageFile);
   setWidgetListEnabled(true);
 
   getQueueController()->deleteLater();
@@ -1218,6 +1220,7 @@ void EmMpmGui::openBaseImageFile(QString imageFile)
   UserInitArea::deleteAllUserInitAreas(m_GraphicsView->scene());
 
   m_GraphicsView->loadBaseImageFile(imageFile);
+  setWindowTitle(imageFile);
 
   // Tell the RecentFileList to update itself then broadcast those changes.
   QRecentFileList::instance()->addFile(imageFile);
@@ -1367,6 +1370,7 @@ void EmMpmGui::baseImageFileLoaded(const QString &filename)
 {
  // std::cout << "Loaded Image file " << filename.toStdString() << std::endl;
   this->setWindowFilePath(filename);
+  setWindowTitle(filename);
   imageDisplayCombo->setCurrentIndex(EmMpm_Constants::OriginalImage);
   inputImageFilePath->setText(filename);
   clearProcessHistograms();
