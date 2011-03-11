@@ -70,7 +70,7 @@ Qt::ItemFlags UserInitAreaTableModel::flags(const QModelIndex &index) const
     theFlags |= Qt::ItemIsEnabled;
 
     int col = index.column();
-    if (col == Class || col == GrayValue || col == Gamma)
+    if (col == Class || col == GrayValue || col == Gamma || col == Mu)
     {
       theFlags = Qt::ItemIsEditable | Qt::ItemIsSelectable | Qt::ItemIsEnabled;
     }
@@ -260,6 +260,7 @@ bool UserInitAreaTableModel::setData(const QModelIndex & index, const QVariant &
     case UserInitAreaTableModel::LowerRight:
       break;
     case UserInitAreaTableModel::Mu:
+      m_UserInitAreas.at(row)->setMu(value.toDouble(&ok));
       break;
     case UserInitAreaTableModel::StdDev:
       break;

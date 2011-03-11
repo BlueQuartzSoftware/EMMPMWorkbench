@@ -1589,7 +1589,6 @@ void EmMpmGui::userInitAreaUpdated(UserInitArea* uia)
   uia->setSigma(sig);
 
   m_UserInitAreaTableModel->updateUserInitArea(uia);
-  //TODO: Add in code to automatically select the row in the table.
 
   // Generate the Histogram Bins
   const int numValues = 256;
@@ -1826,8 +1825,8 @@ void EmMpmGui::on_axisSettingsBtn_clicked()
   m_AxisSettingsDialog->setYAxisMax(sd->upperBound());
 
   sd = m_HistogramPlot->axisScaleDiv(QwtPlot::xBottom);
-    m_AxisSettingsDialog->setXAxisMin(sd->lowerBound());
-    m_AxisSettingsDialog->setXAxisMax(sd->upperBound());
+  m_AxisSettingsDialog->setXAxisMin(sd->lowerBound());
+  m_AxisSettingsDialog->setXAxisMax(sd->upperBound());
 
   int ok = m_AxisSettingsDialog->exec();
   if (ok == 1) {

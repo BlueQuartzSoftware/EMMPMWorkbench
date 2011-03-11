@@ -31,8 +31,7 @@
 #include "ProcessQueueDialog.h"
 
 #include <QtCore/QFileInfo>
-#include <QtGui/QProgressBar>
-#include <QtGui/QLabel>
+#include "QProgressLabel.h"
 
 // -----------------------------------------------------------------------------
 //
@@ -56,8 +55,8 @@ ProcessQueueDialog::~ProcessQueueDialog()
 // -----------------------------------------------------------------------------
 void ProcessQueueDialog::clearTable()
 {
-  this->processTableWidget->clearContents();
-  this->processTableWidget->setRowCount(0);
+//  this->processTableWidget->clearContents();
+//  this->processTableWidget->setRowCount(0);
   m_TasksMap.clear();
 }
 
@@ -66,37 +65,27 @@ void ProcessQueueDialog::clearTable()
 // -----------------------------------------------------------------------------
 void ProcessQueueDialog::addProcess(ProcessQueueTask* task)
 {
-  qint32 rowCount = this->processTableWidget->rowCount();
-  QProgressBar* progBar = new QProgressBar(this);
+//  qint32 rowCount = this->processTableWidget->rowCount();
+  QProgressLabel* progBar = new QProgressLabel(this);
   progBar->setRange(0, 100);
-  progBar->setTextVisible(true);
-  progBar->setFormat("%p%");
   progBar->setAlignment(Qt::AlignBottom);
 
   QFileInfo fileInfo(task->getInputFilePath());
+  progBar->setText(fileInfo.fileName());
 
-  this->processTableWidget->setRowCount(rowCount + 1);
-  QLabel* label = new QLabel(fileInfo.fileName());
-  label->setAlignment(Qt::AlignCenter);
-  this->processTableWidget->setCellWidget(rowCount, 0, label);
-  this->processTableWidget->setCellWidget(rowCount, 1, progBar);
-
-//  QVBoxLayout* verticalLayout;
-//  verticalLayout = new QVBoxLayout(this);
-//  verticalLayout->setContentsMargins(0, 0, 0, 0);
-//  verticalLayout->addWidget(label);
-//  verticalLayout->addWidget(progBar);
-//  this->processTableWidget->setCellWidget(verticalLayout);
+ // this->processTableWidget->setRowCount(rowCount + 1);
+ // this->processTableWidget->setCellWidget(rowCount, 1, progBar);
+  progBarLayout->addWidget(progBar);
 
   connect(task, SIGNAL(progressValueChanged(int)), progBar, SLOT(setValue(int)));
   connect(task, SIGNAL(taskFinished(QObject*)), this, SLOT(removeRow(QObject*)));
   connect(cancelBtn, SIGNAL(clicked()), task, SLOT(cancel()));
   m_TasksMap[task] = progBar;
 
-  processTableWidget->resizeColumnToContents(0);
-  int width = processTableWidget->columnWidth(0);
-  width = width + (width * .1);
-  processTableWidget->setColumnWidth(0, width);
+ // processTableWidget->resizeColumnToContents(0);
+ // int width = processTableWidget->columnWidth(0);
+ // width = width + (width * .1);
+ // processTableWidget->setColumnWidth(0, width);
 
 }
 
@@ -107,13 +96,7 @@ void ProcessQueueDialog::removeRow(QObject* sender)
 {
  // std::cout << "ProcessQueueDialog::removeRow" << std::endl;
   QWidget* widget = m_TasksMap[sender];
-  for (int i = 0; i < processTableWidget->rowCount(); ++i)
-  {
-    if (widget == processTableWidget->cellWidget(i, 1))
-    {
-      processTableWidget->removeRow(i);
-      break;
-    }
-  }
+  progBarLayout->removeWidget(widget);
+
 
 }

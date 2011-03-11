@@ -550,7 +550,7 @@ void EMMPMGraphicsView::loadOverlayImageFile(const QString &filename)
   m_ImageGraphicsItem->setZValue(-1);
   QRectF rect = m_ImageGraphicsItem->boundingRect();
   gScene->setSceneRect(rect);
-  centerOn(m_ImageGraphicsItem);
+  //centerOn(m_ImageGraphicsItem);
 
   m_ImageDisplayType = EmMpm_Constants::SegmentedImage;
 

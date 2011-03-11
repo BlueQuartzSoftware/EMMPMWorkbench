@@ -32,10 +32,11 @@
 #define PROCESSQUEUEDIALOG_H_
 
 #include <ui_ProcessQueueDialog.h>
-
-#include "ProcessQueueTask.h"
 #include <QtCore/QMap>
 #include <QtGui/QWidget>
+
+#include "ProcessQueueTask.h"
+
 
 
 /**

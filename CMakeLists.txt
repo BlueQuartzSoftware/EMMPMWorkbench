@@ -184,7 +184,8 @@ endif()
 # --------------------------------------------------------------------
 # This was left over from the Mutual Information code that never matialized
 # add_subdirectory(${PROJECT_CODE_DIR}/AngReader ${PROJECT_BINARY_DIR}/AngReader)
-# add_subdirectory(${PROJECT_CODE_DIR}/MIApp ${PROJECT_BINARY_DIR}/Applications/MIApp)
+
+add_subdirectory(${PROJECT_SOURCE_DIR}/Test ${PROJECT_BINARY_DIR}/Applications/ProgressLabel)
 
 
 # Should we build the HTML documentation using DOxygen

@@ -70,8 +70,9 @@ void EMMPMTask::EMMPMUpdate_CallBackWrapper(EMMPM_Data* data)
   // warning: <globalSHPTask> MUST point to an appropriate object!
   EMMPMTask* mySelf = static_cast<EMMPMTask* > (data->userData);
 
+ // std::cout << "EMMPMUpdate_CallBackWrapper: Progress=" << data->progress << std::endl;
   emit
-  mySelf->progressValueChanged(data->progress);
+  mySelf->progressValueChanged((int)data->progress);
   emit
   mySelf->progressTextChanged(QString::number(data->progress));
 
