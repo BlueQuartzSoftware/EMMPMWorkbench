@@ -110,7 +110,7 @@ void ProcessQueueDialog::addProcess(ProcessQueueTask* task)
 // -----------------------------------------------------------------------------
 void ProcessQueueDialog::removeRow(QObject* sender)
 {
-  std::cout << "ProcessQueueDialog::removeRow" << std::endl;
+ // std::cout << "ProcessQueueDialog::removeRow" << std::endl;
   QWidget* widget = m_TasksMap.value(sender);
   if (NULL != widget) {
     verticalLayout->removeWidget(widget);

@@ -39,7 +39,7 @@ ProcessQueueController::ProcessQueueController(QObject* parent) :
 QThread(parent),
 m_AutoDelete(true)
 {
-  m_MaxThreads = 4; //QThread::idealThreadCount();
+  m_MaxThreads = QThread::idealThreadCount();
   m_ThreadCount = 1; // We need this to be 1 because the first time we will decrement the value
 }
 

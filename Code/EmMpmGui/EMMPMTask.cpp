@@ -74,7 +74,7 @@ void EMMPMTask::EMMPMUpdate_CallBackWrapper(EMMPM_Data* data)
 //  float current = data->currentEMLoop*data->mpmIterations + data->currentMPMLoop;
 //  data->progress = 100.0 * (current/total);
 
-  std::cout << "EMMPMUpdate_CallBackWrapper: Progress=" << data->progress << std::endl;
+ // std::cout << "EMMPMUpdate_CallBackWrapper: Progress=" << data->progress << std::endl;
   emit mySelf->progressValueChanged((int)data->progress);
   emit mySelf->progressTextChanged(QString::number(data->progress));
 
@@ -189,10 +189,6 @@ EMMPMTask::EMMPMTask(QObject* parent) :
 // -----------------------------------------------------------------------------
 EMMPMTask::~EMMPMTask()
 {
-  std::cout << "EMMPMTask::~EMMPMTask()" << std::endl;
-
-  EMMPM_FreeDataStructure(m_data);
-  EMMPM_FreeCallbackFunctionStructure(m_callbacks);
 }
 
 // -----------------------------------------------------------------------------
@@ -310,10 +306,6 @@ void EMMPMTask::run()
     return;
   }
 
-//  m_callbacks->EMMPM_InitializationFunc = NULL;
-//  m_callbacks->EMMPM_ProgressFunc = NULL;
-//  m_callbacks->EMMPM_ProgressStatsFunc = NULL;
-
   // Run the EM/MPM algorithm on the input image
 
   EMMPM_Run(m_data, m_callbacks);
@@ -347,13 +339,12 @@ void EMMPMTask::run()
   }
 #endif
 
-  UPDATE_PROGRESS(QString("Ending Segmentation"), 0);
+  UPDATE_PROGRESS(QString("Ending Segmentation"), 100);
   emit taskFinished(this);
 
   //Clean up the Memory as this class will NOT get deleted right away. This will
   // deallocate the bulk of the memory
   EMMPM_FreeDataStructure(m_data);
   EMMPM_FreeCallbackFunctionStructure(m_callbacks);
-
 }
 
