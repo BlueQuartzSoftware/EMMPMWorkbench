@@ -74,11 +74,9 @@ void EMMPMTask::EMMPMUpdate_CallBackWrapper(EMMPM_Data* data)
 //  float current = data->currentEMLoop*data->mpmIterations + data->currentMPMLoop;
 //  data->progress = 100.0 * (current/total);
 
- // std::cout << "EMMPMUpdate_CallBackWrapper: Progress=" << data->progress << std::endl;
-  emit
-  mySelf->progressValueChanged((int)data->progress);
-  emit
-  mySelf->progressTextChanged(QString::number(data->progress));
+  std::cout << "EMMPMUpdate_CallBackWrapper: Progress=" << data->progress << std::endl;
+  emit mySelf->progressValueChanged((int)data->progress);
+  emit mySelf->progressTextChanged(QString::number(data->progress));
 
   // Check to make sure we are at the end of an em loop
   if (  data->inside_mpm_loop == 0 && NULL != data->outputImage)
@@ -95,9 +93,9 @@ void EMMPMTask::EMMPMUpdate_CallBackWrapper(EMMPM_Data* data)
     }
     image.setColorTable(colorTable);
     size_t index = 0;
-    for (int y = 0; y < data->rows; ++y)
+    for (unsigned int y = 0; y < data->rows; ++y)
     {
-      for (int x = 0; x < data->columns; ++x)
+      for (unsigned int x = 0; x < data->columns; ++x)
       {
         image.setPixel(x, y, data->outputImage[index]);
         ++index;
@@ -108,7 +106,7 @@ void EMMPMTask::EMMPMUpdate_CallBackWrapper(EMMPM_Data* data)
     size_t histIdx = 0;
     emit mySelf->histogramsAboutToBeUpdated();
 
-    for (int d = 0; d < data->dims; ++d)
+    for (unsigned int d = 0; d < data->dims; ++d)
     {
       for (int l = 0; l < data->classes; ++l)
       {
@@ -191,7 +189,7 @@ EMMPMTask::EMMPMTask(QObject* parent) :
 // -----------------------------------------------------------------------------
 EMMPMTask::~EMMPMTask()
 {
-  //  std::cout << "EMMPMTask::~EMMPMTask()" << std::endl;
+  std::cout << "EMMPMTask::~EMMPMTask()" << std::endl;
 
   EMMPM_FreeDataStructure(m_data);
   EMMPM_FreeCallbackFunctionStructure(m_callbacks);
@@ -301,7 +299,7 @@ void EMMPMTask::run()
   }
 
   // Set the Update Stats Callback function
-  m_callbacks->EMMPM_ProgressStatsFunc = EMMPMTask::EMMPMUpdate_CallBackWrapper;
+   m_callbacks->EMMPM_ProgressStatsFunc = EMMPMTask::EMMPMUpdate_CallBackWrapper;
 
   // Allocate all the memory here
   int err = EMMPM_AllocateDataStructureMemory(m_data);
@@ -312,7 +310,12 @@ void EMMPMTask::run()
     return;
   }
 
+//  m_callbacks->EMMPM_InitializationFunc = NULL;
+//  m_callbacks->EMMPM_ProgressFunc = NULL;
+//  m_callbacks->EMMPM_ProgressStatsFunc = NULL;
+
   // Run the EM/MPM algorithm on the input image
+
   EMMPM_Run(m_data, m_callbacks);
 
   // Set the inputimage pointer to NULL so it does not get freed twice
@@ -346,5 +349,11 @@ void EMMPMTask::run()
 
   UPDATE_PROGRESS(QString("Ending Segmentation"), 0);
   emit taskFinished(this);
+
+  //Clean up the Memory as this class will NOT get deleted right away. This will
+  // deallocate the bulk of the memory
+  EMMPM_FreeDataStructure(m_data);
+  EMMPM_FreeCallbackFunctionStructure(m_callbacks);
+
 }
 

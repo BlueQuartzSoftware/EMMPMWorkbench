@@ -56,6 +56,7 @@ QProgressLabel::QProgressLabel(QWidget* parent) :
 // -----------------------------------------------------------------------------
 QProgressLabel::~QProgressLabel()
 {
+  std::cout << "~QProgressLabel" << std::endl;
 }
 
 // -----------------------------------------------------------------------------

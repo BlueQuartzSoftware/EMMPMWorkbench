@@ -68,7 +68,7 @@ void ProcessQueueDialog::addProcess(ProcessQueueTask* task)
   verticalLayout->removeItem(verticalSpacer);
 
 
-  QProgressLabel* progBar = new QProgressLabel(this);
+  QProgressLabel* progBar = new QProgressLabel(NULL);
   progBar->setRange(0, 100);
   progBar->setAlignment(Qt::AlignBottom);
 
@@ -111,9 +111,11 @@ void ProcessQueueDialog::addProcess(ProcessQueueTask* task)
 void ProcessQueueDialog::removeRow(QObject* sender)
 {
   std::cout << "ProcessQueueDialog::removeRow" << std::endl;
-  QWidget* widget = m_TasksMap[sender];
-  verticalLayout->removeWidget(widget);
-  m_TasksMap.remove(sender);
-  delete widget;
+  QWidget* widget = m_TasksMap.value(sender);
+  if (NULL != widget) {
+    verticalLayout->removeWidget(widget);
+    m_TasksMap.remove(sender);
+    delete widget;
+  }
 
 }

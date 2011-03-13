@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>873</width>
-    <height>560</height>
+    <width>957</width>
+    <height>647</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -333,7 +333,7 @@
       <item>
        <widget class="QGroupBox" name="groupBox_2">
         <property name="sizePolicy">
-         <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
+         <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
           <horstretch>0</horstretch>
           <verstretch>0</verstretch>
          </sizepolicy>
@@ -387,6 +387,12 @@
            <property name="enabled">
             <bool>false</bool>
            </property>
+           <property name="minimumSize">
+            <size>
+             <width>50</width>
+             <height>0</height>
+            </size>
+           </property>
            <property name="maximum">
             <double>9999.989999999999782</double>
            </property>
@@ -400,6 +406,12 @@
            <property name="enabled">
             <bool>false</bool>
            </property>
+           <property name="minimumSize">
+            <size>
+             <width>50</width>
+             <height>0</height>
+            </size>
+           </property>
            <property name="maximum">
             <double>9999.989999999999782</double>
            </property>
@@ -412,6 +424,12 @@
           <widget class="QDoubleSpinBox" name="curvatureRMax">
            <property name="enabled">
             <bool>false</bool>
+           </property>
+           <property name="minimumSize">
+            <size>
+             <width>50</width>
+             <height>0</height>
+            </size>
            </property>
            <property name="correctionMode">
             <enum>QAbstractSpinBox::CorrectToPreviousValue</enum>
@@ -445,6 +463,12 @@
           <widget class="QSpinBox" name="ccostLoopDelay">
            <property name="enabled">
             <bool>false</bool>
+           </property>
+           <property name="minimumSize">
+            <size>
+             <width>50</width>
+             <height>0</height>
+            </size>
            </property>
            <property name="minimum">
             <number>0</number>
@@ -1394,8 +1418,8 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>873</width>
-     <height>21</height>
+     <width>957</width>
+     <height>22</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -1543,8 +1567,8 @@
      <y>393</y>
     </hint>
     <hint type="destinationlabel">
-     <x>252</x>
-     <y>429</y>
+     <x>227</x>
+     <y>433</y>
     </hint>
    </hints>
   </connection>
@@ -1591,8 +1615,8 @@
      <y>393</y>
     </hint>
     <hint type="destinationlabel">
-     <x>235</x>
-     <y>464</y>
+     <x>227</x>
+     <y>468</y>
     </hint>
    </hints>
   </connection>
@@ -1636,11 +1660,11 @@
    <hints>
     <hint type="sourcelabel">
      <x>194</x>
-     <y>242</y>
+     <y>288</y>
     </hint>
     <hint type="destinationlabel">
-     <x>552</x>
-     <y>78</y>
+     <x>535</x>
+     <y>91</y>
     </hint>
    </hints>
   </connection>
@@ -1651,12 +1675,12 @@
    <slot>setDisabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>197</x>
-     <y>234</y>
+     <x>194</x>
+     <y>288</y>
     </hint>
     <hint type="destinationlabel">
-     <x>206</x>
-     <y>75</y>
+     <x>192</x>
+     <y>91</y>
     </hint>
    </hints>
   </connection>
@@ -1667,12 +1691,12 @@
    <slot>setDisabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>198</x>
-     <y>244</y>
+     <x>194</x>
+     <y>288</y>
     </hint>
     <hint type="destinationlabel">
-     <x>227</x>
-     <y>205</y>
+     <x>192</x>
+     <y>225</y>
     </hint>
    </hints>
   </connection>
@@ -1699,8 +1723,8 @@
    <slot>setEnabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>173</x>
-     <y>328</y>
+     <x>194</x>
+     <y>336</y>
     </hint>
     <hint type="destinationlabel">
      <x>202</x>

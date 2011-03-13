@@ -819,9 +819,9 @@ void EmMpmGui::queueControllerFinished()
     QStringList fileList = generateInputFileList();
 
     setCurrentImageFile (sourceDirectoryLE->text() + QDir::separator() + fileList.at(0) );
-    m_GraphicsView->blockSignals(true);   
+    m_GraphicsView->blockSignals(true);
     m_GraphicsView->loadBaseImageFile(m_CurrentImageFile);
-    m_GraphicsView->blockSignals(false);  
+    m_GraphicsView->blockSignals(false);
 
     std::cout << "Setting current Image file: " << getCurrentImageFile().toStdString() << std::endl;
     QFileInfo fileInfo(fileList.at(0));
@@ -863,6 +863,9 @@ void EmMpmGui::on_processFolder_stateChanged(int state)
   {
     enabled = false;
   }
+
+  setWidgetListEnabled(true);
+  setImageWidgetsEnabled(true);
 
   sourceDirectoryLE->setEnabled(enabled);
   sourceDirectoryBtn->setEnabled(enabled);
