@@ -177,6 +177,10 @@ class EmMpmGui :  public QMainWindow, private Ui::EmMpmGui
     void on_outputSuffix_textChanged();
     void on_outputImageType_currentIndexChanged(int index);
 
+    void on_enableUserDefinedAreas_stateChanged(int state);
+
+
+
     // Over rides from Parent Class
     /* Slots to receive events from the ProcessQueueController */
     void queueControllerFinished();

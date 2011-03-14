@@ -68,6 +68,15 @@
          <property name="fieldGrowthPolicy">
           <enum>QFormLayout::FieldsStayAtSizeHint</enum>
          </property>
+         <property name="horizontalSpacing">
+          <number>4</number>
+         </property>
+         <property name="verticalSpacing">
+          <number>6</number>
+         </property>
+         <property name="margin">
+          <number>4</number>
+         </property>
          <item row="0" column="0">
           <widget class="QLabel" name="label_12">
            <property name="sizePolicy">
@@ -277,56 +286,6 @@
            </property>
           </widget>
          </item>
-         <item row="4" column="0">
-          <widget class="QLabel" name="label_9">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="minimumSize">
-            <size>
-             <width>0</width>
-             <height>0</height>
-            </size>
-           </property>
-           <property name="toolTip">
-            <string>Gamma Term in Classical EM/MPM</string>
-           </property>
-           <property name="text">
-            <string>Gamma</string>
-           </property>
-           <property name="alignment">
-            <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-           </property>
-          </widget>
-         </item>
-         <item row="4" column="1">
-          <widget class="QLineEdit" name="m_Gamma">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="minimumSize">
-            <size>
-             <width>60</width>
-             <height>0</height>
-            </size>
-           </property>
-           <property name="maximumSize">
-            <size>
-             <width>60</width>
-             <height>16777215</height>
-            </size>
-           </property>
-           <property name="text">
-            <string>0.1</string>
-           </property>
-          </widget>
-         </item>
         </layout>
        </widget>
       </item>
@@ -340,7 +299,7 @@
         </property>
         <property name="minimumSize">
          <size>
-          <width>225</width>
+          <width>235</width>
           <height>0</height>
          </size>
         </property>
@@ -348,21 +307,47 @@
          <string>Options</string>
         </property>
         <layout class="QFormLayout" name="formLayout_3">
-         <item row="1" column="0">
+         <property name="fieldGrowthPolicy">
+          <enum>QFormLayout::FieldsStayAtSizeHint</enum>
+         </property>
+         <property name="horizontalSpacing">
+          <number>4</number>
+         </property>
+         <property name="verticalSpacing">
+          <number>6</number>
+         </property>
+         <property name="margin">
+          <number>4</number>
+         </property>
+         <item row="0" column="0">
           <widget class="QLabel" name="label_18">
            <property name="text">
             <string>Use Sim. Annealing</string>
            </property>
           </widget>
          </item>
-         <item row="1" column="1">
+         <item row="0" column="1">
           <widget class="QCheckBox" name="useSimulatedAnnealing">
            <property name="text">
             <string/>
            </property>
           </widget>
          </item>
-         <item row="3" column="0">
+         <item row="1" column="0">
+          <widget class="QLabel" name="gradientPenaltyLabel">
+           <property name="text">
+            <string>Use Gradient Penalty</string>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="1">
+          <widget class="QCheckBox" name="useGradientPenalty">
+           <property name="text">
+            <string/>
+           </property>
+          </widget>
+         </item>
+         <item row="2" column="0">
           <widget class="QLabel" name="label_20">
            <property name="enabled">
             <bool>false</bool>
@@ -372,17 +357,7 @@
            </property>
           </widget>
          </item>
-         <item row="5" column="0">
-          <widget class="QLabel" name="label_21">
-           <property name="enabled">
-            <bool>false</bool>
-           </property>
-           <property name="text">
-            <string>Beta C</string>
-           </property>
-          </widget>
-         </item>
-         <item row="3" column="1">
+         <item row="2" column="1">
           <widget class="QDoubleSpinBox" name="gradientBetaE">
            <property name="enabled">
             <bool>false</bool>
@@ -401,7 +376,31 @@
            </property>
           </widget>
          </item>
-         <item row="5" column="1">
+         <item row="3" column="0">
+          <widget class="QLabel" name="label_19">
+           <property name="text">
+            <string>Use Curvature Penalty</string>
+           </property>
+          </widget>
+         </item>
+         <item row="3" column="1">
+          <widget class="QCheckBox" name="useCuravturePenalty">
+           <property name="text">
+            <string/>
+           </property>
+          </widget>
+         </item>
+         <item row="4" column="0">
+          <widget class="QLabel" name="label_21">
+           <property name="enabled">
+            <bool>false</bool>
+           </property>
+           <property name="text">
+            <string>Beta C</string>
+           </property>
+          </widget>
+         </item>
+         <item row="4" column="1">
           <widget class="QDoubleSpinBox" name="curvatureBetaC">
            <property name="enabled">
             <bool>false</bool>
@@ -420,7 +419,17 @@
            </property>
           </widget>
          </item>
-         <item row="6" column="1">
+         <item row="5" column="0">
+          <widget class="QLabel" name="label_22">
+           <property name="enabled">
+            <bool>false</bool>
+           </property>
+           <property name="text">
+            <string>R Max</string>
+           </property>
+          </widget>
+         </item>
+         <item row="5" column="1">
           <widget class="QDoubleSpinBox" name="curvatureRMax">
            <property name="enabled">
             <bool>false</bool>
@@ -440,16 +449,6 @@
           </widget>
          </item>
          <item row="6" column="0">
-          <widget class="QLabel" name="label_22">
-           <property name="enabled">
-            <bool>false</bool>
-           </property>
-           <property name="text">
-            <string>R Max</string>
-           </property>
-          </widget>
-         </item>
-         <item row="7" column="0">
           <widget class="QLabel" name="label_23">
            <property name="enabled">
             <bool>false</bool>
@@ -459,7 +458,7 @@
            </property>
           </widget>
          </item>
-         <item row="7" column="1">
+         <item row="6" column="1">
           <widget class="QSpinBox" name="ccostLoopDelay">
            <property name="enabled">
             <bool>false</bool>
@@ -475,42 +474,14 @@
            </property>
           </widget>
          </item>
-         <item row="4" column="0">
-          <widget class="QLabel" name="label_19">
-           <property name="text">
-            <string>Use Curvature Penalty</string>
-           </property>
-          </widget>
-         </item>
-         <item row="2" column="0">
-          <widget class="QLabel" name="gradientPenaltyLabel">
-           <property name="text">
-            <string>Use Gradient Penalty</string>
-           </property>
-          </widget>
-         </item>
-         <item row="4" column="1">
-          <widget class="QCheckBox" name="useCuravturePenalty">
-           <property name="text">
-            <string/>
-           </property>
-          </widget>
-         </item>
-         <item row="2" column="1">
-          <widget class="QCheckBox" name="useGradientPenalty">
-           <property name="text">
-            <string/>
-           </property>
-          </widget>
-         </item>
-         <item row="0" column="0">
+         <item row="7" column="0">
           <widget class="QLabel" name="label">
            <property name="text">
             <string>User Initialization Areas</string>
            </property>
           </widget>
          </item>
-         <item row="0" column="1">
+         <item row="7" column="1">
           <widget class="QCheckBox" name="enableUserDefinedAreas">
            <property name="text">
             <string/>
@@ -619,7 +590,7 @@
     <item>
      <widget class="QTabWidget" name="tabWidget">
       <property name="currentIndex">
-       <number>0</number>
+       <number>1</number>
       </property>
       <widget class="QWidget" name="filesInputTab">
        <attribute name="title">
@@ -1010,6 +981,9 @@
             </property>
             <item>
              <widget class="QToolButton" name="zoomIn">
+              <property name="toolTip">
+               <string>Zoom In</string>
+              </property>
               <property name="text">
                <string/>
               </property>
@@ -1021,6 +995,9 @@
             </item>
             <item>
              <widget class="QToolButton" name="zoomOut">
+              <property name="toolTip">
+               <string>Zoom Out</string>
+              </property>
               <property name="text">
                <string/>
               </property>
@@ -1032,6 +1009,9 @@
             </item>
             <item>
              <widget class="QToolButton" name="fitToWindow">
+              <property name="toolTip">
+               <string>Fit Image to Current Window Size</string>
+              </property>
               <property name="text">
                <string/>
               </property>
@@ -1120,6 +1100,9 @@
            <widget class="QToolButton" name="addUserInitArea">
             <property name="enabled">
              <bool>false</bool>
+            </property>
+            <property name="toolTip">
+             <string>User Initialization Lasso Tool</string>
             </property>
             <property name="text">
              <string/>
@@ -1328,6 +1311,9 @@
                <property name="contextMenuPolicy">
                 <enum>Qt::CustomContextMenu</enum>
                </property>
+               <property name="toolTip">
+                <string>Image Histogram and Mixture of Gaussians Plots</string>
+               </property>
               </widget>
              </item>
              <item row="3" column="7">
@@ -1381,6 +1367,9 @@
               <horstretch>0</horstretch>
               <verstretch>0</verstretch>
              </sizepolicy>
+            </property>
+            <property name="toolTip">
+             <string>User Initialization Values</string>
             </property>
             <property name="alternatingRowColors">
              <bool>true</bool>
@@ -1523,11 +1512,6 @@
   <tabstop>m_EmIterations</tabstop>
   <tabstop>m_MpmIterations</tabstop>
   <tabstop>m_Beta</tabstop>
-  <tabstop>m_Gamma</tabstop>
-  <tabstop>useSimulatedAnnealing</tabstop>
-  <tabstop>gradientBetaE</tabstop>
-  <tabstop>curvatureBetaC</tabstop>
-  <tabstop>curvatureRMax</tabstop>
   <tabstop>inputImageFilePath</tabstop>
   <tabstop>inputImageFilePathBtn</tabstop>
   <tabstop>outputImageFile</tabstop>
@@ -1681,22 +1665,6 @@
     <hint type="destinationlabel">
      <x>192</x>
      <y>91</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>enableUserDefinedAreas</sender>
-   <signal>clicked(bool)</signal>
-   <receiver>m_Gamma</receiver>
-   <slot>setDisabled(bool)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>194</x>
-     <y>288</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>192</x>
-     <y>225</y>
     </hint>
    </hints>
   </connection>

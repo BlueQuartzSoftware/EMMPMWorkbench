@@ -190,7 +190,6 @@ void EmMpmGui::readSettings()
   qint32 i;
   prefs.beginGroup("EMMPMPlugin");
   READ_STRING_SETTING(prefs, m_Beta, "5.5");
-  READ_STRING_SETTING(prefs, m_Gamma, "0.1");
   READ_SETTING(prefs, m_MpmIterations, ok, i, 5, Int);
   READ_SETTING(prefs, m_EmIterations, ok, i, 5, Int);
   READ_SETTING(prefs, m_NumClasses, ok, i, 2, Int);
@@ -223,7 +222,6 @@ void EmMpmGui::writeSettings()
 #endif
   prefs.beginGroup("EMMPMPlugin");
   WRITE_STRING_SETTING(prefs, m_Beta);
-  WRITE_STRING_SETTING(prefs, m_Gamma);
   WRITE_SETTING(prefs, m_MpmIterations);
   WRITE_SETTING(prefs, m_EmIterations);
   WRITE_SETTING(prefs, m_NumClasses);
@@ -360,7 +358,7 @@ void EmMpmGui::setupGui()
 //  m_grid->attach(m_HistogramPlot);
 
   // setup the Widget List
-  m_WidgetList << m_NumClasses << m_EmIterations << m_MpmIterations << m_Beta << m_Gamma;
+  m_WidgetList << m_NumClasses << m_EmIterations << m_MpmIterations << m_Beta;
   m_WidgetList << enableUserDefinedAreas << useSimulatedAnnealing;
   m_WidgetList << useCuravturePenalty << useGradientPenalty;
   m_WidgetList << curvatureBetaC << curvatureRMax << ccostLoopDelay;
@@ -722,7 +720,7 @@ EMMPMTask* EmMpmGui::newEmMpmTask( QString inputFile, QString outputFile, Proces
 
   for (int i = 0; i < EMMPM_MAX_CLASSES; i++)
   {
-    data->w_gamma[i] = m_Gamma->text().toFloat(&ok);
+    data->w_gamma[i] = 0.0;
   }
   data->mpmIterations = m_MpmIterations->value();
   data->emIterations = m_EmIterations->value();
@@ -1702,7 +1700,6 @@ void EmMpmGui::deleteUserInitArea(UserInitArea* uia)
   if (userInitAreas.size()-1 == 0)
   {
     m_NumClasses->setEnabled(true);
-    m_Gamma->setEnabled(true);
   }
 }
 
@@ -1735,7 +1732,6 @@ void EmMpmGui::userInitAreaAdded(UserInitArea* uia)
   if (userInitAreas.size() != 0)
   {
     m_NumClasses->setEnabled(false);
-    m_Gamma->setEnabled(false);
   }
 
 #if 1
@@ -1870,3 +1866,17 @@ void EmMpmGui::on_clearTempHistograms_clicked()
   addUserInitArea->setChecked(false);
 }
 
+
+// -----------------------------------------------------------------------------
+//
+// -----------------------------------------------------------------------------
+void EmMpmGui::on_enableUserDefinedAreas_stateChanged(int state)
+{
+  if(enableUserDefinedAreas->isChecked()) {
+  m_UserInitTable->show();
+  }
+  else
+  {
+    m_UserInitTable->hide();
+  }
+}
