@@ -126,7 +126,7 @@ private:
     double m_Mu;
     double m_Sigma;
     double m_Gamma;
-    double m_Visible;
+    bool m_Visible;
 };
 
 
