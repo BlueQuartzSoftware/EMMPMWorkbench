@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>957</width>
-    <height>647</height>
+    <width>885</width>
+    <height>650</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -472,6 +472,9 @@
            <property name="minimum">
             <number>0</number>
            </property>
+           <property name="value">
+            <number>1</number>
+           </property>
           </widget>
          </item>
          <item row="7" column="0">
@@ -590,7 +593,7 @@
     <item>
      <widget class="QTabWidget" name="tabWidget">
       <property name="currentIndex">
-       <number>1</number>
+       <number>0</number>
       </property>
       <widget class="QWidget" name="filesInputTab">
        <attribute name="title">
@@ -679,14 +682,38 @@
          </widget>
         </item>
         <item>
-         <widget class="QCheckBox" name="processFolder">
-          <property name="enabled">
-           <bool>true</bool>
-          </property>
-          <property name="text">
-           <string>Process Folder</string>
-          </property>
-         </widget>
+         <layout class="QHBoxLayout" name="horizontalLayout_4">
+          <item>
+           <widget class="QCheckBox" name="processFolder">
+            <property name="enabled">
+             <bool>true</bool>
+            </property>
+            <property name="text">
+             <string>Process Folder</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <spacer name="horizontalSpacer_9">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>40</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+          <item>
+           <widget class="QPushButton" name="loadFirstImageBtn">
+            <property name="text">
+             <string>Load First Image</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
         </item>
         <item>
          <layout class="QGridLayout" name="gridLayout_3">
@@ -1332,7 +1359,7 @@
              <item row="3" column="4">
               <widget class="QToolButton" name="axisSettingsBtn">
                <property name="text">
-                <string>Axis Settings</string>
+                <string>Plot Settings</string>
                </property>
               </widget>
              </item>
@@ -1407,7 +1434,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>957</width>
+     <width>885</width>
      <height>22</height>
     </rect>
    </property>
@@ -1421,22 +1448,13 @@
      </property>
      <addaction name="separator"/>
     </widget>
-    <widget class="QMenu" name="menu_MovingRecentFiles">
-     <property name="title">
-      <string>Segmented Recent Files</string>
-     </property>
-     <addaction name="separator"/>
-    </widget>
     <addaction name="actionOpenBaseImage"/>
     <addaction name="actionOpenOverlayImage"/>
     <addaction name="menu_FixedRecentFiles"/>
-    <addaction name="menu_MovingRecentFiles"/>
     <addaction name="separator"/>
     <addaction name="actionSaveCanvas"/>
     <addaction name="actionAbout"/>
     <addaction name="actionExit"/>
-    <addaction name="separator"/>
-    <addaction name="actionClose"/>
     <addaction name="separator"/>
    </widget>
    <addaction name="menuFile"/>
@@ -1516,7 +1534,6 @@
   <tabstop>inputImageFilePathBtn</tabstop>
   <tabstop>outputImageFile</tabstop>
   <tabstop>outputImageButton</tabstop>
-  <tabstop>processFolder</tabstop>
   <tabstop>sourceDirectoryLE</tabstop>
   <tabstop>sourceDirectoryBtn</tabstop>
   <tabstop>outputDirectoryLE</tabstop>
