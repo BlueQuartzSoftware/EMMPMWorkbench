@@ -83,9 +83,9 @@ class EMMPMGraphicsView : public QGraphicsView
      */
     void dragLeaveEvent(QDragLeaveEvent *event);
 
-    void mousePressEvent(QMouseEvent *);
-    void mouseMoveEvent(QMouseEvent *);
-    void mouseReleaseEvent(QMouseEvent *);
+    void mousePressEvent( QMouseEvent* event );
+    void mouseMoveEvent( QMouseEvent* event );
+    void mouseReleaseEvent( QMouseEvent* event );
 
     //void setBaseImage(QImage image);
     QImage getBaseImage();

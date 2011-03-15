@@ -188,6 +188,23 @@ void UserInitArea::paint(QPainter *painter, const QStyleOptionGraphicsItem *opti
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
+void UserInitArea::mouseDoubleClickEvent (QGraphicsSceneMouseEvent *event)
+{
+  if (!isSelected() && scene()) {
+      scene()->clearSelection();
+      setSelected(true);
+  }
+
+      propertiesSelectedItems(scene());
+//    else if (selectedAction == growAction)
+//        growSelectedItems(scene());
+//    else if (selectedAction == shrinkAction)
+//        shrinkSelectedItems(scene());
+}
+
+// -----------------------------------------------------------------------------
+//
+// -----------------------------------------------------------------------------
 void UserInitArea::contextMenuEvent(QGraphicsSceneContextMenuEvent *event)
 {
     if (!isSelected() && scene()) {

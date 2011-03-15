@@ -212,14 +212,14 @@ QImage& EMMPMGraphicsView::blend(QImage& src, QImage& dst, float opacity)
 
     if (src.width() != dst.width() || src.height() != dst.height()) {
 #ifndef NDEBUG
-        std::cerr << "WARNING: KImageEffect::blend : src and destination images are not the same size\n";
+        std::cerr << "WARNING: ImageEffect::blend : src and destination images are not the same size\n";
 #endif
         return dst;
     }
 
     if (opacity < 0.0 || opacity > 1.0) {
 #ifndef NDEBUG
-        std::cerr << "WARNING: KImageEffect::blend : invalid opacity. Range [0, 1]\n";
+        std::cerr << "WARNING: ImageEffect::blend : invalid opacity. Range [0, 1]\n";
 #endif
         return dst;
     }
@@ -642,6 +642,7 @@ void EMMPMGraphicsView::mousePressEvent(QMouseEvent *event)
   QGraphicsView::mousePressEvent(event);
   }
 }
+
 
 // -----------------------------------------------------------------------------
 //

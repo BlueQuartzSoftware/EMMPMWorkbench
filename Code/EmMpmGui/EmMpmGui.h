@@ -90,8 +90,7 @@ class EmMpmGui :  public QMainWindow, private Ui::EmMpmGui
     MXA_INSTANCE_PROPERTY(QString, CurrentImageFile)
     MXA_INSTANCE_PROPERTY(QString, CurrentProcessedFile)
     MXA_INSTANCE_PROPERTY(QSortFilterProxyModel*, ProxyModel)
-    MXA_INSTANCE_PROPERTY(QList<QWidget* >, WidgetList)
-    MXA_INSTANCE_PROPERTY(QList<QWidget*>, ImageWidgets)
+
     MXA_INSTANCE_PROPERTY(bool, OutputExistsCheck)
     MXA_INSTANCE_PROPERTY(ProcessQueueController*, QueueController)
   //  MXA_INSTANCE_PROPERTY(ProcessQueueDialog*, QueueDialog)
@@ -127,7 +126,6 @@ class EmMpmGui :  public QMainWindow, private Ui::EmMpmGui
     void on_actionSaveCanvas_triggered();
     void on_actionAbout_triggered();
     void on_actionExit_triggered();
-    void on_actionClose_triggered();
 
     void on_axisSettingsBtn_clicked();
 
@@ -176,6 +174,7 @@ class EmMpmGui :  public QMainWindow, private Ui::EmMpmGui
     void on_outputPrefix_textChanged();
     void on_outputSuffix_textChanged();
     void on_outputImageType_currentIndexChanged(int index);
+    void on_loadFirstImageBtn_clicked();
 
     void on_enableUserDefinedAreas_stateChanged(int state);
 
@@ -191,7 +190,7 @@ class EmMpmGui :  public QMainWindow, private Ui::EmMpmGui
 
     void clearProcessHistograms();
     void addProcessHistogram(QVector<double> data);
-    void updateCombinedGaussian();
+    void plotCombinedGaussian();
 
   protected:
 
@@ -258,6 +257,7 @@ class EmMpmGui :  public QMainWindow, private Ui::EmMpmGui
     QStringList generateInputFileList();
 
     void setImageWidgetsEnabled(bool b);
+    void setProcessFolderWidgetsEnabled(bool b);
 
   private:
 
@@ -272,9 +272,16 @@ class EmMpmGui :  public QMainWindow, private Ui::EmMpmGui
   QwtPlotCurve*           m_histogram;
   QList<QwtPlotCurve*>    m_Gaussians;
   QwtPlotCurve*           m_CombinedGaussians;
+  bool                    m_ShowCombinedGaussians;
   QList<QwtPlotCurve*>    m_ProcessGaussians;
   AxisSettingsDialog*     m_AxisSettingsDialog;
   QMap<QObject*, QWidget*> m_TasksMap;
+
+  QList<QWidget*> m_WidgetList;
+  QList<QWidget*> m_ImageWidgets;
+  QList<QWidget*> m_ProcessFolderWidgets;
+
+
 
   EmMpmGui(const EmMpmGui&); // Copy Constructor Not Implemented
   void operator=(const EmMpmGui&); // Operator '=' Not Implemented

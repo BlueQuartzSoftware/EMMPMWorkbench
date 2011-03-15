@@ -127,6 +127,7 @@ m_panner(NULL),
 m_grid(NULL),
 m_histogram(NULL),
 m_CombinedGaussians(NULL),
+m_ShowCombinedGaussians(false),
 m_ProxyModel(NULL),
 m_OutputExistsCheck(false),
 m_QueueController(NULL),
@@ -202,8 +203,8 @@ void EmMpmGui::readSettings()
   READ_STRING_SETTING(prefs, outputPrefix, "Segmented_");
   READ_STRING_SETTING(prefs, outputSuffix, "");
   prefs.endGroup();
-  on_processFolder_stateChanged(processFolder->isChecked());
 
+  on_processFolder_stateChanged(processFolder->checkState());
   if (this->sourceDirectoryLE->text().isEmpty() == false)
   {
     this->populateFileTable(this->sourceDirectoryLE, this->fileListView);
@@ -368,6 +369,11 @@ void EmMpmGui::setupGui()
   m_ImageWidgets << zoomIn << zoomOut << fitToWindow << zoomCB << imageDisplayCombo;
   setImageWidgetsEnabled(false);
 
+  m_ProcessFolderWidgets <<  sourceDirectoryLE << sourceDirectoryBtn << outputDirectoryLE
+  << outputDirectoryBtn << outputPrefix << outputSuffix << filterPatternLabel
+  << filterPatternLineEdit << fileListView << outputImageTypeLabel << outputImageType << loadFirstImageBtn;
+
+
 #if 0
   m_zoomer = new QwtPlotZoomer(QwtPlot::xBottom, QwtPlot::yLeft, m_HistogramPlot->canvas());
   m_zoomer->setRubberBand(QwtPicker::RectRubberBand);
@@ -415,7 +421,7 @@ void EmMpmGui::copyGrayValues( EMMPM_Data* inputs)
   for (int r = 0; r < size; ++r)
   {
     uia = uias[r];
-    inputs->grayTable[uia->getEmMpmClass()] = uia->getEmMpmGrayLevel();
+    inputs->grayTable[r] = uia->getEmMpmGrayLevel();
   }
 }
 
@@ -431,7 +437,7 @@ void EmMpmGui::copyInitCoords( EMMPM_Data* inputs)
   for (int r = 0; r < size; ++r)
   {
     uia = uias[r];
-    cPtr = inputs->initCoords[uia->getEmMpmClass()];
+    cPtr = inputs->initCoords[r];
     uia->getUpperLeft( cPtr[0], cPtr[1]);
     uia->getLowerRight( cPtr[2], cPtr[3] );
   }
@@ -535,6 +541,13 @@ void EMMPMUpdateStats(EMMPM_Data* data)
 void EmMpmGui::on_processBtn_clicked()
 {
 
+  /* this is a first good sanity check */
+  if (enableUserDefinedAreas->isChecked() && m_UserInitAreaTableModel->rowCount() == 0)
+   {
+     QMessageBox::critical(this, tr("User Initialization Areas Error"), tr("Enable User Init Areas is ON but no areas are defined."), QMessageBox::Ok);
+     return;
+   }
+
   /* If the 'processFolder' checkbox is checked then we need to check for some
    * additional inputs
    */
@@ -617,6 +630,7 @@ void EmMpmGui::on_processBtn_clicked()
       }
     }
   }
+
 
   m_QueueDialog->clearTable();
   if (getQueueController() != NULL)
@@ -862,27 +876,41 @@ void EmMpmGui::on_processFolder_stateChanged(int state)
     enabled = false;
   }
 
-  setWidgetListEnabled(true);
-  setImageWidgetsEnabled(true);
-
-  sourceDirectoryLE->setEnabled(enabled);
-  sourceDirectoryBtn->setEnabled(enabled);
-  outputDirectoryLE->setEnabled(enabled);
-  outputDirectoryBtn->setEnabled(enabled);
-  outputPrefix->setEnabled(enabled);
-  outputSuffix->setEnabled(enabled);
-  filterPatternLabel->setEnabled(enabled);
-  filterPatternLineEdit->setEnabled(enabled);
-  fileListView->setEnabled(enabled);
-  outputImageTypeLabel->setEnabled(enabled);
-  outputImageType->setEnabled(enabled);
-
+  QFileInfo fileinfo(inputImageFilePath->text());
+  if (true == fileinfo.exists())
+  {
+    setWidgetListEnabled(true);
+    setImageWidgetsEnabled(true);
+  }
+  else
+  {
+    setWidgetListEnabled(false);
+    setImageWidgetsEnabled(false);
+  }
+  setProcessFolderWidgetsEnabled(enabled);
   inputImageFilePath->setEnabled(!enabled);
   inputImageFilePathBtn->setEnabled(!enabled);
-
   outputImageFile->setEnabled(!enabled);
   outputImageButton->setEnabled(!enabled);
 }
+
+
+// -----------------------------------------------------------------------------
+//
+// -----------------------------------------------------------------------------
+void EmMpmGui::on_loadFirstImageBtn_clicked()
+{
+  // If the input folder exists
+  QFileInfo fileinfo(outputDirectoryLE->text());
+  if (true == fileinfo.exists())
+  {
+    // Get the first image from the list of images
+    QStringList fileList = generateInputFileList();
+    QString inputFile = (sourceDirectoryLE->text() + QDir::separator() + fileList.at(0));
+    openBaseImageFile(inputFile);
+  }
+}
+
 
 // -----------------------------------------------------------------------------
 //
@@ -926,11 +954,14 @@ void EmMpmGui::on_sourceDirectoryBtn_clicked()
   QString aDir = QFileDialog::getExistingDirectory(this, tr("Select Source Directory"), getOpenDialogLastDirectory(), QFileDialog::ShowDirsOnly
           | QFileDialog::DontResolveSymlinks);
   setOpenDialogLastDirectory(aDir);
+  loadFirstImageBtn->setEnabled(false);
   if (!getOpenDialogLastDirectory().isNull())
   {
     this->sourceDirectoryLE->setText(getOpenDialogLastDirectory() );
+    populateFileTable(sourceDirectoryLE, fileListView);
+    loadFirstImageBtn->setEnabled(true);
   }
-  populateFileTable(sourceDirectoryLE, fileListView);
+
 }
 
 // -----------------------------------------------------------------------------
@@ -1024,8 +1055,12 @@ void EmMpmGui::on_outputImageFile_textChanged(const QString & text)
 // -----------------------------------------------------------------------------
 void EmMpmGui::on_sourceDirectoryLE_textChanged(const QString & text)
 {
-  verifyPathExists(sourceDirectoryLE->text(), sourceDirectoryLE);
-  this->populateFileTable(sourceDirectoryLE, fileListView);
+  loadFirstImageBtn->setEnabled(false);
+  if (true == verifyPathExists(sourceDirectoryLE->text(), sourceDirectoryLE) )
+  {
+    this->populateFileTable(sourceDirectoryLE, fileListView);
+    loadFirstImageBtn->setEnabled(true);
+  }
 }
 
 // -----------------------------------------------------------------------------
@@ -1125,6 +1160,16 @@ void EmMpmGui::setImageWidgetsEnabled(bool b)
   }
 }
 
+// -----------------------------------------------------------------------------
+//
+// -----------------------------------------------------------------------------
+void EmMpmGui::setProcessFolderWidgetsEnabled(bool b)
+{
+  foreach (QWidget* w, m_ProcessFolderWidgets)
+  {
+    w->setEnabled(b);
+  }
+}
 
 // -----------------------------------------------------------------------------
 //
@@ -1170,8 +1215,6 @@ qint32 EmMpmGui::checkDirtyDocument()
 // -----------------------------------------------------------------------------
 void EmMpmGui::updateBaseRecentFileList(const QString &file)
 {
-  // std::cout << "IPHelperMainWindow::updateRecentFileList" << std::endl;
-
   // Clear the Recent Items Menu
   this->menu_FixedRecentFiles->clear();
 
@@ -1193,8 +1236,6 @@ void EmMpmGui::updateBaseRecentFileList(const QString &file)
 // -----------------------------------------------------------------------------
 void EmMpmGui::openRecentBaseImageFile()
 {
-  //std::cout << "QRecentFileList::openRecentFile()" << std::endl;
-
   QAction *action = qobject_cast<QAction *>(sender());
   if (action)
   {
@@ -1202,7 +1243,6 @@ void EmMpmGui::openRecentBaseImageFile()
     QString file = action->data().toString();
     openBaseImageFile( file );
   }
-
 }
 
 // -----------------------------------------------------------------------------
@@ -1214,9 +1254,6 @@ void EmMpmGui::openBaseImageFile(QString imageFile)
   {
     return;
   }
-  // Clear out any Gaussians that were created
-  //clearProcessHistograms();
-
   // Delete all the User Init Areas from the Scene
   UserInitArea::deleteAllUserInitAreas(m_GraphicsView->scene());
 
@@ -1279,30 +1316,23 @@ void EmMpmGui::on_actionSaveCanvas_triggered()
     image = m_GraphicsView->getCompositedImage();
   }
   int err = 0;
-  if (outputImageFile->text().isEmpty())
+
+  QString outputFile = this->m_OpenDialogLastDirectory + QDir::separator() + "Segmented.tif";
+  outputFile = QFileDialog::getSaveFileName(this, tr("Save Processed Image As ..."), outputFile, tr("Images (*.tif *.bmp *.jpg *.png)"));
+  if (!outputFile.isEmpty())
   {
-    QString outputFile = this->m_OpenDialogLastDirectory + QDir::separator() + "Segmented.tif";
-    outputFile = QFileDialog::getSaveFileName(this, tr("Save Processed Image As ..."), outputFile, tr("Images (*.tif *.bmp *.jpg *.png)"));
-    if ( !outputFile.isEmpty() )
+    bool ok = image.save(outputFile);
+    if (ok == true)
     {
-      outputImageFile->setText(outputFile);
+      //TODO: Set a window title or something
     }
-    else {
-      return;
+    else
+    {
+      //TODO: Add in a GUI dialog to help explain the error or give suggestions.
+      err = -1;
     }
   }
 
-  bool ok = image.save(outputImageFile->text());
-  if (ok == true) {
-
-  //TODO: Set a window title or something
-  }
-  else
-  {
-    //TODO: Add in a GUI dialog to help explain the error or give suggestions.
-    err = -1;
-  }
-  this->setWindowModified(false);
 }
 
 
@@ -1317,26 +1347,6 @@ void EmMpmGui::on_actionAbout_triggered()
   version.append(EmMpm_Gui::Version::PackageComplete.c_str());
   about.setApplicationInfo(an, version);
   about.exec();
-}
-
-// -----------------------------------------------------------------------------
-//
-// -----------------------------------------------------------------------------
-void EmMpmGui::on_actionClose_triggered() {
-  qint32 err = -1;
-  err = checkDirtyDocument();
-  if (err >= 0)
-  {
-    // Close the window. Files have been saved if needed
-    if (QApplication::activeWindow() == this)
-    {
-      this->close();
-    }
-    else
-    {
-      QApplication::activeWindow()->close();
-    }
-  }
 }
 
 // -----------------------------------------------------------------------------
@@ -1389,64 +1399,7 @@ void EmMpmGui::overlayImageFileLoaded(const QString &filename)
 }
 
 
-// -----------------------------------------------------------------------------
-//
-// -----------------------------------------------------------------------------
-void EmMpmGui::plotImageHistogram()
-{
-  QImage image = m_GraphicsView->getBaseImage();
-  const int numValues = 256;
 
-  // Generate the Histogram Bins
-  QwtArray<double> intervals(numValues);
-  for (int i = 0; i < numValues; ++i)
-  {
-    intervals[i] = (double)i;
-  }
-  QwtArray<double> values(numValues);
-
-  qint32 height = image.height();
-  qint32 width = image.width();
-  float totalPixels = height * width;
-  QRgb rgbPixel;
-  int gray;
-  qint32 index;
-  double max = std::numeric_limits<double>::min();
-
-  for (qint32 y = 0; y < height; y++)
-  {
-    for (qint32 x = 0; x < width; x++)
-    {
-      index = (y * width) + x;
-      rgbPixel = image.pixel(x, y);
-      gray = qGray(rgbPixel);
-      values[gray]++;
-      if (values[gray] > max) { max = values[gray]; }
-    }
-  }
-
-  // Normalize the bin counts by the total number of pixels
-  max = 0.0;
-  for (int i = 0; i < 256; ++i)
-  {
-    values[i] = values[i] / totalPixels;
-    if (values[i] > max) { max = values[i]; }
-  }
-  if (NULL == m_histogram)
-  {
-    m_histogram = new QwtPlotCurve("Original Image");
-    m_histogram->setRenderHint(QwtPlotItem::RenderAntialiased);
-    m_histogram->setPen(QPen(Qt::blue, 2, Qt::SolidLine));
-    m_histogram->attach(m_HistogramPlot);
-  }
-  m_histogram->setData(intervals, values);
-
-  m_AxisSettingsDialog->setXAxisMax(256.0);
-  m_AxisSettingsDialog->setXAxisMin(0.0);
-  m_AxisSettingsDialog->setYAxisMax(max);
-  m_AxisSettingsDialog->setYAxisMin(0.0);
-  updateHistogramAxis();
-}
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
@@ -1490,8 +1443,7 @@ void EmMpmGui::addProcessHistogram(QVector<double> data)
     if (data[i] > max) { max = data[i]; }
   }
 
-  QPen pen(Qt::red, 1.0, Qt::SolidLine);
-  //pen.setWidth(2);
+  QPen pen(Qt::red, 1.5, Qt::SolidLine);
   QList<UserInitArea*> uias = m_UserInitAreaTableModel->getUserInitAreas();
   if (uias.size() > 0) {
     QColor c = uias.at(m_CurrentHistogramClass)->getColor();
@@ -1509,7 +1461,7 @@ void EmMpmGui::addProcessHistogram(QVector<double> data)
   updateHistogramAxis();
   ++m_CurrentHistogramClass;
 
-  updateCombinedGaussian();
+  plotCombinedGaussian();
 }
 
 // -----------------------------------------------------------------------------
@@ -1630,25 +1582,91 @@ void EmMpmGui::userInitAreaUpdated(UserInitArea* uia)
   QwtPlotCurve* curve = m_Gaussians[row];
   curve->setData(intervals, values);
   QColor c = uia->getColor();
-  curve->setPen(QPen(c));
+
+  curve->setPen(QPen(c, 2.0, Qt::SolidLine));
 
 //Update the combine Gaussian Curve
-  updateCombinedGaussian();
-
-
+  plotCombinedGaussian();
+  // Update the plot
   m_HistogramPlot->replot();
-
 }
 
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
-void EmMpmGui::updateCombinedGaussian()
+void EmMpmGui::plotImageHistogram()
 {
+  QImage image = m_GraphicsView->getBaseImage();
+  const int numValues = 256;
+
+  // Generate the Histogram Bins
+  QwtArray<double> intervals(numValues);
+  for (int i = 0; i < numValues; ++i)
+  {
+    intervals[i] = (double)i;
+  }
+  QwtArray<double> values(numValues);
+
+  qint32 height = image.height();
+  qint32 width = image.width();
+  float totalPixels = height * width;
+  QRgb rgbPixel;
+  int gray;
+  qint32 index;
+  double max = std::numeric_limits<double>::min();
+
+  for (qint32 y = 0; y < height; y++)
+  {
+    for (qint32 x = 0; x < width; x++)
+    {
+      index = (y * width) + x;
+      rgbPixel = image.pixel(x, y);
+      gray = qGray(rgbPixel);
+      values[gray]++;
+      if (values[gray] > max) { max = values[gray]; }
+    }
+  }
+
+  // Normalize the bin counts by the total number of pixels
+  max = 0.0;
+  for (int i = 0; i < 256; ++i)
+  {
+    values[i] = values[i] / totalPixels;
+    if (values[i] > max) { max = values[i]; }
+  }
+  if (NULL == m_histogram)
+  {
+    m_histogram = new QwtPlotCurve("Original Image");
+    m_histogram->setRenderHint(QwtPlotItem::RenderAntialiased);
+    m_histogram->setPen(QPen(Qt::blue, 2, Qt::SolidLine));
+    m_histogram->attach(m_HistogramPlot);
+  }
+  m_histogram->setData(intervals, values);
+
+  m_AxisSettingsDialog->setXAxisMax(256.0);
+  m_AxisSettingsDialog->setXAxisMin(0.0);
+  m_AxisSettingsDialog->setYAxisMax(max);
+  m_AxisSettingsDialog->setYAxisMin(0.0);
+  updateHistogramAxis();
+}
+
+// -----------------------------------------------------------------------------
+//
+// -----------------------------------------------------------------------------
+void EmMpmGui::plotCombinedGaussian()
+{
+  if (m_ShowCombinedGaussians == false)
+  {
+    if (NULL != m_CombinedGaussians) {
+      m_CombinedGaussians->detach();
+    }
+    return;
+  }
   if (m_CombinedGaussians == NULL)
   {
     m_CombinedGaussians = new QwtPlotCurve("Combined Gaussians");
     m_CombinedGaussians->setPen(QPen(Qt::black, 1.0, Qt::SolidLine));
+    m_CombinedGaussians->setRenderHint(QwtPlotItem::RenderAntialiased);
     m_CombinedGaussians->attach(m_HistogramPlot);
   }
 
@@ -1674,9 +1692,7 @@ void EmMpmGui::updateCombinedGaussian()
       values[i] += data->y(i);
     }
   }
-
   m_CombinedGaussians->setData(intervals, values);
-
 }
 
 // -----------------------------------------------------------------------------
@@ -1712,16 +1728,10 @@ void EmMpmGui::userInitAreaAdded(UserInitArea* uia)
   if (NULL == uia) { return; }
   addUserInitArea->toggle();
   QColor color = uia->getColor();
-#if 1
+
   QwtPlotCurve* curve = new QwtPlotCurve("User Init Area");
   curve->setPen(QPen(color));
-#else
-  QwtPlotMarker* curve = new QwtPlotMarker();
-  curve->setLinePen(color);
-#endif
   curve->setRenderHint(QwtPlotItem::RenderAntialiased);
-
-
   curve->attach(m_HistogramPlot);
 
   // Figure out the proper row to insert the curve object to keep it in sync with
@@ -1830,6 +1840,8 @@ void EmMpmGui::on_axisSettingsBtn_clicked()
 
   int ok = m_AxisSettingsDialog->exec();
   if (ok == 1) {
+    m_ShowCombinedGaussians = m_AxisSettingsDialog->getShowCombinedGaussians();
+    plotCombinedGaussian();
     updateHistogramAxis();
   }
 }

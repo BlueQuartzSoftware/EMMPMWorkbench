@@ -39,7 +39,7 @@
 //-- UIC generated Header
 #include <ui_AxisSettingsDialog.h>
 
-#define AXIS_GET_VALUE(w)\
+#define AXIS_PROPERTY_VALUE(w)\
   void set##w(double value) {\
     w->setText(QString::number(value)); }\
   double get##w() { \
@@ -55,10 +55,13 @@ class AxisSettingsDialog : public QDialog, public Ui::AxisSettingsDialog
     AxisSettingsDialog(QWidget *parent = 0);
     virtual ~AxisSettingsDialog();
 
-    AXIS_GET_VALUE(XAxisMin)
-    AXIS_GET_VALUE(XAxisMax)
-    AXIS_GET_VALUE(YAxisMin)
-    AXIS_GET_VALUE(YAxisMax)
+    AXIS_PROPERTY_VALUE(XAxisMin)
+    AXIS_PROPERTY_VALUE(XAxisMax)
+    AXIS_PROPERTY_VALUE(YAxisMin)
+    AXIS_PROPERTY_VALUE(YAxisMax)
+
+    bool getShowCombinedGaussians() { return showCombinedGaussians->isChecked(); }
+    void setShowCombinedGaussians(bool b) { showCombinedGaussians->setChecked(b); }
 
   protected slots:
     void on_XAxisMin_textEdited(const QString &s);
