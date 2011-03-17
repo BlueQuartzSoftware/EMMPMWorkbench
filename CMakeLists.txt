@@ -75,10 +75,6 @@ configure_file(${PROJECT_SOURCE_DIR}/License.txt.in
 configure_file(${PROJECT_SOURCE_DIR}/ReadMe.txt.in
                 ${PROJECT_BINARY_DIR}/ReadMe.txt )
 
-# --------------------------------------------------------------------
-# Generate the License File Headers
-include(${PROJECT_SOURCE_DIR}/License/License.cmake)
-
 SET (MXA_INSTALL_FILES "0")
 SET (MXA_SOURCE_DIR ${PROJECT_CODE_DIR})
 
@@ -113,14 +109,7 @@ LINK_DIRECTORIES(${Boost_LIBRARY_DIRS})
 # Find the ITK Package
 # --------------------------------------------------------------------
 FIND_PACKAGE(ITK)
-# --------------------------------------------------------------------
-# Find the ITK Package
-# --------------------------------------------------------------------
-#IF(ITK_FOUND)
-#  file(APPEND ${CMP_PLUGIN_SEARCHDIR_FILE} "${ITK_LIBRARY_DIRS};")
-#ELSE(ITK_FOUND)
-#  MESSAGE(FATAL_ERROR "Cannot build without ITK.  Please set ITK_DIR.")
-#ENDIF(ITK_FOUND)
+
 # ------------------------------------------------------------------------------
 #  Qt 4 Section
 # ------------------------------------------------------------------------------
@@ -147,6 +136,9 @@ IF (QT4_FOUND)
     # FindQt4Plugins("qgif;qjpeg;qtiff" "${PROJECT_BINARY_DIR}/QTPLUGINS.txt" "${CMP_PLUGIN_SEARCHDIR_FILE}" "imageformats" )
 endif()
 
+# --------------------------------------------------------------------
+# Generate the License File Headers
+include(${PROJECT_SOURCE_DIR}/License/License.cmake)
 
 # --------------------------------------------------------------------
 # Compile the support libraries

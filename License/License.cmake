@@ -15,7 +15,7 @@ foreach(lf ${LICENSE_FILES})
     get_filename_component(cmp_text_file_name ${lf} NAME)
     get_filename_component(lf_fn ${lf} NAME_WE)
     # Copy the text file into the Build Directory
-    configure_file("${lf}" ${PROJECT_BINARY_DIR}/License/${cmp_text_file_name}   COPYONLY )
+    configure_file("${lf}" ${PROJECT_BINARY_DIR}/License/${cmp_text_file_name} COPYONLY )
         
     # create the Qt Resource File
     configure_file(${CMP_CONFIGURED_FILES_SOURCE_DIR}/QtResourceFile.qrc.in 

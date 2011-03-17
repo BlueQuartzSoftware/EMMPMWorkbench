@@ -27,3 +27,5 @@ related source and binaries is as follows:
   
 The complete sub-set of boost is included in this release of the project. The source
 is compressed as a GZip file and can be found as the file "MXABoost.tar.gz".
+
+The source codes used for this project can be found at http://scm.bluequartz.net

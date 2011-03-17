@@ -88,7 +88,6 @@ void ApplicationAboutBoxDialog::setLicenseFiles(QStringList files)
 // -----------------------------------------------------------------------------
 void ApplicationAboutBoxDialog::on_licenseCombo_currentIndexChanged(int index)
 {
-  std::cout << "on_licenseCombo_action" << std::endl;
   QString resourceFile = m_licenseFiles[licenseCombo->currentIndex()];
   loadResourceFile(resourceFile);
 }

@@ -128,7 +128,7 @@ SET( EmMpmGui_RCS
 )
 
 # -- Run MOC and UIC on the necessary files   
-QT4_ADD_RESOURCES( Generated_RC_SRCS ${EmMpmGui_RCS} )
+QT4_ADD_RESOURCES( Generated_RC_SRCS ${EmMpmGui_RCS}  ${QRC_LICENSE_FILES})
 
 # this will run uic on .ui files:
 QT4_WRAP_UI( Generated_UI_HDRS ${EmMpmGui_UIS} )

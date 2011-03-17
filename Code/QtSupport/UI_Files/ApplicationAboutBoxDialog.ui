@@ -67,7 +67,7 @@
         </sizepolicy>
        </property>
        <property name="text">
-        <string>License</string>
+        <string>View a License</string>
        </property>
        <property name="alignment">
         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
