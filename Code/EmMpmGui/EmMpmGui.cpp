@@ -517,7 +517,7 @@ void EMMPMUpdateStats(EMMPM_Data* data)
       double mu = data->m[c];
       double sig = data->v[c];
       double twoSigSqrd = sig * sig * 2.0f;
-      double constant = 1.0f / (sig * sqrtf(2.0f * M_PI));
+      double constant = 1.0 / (sig * sqrt(2.0 * M_PI));
       for (size_t x = 0; x < 256; ++x)
       {
         hist[c][x] = constant * exp(-1.0f * ((x - mu) * (x - mu)) / (twoSigSqrd));
@@ -647,7 +647,7 @@ void EmMpmGui::on_processBtn_clicked()
   }
   ProcessQueueController* queueController = new ProcessQueueController(this);
   setQueueController(queueController);
-  bool ok;
+ // bool ok;
 
   InputOutputFilePairList filepairs;
 
@@ -1502,7 +1502,7 @@ void EmMpmGui::userInitAreaUpdated(UserInitArea* uia)
   int yStart = b.y() + p.y();
   int yEnd = b.y() + p.y() + b.height();
 
-  double mu, sig, stdDev;
+  double mu, sig;
   mu = 0.0;
   sig = 0.0;
   //Calculate Mu
@@ -1543,11 +1543,11 @@ void EmMpmGui::userInitAreaUpdated(UserInitArea* uia)
     intervals[i] = (double)i;
   }
   QwtArray<double> values(numValues);
-  float sqrt2pi = sqrtf(2.0f * M_PI);
-  float twoSigSqrd = sig * sig * 2.0f;
-  float constant = 1.0f / (sig * sqrt2pi);
-  size_t max_index = 0;
-  for (size_t x = 0; x < 256; ++x)
+  float sqrt2pi = sqrt(2.0 * M_PI);
+  float twoSigSqrd = sig * sig * 2.0;
+  float constant = 1.0 / (sig * sqrt2pi);
+  int max_index = 0;
+  for (int x = 0; x < 256; ++x)
   {
     values[x] = constant * exp(-1.0f * ((x - mu) * (x - mu)) / (twoSigSqrd));
     if (values[x] > max)
@@ -1561,7 +1561,7 @@ void EmMpmGui::userInitAreaUpdated(UserInitArea* uia)
   double binSize = m_histogram->y( max_index );
   // Now rescale all the Y Values for this Gaussian so that the peak of the gaussian
   // coincides with the local peak of the Image Histogram
-  for (size_t x = 0; x < 256; ++x)
+  for (int x = 0; x < 256; ++x)
   {
     values[x] = (values[x]/max) * binSize;
   }
@@ -1679,7 +1679,7 @@ void EmMpmGui::plotCombinedGaussian()
   {
     curve = m_Gaussians[c];
     QwtArrayData* data = static_cast<QwtArrayData*>(&(curve->data()));
-    for (size_t i = 0; i < numValues; ++i)
+    for (int i = 0; i < numValues; ++i)
     {
       values[i] += data->y(i);
     }
