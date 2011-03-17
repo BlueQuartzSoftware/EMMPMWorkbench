@@ -32,11 +32,13 @@
 #define _EMMPM_GRAPHICS_VIEW_H_
 
 #include <iostream>
+
+#include <QtCore/QVector>
 #include <QtGui/QGraphicsView>
 #include <QtGui/QGraphicsItem>
 #include <QtGui/QRubberBand>
 
-class UserInitAreaTableModel;
+//class UserInitAreaTableModel;
 class UserInitArea;
 class EmMpmGui;
 
@@ -52,15 +54,15 @@ enum ImageDisplayType {
 
 class EMMPMGraphicsView : public QGraphicsView
 {
-    Q_OBJECT
+    Q_OBJECT;
 
   public:
 
     EMMPMGraphicsView( QWidget *parent = NULL);
 
-    void setUserInitAreaTableModel(UserInitAreaTableModel* userInitAreaTableModel)
+    void setUserInitAreaTableModel(QVector<UserInitArea*>* userInitAreaVector)
     {
-      m_UserInitAreaTableModel = userInitAreaTableModel;
+      m_UserInitAreaVector = userInitAreaVector;
     }
 
     void setEmMpmGui(EmMpmGui* gui);
@@ -123,6 +125,7 @@ class EMMPMGraphicsView : public QGraphicsView
    void fireBaseImageFileLoaded(const QString &filename);
    void fireOverlayImageFileLoaded(const QString &filename);
    void fireUserInitAreaAdded(UserInitArea* uia);
+   void fireUserInitAreaLostFocus();
 
   protected:
 
@@ -138,7 +141,8 @@ class EMMPMGraphicsView : public QGraphicsView
    QRubberBand*   m_RubberBand;
    QPoint         m_MouseClickOrigin;
    float          m_ZoomFactors[10];
-   UserInitAreaTableModel* m_UserInitAreaTableModel;
+  // UserInitAreaTableModel* m_UserInitAreaTableModel;
+   QVector<UserInitArea*>*      m_UserInitAreaVector;
 
    EmMpmGui*      m_MainGui;
    EmMpm_Constants::ImageDisplayType           m_ImageDisplayType;

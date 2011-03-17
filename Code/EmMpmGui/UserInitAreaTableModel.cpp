@@ -151,6 +151,7 @@ QVariant UserInitAreaTableModel::data(const QModelIndex &index, qint32 role) con
     QPoint p = uia->pos().toPoint();
     QRect b = uia->boundingRect().toAlignedRect();
     QString s;
+    unsigned int x, y;
 
     int col = index.column();
     switch(col)
@@ -160,16 +161,18 @@ QVariant UserInitAreaTableModel::data(const QModelIndex &index, qint32 role) con
       case UserInitAreaTableModel::GrayValue:
         return QVariant(uia->getEmMpmGrayLevel());
       case UserInitAreaTableModel::UpperLeft:
-        s = QString::number(b.x() + p.x());
+        uia->getUpperLeft(x, y);
+        s = QString::number(x);
         s.append(", ");
-        s.append(QString::number(b.y() + p.y()));
-        uia->setUpperLeft(b.x() + p.x(), b.y() + p.y());
+        s.append(QString::number(y));
+        //uia->setUpperLeft(b.x() + p.x(), b.y() + p.y());
         return QVariant(s);
       case UserInitAreaTableModel::LowerRight:
-        s = QString::number(b.x() + p.x() + b.width());
+        uia->getLowerRight(x, y);
+        s = QString::number(x);
         s.append(", ");
-        s.append(QString::number(b.y() + p.y() + b.height()));
-        uia->setLowerRight(b.x() + p.x() + b.width(), b.y() + p.y() + b.height());
+        s.append(QString::number(y));
+        //uia->setLowerRight(b.x() + p.x() + b.width(), b.y() + p.y() + b.height());
         return QVariant(s);
       case UserInitAreaTableModel::Mu:
         return QVariant(uia->getMu());

@@ -43,7 +43,7 @@
 
 #include "EmMpmGui.h"
 #include "UserInitArea.h"
-#include "UserInitAreaTableModel.h"
+//#include "UserInitAreaTableModel.h"
 #include "UserInitAreaDialog.h"
 
 // -----------------------------------------------------------------------------
@@ -52,7 +52,7 @@
 EMMPMGraphicsView::EMMPMGraphicsView(QWidget *parent)
 : QGraphicsView(parent),
   m_ImageGraphicsItem(NULL),
-  m_UserInitAreaTableModel(NULL)
+  m_UserInitAreaVector(NULL)
 {
   setAcceptDrops(true);
   setDragMode(RubberBandDrag);
@@ -639,7 +639,7 @@ void EMMPMGraphicsView::mousePressEvent(QMouseEvent *event)
   }
   else
   {
-  QGraphicsView::mousePressEvent(event);
+    QGraphicsView::mousePressEvent(event);
   }
 }
 
@@ -663,18 +663,27 @@ void EMMPMGraphicsView::mouseMoveEvent(QMouseEvent *event)
 // -----------------------------------------------------------------------------
 void EMMPMGraphicsView::mouseReleaseEvent(QMouseEvent *event)
 {
- if (m_AddUserInitArea == true)
- {
-   m_RubberBand->hide();
-   QRect box = QRect(m_MouseClickOrigin, event->pos()).normalized();
-   QPolygonF sceneBox = mapToScene(box);
-   addNewInitArea(sceneBox);
-   m_AddUserInitArea = false;
- }
- else
- {
-   QGraphicsView::mouseReleaseEvent(event);
- }
+  if (m_AddUserInitArea == true)
+  {
+    m_RubberBand->hide();
+    QRect box = QRect(m_MouseClickOrigin, event->pos()).normalized();
+    QPolygonF sceneBox = mapToScene(box);
+    addNewInitArea(sceneBox);
+    m_AddUserInitArea = false;
+  }
+  else
+  {
+    QGraphicsView::mouseReleaseEvent(event);
+    if (scene())
+    {
+      QList<QGraphicsItem *> selected;
+      selected = scene()->selectedItems();
+      if (selected.count() == 0)
+      {
+        emit fireUserInitAreaLostFocus();
+      }
+    }
+  }
 }
 
 // -----------------------------------------------------------------------------
@@ -692,7 +701,7 @@ void EMMPMGraphicsView::addNewInitArea(const QPolygonF &polygon)
 {
   QRectF brect = polygon.boundingRect();
 
-  UserInitArea* userInitArea = new UserInitArea(m_UserInitAreaTableModel->rowCount(), brect);
+  UserInitArea* userInitArea = new UserInitArea(m_UserInitAreaVector->count(), brect);
 
   // Line Color
   userInitArea->setPen(QPen(QColor(225, 225, 225, UIA::Alpha)));
@@ -703,21 +712,19 @@ void EMMPMGraphicsView::addNewInitArea(const QPolygonF &polygon)
   userInitArea->setCacheMode(QGraphicsItem::DeviceCoordinateCache);
 
   // Show a dialog to let the user set the values
-  UserInitAreaDialog initDialog(userInitArea);
+  UserInitAreaDialog initDialog;
+  initDialog.getUserInitAreaWidget()->setUserInitArea(userInitArea);
   int ret =initDialog.exec();
   if (ret == QDialog::Accepted)
   {
-    m_UserInitAreaTableModel->addUserInitArea(userInitArea);
+    m_UserInitAreaVector->push_back(userInitArea);
 
+    connect (userInitArea, SIGNAL(fireUserInitAreaAboutToDelete(UserInitArea*)),
+             m_MainGui, SLOT(deleteUserInitArea(UserInitArea*)), Qt::QueuedConnection);
 
-    connect (userInitArea, SIGNAL(fireUserInitAreaUpdated(UserInitArea*)),
-             m_UserInitAreaTableModel, SLOT(updateUserInitArea(UserInitArea*)), Qt::QueuedConnection);
     connect (userInitArea, SIGNAL (fireUserInitAreaUpdated(UserInitArea*)),
              m_MainGui, SLOT(userInitAreaUpdated(UserInitArea*)), Qt::QueuedConnection);
-    connect (userInitArea, SIGNAL(fireUserInitAreaAboutToDelete(UserInitArea*)),
-             m_MainGui, SLOT(deleteUserInitArea(UserInitArea*)) );
-    connect (userInitArea, SIGNAL(fireUserInitAreaDeleted(UserInitArea*)),
-             m_UserInitAreaTableModel, SLOT(deleteUserInitArea(UserInitArea*)));
+
     connect (userInitArea, SIGNAL(fireUserInitAreaSelected(UserInitArea*)),
              m_MainGui, SLOT(userInitAreaSelected(UserInitArea*)), Qt::QueuedConnection);
 

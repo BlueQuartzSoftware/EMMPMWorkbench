@@ -34,7 +34,7 @@
 #include <QtCore/QObject>
 #include <QtGui/QGraphicsPolygonItem>
 #include <QtGui/QGraphicsRectItem>
-
+#include <QtGui/QBrush>
 
 
 class UserInitArea : public QObject, public QGraphicsPolygonItem
@@ -58,19 +58,23 @@ public:
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget = 0);
 
  public slots:
-    void setEmMpmGrayLevel(int gray) { m_GrayLevel = gray; }
-    int getEmMpmGrayLevel() { return m_GrayLevel; }
 
-    void setEmMpmClass(int eClass) { m_Class = eClass; }
+    void setEmMpmGrayLevel(int gray)
+    { m_GrayLevel = gray;}
+    int getEmMpmGrayLevel()
+    { return m_GrayLevel;}
+
+    void setEmMpmClass(int eClass)
+    { m_Class = eClass;}
     int getEmMpmClass() { return m_Class; }
 
     void setColor(QColor color);
-    QColor getColor() { return m_Color; }
+    QColor getColor() { return brush().color(); }
 
-    void setUpperLeft(unsigned int x, unsigned int y);
+  //  void setUpperLeft(unsigned int x, unsigned int y);
     void getUpperLeft(unsigned int &x, unsigned int &y);
 
-    void setLowerRight(unsigned int x, unsigned int y);
+  //  void setLowerRight(unsigned int x, unsigned int y);
     void getLowerRight(unsigned int &x, unsigned int &y);
 
     void setMu(double mu);
@@ -81,6 +85,9 @@ public:
 
     void setGamma(double g);
     double getGamma();
+
+    void setLineWidth(qreal w);
+    qreal getLineWidth();
 
     void setVisible(bool visible);
 
@@ -122,10 +129,11 @@ private:
     int m_Class;
     int m_UpperLeft[2];
     int m_LowerRight[2];
-    QColor m_Color;
+ //   QColor m_Color;
     double m_Mu;
     double m_Sigma;
     double m_Gamma;
+    qreal m_LineWidth;
     bool m_Visible;
 };
 

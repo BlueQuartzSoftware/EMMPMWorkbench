@@ -54,14 +54,6 @@
 #include <QtGui/QStringListModel>
 #include <QtGui/QLineEdit>
 
-// Our Project wide includes
-#include "QtSupport/ApplicationAboutBoxDialog.h"
-#include "QtSupport/QRecentFileList.h"
-#include "QtSupport/QFileCompleter.h"
-#include "QtSupport/ImageGraphicsDelegate.h"
-#include "QtSupport/ProcessQueueController.h"
-#include "QtSupport/ProcessQueueDialog.h"
-
 //-- Qwt Includes
 #include <qwt.h>
 #include <qwt_data.h>
@@ -76,6 +68,16 @@
 #include <qwt_plot_curve.h>
 #include <qwt_plot_marker.h>
 
+// Our Project wide includes
+#include "QtSupport/ApplicationAboutBoxDialog.h"
+#include "QtSupport/QRecentFileList.h"
+#include "QtSupport/QFileCompleter.h"
+#include "QtSupport/ImageGraphicsDelegate.h"
+#include "QtSupport/ProcessQueueController.h"
+#include "QtSupport/ProcessQueueDialog.h"
+
+
+//
 #include <emmpm/public/InitializationFunctions.h>
 #include <emmpm/public/ProgressFunctions.h>
 #include <emmpm/tiff/EMTiffIO.h>
@@ -84,10 +86,12 @@
 
 //
 #include "EmMpmGuiVersion.h"
-#include "UserInitAreaTableModel.h"
+//#include "UserInitAreaTableModel.h"
+#include "UserInitArea.h"
 #include "EMMPMTask.h"
 #include "AxisSettingsDialog.h"
 #include "License/LicenseFiles.h"
+#include "UserInitAreaWidget.h"
 
 #define READ_STRING_SETTING(prefs, var, emptyValue)\
   var->setText( prefs.value(#var).toString() );\
@@ -250,10 +254,13 @@ void EmMpmGui::setupGui()
   resize(mySize);
 #endif
 
+  m_UserInitAreaVector = new QVector<UserInitArea*>;
+
   m_AxisSettingsDialog = new AxisSettingsDialog(this);
   m_AxisSettingsDialog->setVisible(false);
 
   m_GraphicsView->setEmMpmGui(this);
+  m_GraphicsView->setUserInitAreaTableModel(m_UserInitAreaVector);
   compositeModeCB->blockSignals(true);
 
   compositeModeCB->insertItem(0, "Exclusion");
@@ -289,15 +296,17 @@ void EmMpmGui::setupGui()
  // userInitTab->setEnabled(false);
 
 
-  QHeaderView* headerView = new QHeaderView(Qt::Horizontal, m_UserInitTable);
-  headerView->setResizeMode(QHeaderView::Interactive);
-  m_UserInitTable->setHorizontalHeader(headerView);
-  m_UserInitAreaTableModel = new UserInitAreaTableModel;
-  m_GraphicsView->setUserInitAreaTableModel(m_UserInitAreaTableModel);
-  m_UserInitTable->setModel(m_UserInitAreaTableModel);
-  QAbstractItemDelegate* aid = m_UserInitAreaTableModel->getItemDelegate();
-  m_UserInitTable->setItemDelegate(aid);
-  headerView->show();
+//  QHeaderView* headerView = new QHeaderView(Qt::Horizontal, m_UserInitTable);
+//  headerView->setResizeMode(QHeaderView::Interactive);
+//  m_UserInitTable->setHorizontalHeader(headerView);
+
+//  m_UserInitAreaTableModel = new UserInitAreaTableModel;
+//  m_GraphicsView->setUserInitAreaTableModel(m_UserInitAreaTableModel);
+
+//  m_UserInitTable->setModel(m_UserInitAreaTableModel);
+//  QAbstractItemDelegate* aid = m_UserInitAreaTableModel->getItemDelegate();
+//  m_UserInitTable->setItemDelegate(aid);
+//  headerView->show();
 
 
   connect (m_GraphicsView, SIGNAL(fireBaseImageFileLoaded(const QString &)),
@@ -305,6 +314,8 @@ void EmMpmGui::setupGui()
 
   connect (m_GraphicsView, SIGNAL(fireOverlayImageFileLoaded(const QString &)),
            this, SLOT(overlayImageFileLoaded(const QString &)), Qt::QueuedConnection);
+  connect (m_GraphicsView, SIGNAL(fireUserInitAreaLostFocus()),
+           this, SLOT(userInitAreaLostFocus()), Qt::QueuedConnection);
 
   connect (addUserInitArea, SIGNAL(toggled(bool)),
            m_GraphicsView, SLOT(addUserInitArea(bool)));
@@ -345,7 +356,7 @@ void EmMpmGui::setupGui()
   cancelBtn->setVisible(false);
 
   // Hid the user init table by default
-  m_UserInitTable->hide();
+ // m_UserInitAreaWidget->hide();
 
   // Configure the Histogram Plot
   m_HistogramPlot->setCanvasBackground(QColor(Qt::white));
@@ -415,12 +426,11 @@ char* EmMpmGui::copyStringToNewBuffer(const QString &fname)
 // -----------------------------------------------------------------------------
 void EmMpmGui::copyGrayValues( EMMPM_Data* inputs)
 {
-  QList<UserInitArea*> uias = m_UserInitAreaTableModel->getUserInitAreas();
-  int size = uias.count();
+  int size = m_UserInitAreaVector->count();
   UserInitArea* uia = NULL;
   for (int r = 0; r < size; ++r)
   {
-    uia = uias[r];
+    uia = m_UserInitAreaVector->at(r);
     inputs->grayTable[r] = uia->getEmMpmGrayLevel();
   }
 }
@@ -430,13 +440,12 @@ void EmMpmGui::copyGrayValues( EMMPM_Data* inputs)
 // -----------------------------------------------------------------------------
 void EmMpmGui::copyInitCoords( EMMPM_Data* inputs)
 {
-  QList<UserInitArea*> uias = m_UserInitAreaTableModel->getUserInitAreas();
-  int size = uias.count();
+  int size = m_UserInitAreaVector->count();
   UserInitArea* uia = NULL;
   unsigned int* cPtr = inputs->initCoords[0];
   for (int r = 0; r < size; ++r)
   {
-    uia = uias[r];
+    uia = m_UserInitAreaVector->at(r);
     cPtr = inputs->initCoords[r];
     uia->getUpperLeft( cPtr[0], cPtr[1]);
     uia->getLowerRight( cPtr[2], cPtr[3] );
@@ -448,12 +457,12 @@ void EmMpmGui::copyInitCoords( EMMPM_Data* inputs)
 // -----------------------------------------------------------------------------
 void EmMpmGui::copyIntializationValues(EMMPM_Data* inputs)
 {
-  QList<UserInitArea*> uias = m_UserInitAreaTableModel->getUserInitAreas();
-  int size = uias.count();
+  int size = m_UserInitAreaVector->count();
+
   UserInitArea* uia = NULL;
   for (int r = 0; r < size; ++r)
   {
-    uia = uias[r];
+    uia = m_UserInitAreaVector->at(r);
     inputs->m[r] = uia->getMu();
     inputs->v[r] = uia->getSigma() * uia->getSigma();
  //   std::cout << "Initializing with Mu:" << inputs->m[r] << "  Sigma: " << inputs->v[r] << std::endl;
@@ -465,12 +474,11 @@ void EmMpmGui::copyIntializationValues(EMMPM_Data* inputs)
 // -----------------------------------------------------------------------------
 void EmMpmGui::copyGammaValues(EMMPM_Data* inputs)
 {
-  QList<UserInitArea*> uias = m_UserInitAreaTableModel->getUserInitAreas();
-  int size = uias.count();
+  int size = m_UserInitAreaVector->count();
   UserInitArea* uia = NULL;
   for (int r = 0; r < size; ++r)
   {
-    uia = uias[r];
+    uia = m_UserInitAreaVector->at(r);
     inputs->w_gamma[r] = uia->getGamma();
  //   std::cout << "Initializing with Gamma:" << inputs->w_gamma[r] << std::endl;
   }
@@ -542,7 +550,7 @@ void EmMpmGui::on_processBtn_clicked()
 {
 
   /* this is a first good sanity check */
-  if (enableUserDefinedAreas->isChecked() && m_UserInitAreaTableModel->rowCount() == 0)
+  if (enableUserDefinedAreas->isChecked() && m_UserInitAreaVector->count() == 0)
    {
      QMessageBox::critical(this, tr("User Initialization Areas Error"), tr("Enable User Init Areas is ON but no areas are defined."), QMessageBox::Ok);
      return;
@@ -1094,24 +1102,6 @@ void EmMpmGui::on_imageDisplayCombo_currentIndexChanged()
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
-void EmMpmGui::on_enableUserDefinedAreas_clicked(bool b)
-{
- // userInitTab->setEnabled(b);
-
-  QList<UserInitArea*> uias = m_UserInitAreaTableModel->getUserInitAreas();
-  int size = uias.count();
-  UserInitArea* uia = NULL;
-  for (int r = 0; r < size; ++r)
-  {
-    uia = uias[r];
-    uia->setVisible(b);
-  }
-
-}
-
-// -----------------------------------------------------------------------------
-//
-// -----------------------------------------------------------------------------
 void EmMpmGui::on_compositeModeCB_currentIndexChanged()
 {
   int index = compositeModeCB->currentIndex();
@@ -1444,9 +1434,9 @@ void EmMpmGui::addProcessHistogram(QVector<double> data)
   }
 
   QPen pen(Qt::red, 1.5, Qt::SolidLine);
-  QList<UserInitArea*> uias = m_UserInitAreaTableModel->getUserInitAreas();
-  if (uias.size() > 0) {
-    QColor c = uias.at(m_CurrentHistogramClass)->getColor();
+
+  if (m_UserInitAreaVector->size() > 0) {
+    QColor c = m_UserInitAreaVector->at(m_CurrentHistogramClass)->getColor();
     pen.setColor(c);
   }
 
@@ -1469,15 +1459,15 @@ void EmMpmGui::addProcessHistogram(QVector<double> data)
 // -----------------------------------------------------------------------------
 void EmMpmGui::userInitAreaSelected(UserInitArea* uia)
 {
-  if (NULL == uia)
-  {
-    return;
-  }
-  QList<UserInitArea*> userInitAreas = m_UserInitAreaTableModel->getUserInitAreas();
-  int row = userInitAreas.indexOf(uia, 0);
 
-  QModelIndex index = m_UserInitAreaTableModel->index(row, 0);
-  m_UserInitTable->selectRow(row);
+}
+
+// -----------------------------------------------------------------------------
+//
+// -----------------------------------------------------------------------------
+void EmMpmGui::userInitAreaLostFocus()
+{
+  m_UserInitAreaWidget->setUserInitArea(NULL);
 }
 
 // -----------------------------------------------------------------------------
@@ -1490,6 +1480,9 @@ void EmMpmGui::userInitAreaUpdated(UserInitArea* uia)
   {
     return;
   }
+
+ // m_UserInitAreaWidget->setUserInitArea(uia);
+
   QPoint p = uia->pos().toPoint();
   QRect b = uia->boundingRect().toAlignedRect();
 
@@ -1542,8 +1535,6 @@ void EmMpmGui::userInitAreaUpdated(UserInitArea* uia)
   sig = sqrt(sig);
   uia->setSigma(sig);
 
-  m_UserInitAreaTableModel->updateUserInitArea(uia);
-
   // Generate the Histogram Bins
   const int numValues = 256;
   QwtArray<double> intervals(numValues);
@@ -1577,13 +1568,14 @@ void EmMpmGui::userInitAreaUpdated(UserInitArea* uia)
 
   // Locate our curve object by getting the row from the TableModel that corresponds
   // to the UIA object that was passed in
-  QList<UserInitArea*> userInitAreas = m_UserInitAreaTableModel->getUserInitAreas();
-  int row = userInitAreas.indexOf(uia, 0);
+  int row = m_UserInitAreaVector->indexOf(uia, 0);
   QwtPlotCurve* curve = m_Gaussians[row];
   curve->setData(intervals, values);
   QColor c = uia->getColor();
+  c.setAlpha(255);
+  curve->setPen(QPen(c, uia->getLineWidth(), Qt::SolidLine));
 
-  curve->setPen(QPen(c, 2.0, Qt::SolidLine));
+  m_UserInitAreaWidget->setUserInitArea(uia);
 
 //Update the combine Gaussian Curve
   plotCombinedGaussian();
@@ -1638,7 +1630,7 @@ void EmMpmGui::plotImageHistogram()
   {
     m_histogram = new QwtPlotCurve("Original Image");
     m_histogram->setRenderHint(QwtPlotItem::RenderAntialiased);
-    m_histogram->setPen(QPen(Qt::blue, 2, Qt::SolidLine));
+    m_histogram->setPen(QPen(Qt::blue, 2.0, Qt::SolidLine));
     m_histogram->attach(m_HistogramPlot);
   }
   m_histogram->setData(intervals, values);
@@ -1700,23 +1692,21 @@ void EmMpmGui::plotCombinedGaussian()
 // -----------------------------------------------------------------------------
 void EmMpmGui::deleteUserInitArea(UserInitArea* uia)
 {
-  QList<UserInitArea*> userInitAreas = m_UserInitAreaTableModel->getUserInitAreas();
-  int row = userInitAreas.indexOf(uia, 0);
-#if 1
+  int row = m_UserInitAreaVector->indexOf(uia, 0);
+
   QwtPlotCurve* curve = m_Gaussians[row];
   m_Gaussians.removeAll(curve);
-#else
-  QwtPlotMarker* curve = m_UIAMarkers[row];
-  m_UIAMarkers.removeAll(curve);
-#endif
+
   curve->detach();
   delete curve; // Clean up the memory
   m_HistogramPlot->replot();
-  m_NumClasses->setValue(userInitAreas.size()-1);
-  if (userInitAreas.size()-1 == 0)
+  m_NumClasses->setValue(m_UserInitAreaVector->size()-1);
+  if (m_UserInitAreaVector->size()-1 == 0)
   {
     m_NumClasses->setEnabled(true);
   }
+  uia = m_UserInitAreaVector->at(row);
+  m_UserInitAreaVector->remove(row);
 }
 
 // -----------------------------------------------------------------------------
@@ -1724,37 +1714,34 @@ void EmMpmGui::deleteUserInitArea(UserInitArea* uia)
 // -----------------------------------------------------------------------------
 void EmMpmGui::userInitAreaAdded(UserInitArea* uia)
 {
-//  std::cout << "EmMpmGui::userInitAreaAdded(UserInitArea* uia)" << std::endl;
+ // std::cout << "EmMpmGui::userInitAreaAdded(UserInitArea* uia)" << std::endl;
+  m_UserInitAreaWidget->setUserInitArea(uia);
+
   if (NULL == uia) { return; }
+
   addUserInitArea->toggle();
   QColor color = uia->getColor();
+  color.setAlpha(255);
 
   QwtPlotCurve* curve = new QwtPlotCurve("User Init Area");
-  curve->setPen(QPen(color));
+  curve->setPen(QPen(color, uia->getLineWidth()));
   curve->setRenderHint(QwtPlotItem::RenderAntialiased);
   curve->attach(m_HistogramPlot);
 
   // Figure out the proper row to insert the curve object to keep it in sync with
   // the table model
-  QList<UserInitArea*> userInitAreas = m_UserInitAreaTableModel->getUserInitAreas();
-  int row = userInitAreas.indexOf(uia, 0);
-  m_NumClasses->setValue(userInitAreas.size());
-  if (userInitAreas.size() != 0)
+  int row = m_UserInitAreaVector->indexOf(uia, 0);
+  m_NumClasses->setValue(m_UserInitAreaVector->size());
+  if (m_UserInitAreaVector->size() != 0)
   {
     m_NumClasses->setEnabled(false);
   }
 
-#if 1
   m_Gaussians.insert(row, curve);
-#else
-  m_UIAMarkers.insert(row, curve);
-#endif
 
   // Now update the curve with the initial data
   userInitAreaUpdated(uia);
 }
-
-
 
 // -----------------------------------------------------------------------------
 //
@@ -1866,29 +1853,86 @@ void EmMpmGui::on_clearTempHistograms_clicked()
   plotImageHistogram();
   if (enableUserDefinedAreas->isChecked() )
   {
-    QList<UserInitArea*> uias = m_UserInitAreaTableModel->getUserInitAreas();
-    int size = uias.count();
+    int size = m_UserInitAreaVector->count();
     UserInitArea* uia = NULL;
     for (int r = 0; r < size; ++r)
     {
-      uia = uias[r];
+      uia = m_UserInitAreaVector->at(r);
       userInitAreaAdded(uia);
     }
   }
   addUserInitArea->setChecked(false);
 }
 
-
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
 void EmMpmGui::on_enableUserDefinedAreas_stateChanged(int state)
 {
-  if(enableUserDefinedAreas->isChecked()) {
-  m_UserInitTable->show();
-  }
-  else
+  int size = m_UserInitAreaVector->count();
+  UserInitArea* uia = NULL;
+  int s = m_Gaussians.size();
+  int u = m_UserInitAreaVector->size();
+
+  for (int r = 0; r < size; ++r)
   {
-    m_UserInitTable->hide();
+    uia = m_UserInitAreaVector->at(r);
+    if(enableUserDefinedAreas->isChecked()) {
+      uia->setVisible(true);
+      m_GraphicsView->scene()->addItem(uia);
+      userInitAreaAdded(uia);
+    } else {
+      uia->setVisible(false);
+      m_GraphicsView->scene()->removeItem(uia);
+    }
   }
+  s = m_Gaussians.size();
+  m_UserInitAreaWidget->setUserInitArea(NULL);
+  if(enableUserDefinedAreas->isChecked() == false)
+  {
+    clearProcessHistograms();
+  }
+  m_HistogramPlot->replot();
 }
+
+// -----------------------------------------------------------------------------
+//
+// -----------------------------------------------------------------------------
+void EmMpmGui::on_enableUserDefinedAreas_clicked(bool b)
+{
+}
+
+// -----------------------------------------------------------------------------
+//
+// -----------------------------------------------------------------------------
+UserInitAreaWidget* EmMpmGui::getUserInitAreaWidget()
+{
+  return m_UserInitAreaWidget;
+}
+
+
+// -----------------------------------------------------------------------------
+//
+// -----------------------------------------------------------------------------
+void EmMpmGui::on_actionUser_Initialization_triggered()
+{
+  UserInitAreaDockWidget->show();
+}
+
+// -----------------------------------------------------------------------------
+//
+// -----------------------------------------------------------------------------
+void EmMpmGui::on_actionHistogram_triggered()
+{
+  HistogramDockWidget->show();
+}
+
+
+// -----------------------------------------------------------------------------
+//
+// -----------------------------------------------------------------------------
+void EmMpmGui::on_actionParameters_triggered()
+{
+  ParametersDockWidget->show();
+}
+

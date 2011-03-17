@@ -82,6 +82,7 @@ SET( EmMpmGui_SRCS
   ${EmMpmGui_SOURCE_DIR}/UserInitArea.cpp
   ${EmMpmGui_SOURCE_DIR}/UserInitAreaTableModel.cpp
   ${EmMpmGui_SOURCE_DIR}/UserInitAreaDialog.cpp
+  ${EmMpmGui_SOURCE_DIR}/UserInitAreaWidget.cpp
   ${EmMpmGui_SOURCE_DIR}/AxisSettingsDialog.cpp
   ${EmMpmGui_SOURCE_DIR}/EMMPMTask.cpp
   ${PROJECT_CODE_DIR}/AIM/Common/AIMImage.cpp
@@ -95,6 +96,7 @@ SET( EmMpmGui_MOC_HDRS
   ${EmMpmGui_SOURCE_DIR}/UserInitArea.h
   ${EmMpmGui_SOURCE_DIR}/UserInitAreaTableModel.h
   ${EmMpmGui_SOURCE_DIR}/UserInitAreaDialog.h
+  ${EmMpmGui_SOURCE_DIR}/UserInitAreaWidget.h
   ${EmMpmGui_SOURCE_DIR}/AxisSettingsDialog.h
   ${EmMpmGui_SOURCE_DIR}/UserInitAreaItemDelegate.h
   ${EmMpmGui_SOURCE_DIR}/EMMPMTask.h
@@ -115,6 +117,7 @@ cmp_IDE_SOURCE_PROPERTIES(EmMpmGui "${EmMpmGui_HDRS}" "${EmMpmGui_SRCS}" "0")
 SET( EmMpmGui_UIS
  ${EmMpmGui_SOURCE_DIR}/UI_Files/EmMpmGui.ui
  ${EmMpmGui_SOURCE_DIR}/UI_Files/UserInitAreaDialog.ui
+ ${EmMpmGui_SOURCE_DIR}/UI_Files/UserInitAreaWidget.ui
  ${EmMpmGui_SOURCE_DIR}/UI_Files/AxisSettingsDialog.ui
 )
 cmp_IDE_SOURCE_PROPERTIES(EmMpmGui/UI_Files "${EmMpmGui_UIS}" "" "0")

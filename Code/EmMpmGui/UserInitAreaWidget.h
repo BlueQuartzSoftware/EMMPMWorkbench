@@ -28,32 +28,57 @@
  * USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 
-#ifndef USERINITAREADIALOG_H_
-#define USERINITAREADIALOG_H_
+#ifndef USERINITAREAWIDGET_H_
+#define USERINITAREAWIDGET_H_
 
-#include <QtGui/QDialog>
+#include <QtCore/QList>
+#include <QtGui/QWidget>
 #include <QtGui/QColor>
 
 
 //-- UIC generated Header
-#include <ui_UserInitAreaDialog.h>
+#include <ui_UserInitAreaWidget.h>
 
-class UserInitAreaWidget;
+class UserInitArea;
+
+namespace UIA
+{
+  const static int Alpha = 155;
+}
 
 
-class UserInitAreaDialog : public QDialog, public Ui::UserInitAreaDialog
+
+class UserInitAreaWidget  : public QWidget, public Ui::UserInitAreaWidget
 {
   Q_OBJECT;
 
   public:
-    UserInitAreaDialog(QWidget *parent = 0);
-    virtual ~UserInitAreaDialog();
+    UserInitAreaWidget(QWidget *parent = 0);
+    virtual ~UserInitAreaWidget();
 
-    UserInitAreaWidget* getUserInitAreaWidget();
+    void setUserInitArea(UserInitArea* uia);
+    UserInitArea* getUserInitArea();
+
+  protected slots:
+    void on_m_GrayLevel_valueChanged(int v);
+    void on_m_Class_valueChanged(int v);
+    void on_m_Gamma_valueChanged(double v);
+    void on_colorButton_clicked();
+    void on_m_LineWidth_valueChanged(double v);
+
+    /**
+     * @brief Enables or Disables all the widgets in a list
+     * @param b
+     */
+    void setWidgetListEnabled(bool b);
+
 
   private:
-    UserInitAreaDialog(const UserInitAreaDialog&); // Copy Constructor Not Implemented
-    void operator=(const UserInitAreaDialog&); // Operator '=' Not Implemented
+    UserInitArea* m_uia;
+    QList<QWidget*> m_WidgetList;
+
+    UserInitAreaWidget(const UserInitAreaWidget&); // Copy Constructor Not Implemented
+    void operator=(const UserInitAreaWidget&); // Operator '=' Not Implemented
 };
 
-#endif /* USERINITAREADIALOG_H_ */
+#endif /* USERINITAREAWIDGET_H_ */

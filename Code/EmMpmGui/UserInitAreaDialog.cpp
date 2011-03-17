@@ -30,29 +30,14 @@
 
 #include "UserInitAreaDialog.h"
 #include "UserInitArea.h"
+#include "UserInitAreaWidget.h"
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
-UserInitAreaDialog::UserInitAreaDialog(UserInitArea* uia, QWidget *parent) :
-QDialog(parent),
-m_uia(uia)
+UserInitAreaDialog::UserInitAreaDialog(QWidget *parent) :
+QDialog(parent)
 {
   setupUi(this);
-
-  m_GrayLevel->setValue(uia->getEmMpmGrayLevel());
-  m_Class->setValue(uia->getEmMpmClass());
-  bool ok = false;
-  m_Mu->setText(QString::number(uia->getMu()));
-  m_Sigma->setText(QString::number(uia->getSigma()));
-  m_Gamma->setValue(uia->getGamma());
-
-
-  connect(m_GrayLevel, SIGNAL(valueChanged(int)),
-          uia, SLOT(setEmMpmGrayLevel(int)), Qt::QueuedConnection);
-  connect(m_Class, SIGNAL(valueChanged(int)),
-          uia, SLOT(setEmMpmClass(int)), Qt::QueuedConnection);
-  connect(m_Gamma, SIGNAL(valueChanged(double)),
-          uia, SLOT(setGamma(double)), Qt::QueuedConnection);
 }
 
 // -----------------------------------------------------------------------------
@@ -65,20 +50,8 @@ UserInitAreaDialog::~UserInitAreaDialog()
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
-//QColor UserInitAreaDialog::getSelectedColor()
-//{
-//  QStringList colorNames = QColor::colorNames();
-//  return QColor(colorNames[colorPicker->currentIndex()]);
-//}
-
-
-// -----------------------------------------------------------------------------
-//
-// -----------------------------------------------------------------------------
-void UserInitAreaDialog::on_colorPicker_currentIndexChanged(int index)
+UserInitAreaWidget* UserInitAreaDialog::getUserInitAreaWidget()
 {
-  QStringList colorNames = QColor::colorNames();
-  QColor c = QColor(colorNames[colorPicker->currentIndex()]);
-  c.setAlpha(UIA::Alpha);
-  m_uia->setColor( c );
+  return m_UserInitAreaWidget;
 }
+

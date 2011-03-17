@@ -56,7 +56,7 @@ class QwtPlotCurve;
 class QwtPlotMarker;
 class EMMPMTask;
 class AxisSettingsDialog;
-
+class UserInitAreaWidget;
 
 #include "IPHelper/plugins/QImageProcessingInputFrame.h"
 
@@ -97,6 +97,8 @@ class EmMpmGui :  public QMainWindow, private Ui::EmMpmGui
     MXA_INSTANCE_PROPERTY(QString, OpenDialogLastDirectory)
     MXA_INSTANCE_PROPERTY(InputOutputFilePairList, InputOutputFilePairList)
 
+    UserInitAreaWidget* getUserInitAreaWidget();
+
     char* copyStringToNewBuffer(const QString &fname);
     void copyGrayValues( EMMPM_Data* inputs);
     void copyInitCoords( EMMPM_Data* inputs);
@@ -118,6 +120,7 @@ class EmMpmGui :  public QMainWindow, private Ui::EmMpmGui
     void deleteUserInitArea(UserInitArea* uia);
     void userInitAreaUpdated(UserInitArea* uia);
     void userInitAreaSelected(UserInitArea* uia);
+    void userInitAreaLostFocus();
 
   protected slots:
   //Manual Hookup Menu Actions
@@ -126,6 +129,10 @@ class EmMpmGui :  public QMainWindow, private Ui::EmMpmGui
     void on_actionSaveCanvas_triggered();
     void on_actionAbout_triggered();
     void on_actionExit_triggered();
+
+    void on_actionParameters_triggered();
+    void on_actionHistogram_triggered();
+    void on_actionUser_Initialization_triggered();
 
     void on_axisSettingsBtn_clicked();
 
@@ -261,7 +268,8 @@ class EmMpmGui :  public QMainWindow, private Ui::EmMpmGui
 
   private:
 
-  UserInitAreaTableModel*     m_UserInitAreaTableModel;
+ // UserInitAreaTableModel*     m_UserInitAreaTableModel;
+  QVector<UserInitArea*>*      m_UserInitAreaVector;
   qint32                      m_CurrentHistogramClass;
 
   QwtPlotZoomer* m_zoomer;

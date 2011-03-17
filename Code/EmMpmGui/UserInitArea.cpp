@@ -58,13 +58,23 @@ QGraphicsPolygonItem(polygon, parent)
   m_CurrentResizeHandle = UserInitArea::NO_CTRL_POINT;
   ctrlPointSize = 7.0f;
   m_GrayLevel = 0 + (255/16 * userIndex);
-  m_Color.setRgb(25, 25, 255, 150);
+
   m_Class = userIndex;
   m_Mu = 1.0;
   m_Sigma = 0.1;
   m_Gamma = 1.0;
+  m_LineWidth = 1.0;
   m_Visible = true;
-  setBrush(QBrush(m_Color));
+
+  QPoint p = pos().toPoint();
+  QRect b = boundingRect().toAlignedRect();
+  m_UpperLeft[0] = b.x() + p.x();
+  m_UpperLeft[1] = b.y() + p.y();
+  m_LowerRight[0] = b.x() + p.x() + b.width();
+  m_LowerRight[1] = b.y() + p.y() + b.height();
+
+  QStringList colorNames = QColor::colorNames();
+  setBrush(QBrush(QColor(colorNames[21])));
 }
 
 // -----------------------------------------------------------------------------
@@ -75,24 +85,37 @@ UserInitArea::~UserInitArea()
 
 }
 
-void UserInitArea::setUpperLeft(unsigned int x, unsigned int y)
-{
-   m_UpperLeft[0] = x;
-   m_UpperLeft[1] = y;
-}
+//void UserInitArea::setUpperLeft(unsigned int x, unsigned int y)
+//{
+//   m_UpperLeft[0] = x;
+//   m_UpperLeft[1] = y;
+//}
+
 void UserInitArea::getUpperLeft(unsigned int &x, unsigned int &y)
 {
+  QPoint p = pos().toPoint();
+  QRect b = boundingRect().toAlignedRect();
+  m_UpperLeft[0] = b.x() + p.x();
+  m_UpperLeft[1] = b.y() + p.y();
+
   x = m_UpperLeft[0];
   y = m_UpperLeft[1];
 }
 
-void UserInitArea::setLowerRight(unsigned int x, unsigned int y)
-{
-  m_LowerRight[0] = x;
-  m_LowerRight[1] = y;
-}
+//void UserInitArea::setLowerRight(unsigned int x, unsigned int y)
+//{
+//  m_LowerRight[0] = x;
+//  m_LowerRight[1] = y;
+//}
+
+
 void UserInitArea::getLowerRight(unsigned int &x, unsigned int &y)
 {
+  QPoint p = pos().toPoint();
+  QRect b = boundingRect().toAlignedRect();
+  m_LowerRight[0] = b.x() + p.x() + b.width();
+  m_LowerRight[1] = b.y() + p.y() + b.height();
+
   x = m_LowerRight[0];
   y = m_LowerRight[1];
 }
@@ -133,6 +156,17 @@ double UserInitArea::getGamma()
   return m_Gamma;
 }
 
+void UserInitArea::setLineWidth(qreal w)
+{
+  m_LineWidth = w;
+  emit fireUserInitAreaUpdated(this);
+}
+
+qreal UserInitArea::getLineWidth()
+{
+  return m_LineWidth;
+}
+
 
 // -----------------------------------------------------------------------------
 //
@@ -147,7 +181,11 @@ void UserInitArea::setVisible(bool visible)
 // -----------------------------------------------------------------------------
 void UserInitArea::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget)
 {
-  if (m_Visible == false) { return; }
+  if (m_Visible == false)
+  {
+    std::cout << "UserInitArea::paint Visible=false" << std::endl;
+    return;
+  }
 
   painter->setRenderHint(QPainter::Antialiasing, true);
 
@@ -249,7 +287,8 @@ void UserInitArea::propertiesSelectedItems(QGraphicsScene *scene)
     {
       UserInitArea *itemBase = qgraphicsitem_cast<UserInitArea *>(item);
       if (itemBase) {
-        UserInitAreaDialog about(itemBase);
+        UserInitAreaDialog about(NULL);
+        about.getUserInitAreaWidget()->setUserInitArea(itemBase);
         about.exec();
         emit itemBase->fireUserInitAreaUpdated(itemBase);
       }
@@ -559,8 +598,11 @@ int UserInitArea::type() const
     return Type;
 }
 
+// -----------------------------------------------------------------------------
+//
+// -----------------------------------------------------------------------------
 void UserInitArea::setColor(QColor color)
 {
-  m_Color = color;
-  setBrush(QBrush(m_Color));
+  setBrush(QBrush(color));
+  emit fireUserInitAreaUpdated(this);
 }

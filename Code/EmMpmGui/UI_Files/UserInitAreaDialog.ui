@@ -6,12 +6,12 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>262</width>
-    <height>203</height>
+    <width>232</width>
+    <height>410</height>
    </rect>
   </property>
   <property name="sizePolicy">
-   <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+   <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
     <horstretch>0</horstretch>
     <verstretch>0</verstretch>
    </sizepolicy>
@@ -25,43 +25,17 @@
   <property name="modal">
    <bool>true</bool>
   </property>
-  <layout class="QFormLayout" name="formLayout">
-   <property name="fieldGrowthPolicy">
-    <enum>QFormLayout::FieldsStayAtSizeHint</enum>
+  <layout class="QVBoxLayout" name="verticalLayout">
+   <property name="spacing">
+    <number>0</number>
    </property>
-   <property name="horizontalSpacing">
-    <number>6</number>
+   <property name="margin">
+    <number>0</number>
    </property>
-   <property name="verticalSpacing">
-    <number>6</number>
-   </property>
-   <property name="leftMargin">
-    <number>8</number>
-   </property>
-   <property name="topMargin">
-    <number>8</number>
-   </property>
-   <property name="rightMargin">
-    <number>8</number>
-   </property>
-   <property name="bottomMargin">
-    <number>4</number>
-   </property>
-   <item row="0" column="0">
-    <widget class="QLabel" name="label_2">
-     <property name="text">
-      <string>Class</string>
-     </property>
-    </widget>
+   <item>
+    <widget class="UserInitAreaWidget" name="m_UserInitAreaWidget" native="true"/>
    </item>
-   <item row="0" column="1">
-    <widget class="QSpinBox" name="m_Class">
-     <property name="maximum">
-      <number>15</number>
-     </property>
-    </widget>
-   </item>
-   <item row="7" column="0" colspan="2">
+   <item>
     <widget class="QDialogButtonBox" name="buttonBox">
      <property name="orientation">
       <enum>Qt::Horizontal</enum>
@@ -71,88 +45,14 @@
      </property>
     </widget>
    </item>
-   <item row="1" column="0">
-    <widget class="QLabel" name="label_3">
-     <property name="text">
-      <string>Gray Level</string>
-     </property>
-    </widget>
-   </item>
-   <item row="1" column="1">
-    <widget class="QSpinBox" name="m_GrayLevel">
-     <property name="maximum">
-      <number>255</number>
-     </property>
-    </widget>
-   </item>
-   <item row="2" column="0">
-    <widget class="QLabel" name="label">
-     <property name="text">
-      <string>Color of Area</string>
-     </property>
-    </widget>
-   </item>
-   <item row="2" column="1">
-    <widget class="ColorComboPicker" name="colorPicker"/>
-   </item>
-   <item row="4" column="0">
-    <widget class="QLabel" name="label_4">
-     <property name="text">
-      <string>Mu</string>
-     </property>
-    </widget>
-   </item>
-   <item row="5" column="0">
-    <widget class="QLabel" name="label_5">
-     <property name="text">
-      <string>Sigma</string>
-     </property>
-    </widget>
-   </item>
-   <item row="6" column="0">
-    <widget class="QLabel" name="label_6">
-     <property name="text">
-      <string>Gamma</string>
-     </property>
-    </widget>
-   </item>
-   <item row="5" column="1">
-    <widget class="QLabel" name="m_Sigma">
-     <property name="text">
-      <string>0.1</string>
-     </property>
-    </widget>
-   </item>
-   <item row="4" column="1">
-    <widget class="QLabel" name="m_Mu">
-     <property name="text">
-      <string>1.0</string>
-     </property>
-    </widget>
-   </item>
-   <item row="6" column="1">
-    <widget class="QDoubleSpinBox" name="m_Gamma">
-     <property name="decimals">
-      <number>3</number>
-     </property>
-     <property name="maximum">
-      <double>99999.990000000005239</double>
-     </property>
-     <property name="singleStep">
-      <double>0.500000000000000</double>
-     </property>
-     <property name="value">
-      <double>1.000000000000000</double>
-     </property>
-    </widget>
-   </item>
   </layout>
  </widget>
  <customwidgets>
   <customwidget>
-   <class>ColorComboPicker</class>
-   <extends>QComboBox</extends>
-   <header location="global">ColorComboPicker.h</header>
+   <class>UserInitAreaWidget</class>
+   <extends>QWidget</extends>
+   <header location="global">UserInitAreaWidget.h</header>
+   <container>1</container>
   </customwidget>
  </customwidgets>
  <resources/>
