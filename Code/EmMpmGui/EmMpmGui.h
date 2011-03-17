@@ -266,6 +266,9 @@ class EmMpmGui :  public QMainWindow, private Ui::EmMpmGui
     void setImageWidgetsEnabled(bool b);
     void setProcessFolderWidgetsEnabled(bool b);
 
+    void saveLayout();
+    void loadLayout();
+
   private:
 
  // UserInitAreaTableModel*     m_UserInitAreaTableModel;

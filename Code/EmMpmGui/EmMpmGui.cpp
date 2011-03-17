@@ -193,8 +193,8 @@ void EmMpmGui::readSettings()
   QString val;
   bool ok;
   qint32 i;
-  prefs.beginGroup("EMMPMPlugin");
-  READ_STRING_SETTING(prefs, m_Beta, "5.5");
+  prefs.beginGroup("EmMpmGui");
+  READ_STRING_SETTING(prefs, m_Beta, "0.5");
   READ_SETTING(prefs, m_MpmIterations, ok, i, 5, Int);
   READ_SETTING(prefs, m_EmIterations, ok, i, 5, Int);
   READ_SETTING(prefs, m_NumClasses, ok, i, 2, Int);
@@ -213,6 +213,20 @@ void EmMpmGui::readSettings()
   {
     this->populateFileTable(this->sourceDirectoryLE, this->fileListView);
   }
+
+  prefs.beginGroup("WindodwSettings");
+  if (prefs.contains(QString("Geometry")) )
+  {
+    QByteArray geo_data = prefs.value(QString("Geometry")).toByteArray();
+    ok = restoreGeometry(geo_data);
+  }
+
+  if (prefs.contains(QString("Layout")))
+  {
+    QByteArray layout_data = prefs.value(QString("Layout")).toByteArray();
+    restoreState(layout_data);
+  }
+  prefs.endGroup();
 }
 
 // -----------------------------------------------------------------------------
@@ -225,7 +239,7 @@ void EmMpmGui::writeSettings()
 #else
   QSettings prefs(QSettings::IniFormat, QSettings::UserScope, QCoreApplication::organizationDomain(), QCoreApplication::applicationName());
 #endif
-  prefs.beginGroup("EMMPMPlugin");
+  prefs.beginGroup("EmMpmGui");
   WRITE_STRING_SETTING(prefs, m_Beta);
   WRITE_SETTING(prefs, m_MpmIterations);
   WRITE_SETTING(prefs, m_EmIterations);
@@ -238,6 +252,13 @@ void EmMpmGui::writeSettings()
   WRITE_STRING_SETTING(prefs, outputDirectoryLE);
   WRITE_STRING_SETTING(prefs, outputPrefix);
   WRITE_STRING_SETTING(prefs, outputSuffix);
+  prefs.endGroup();
+
+  prefs.beginGroup("WindodwSettings");
+  QByteArray geo_data = saveGeometry();
+  QByteArray layout_data = saveState();
+  prefs.setValue(QString("Geometry"), geo_data);
+  prefs.setValue(QString("Layout"), layout_data);
   prefs.endGroup();
 }
 
@@ -1936,3 +1957,82 @@ void EmMpmGui::on_actionParameters_triggered()
   ParametersDockWidget->show();
 }
 
+// -----------------------------------------------------------------------------
+//
+// -----------------------------------------------------------------------------
+void EmMpmGui::saveLayout()
+{
+    QString fileName
+        = QFileDialog::getSaveFileName(this, tr("Save layout"));
+    if (fileName.isEmpty())
+        return;
+    QFile file(fileName);
+    if (!file.open(QFile::WriteOnly)) {
+        QString msg = tr("Failed to open %1\n%2")
+                        .arg(fileName)
+                        .arg(file.errorString());
+        QMessageBox::warning(this, tr("Error"), msg);
+        return;
+    }
+
+    QByteArray geo_data = saveGeometry();
+    QByteArray layout_data = saveState();
+
+    QSettings prefs;
+
+    bool ok = file.putChar((uchar)geo_data.size());
+    if (ok)
+        ok = file.write(geo_data) == geo_data.size();
+    if (ok)
+        ok = file.write(layout_data) == layout_data.size();
+
+    if (!ok) {
+        QString msg = tr("Error writing to %1\n%2")
+                        .arg(fileName)
+                        .arg(file.errorString());
+        QMessageBox::warning(this, tr("Error"), msg);
+        return;
+    }
+}
+
+void EmMpmGui::loadLayout()
+{
+    QString fileName
+        = QFileDialog::getOpenFileName(this, tr("Load layout"));
+    if (fileName.isEmpty())
+        return;
+    QFile file(fileName);
+    if (!file.open(QFile::ReadOnly)) {
+        QString msg = tr("Failed to open %1\n%2")
+                        .arg(fileName)
+                        .arg(file.errorString());
+        QMessageBox::warning(this, tr("Error"), msg);
+        return;
+    }
+
+    uchar geo_size;
+    QByteArray geo_data;
+    QByteArray layout_data;
+
+    bool ok = file.getChar((char*)&geo_size);
+    if (ok) {
+        geo_data = file.read(geo_size);
+        ok = geo_data.size() == geo_size;
+    }
+    if (ok) {
+        layout_data = file.readAll();
+        ok = layout_data.size() > 0;
+    }
+
+    if (ok)
+        ok = restoreGeometry(geo_data);
+    if (ok)
+        ok = restoreState(layout_data);
+
+    if (!ok) {
+        QString msg = tr("Error reading %1")
+                        .arg(fileName);
+        QMessageBox::warning(this, tr("Error"), msg);
+        return;
+    }
+}
