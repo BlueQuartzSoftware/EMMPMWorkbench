@@ -1,7 +1,8 @@
 # --------------------------------------------------------------------
 # create Resource files for the various license files that are used and 
 # also create a header file that lists all the License Files
-set(LICENSE_FILES ${PROJECT_SOURCE_DIR}/License/Boost.license
+set(LICENSE_FILES ${PROJECT_BINARY_DIR}/License.txt
+                  ${PROJECT_SOURCE_DIR}/License/Boost.license
                   ${PROJECT_SOURCE_DIR}/License/ITK.license
                   ${PROJECT_SOURCE_DIR}/License/MXA.license
                   ${PROJECT_SOURCE_DIR}/License/Qt.license
