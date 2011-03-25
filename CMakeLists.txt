@@ -14,7 +14,7 @@
 # additional issues.
 # ------------------------------------------------------------------------------
 
-project (EIMApps)
+project (QEMMPM)
 cmake_minimum_required(VERSION 2.8)
 
 # ---------- Setup output Directories -------------------------
@@ -39,7 +39,7 @@ SET (CMAKE_ARCHIVE_OUTPUT_DIRECTORY
   )
 
 SET (PROJECT_CODE_DIR ${PROJECT_SOURCE_DIR}/Code)
-SET (PROJECT_RESOURCES_DIR ${EIMApps_SOURCE_DIR}/Resources)
+SET (PROJECT_RESOURCES_DIR ${QEMMPM_SOURCE_DIR}/Resources)
 SET (PROJECT_PREFIX "MXA" CACHE STRING "The Prefix to be used for Preprocessor definitions")
 SET (EXE_DEBUG_EXTENSION "_debug")
 SET (PROJECT_INSTALL_HEADERS "0")
@@ -49,7 +49,7 @@ SET (PROJECT_INSTALL_EXECUTABLES "1")
 # Include the cmp project to perform all the basic configuration tests for the 
 # project.
 #------------------------------------------------------------------------------- 
-set (CMP_HEADER_DIR ${EIMApps_BINARY_DIR}/MXA)
+set (CMP_HEADER_DIR ${QEMMPM_BINARY_DIR}/MXA)
 set (CMP_CONFIGURATION_FILE_NAME "CMPConfiguration.h")
 set (CMP_TYPES_FILE_NAME "MXATypes.h")
 set (CMP_VERSION_HEADER_FILE_NAME "MXAVersion.h")
@@ -58,15 +58,15 @@ set (CMP_PROJECT_NAMESPACE "MXA")
 set (CMP_PROJECT_NAME "MXA")
 SET (CMP_INSTALL_FILES "1")
 set (CMP_ENABLE_PLUGINS "0")
-#set (CMP_PLUGIN_LIST_FILE ${PROJECT_BINARY_DIR}/EIMAppsPluginList.txt)
+#set (CMP_PLUGIN_LIST_FILE ${PROJECT_BINARY_DIR}/QEMMPMPluginList.txt)
 INCLUDE (${PROJECT_RESOURCES_DIR}/cmp/cmpProject.cmake)
 
 # --------------------------------------------------------------------
 # Generate a Header file with Compile Version variables
 # --------------------------------------------------------------------
-cmpGenerateVersionString( "${EIMApps_BINARY_DIR}/${PROJECT_NAME}/Common/${PROJECT_NAME}Version.h" 
-                          "EIMApps" 
-                          "EIMApps")
+cmpGenerateVersionString( "${QEMMPM_BINARY_DIR}/${PROJECT_NAME}/Common/${PROJECT_NAME}Version.h" 
+                          "QEMMPM" 
+                          "QEMMPM")
                           
 # --------------------------------------------------------------------
 # Generate our ReadMe and License Files
@@ -153,13 +153,13 @@ add_subdirectory(${PROJECT_CODE_DIR}/EmMpmGui ${PROJECT_BINARY_DIR}/Applications
 
 
 # Should we build the HTML documentation using DOxygen
-option(EIMApps_BUILD_API_DOCS "Use Doxygen to create the HTML based API documentation" OFF)
-if(EIMApps_BUILD_API_DOCS)
+option(QEMMPM_BUILD_API_DOCS "Use Doxygen to create the HTML based API documentation" OFF)
+if(QEMMPM_BUILD_API_DOCS)
   FIND_PACKAGE(Doxygen)
   if (NOT DOXYGEN_FOUND)
     message(FATAL_ERROR "Doxygen is needed to build the documentation. Please install it correctly")
   endif()
-  configure_file(${PROJECT_RESOURCES_DIR}/EIMApps.doxyfile.in 
+  configure_file(${PROJECT_RESOURCES_DIR}/QEMMPM.doxyfile.in 
                  ${PROJECT_BINARY_DIR}/Doxyfile  @ONLY IMMEDIATE)
   add_custom_target(docs COMMAND ${DOXYGEN_EXECUTABLE} ${PROJECT_BINARY_DIR}/Doxyfile)
 endif()

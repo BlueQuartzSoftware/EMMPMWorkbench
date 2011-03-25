@@ -1352,7 +1352,7 @@ void EmMpmGui::on_actionSaveCanvas_triggered()
 // -----------------------------------------------------------------------------
 void EmMpmGui::on_actionAbout_triggered()
 {
-  ApplicationAboutBoxDialog about(EIMApps::LicenseList, this);
+  ApplicationAboutBoxDialog about(QEMMPM::LicenseList, this);
   QString an = QCoreApplication::applicationName();
   QString version("");
   version.append(EmMpm_Gui::Version::PackageComplete.c_str());

@@ -70,8 +70,8 @@ include_directories( ${PROJECT_CODE_DIR}/EmMpmGui )
 include_directories( ${PROJECT_CODE_DIR}/QtSupport )
 
 include_directories( ${EmMpmGui_BINARY_DIR} )
-include_directories( ${EIMApps_BINARY_DIR}/MXA)
-include_directories( ${EIMApps_BINARY_DIR}/QtSupport )
+include_directories( ${QEMMPM_BINARY_DIR}/MXA)
+include_directories( ${QEMMPM_BINARY_DIR}/QtSupport )
  
 # --------------------------------------------------------------------
 # Set up all the source codes
@@ -170,9 +170,9 @@ BuildQtAppBundle(
     SOURCES ${${PROJECT_NAME}_PROJECT_SRCS}
     DEBUG_EXTENSION ${EXE_DEBUG_EXTENSION}
     ICON_FILE  ${APPLICATION_ICON}
-    VERSION_MAJOR ${EIMApps_VER_MAJOR}
-    VERSION_MINOR ${EIMApps_VER_MINOR}
-    VERSION_PATCH ${EIMApps_VER_PATCH}
+    VERSION_MAJOR ${QEMMPM_VER_MAJOR}
+    VERSION_MINOR ${QEMMPM_VER_MINOR}
+    VERSION_PATCH ${QEMMPM_VER_PATCH}
     BINARY_DIR    ${${PROJECT_NAME}_BINARY_DIR}
     LINK_LIBRARIES ${QT_LIBRARIES} QtSupport ${QWT_LIBRARIES} ${TIFF_LIBRARIES} ${EMMPM_LIBRARIES}
     LIB_SEARCH_DIRS ${CMAKE_LIBRARY_OUTPUT_DIRECTORY} ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
