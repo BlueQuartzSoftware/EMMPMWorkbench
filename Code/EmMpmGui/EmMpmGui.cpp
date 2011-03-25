@@ -617,19 +617,19 @@ void EmMpmGui::on_processBtn_clicked()
     QFileInfo fi(inputImageFilePath->text());
     if (fi.exists() == false)
     {
-      QMessageBox::critical(this, tr("Fixed Image File Error"), tr("Fixed Image does not exist. Please check the path."), QMessageBox::Ok);
+      QMessageBox::critical(this, tr("Fixed Image File Error"), tr("Input Image does not exist. Please check the path."), QMessageBox::Ok);
       return;
     }
 
     if (outputImageFile->text().isEmpty() == true)
     {
-      QMessageBox::critical(this, tr("Output Image File Error"), tr("Please select a file name for the registered image to be saved as."), QMessageBox::Ok);
+      QMessageBox::critical(this, tr("Output Image File Error"), tr("Please select a file name for the segmented image to be saved as."), QMessageBox::Ok);
       return;
     }
     QFile file(outputImageFile->text());
     if (file.exists() == true)
     {
-      int ret = QMessageBox::warning(this, tr("QEM/MPM"),
+      int ret = QMessageBox::warning(this, tr("EM/MPM GUI"),
                                      tr("The Output File Already Exists\nDo you want to over write the existing file?"),
                                      QMessageBox::No | QMessageBox::Default,
                                      QMessageBox::Yes,

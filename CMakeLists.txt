@@ -108,7 +108,7 @@ LINK_DIRECTORIES(${Boost_LIBRARY_DIRS})
 # --------------------------------------------------------------------
 # Find the ITK Package
 # --------------------------------------------------------------------
-FIND_PACKAGE(ITK)
+#FIND_PACKAGE(ITK)
 
 # ------------------------------------------------------------------------------
 #  Qt 4 Section
@@ -142,42 +142,14 @@ include(${PROJECT_SOURCE_DIR}/License/License.cmake)
 
 # --------------------------------------------------------------------
 # Compile the support libraries
-add_subdirectory(${PROJECT_CODE_DIR}/AIM ${PROJECT_BINARY_DIR}/AIMLib)
+#add_subdirectory(${PROJECT_CODE_DIR}/AIM ${PROJECT_BINARY_DIR}/AIMLib)
 add_subdirectory(${PROJECT_CODE_DIR}/QtSupport ${PROJECT_BINARY_DIR}/QtSupport)
 add_subdirectory(${PROJECT_CODE_DIR}/MXA ${PROJECT_BINARY_DIR}/MXA)
 
-set(IPHelper_BINARY_DIR ${PROJECT_BINARY_DIR}/Applications/IPHelper)
-# --------------------------------------------------------------------
-# Option to compile the Qt Based EIMApps Application
-option(EIMApps_BUILD_IPHELPER_GUI "Build the EIMApps GUI Application" ON)
-if (EIMApps_BUILD_IPHELPER_GUI)
-    # Clear these files each time otherwise we get duplicates
-    file(WRITE "${IPHelper_BINARY_DIR}/IPHelper_Plugins.txt" "")
-    file(WRITE "${IPHelper_BINARY_DIR}/LibSearchDirs.txt" "")
-    
-    # Compile the image processing plugins
-    add_subdirectory(${PROJECT_CODE_DIR}/IPHelper/plugins/EMMPM ${PROJECT_BINARY_DIR}/plugins/EMMPM)
-    add_subdirectory(${PROJECT_CODE_DIR}/IPHelper/plugins/CrossCorrelation ${PROJECT_BINARY_DIR}/plugins/CrossCorrelation)
-    #add_subdirectory(${PROJECT_CODE_DIR}/IPHelper/plugins/MutualInformation ${PROJECT_BINARY_DIR}/plugins/MutualInformation)
-
-    # Compile the main Application - this MUST be last due to how some variables are built up.
-    add_subdirectory(${PROJECT_CODE_DIR}/IPHelper/Application ${IPHelper_BINARY_DIR})
-endif()
-
 
 # --------------------------------------------------------------------
-# Option to Compile the Enhanced EM/MPM Qt Base GUI application
-option(EIMApps_BUILD_EMMPM_GUI "Build the EM/MPM GUI Application" ON)
-
-if (EIMApps_BUILD_EMMPM_GUI)
-    add_subdirectory(${PROJECT_CODE_DIR}/EmMpmGui ${PROJECT_BINARY_DIR}/Applications/EmMpmGui)
-endif()
-
-# --------------------------------------------------------------------
-# This was left over from the Mutual Information code that never matialized
-# add_subdirectory(${PROJECT_CODE_DIR}/AngReader ${PROJECT_BINARY_DIR}/AngReader)
-
-#add_subdirectory(${PROJECT_SOURCE_DIR}/Test ${PROJECT_BINARY_DIR}/Applications/ProgressLabel)
+# Compile the Enhanced EM/MPM Qt Base GUI application
+add_subdirectory(${PROJECT_CODE_DIR}/EmMpmGui ${PROJECT_BINARY_DIR}/Applications/EmMpmGui)
 
 
 # Should we build the HTML documentation using DOxygen
