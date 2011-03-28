@@ -194,7 +194,7 @@ class EmMpmGui :  public QMainWindow, private Ui::EmMpmGui
     // These slots get called when the plugin starts and finishes processing
     void processingStarted();
     void processingFinished();
-
+    void processingMessage(QString str);
 
     void clearProcessHistograms();
     void addProcessHistogram(QVector<double> data);

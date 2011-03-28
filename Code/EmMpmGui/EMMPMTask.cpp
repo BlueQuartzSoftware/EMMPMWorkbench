@@ -76,7 +76,11 @@ void EMMPMTask::EMMPMUpdate_CallBackWrapper(EMMPM_Data* data)
 
  // std::cout << "EMMPMUpdate_CallBackWrapper: Progress=" << data->progress << std::endl;
   emit mySelf->progressValueChanged((int)data->progress);
-  emit mySelf->progressTextChanged(QString::number(data->progress));
+  
+  QString msg("EM Loop: ");
+  msg.append(QString::number(data->currentEMLoop)).append(" - MPM Loop: ").append(QString::number(data->currentMPMLoop));
+
+  emit mySelf->progressTextChanged(msg);
 
   // Check to make sure we are at the end of an em loop
   if ( /* data->inside_mpm_loop == 0 && */ NULL != data->outputImage)

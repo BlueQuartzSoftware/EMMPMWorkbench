@@ -97,6 +97,14 @@ class EMMPMTask : public ProcessQueueTask
      * @brief Slot to receive a signal to cancel the operation
      */
     void cancel();
+  
+signals:
+     /**
+     * @brief Signal sent when the encoder has a message to relay to the GUI or other output device.
+     */
+   //   void progressTextChanged (QString progressText );
+
+
 
   private:
 

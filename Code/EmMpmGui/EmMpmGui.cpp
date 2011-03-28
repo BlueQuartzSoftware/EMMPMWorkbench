@@ -702,7 +702,8 @@ void EmMpmGui::on_processBtn_clicked()
 
     queueController->addTask(static_cast<QThread*> (task));
     connect(cancelBtn, SIGNAL(clicked()), task, SLOT(cancel()));
-
+    
+    connect(task, SIGNAL(progressTextChanged(QString )), this, SLOT(processingMessage(QString )), Qt::QueuedConnection);
     connect(task, SIGNAL(updateImageAvailable(QImage)), m_GraphicsView, SLOT(setOverlayImage(QImage)));
     connect(task, SIGNAL(histogramsAboutToBeUpdated()), this, SLOT(clearProcessHistograms()));
     connect(task, SIGNAL(updateHistogramAvailable(QVector<double>)), this, SLOT(addProcessHistogram(QVector<double>)));
@@ -861,6 +862,14 @@ void EmMpmGui::processingFinished()
   processBtn->setVisible(true);
   cancelBtn->setVisible(false);
   this->statusBar()->showMessage("Processing Complete");
+}
+
+// -----------------------------------------------------------------------------
+//
+// -----------------------------------------------------------------------------
+void EmMpmGui::processingMessage(QString str)
+{
+  this->statusBar()->showMessage(str);
 }
 
 // -----------------------------------------------------------------------------

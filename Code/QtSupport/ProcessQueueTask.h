@@ -84,7 +84,7 @@ class ProcessQueueTask : public QThread
     /**
      * @brief Signal sent when the encoder has a message to relay to the GUI or other output device.
      */
-      void progressTextChanged ( const QString & progressText );
+      void progressTextChanged ( QString progressText );
 
       /**
        * @brief Signal sent to the GUI to indicate progress of the encoder which is an integer value between 0 and 100.
