@@ -217,8 +217,8 @@ void EMMPMTask::run()
 {
   UPDATE_PROGRESS(QString("Starting Segmentation"), 0);
 
-  this->setInputFilePath(QString(m_data->input_file_name));
-  this->setOutputFilePath(QString(m_data->output_file_name));
+ // this->setInputFilePath(QString(m_data->input_file_name));
+ // this->setOutputFilePath(QString(m_data->output_file_name));
   // Get our input image from the Image IO functions
   QImage image = QImage(m_data->input_file_name);
   qint32 height = image.height();
@@ -283,9 +283,6 @@ void EMMPMTask::run()
       break;
     case EMMPM_Basic:
       m_callbacks->EMMPM_InitializationFunc = EMMPM_BasicInitialization;
-      break;
-    case EMMPM_CurvaturePenalty:
-      m_callbacks->EMMPM_InitializationFunc = EMMPM_CurvatureInitialization;
       break;
     case EMMPM_ManualInit:
       m_callbacks->EMMPM_InitializationFunc = EMMPM_ManualInitialization;

@@ -720,7 +720,7 @@ void EMMPMGraphicsView::addNewInitArea(const QPolygonF &polygon)
     m_UserInitAreaVector->push_back(userInitArea);
 
     connect (userInitArea, SIGNAL(fireUserInitAreaAboutToDelete(UserInitArea*)),
-             m_MainGui, SLOT(deleteUserInitArea(UserInitArea*)), Qt::QueuedConnection);
+             m_MainGui, SLOT(deleteUserInitArea(UserInitArea*)), Qt::DirectConnection);
 
     connect (userInitArea, SIGNAL (fireUserInitAreaUpdated(UserInitArea*)),
              m_MainGui, SLOT(userInitAreaUpdated(UserInitArea*)), Qt::QueuedConnection);

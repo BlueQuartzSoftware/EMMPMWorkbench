@@ -46,6 +46,7 @@
 #include <QtCore/QThread>
 #include <QtCore/QThreadPool>
 #include <QtCore/QFileInfoList>
+
 #include <QtGui/QApplication>
 #include <QtGui/QFileDialog>
 #include <QtGui/QCloseEvent>
@@ -53,6 +54,7 @@
 #include <QtGui/QListWidget>
 #include <QtGui/QStringListModel>
 #include <QtGui/QLineEdit>
+#include <QtGui/QDoubleValidator>
 
 //-- Qwt Includes
 #include <qwt.h>
@@ -391,7 +393,7 @@ void EmMpmGui::setupGui()
 //  m_grid->attach(m_HistogramPlot);
 
   // setup the Widget List
-  m_WidgetList << m_NumClasses << m_EmIterations << m_MpmIterations << m_Beta;
+  m_WidgetList << m_NumClasses << m_EmIterations << m_MpmIterations << m_Beta << m_MinVariance;
   m_WidgetList << enableUserDefinedAreas << useSimulatedAnnealing;
   m_WidgetList << useCuravturePenalty << useGradientPenalty;
   m_WidgetList << curvatureBetaC << curvatureRMax << ccostLoopDelay;
@@ -405,6 +407,9 @@ void EmMpmGui::setupGui()
   << outputDirectoryBtn << outputPrefix << outputSuffix << filterPatternLabel
   << filterPatternLineEdit << fileListView << outputImageTypeLabel << outputImageType << loadFirstImageBtn;
 
+  QDoubleValidator* betaValidator = new QDoubleValidator(m_Beta);
+  QDoubleValidator* minVarValidator = new QDoubleValidator(m_MinVariance);
+
 
 #if 0
   m_zoomer = new QwtPlotZoomer(QwtPlot::xBottom, QwtPlot::yLeft, m_HistogramPlot->canvas());
@@ -415,13 +420,13 @@ void EmMpmGui::setupGui()
 
   m_panner = new QwtPlotPanner(m_HistogramPlot->canvas());
   m_panner->setMouseButton(Qt::MidButton);
-
+#endif
   m_picker
-  = new QwtPlotPicker(QwtPlot::xBottom, QwtPlot::yLeft, QwtPicker::PointSelection | QwtPicker::DragSelection, QwtPlotPicker::CrossRubberBand, QwtPicker::AlwaysOn, m_HistogramPlot->canvas());
+  = new QwtPlotPicker(QwtPlot::xBottom, QwtPlot::yLeft, QwtPicker::PointSelection, QwtPlotPicker::CrossRubberBand, QwtPicker::AlwaysOn, m_HistogramPlot->canvas());
   m_picker->setRubberBandPen(QColor(Qt::green));
   m_picker->setRubberBand(QwtPicker::CrossRubberBand);
   m_picker->setTrackerPen(QColor(Qt::blue));
-#endif
+
 
 }
 
@@ -503,7 +508,21 @@ void EmMpmGui::copyGammaValues(EMMPM_Data* inputs)
     inputs->w_gamma[r] = uia->getGamma();
  //   std::cout << "Initializing with Gamma:" << inputs->w_gamma[r] << std::endl;
   }
+}
 
+// -----------------------------------------------------------------------------
+//
+// -----------------------------------------------------------------------------
+void EmMpmGui::copyMinVarianceValues(EMMPM_Data* inputs)
+{
+  int size = m_UserInitAreaVector->count();
+  UserInitArea* uia = NULL;
+  for (int r = 0; r < size; ++r)
+  {
+    uia = m_UserInitAreaVector->at(r);
+    inputs->min_variance[r] = uia->getMinVariance();
+    //   std::cout << "Initializing with Gamma:" << inputs->w_gamma[r] << std::endl;
+  }
 }
 
 // -----------------------------------------------------------------------------
@@ -777,6 +796,7 @@ EMMPMTask* EmMpmGui::newEmMpmTask( QString inputFile, QString outputFile, Proces
     for (int value = 0; value < data->classes; ++value)
     {
       data->grayTable[value] = value * 255 / n;
+      data->min_variance[value] = m_MinVariance->text().toFloat(&ok);
     }
   }
   else
@@ -789,6 +809,7 @@ EMMPMTask* EmMpmGui::newEmMpmTask( QString inputFile, QString outputFile, Proces
     copyInitCoords(data);
     copyIntializationValues(data);
     copyGammaValues(data);
+    copyMinVarianceValues(data);
   }
   data->useCurvaturePenalty = (useCuravturePenalty->isChecked()) ? 1 : 0;
   data->useGradientPenalty = (useGradientPenalty->isChecked()) ? 1 : 0;
@@ -796,7 +817,6 @@ EMMPMTask* EmMpmGui::newEmMpmTask( QString inputFile, QString outputFile, Proces
   data->beta_c = (useCuravturePenalty->isChecked()) ? curvatureBetaC->value() : 0.0;
   data->r_max = (useCuravturePenalty->isChecked()) ? curvatureRMax->value() : 0.0;
   data->ccostLoopDelay = (useCuravturePenalty->isChecked()) ? ccostLoopDelay->value() : m_MpmIterations->value() + 1;
-
 
   return task;
 }
@@ -1265,8 +1285,18 @@ void EmMpmGui::openBaseImageFile(QString imageFile)
   {
     return;
   }
-  // Delete all the User Init Areas from the Scene
+
   UserInitArea::deleteAllUserInitAreas(m_GraphicsView->scene());
+  
+  // Delete all the User Init Areas from the Scene
+  enableUserDefinedAreas->setCheckState(Qt::Unchecked);
+  on_enableUserDefinedAreas_stateChanged(Qt::Unchecked);
+
+
+  
+  
+  m_UserInitAreaVector->clear();
+
 
   m_GraphicsView->loadBaseImageFile(imageFile);
   setWindowTitle(imageFile);
@@ -1472,7 +1502,15 @@ void EmMpmGui::addProcessHistogram(QVector<double> data)
   updateHistogramAxis();
   ++m_CurrentHistogramClass;
 
-  plotCombinedGaussian();
+  // Only update the combined Gaussian when all the individual Gaussian's are in place
+  if (m_UserInitAreaVector->size() == m_CurrentHistogramClass)
+  {
+      plotCombinedGaussian();
+  }
+
+
+
+  m_HistogramPlot->replot();
 }
 
 // -----------------------------------------------------------------------------
@@ -1695,7 +1733,7 @@ void EmMpmGui::plotCombinedGaussian()
 
   QwtPlotCurve* curve = NULL;
   int count = m_Gaussians.size();
-  if (count < 2) { return; } // only one gaussian is the same as the user init gaussian and is meaningless
+  if (count < 2) { return; } // only one Gaussian is the same as the user init Gaussian and is meaningless
   for (int c = 0; c < count; ++c)
   {
     curve = m_Gaussians[c];
@@ -1714,7 +1752,10 @@ void EmMpmGui::plotCombinedGaussian()
 void EmMpmGui::deleteUserInitArea(UserInitArea* uia)
 {
   int row = m_UserInitAreaVector->indexOf(uia, 0);
-
+  if (row >= m_Gaussians.count() )
+  {
+    return;
+  }
   QwtPlotCurve* curve = m_Gaussians[row];
   m_Gaussians.removeAll(curve);
 
@@ -1904,7 +1945,9 @@ void EmMpmGui::on_enableUserDefinedAreas_stateChanged(int state)
       userInitAreaAdded(uia);
     } else {
       uia->setVisible(false);
-      m_GraphicsView->scene()->removeItem(uia);
+      if (uia && uia->scene()) {
+        m_GraphicsView->scene()->removeItem(uia);
+      }
     }
   }
   s = m_Gaussians.size();

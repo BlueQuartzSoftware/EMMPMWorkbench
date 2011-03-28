@@ -85,6 +85,16 @@ void UserInitAreaWidget::on_m_Gamma_valueChanged(double v)
   }
 }
 
+// -----------------------------------------------------------------------------
+//
+// -----------------------------------------------------------------------------
+void UserInitAreaWidget::on_m_MinVariance_valueChanged(double v)
+{
+  if (m_uia != NULL)
+  {
+    m_uia->setMinVariance(m_MinVariance->value());
+  }
+}
 
 // -----------------------------------------------------------------------------
 //

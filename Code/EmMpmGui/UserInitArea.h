@@ -86,12 +86,15 @@ public:
     void setGamma(double g);
     double getGamma();
 
+    void setMinVariance(double v);
+    double getMinVariance();
+
     void setLineWidth(qreal w);
     qreal getLineWidth();
 
     void setVisible(bool visible);
 
-  static void deleteAllUserInitAreas(QGraphicsScene* scene);
+    static void deleteAllUserInitAreas(QGraphicsScene* scene);
 
  signals:
 
@@ -133,6 +136,7 @@ private:
     double m_Mu;
     double m_Sigma;
     double m_Gamma;
+    double m_MinVariance;
     qreal m_LineWidth;
     bool m_Visible;
 };

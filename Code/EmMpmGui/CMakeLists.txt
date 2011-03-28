@@ -122,10 +122,14 @@ SET( EmMpmGui_UIS
 )
 cmp_IDE_SOURCE_PROPERTIES(EmMpmGui/UI_Files "${EmMpmGui_UIS}" "" "0")
 
+# Organize the .qrc files that were generated from the various license files
+cmp_IDE_GENERATED_PROPERTIES(EmMpmGui/Generated/License "${QRC_LICENSE_FILES}" "" "0")
+
 # and finally any resource files
 SET( EmMpmGui_RCS
  ${PROJECT_RESOURCES_DIR}/icons/images/Icons.qrc
 )
+cmp_IDE_SOURCE_PROPERTIES(EmMpmGui/QrcFiles "${EmMpmGui_RCS}" "" "0")
 
 # -- Run MOC and UIC on the necessary files   
 QT4_ADD_RESOURCES( Generated_RC_SRCS ${EmMpmGui_RCS}  ${QRC_LICENSE_FILES})

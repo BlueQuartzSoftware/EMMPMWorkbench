@@ -104,7 +104,8 @@ class EmMpmGui :  public QMainWindow, private Ui::EmMpmGui
     void copyInitCoords( EMMPM_Data* inputs);
     void copyIntializationValues(EMMPM_Data* inputs);
     void copyGammaValues(EMMPM_Data* inputs);
-
+    void copyMinVarianceValues(EMMPM_Data* inputs);
+    
     void updateHistogramAxis();
 
     signals:
@@ -273,7 +274,7 @@ class EmMpmGui :  public QMainWindow, private Ui::EmMpmGui
 
  // UserInitAreaTableModel*     m_UserInitAreaTableModel;
   QVector<UserInitArea*>*      m_UserInitAreaVector;
-  qint32                      m_CurrentHistogramClass;
+  qint32                       m_CurrentHistogramClass;
 
   QwtPlotZoomer* m_zoomer;
   QwtPlotPicker* m_picker;
