@@ -1287,16 +1287,14 @@ void EmMpmGui::openBaseImageFile(QString imageFile)
   }
 
   UserInitArea::deleteAllUserInitAreas(m_GraphicsView->scene());
-  
+
   // Delete all the User Init Areas from the Scene
   enableUserDefinedAreas->setCheckState(Qt::Unchecked);
   on_enableUserDefinedAreas_stateChanged(Qt::Unchecked);
-
-
-  
-  
+  //Clear out the UserInitAreas that we are tracking. They have all been released
+  // in memory we just simply need to clear the tracking vector. This class does
+  // not own the pointer so we don't worry about cleaning up the memory.
   m_UserInitAreaVector->clear();
-
 
   m_GraphicsView->loadBaseImageFile(imageFile);
   setWindowTitle(imageFile);
@@ -1307,8 +1305,6 @@ void EmMpmGui::openBaseImageFile(QString imageFile)
   setImageWidgetsEnabled(true);
   updateBaseRecentFileList(imageFile);
 }
-
-
 
 // -----------------------------------------------------------------------------
 //
@@ -1326,7 +1322,6 @@ void EmMpmGui::on_actionOpenBaseImage_triggered()
   }
   openBaseImageFile(imageFile);
 }
-
 
 // -----------------------------------------------------------------------------
 //
