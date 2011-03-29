@@ -26,8 +26,6 @@ MXACompileDir(Common)
 MXACompileDir(Utilities)
 MXACompileDir(BMPIO)
 
-
-
 set (Project_SRCS 
     ${Project_SRCS} 
     )
@@ -50,24 +48,25 @@ add_library(${PROJECT_NAME} ${LIB_TYPE}  ${Project_SRCS})
 # target_link_libraries(${PROJECT_NAME} ${HDF5_LIBRARIES} )
 LibraryProperties( ${PROJECT_NAME} ${EXE_DEBUG_EXTENSION})
 
-set(install_dir "tools")
-set(lib_install_dir "lib")
-if (WIN32)
-    set (install_dir ".")
-    set(lib_install_dir "")
+if (NOT APPLE)
+    set(install_dir "tools")
+    set(lib_install_dir "lib")
+    if (WIN32)
+        set (install_dir ".")
+        set(lib_install_dir "")
+    endif()
+    
+    if (BUILD_SHARED_LIBS)
+        INSTALL(TARGETS ${PROJECT_NAME} 
+            COMPONENT Applications
+            RUNTIME DESTINATION ${install_dir}
+            LIBRARY DESTINATION ${lib_install_dir}
+            ARCHIVE DESTINATION ${lib_install_dir}       
+            BUNDLE DESTINATION "."
+        ) 
+    endif() 
+
 endif()
-
-if (BUILD_SHARED_LIBS)
-    INSTALL(TARGETS ${PROJECT_NAME} 
-        COMPONENT Applications
-        RUNTIME DESTINATION ${install_dir}
-        LIBRARY DESTINATION ${lib_install_dir}
-        ARCHIVE DESTINATION ${lib_install_dir}       
-        BUNDLE DESTINATION "."
-    ) 
-endif() 
-
-
 
 
 # --------------------------------------------------------------------
