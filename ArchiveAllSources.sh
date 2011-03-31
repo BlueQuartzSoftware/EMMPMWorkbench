@@ -17,21 +17,21 @@ parallel=2
 # If any of those are missing then this script will fail horribly.
 
 GIT=`type -P git`
-if [ $GIT == "" ]
+if [[ $GIT == "" ]]
   then
   echo "Git is needed for this script. Please install it on your system and be sure it is on your path."
   exit 1
 fi
 
 QMAKE=`type -P qmake`
-if [ $QMAKE == "" ]
+if [[ $QMAKE == "" ]]
   then
   echo "An installation of Qt is required. Please install a version of Qt of at least 4.6 or greater."
   exit 1
 fi
 
 CMAKE=`type -P cmake`
-if [ $CMAKE == "" ]
+if [[ $CMAKE == "" ]]
   then
   echo "An installation of CMake is required. Please install a version of CMake of at least 2.8.3 or greater."
   exit 1
@@ -45,7 +45,7 @@ export PATH=$PATH:/Users/Shared/Toolkits/CMake-2.8.3/bin
 # with any other CMake generator
 CMAKE_GENERATOR="Unix Makefiles"
 
-archive_destination="/Volumes/PortableBackup/TO81-Deliverables"
+archive_destination="/Volumes/Misc/TO81-Deliverables"
 DATE=`date +%Y.%m.%d`
 
 mkdir -p $archive_destination/4.1
@@ -101,8 +101,9 @@ do
 done
 
 echo "4.5:  Copying Qt source code"
-cp /Users/Warehouse/qt-everywhere-opensource-src-4.7.2.zip $archive_destination/4.5/Source/.
+cp /Volumes/Backup/Warehouse/Qt-4.7.2/qt-everywhere-opensource-src-4.7.2.zip $archive_destination/4.5/Source/.
 
 echo "You still need the following items:"
 echo "  MS Word version of final report"
 echo "  Precompiled Binaries for OS X and Windows"
+echo "  CMake installers for Windows and OS X"
