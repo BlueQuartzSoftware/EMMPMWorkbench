@@ -105,7 +105,7 @@ class EmMpmGui :  public QMainWindow, private Ui::EmMpmGui
     void copyIntializationValues(EMMPM_Data* inputs);
     void copyGammaValues(EMMPM_Data* inputs);
     void copyMinVarianceValues(EMMPM_Data* inputs);
-    
+
     void updateHistogramAxis();
 
     signals:
@@ -147,8 +147,9 @@ class EmMpmGui :  public QMainWindow, private Ui::EmMpmGui
     void on_compositeModeCB_currentIndexChanged();
     void on_fitToWindow_clicked();
     void on_transparency_valueChanged(int value);
-    void on_enableUserDefinedAreas_clicked(bool b);
     void on_clearTempHistograms_clicked();
+
+    void on_enableUserDefinedAreas_stateChanged(int state);
 
     /**
      * @brief Qt Slot that fires in response to a click on a "Recent File' Menu entry.
@@ -183,9 +184,6 @@ class EmMpmGui :  public QMainWindow, private Ui::EmMpmGui
     void on_outputSuffix_textChanged();
     void on_outputImageType_currentIndexChanged(int index);
     void on_loadFirstImageBtn_clicked();
-
-    void on_enableUserDefinedAreas_stateChanged(int state);
-
 
 
     // Over rides from Parent Class

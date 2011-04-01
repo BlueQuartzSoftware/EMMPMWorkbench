@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1126</width>
-    <height>706</height>
+    <width>1032</width>
+    <height>665</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -54,7 +54,7 @@
     <item>
      <widget class="QTabWidget" name="tabWidget">
       <property name="currentIndex">
-       <number>0</number>
+       <number>1</number>
       </property>
       <widget class="QWidget" name="filesInputTab">
        <attribute name="title">
@@ -560,7 +560,7 @@
              <enum>Qt::Horizontal</enum>
             </property>
             <property name="sizeType">
-             <enum>QSizePolicy::Fixed</enum>
+             <enum>QSizePolicy::Expanding</enum>
             </property>
             <property name="sizeHint" stdset="0">
              <size>
@@ -589,77 +589,6 @@
              <bool>true</bool>
             </property>
            </widget>
-          </item>
-          <item>
-           <spacer name="horizontalSpacer_2">
-            <property name="orientation">
-             <enum>Qt::Horizontal</enum>
-            </property>
-            <property name="sizeHint" stdset="0">
-             <size>
-              <width>40</width>
-              <height>20</height>
-             </size>
-            </property>
-           </spacer>
-          </item>
-          <item>
-           <layout class="QHBoxLayout" name="horizontalLayout_6">
-            <property name="spacing">
-             <number>6</number>
-            </property>
-            <property name="sizeConstraint">
-             <enum>QLayout::SetMinimumSize</enum>
-            </property>
-            <item>
-             <widget class="QComboBox" name="imageDisplayCombo">
-              <item>
-               <property name="text">
-                <string>Original Image</string>
-               </property>
-              </item>
-              <item>
-               <property name="text">
-                <string>Segmented Image</string>
-               </property>
-              </item>
-              <item>
-               <property name="text">
-                <string>Composited Image</string>
-               </property>
-              </item>
-             </widget>
-            </item>
-            <item>
-             <widget class="QComboBox" name="compositeModeCB">
-              <property name="enabled">
-               <bool>false</bool>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QSlider" name="transparency">
-              <property name="enabled">
-               <bool>false</bool>
-              </property>
-              <property name="minimumSize">
-               <size>
-                <width>25</width>
-                <height>0</height>
-               </size>
-              </property>
-              <property name="maximum">
-               <number>255</number>
-              </property>
-              <property name="value">
-               <number>128</number>
-              </property>
-              <property name="orientation">
-               <enum>Qt::Horizontal</enum>
-              </property>
-             </widget>
-            </item>
-           </layout>
           </item>
          </layout>
         </item>
@@ -740,6 +669,58 @@
           </widget>
          </widget>
         </item>
+        <item>
+         <layout class="QHBoxLayout" name="horizontalLayout_4">
+          <item>
+           <widget class="QComboBox" name="imageDisplayCombo">
+            <item>
+             <property name="text">
+              <string>Original</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>Segmented</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>Composited</string>
+             </property>
+            </item>
+           </widget>
+          </item>
+          <item>
+           <widget class="QComboBox" name="compositeModeCB">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QSlider" name="transparency">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
+            <property name="minimumSize">
+             <size>
+              <width>25</width>
+              <height>0</height>
+             </size>
+            </property>
+            <property name="maximum">
+             <number>255</number>
+            </property>
+            <property name="value">
+             <number>48</number>
+            </property>
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
        </layout>
       </widget>
      </widget>
@@ -751,7 +732,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1126</width>
+     <width>1032</width>
      <height>22</height>
     </rect>
    </property>
@@ -804,6 +785,9 @@
    </attribute>
    <widget class="QWidget" name="dockWidgetContents">
     <layout class="QVBoxLayout" name="verticalLayout_6">
+     <property name="spacing">
+      <number>6</number>
+     </property>
      <property name="margin">
       <number>4</number>
      </property>
@@ -1160,6 +1144,9 @@
             <height>0</height>
            </size>
           </property>
+          <property name="decimals">
+           <number>4</number>
+          </property>
           <property name="maximum">
            <double>9999.989999999999782</double>
           </property>
@@ -1203,6 +1190,9 @@
             <height>0</height>
            </size>
           </property>
+          <property name="decimals">
+           <number>4</number>
+          </property>
           <property name="maximum">
            <double>9999.989999999999782</double>
           </property>
@@ -1234,6 +1224,9 @@
           </property>
           <property name="correctionMode">
            <enum>QAbstractSpinBox::CorrectToPreviousValue</enum>
+          </property>
+          <property name="decimals">
+           <number>4</number>
           </property>
           <property name="value">
            <double>15.000000000000000</double>
@@ -1605,8 +1598,6 @@
   <tabstop>fileListView</tabstop>
   <tabstop>processBtn</tabstop>
   <tabstop>addUserInitArea</tabstop>
-  <tabstop>imageDisplayCombo</tabstop>
-  <tabstop>compositeModeCB</tabstop>
   <tabstop>zoomCB</tabstop>
   <tabstop>tabWidget</tabstop>
   <tabstop>fitToWindow</tabstop>

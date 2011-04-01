@@ -286,8 +286,11 @@ void EmMpmGui::setupGui()
   m_GraphicsView->setUserInitAreaTableModel(m_UserInitAreaVector);
   compositeModeCB->blockSignals(true);
 
-  compositeModeCB->insertItem(0, "Exclusion");
-  compositeModeCB->insertItem(1, "Difference");
+  compositeModeCB->insertItem(0, "Exclusion", QVariant(EmMpm_Constants::Exclusion));
+  compositeModeCB->insertItem(1, "Difference", QVariant(EmMpm_Constants::Difference));
+  compositeModeCB->insertItem(2, "Alpha Blend", QVariant(EmMpm_Constants::Alpha_Blend));
+
+#if 0
   compositeModeCB->insertItem(2, "Plus");
   compositeModeCB->insertItem(3, "Multiply");
   compositeModeCB->insertItem(4, "Screen");
@@ -297,8 +300,8 @@ void EmMpmGui::setupGui()
   compositeModeCB->insertItem(8, "Color Burn");
   compositeModeCB->insertItem(9, "Hard Light");
   compositeModeCB->insertItem(10, "Soft Light");
-  compositeModeCB->insertItem(11, "Alpha Blend");
-#if 0
+
+
   compositeModeCB->insertItem(12, "Destination");
   compositeModeCB->insertItem(13, "Source Over");
   compositeModeCB->insertItem(14, "Destination Over");
@@ -312,25 +315,10 @@ void EmMpmGui::setupGui()
   compositeModeCB->insertItem(20, "Overlay");
   compositeModeCB->insertItem(21, "Clear");
 #endif
-
-  compositeModeCB->setCurrentIndex(0);
+  compositeModeCB->setCurrentIndex(2);
   compositeModeCB->blockSignals(false);
+
   compositeModeCB->setEnabled(false);
- // userInitTab->setEnabled(false);
-
-
-//  QHeaderView* headerView = new QHeaderView(Qt::Horizontal, m_UserInitTable);
-//  headerView->setResizeMode(QHeaderView::Interactive);
-//  m_UserInitTable->setHorizontalHeader(headerView);
-
-//  m_UserInitAreaTableModel = new UserInitAreaTableModel;
-//  m_GraphicsView->setUserInitAreaTableModel(m_UserInitAreaTableModel);
-
-//  m_UserInitTable->setModel(m_UserInitAreaTableModel);
-//  QAbstractItemDelegate* aid = m_UserInitAreaTableModel->getItemDelegate();
-//  m_UserInitTable->setItemDelegate(aid);
-//  headerView->show();
-
 
   connect (m_GraphicsView, SIGNAL(fireBaseImageFileLoaded(const QString &)),
            this, SLOT(baseImageFileLoaded(const QString &)), Qt::QueuedConnection);
@@ -692,7 +680,12 @@ void EmMpmGui::on_processBtn_clicked()
   InputOutputFilePairList filepairs;
 
  //   Need to get the size of the image in order to properly set the m_data->cols, rows, dims
- //    and imagechannels so we can allocate all the memory properly
+ //    and image channels so we can allocate all the memory properly
+  // Setup for Composited Alpha Blending by default
+  imageDisplayCombo->setCurrentIndex(EmMpm_Constants::CompositedImage);
+  compositeModeCB->setCurrentIndex(EmMpm_Constants::Alpha_Blend);
+  on_imageDisplayCombo_currentIndexChanged();
+
 
   if (this->processFolder->isChecked() == false)
   {
@@ -702,7 +695,7 @@ void EmMpmGui::on_processBtn_clicked()
 
     queueController->addTask(static_cast<QThread*> (task));
     connect(cancelBtn, SIGNAL(clicked()), task, SLOT(cancel()));
-    
+
     connect(task, SIGNAL(progressTextChanged(QString )), this, SLOT(processingMessage(QString )), Qt::QueuedConnection);
     connect(task, SIGNAL(updateImageAvailable(QImage)), m_GraphicsView, SLOT(setOverlayImage(QImage)));
     connect(task, SIGNAL(histogramsAboutToBeUpdated()), this, SLOT(clearProcessHistograms()));
@@ -910,6 +903,11 @@ void EmMpmGui::queueControllerFinished()
   }
   setWindowTitle(m_CurrentImageFile);
   setWidgetListEnabled(true);
+  if (m_UserInitAreaVector->size() != 0)
+  {
+    m_NumClasses->setEnabled(false);
+    m_MinVariance->setEnabled(false);
+  }
 
   getQueueController()->deleteLater();
   setQueueController(NULL);
@@ -1134,12 +1132,17 @@ void EmMpmGui::on_outputDirectoryLE_textChanged(const QString & text)
 // -----------------------------------------------------------------------------
 void EmMpmGui::on_imageDisplayCombo_currentIndexChanged()
 {
+  bool ok = false;
   if (imageDisplayCombo->currentIndex() == EmMpm_Constants::CompositedImage)
   {
     compositeModeCB->setEnabled(true);
-    if (compositeModeCB->currentIndex() == 11)
+    EmMpm_Constants::CompositeType cType = static_cast<EmMpm_Constants::CompositeType>(compositeModeCB->itemData(compositeModeCB->currentIndex()).toInt(&ok));
+    on_compositeModeCB_currentIndexChanged();
+    if (cType == EmMpm_Constants::Alpha_Blend)
     {
       transparency->setEnabled(true);
+      float value = static_cast<float>(transparency->value()/255.0f);
+      on_transparency_valueChanged(value);
     }
   }
   else
@@ -1154,9 +1157,10 @@ void EmMpmGui::on_imageDisplayCombo_currentIndexChanged()
 // -----------------------------------------------------------------------------
 void EmMpmGui::on_compositeModeCB_currentIndexChanged()
 {
-  int index = compositeModeCB->currentIndex();
-  m_GraphicsView->setCompositeMode(index);
-  if (index == 11)
+  bool ok = false;
+  EmMpm_Constants::CompositeType cType = static_cast<EmMpm_Constants::CompositeType>(compositeModeCB->itemData(compositeModeCB->currentIndex()).toInt(&ok));
+  m_GraphicsView->setCompositeMode(cType);
+  if (cType == EmMpm_Constants::Alpha_Blend)
   {
     transparency->setEnabled(true);
   }
@@ -1413,6 +1417,10 @@ void EmMpmGui::openOverlayImage(QString processedImage)
     return;
   }
   m_GraphicsView->loadOverlayImageFile(processedImage);
+  imageDisplayCombo->setCurrentIndex(EmMpm_Constants::CompositedImage);
+  compositeModeCB->setCurrentIndex(EmMpm_Constants::Alpha_Blend);
+  on_imageDisplayCombo_currentIndexChanged();
+
   setWidgetListEnabled(true);
 
   updateBaseRecentFileList(processedImage);
@@ -1438,8 +1446,7 @@ void EmMpmGui::baseImageFileLoaded(const QString &filename)
 // -----------------------------------------------------------------------------
 void EmMpmGui::overlayImageFileLoaded(const QString &filename)
 {
-//  std::cout << "EmMpmGui::overlayImageFileLoaded" << std::endl;
-  imageDisplayCombo->setCurrentIndex(EmMpm_Constants::SegmentedImage);
+  // std::cout << "EmMpmGui::overlayImageFileLoaded" << std::endl;
   outputImageFile->setText(filename);
 }
 
@@ -1490,7 +1497,8 @@ void EmMpmGui::addProcessHistogram(QVector<double> data)
 
   QPen pen(Qt::red, 1.5, Qt::SolidLine);
 
-  if (m_UserInitAreaVector->size() > 0) {
+  if (m_UserInitAreaVector->size() > 0)
+  {
     QColor c = m_UserInitAreaVector->at(m_CurrentHistogramClass)->getColor();
     pen.setColor(c);
   }
@@ -1766,13 +1774,22 @@ void EmMpmGui::deleteUserInitArea(UserInitArea* uia)
   curve->detach();
   delete curve; // Clean up the memory
   m_HistogramPlot->replot();
-  m_NumClasses->setValue(m_UserInitAreaVector->size()-1);
-  if (m_UserInitAreaVector->size()-1 == 0)
-  {
-    m_NumClasses->setEnabled(true);
-  }
+
   uia = m_UserInitAreaVector->at(row);
   m_UserInitAreaVector->remove(row);
+
+  // Now renumber the classes:
+  qint32 size = m_UserInitAreaVector->size();
+  for(qint32 i = 0; i < size; ++i)
+  {
+    m_UserInitAreaVector->at(i)->setEmMpmClass(i);
+  }
+  m_NumClasses->setValue(m_UserInitAreaVector->size());
+  if (m_UserInitAreaVector->size() == 0)
+  {
+    m_NumClasses->setEnabled(true);
+    m_MinVariance->setEnabled(true);
+  }
 }
 
 // -----------------------------------------------------------------------------
@@ -1801,6 +1818,7 @@ void EmMpmGui::userInitAreaAdded(UserInitArea* uia)
   if (m_UserInitAreaVector->size() != 0)
   {
     m_NumClasses->setEnabled(false);
+    m_MinVariance->setEnabled(false);
   }
 
   m_Gaussians.insert(row, curve);
@@ -1935,6 +1953,9 @@ void EmMpmGui::on_clearTempHistograms_clicked()
 // -----------------------------------------------------------------------------
 void EmMpmGui::on_enableUserDefinedAreas_stateChanged(int state)
 {
+  m_NumClasses->setEnabled( !enableUserDefinedAreas->isChecked() );
+  m_MinVariance->setEnabled( !enableUserDefinedAreas->isChecked() );
+
   int size = m_UserInitAreaVector->count();
   UserInitArea* uia = NULL;
   int s = m_Gaussians.size();
@@ -1961,13 +1982,6 @@ void EmMpmGui::on_enableUserDefinedAreas_stateChanged(int state)
     clearProcessHistograms();
   }
   m_HistogramPlot->replot();
-}
-
-// -----------------------------------------------------------------------------
-//
-// -----------------------------------------------------------------------------
-void EmMpmGui::on_enableUserDefinedAreas_clicked(bool b)
-{
 }
 
 // -----------------------------------------------------------------------------

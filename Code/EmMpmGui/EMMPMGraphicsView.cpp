@@ -436,6 +436,10 @@ QImage& EMMPMGraphicsView::blend(QImage& src, QImage& dst, float opacity)
 // -----------------------------------------------------------------------------
 void EMMPMGraphicsView::setImageDisplayType(int displayType)
 {
+  if (1 == displayType)
+  {
+    std::cout << "Here" << std::endl;
+  }
   m_ImageDisplayType = (EmMpm_Constants::ImageDisplayType)displayType;
   QPainter painter;
   QImage paintImage(m_BaseImage.size(), QImage::Format_ARGB32_Premultiplied);
@@ -531,6 +535,20 @@ void EMMPMGraphicsView::loadOverlayImageFile(const QString &filename)
   {
     colorTable[i] = qRgb(i, i, i);
   }
+
+#if 0
+  qint32 size = m_UserInitAreaVector->size();
+  UserInitArea* u = NULL;
+  for(qint32 i = 0; i < size; ++i)
+  {
+    u = m_UserInitAreaVector->at(i);
+    if (NULL != u) {
+      int index = u->getEmMpmGrayLevel();
+      colorTable[index] = u->getColor().rgb();
+    }
+  }
+#endif
+
   m_OverlayImage.setColorTable(colorTable);
   m_OverlayImage.convertToFormat(QImage::Format_ARGB32_Premultiplied);
 
@@ -552,7 +570,7 @@ void EMMPMGraphicsView::loadOverlayImageFile(const QString &filename)
   gScene->setSceneRect(rect);
   //centerOn(m_ImageGraphicsItem);
 
-  m_ImageDisplayType = EmMpm_Constants::SegmentedImage;
+  m_ImageDisplayType = EmMpm_Constants::CompositedImage;
 
   setImageDisplayType(m_ImageDisplayType);
 
@@ -586,7 +604,7 @@ void EMMPMGraphicsView::setOverlayImage(QImage image)
   gScene->setSceneRect(rect);
  // centerOn(m_ImageGraphicsItem);
 
-  m_ImageDisplayType = EmMpm_Constants::SegmentedImage;
+ // m_ImageDisplayType = EmMpm_Constants::SegmentedImage;
 
   setImageDisplayType(m_ImageDisplayType);
 
@@ -739,12 +757,14 @@ void EMMPMGraphicsView::addNewInitArea(const QPolygonF &polygon)
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
-void EMMPMGraphicsView::setCompositeMode(int mode) {
+void EMMPMGraphicsView::setCompositeMode(EmMpm_Constants::CompositeType mode) {
 
   switch(mode)
   {
-    case 0: m_composition_mode = QPainter::CompositionMode_Exclusion; break;
-    case 1: m_composition_mode = QPainter::CompositionMode_Difference; break;
+    case EmMpm_Constants::Exclusion: m_composition_mode = QPainter::CompositionMode_Exclusion; break;
+    case EmMpm_Constants::Difference: m_composition_mode = QPainter::CompositionMode_Difference; break;
+    case EmMpm_Constants::Alpha_Blend: m_composition_mode = QPainter::CompositionMode_SourceOver; break;
+#if 0
     case 2: m_composition_mode = QPainter::CompositionMode_Plus; break;
     case 3: m_composition_mode = QPainter::CompositionMode_Multiply; break;
     case 4: m_composition_mode = QPainter::CompositionMode_Screen; break;
@@ -754,8 +774,6 @@ void EMMPMGraphicsView::setCompositeMode(int mode) {
     case 8: m_composition_mode = QPainter::CompositionMode_ColorBurn; break;
     case 9: m_composition_mode = QPainter::CompositionMode_HardLight; break;
     case 10: m_composition_mode = QPainter::CompositionMode_SoftLight; break;
-    case 11: m_composition_mode = QPainter::CompositionMode_SourceOver; break;
-
 
     case 12: m_composition_mode = QPainter::CompositionMode_Destination; break;
     case 13: m_composition_mode = QPainter::CompositionMode_Source; break;
@@ -767,6 +785,7 @@ void EMMPMGraphicsView::setCompositeMode(int mode) {
     case 19: m_composition_mode = QPainter::CompositionMode_DestinationAtop; break;
     case 20: m_composition_mode = QPainter::CompositionMode_Overlay; break;
     case 21: m_composition_mode = QPainter::CompositionMode_Clear; break;
+#endif
   default:
     m_composition_mode = QPainter::CompositionMode_Exclusion; break;
   }

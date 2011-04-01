@@ -48,6 +48,15 @@ enum ImageDisplayType {
   OriginalImage = 0,
   SegmentedImage,
   CompositedImage,
+  UnknownDisplayType
+};
+
+enum CompositeType
+{
+  Exclusion,
+  Difference,
+  Alpha_Blend,
+  UnknownCompositeType
 };
 
 }
@@ -115,7 +124,7 @@ class EMMPMGraphicsView : public QGraphicsView
 
     void setImageDisplayType(int displayType);
 
-    void setCompositeMode(int mode);
+    void setCompositeMode(EmMpm_Constants::CompositeType mode);
 
     void addUserInitArea(bool b);
 
