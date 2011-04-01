@@ -103,7 +103,9 @@ done
 echo "4.5:  Copying Qt source code"
 cp /Volumes/Backup/Warehouse/Qt-4.7.2/qt-everywhere-opensource-src-4.7.2.zip $archive_destination/4.5/Source/.
 
+echo "4.6: Copying Final Report"
+cp /Users/mjackson/BlueQuartz/Contracts_Current/AFRL-TO81/Final_Report_S587-081.docx $archive_destination/4.6
+
 echo "You still need the following items:"
-echo "  MS Word version of final report"
 echo "  Precompiled Binaries for OS X and Windows"
 echo "  CMake installers for Windows and OS X"

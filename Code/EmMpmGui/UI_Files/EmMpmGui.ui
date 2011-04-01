@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1134</width>
-    <height>768</height>
+    <width>1126</width>
+    <height>706</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -24,6 +24,9 @@
   </property>
   <property name="windowTitle">
    <string>EM/MPM</string>
+  </property>
+  <property name="dockNestingEnabled">
+   <bool>true</bool>
   </property>
   <property name="dockOptions">
    <set>QMainWindow::AllowNestedDocks|QMainWindow::AllowTabbedDocks|QMainWindow::AnimatedDocks|QMainWindow::VerticalTabs</set>
@@ -51,7 +54,7 @@
     <item>
      <widget class="QTabWidget" name="tabWidget">
       <property name="currentIndex">
-       <number>0</number>
+       <number>1</number>
       </property>
       <widget class="QWidget" name="filesInputTab">
        <attribute name="title">
@@ -748,8 +751,8 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1134</width>
-     <height>21</height>
+     <width>1126</width>
+     <height>22</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -1416,6 +1419,9 @@
   <widget class="QDockWidget" name="HistogramDockWidget">
    <property name="features">
     <set>QDockWidget::AllDockWidgetFeatures</set>
+   </property>
+   <property name="allowedAreas">
+    <set>Qt::AllDockWidgetAreas</set>
    </property>
    <property name="windowTitle">
     <string>Histogram</string>
