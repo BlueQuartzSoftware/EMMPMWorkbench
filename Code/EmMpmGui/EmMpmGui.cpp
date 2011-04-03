@@ -371,7 +371,7 @@ void EmMpmGui::setupGui()
 
   // Configure the Histogram Plot
   m_HistogramPlot->setCanvasBackground(QColor(Qt::white));
-  m_HistogramPlot->setTitle("Image Histogram");
+  //m_HistogramPlot->setTitle("Image Histogram");
   //  m_HistogramPlot->setAxisTitle(QwtPlot::xBottom, "Gray Scale Value");
   m_grid = new QwtPlotGrid;
   m_grid->enableXMin(true);

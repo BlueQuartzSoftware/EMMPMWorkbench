@@ -60,6 +60,20 @@ class UserInitAreaWidget;
 
 #include "IPHelper/plugins/QImageProcessingInputFrame.h"
 
+/**
+ * @class EmMpmGui EmMpmGui.h Code/EmMpmGui/EmMpmGui.h
+ * @brief This is the implementation of the Main Window for the EMMPM Gui application.
+ *
+ * @section additions Things to Add
+ * @li Save the histogram/Gaussian curves to a file
+ * @li Present the segmented image in colors matching the colors that the user selects
+ * @li Redo most of the icons to make them small and along the bottom of the GraphicsView
+ *
+ *
+ * @author Michael A. Jackson for BlueQuartz Software
+ * @date Apr 3, 2011
+ * @version 1.0
+ */
 class EmMpmGui :  public QMainWindow, private Ui::EmMpmGui
 {
 

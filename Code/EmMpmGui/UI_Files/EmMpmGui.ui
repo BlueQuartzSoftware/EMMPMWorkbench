@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1032</width>
-    <height>745</height>
+    <width>1025</width>
+    <height>748</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -61,9 +61,6 @@
         <string>File Selection</string>
        </attribute>
        <layout class="QVBoxLayout" name="verticalLayout" stretch="0,0,0,0,0,0,0,0,0,0">
-        <property name="spacing">
-         <number>6</number>
-        </property>
         <property name="margin">
          <number>4</number>
         </property>
@@ -71,13 +68,20 @@
          <layout class="QGridLayout" name="gridLayout_5">
           <item row="3" column="1">
            <widget class="QLabel" name="label_6">
+            <property name="toolTip">
+             <string>The image to be segmented</string>
+            </property>
             <property name="text">
              <string>Input Image</string>
             </property>
            </widget>
           </item>
           <item row="3" column="2">
-           <widget class="QFSDropLineEdit" name="inputImageFilePath"/>
+           <widget class="QFSDropLineEdit" name="inputImageFilePath">
+            <property name="toolTip">
+             <string>The image to be segmented</string>
+            </property>
+           </widget>
           </item>
           <item row="3" column="3">
            <widget class="QPushButton" name="inputImageFilePathBtn">
@@ -88,6 +92,9 @@
           </item>
           <item row="4" column="1">
            <widget class="QLabel" name="label_7">
+            <property name="toolTip">
+             <string>The output image to be written at the conclusion of the segmentation</string>
+            </property>
             <property name="text">
              <string>Segmented Image</string>
             </property>
@@ -95,6 +102,9 @@
           </item>
           <item row="4" column="2">
            <widget class="QLineEdit" name="outputImageFile">
+            <property name="toolTip">
+             <string>The output image to be written at the conclusion of the segmentation</string>
+            </property>
             <property name="text">
              <string/>
             </property>
@@ -107,7 +117,7 @@
             </property>
            </widget>
           </item>
-          <item row="2" column="1" colspan="2">
+          <item row="2" column="1" colspan="3">
            <widget class="QLabel" name="label_16">
             <property name="font">
              <font>
@@ -188,10 +198,16 @@
             </property>
            </widget>
           </item>
-          <item row="0" column="1">
+          <item row="0" column="1" colspan="2">
            <widget class="QCheckBox" name="processFolder">
             <property name="enabled">
              <bool>true</bool>
+            </property>
+            <property name="toolTip">
+             <string>Check this box if you want to process multiple images in a single run</string>
+            </property>
+            <property name="statusTip">
+             <string>Check this box if you want to process multiple images in a single run</string>
             </property>
             <property name="text">
              <string>Process Folder</string>
@@ -215,32 +231,34 @@
          </widget>
         </item>
         <item>
-         <layout class="QHBoxLayout" name="_5">
-          <item>
+         <layout class="QGridLayout" name="gridLayout_7">
+          <item row="0" column="0">
            <widget class="QLabel" name="label_2">
+            <property name="toolTip">
+             <string>The prefix to be attached to the output filename</string>
+            </property>
+            <property name="statusTip">
+             <string>The prefix to be attached to the output filename</string>
+            </property>
             <property name="text">
              <string>Output Prefix</string>
             </property>
            </widget>
           </item>
-          <item>
+          <item row="0" column="1">
            <widget class="QLineEdit" name="outputPrefix">
+            <property name="toolTip">
+             <string>The prefix to be attached to the output filename</string>
+            </property>
+            <property name="statusTip">
+             <string>The prefix to be attached to the output filename</string>
+            </property>
             <property name="text">
              <string>Segmented_</string>
             </property>
            </widget>
           </item>
-          <item>
-           <widget class="QLabel" name="label_3">
-            <property name="text">
-             <string>Output Suffix</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QLineEdit" name="outputSuffix"/>
-          </item>
-          <item>
+          <item row="0" column="4" rowspan="2">
            <spacer name="horizontalSpacer_8">
             <property name="orientation">
              <enum>Qt::Horizontal</enum>
@@ -253,15 +271,50 @@
             </property>
            </spacer>
           </item>
-          <item>
+          <item row="0" column="5">
            <widget class="QLabel" name="outputImageTypeLabel">
+            <property name="toolTip">
+             <string>The format of the output image(s)</string>
+            </property>
+            <property name="statusTip">
+             <string>The format of the output image(s)</string>
+            </property>
             <property name="text">
              <string>Output Image Format</string>
             </property>
            </widget>
           </item>
-          <item>
+          <item row="1" column="0">
+           <widget class="QLabel" name="label_3">
+            <property name="toolTip">
+             <string>A suffix to be attached to each output filename</string>
+            </property>
+            <property name="statusTip">
+             <string>A suffix to be attached to each output filename</string>
+            </property>
+            <property name="text">
+             <string>Output Suffix</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="1">
+           <widget class="QLineEdit" name="outputSuffix">
+            <property name="toolTip">
+             <string>A suffix to be attached to each output filename</string>
+            </property>
+            <property name="statusTip">
+             <string>A suffix to be attached to each output filename</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="5">
            <widget class="QComboBox" name="outputImageType">
+            <property name="toolTip">
+             <string>The format of the output image(s)</string>
+            </property>
+            <property name="statusTip">
+             <string>The format of the output image(s)</string>
+            </property>
             <item>
              <property name="text">
               <string>tif</string>
@@ -318,6 +371,12 @@
               <italic>true</italic>
              </font>
             </property>
+            <property name="toolTip">
+             <string>Example output filename</string>
+            </property>
+            <property name="statusTip">
+             <string>Example output filename</string>
+            </property>
             <property name="text">
              <string>TextLabel</string>
             </property>
@@ -346,8 +405,8 @@
          </widget>
         </item>
         <item>
-         <layout class="QHBoxLayout" name="_2">
-          <item>
+         <layout class="QGridLayout" name="gridLayout_2">
+          <item row="0" column="0">
            <widget class="QLabel" name="label_13">
             <property name="font">
              <font>
@@ -360,49 +419,7 @@
             </property>
            </widget>
           </item>
-          <item>
-           <spacer name="horizontalSpacer_6">
-            <property name="orientation">
-             <enum>Qt::Horizontal</enum>
-            </property>
-            <property name="sizeType">
-             <enum>QSizePolicy::Minimum</enum>
-            </property>
-            <property name="sizeHint" stdset="0">
-             <size>
-              <width>40</width>
-              <height>20</height>
-             </size>
-            </property>
-           </spacer>
-          </item>
-          <item>
-           <widget class="QLabel" name="filterPatternLabel">
-            <property name="text">
-             <string>Input File Name Filter </string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QLineEdit" name="filterPatternLineEdit">
-            <property name="text">
-             <string/>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QLabel" name="label_4">
-            <property name="font">
-             <font>
-              <italic>true</italic>
-             </font>
-            </property>
-            <property name="text">
-             <string>(Basic Wildcard filtering)</string>
-            </property>
-           </widget>
-          </item>
-          <item>
+          <item row="0" column="1" colspan="4">
            <spacer name="horizontalSpacer_11">
             <property name="orientation">
              <enum>Qt::Horizontal</enum>
@@ -415,10 +432,48 @@
             </property>
            </spacer>
           </item>
+          <item row="1" column="0">
+           <widget class="QLabel" name="filterPatternLabel">
+            <property name="statusTip">
+             <string>Quick Filtering of the input filenames. This is an inclusive only filter. Simply type part of the filename to filter the list.</string>
+            </property>
+            <property name="text">
+             <string>Input File Name Filter </string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="1" colspan="3">
+           <widget class="QLineEdit" name="filterPatternLineEdit">
+            <property name="statusTip">
+             <string>Quick Filtering of the input filenames. This is an inclusive only filter. Simply type part of the filename to filter the list.</string>
+            </property>
+            <property name="text">
+             <string/>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="4">
+           <widget class="QLabel" name="label_4">
+            <property name="font">
+             <font>
+              <italic>true</italic>
+             </font>
+            </property>
+            <property name="text">
+             <string>(Basic Wildcard filtering)</string>
+            </property>
+           </widget>
+          </item>
          </layout>
         </item>
         <item>
          <widget class="QListView" name="fileListView">
+          <property name="toolTip">
+           <string>The list of files to be segmented</string>
+          </property>
+          <property name="statusTip">
+           <string>The list of files to be segmented</string>
+          </property>
           <property name="alternatingRowColors">
            <bool>true</bool>
           </property>
@@ -459,7 +514,10 @@
             <item>
              <widget class="QToolButton" name="zoomIn">
               <property name="toolTip">
-               <string>Zoom In</string>
+               <string>Zoom In on the image (increase magnification)</string>
+              </property>
+              <property name="statusTip">
+               <string>Zoom In on the image (increase magnification)</string>
               </property>
               <property name="text">
                <string/>
@@ -473,7 +531,10 @@
             <item>
              <widget class="QToolButton" name="zoomOut">
               <property name="toolTip">
-               <string>Zoom Out</string>
+               <string>Zoom Out from the Image (Decrease Magnification)</string>
+              </property>
+              <property name="statusTip">
+               <string>Zoom Out from the Image (Decrease Magnification)</string>
               </property>
               <property name="text">
                <string/>
@@ -489,6 +550,9 @@
               <property name="toolTip">
                <string>Fit Image to Current Window Size</string>
               </property>
+              <property name="statusTip">
+               <string>Fit Image to Current Window Size</string>
+              </property>
               <property name="text">
                <string/>
               </property>
@@ -500,6 +564,12 @@
             </item>
             <item>
              <widget class="QComboBox" name="zoomCB">
+              <property name="toolTip">
+               <string>Select the magnification for the current image</string>
+              </property>
+              <property name="statusTip">
+               <string>Select the magnification for the current image</string>
+              </property>
               <property name="currentIndex">
                <number>3</number>
               </property>
@@ -579,7 +649,10 @@
              <bool>false</bool>
             </property>
             <property name="toolTip">
-             <string>User Initialization Lasso Tool</string>
+             <string>User Initialization Lasso button. Click to start a new predefined area.</string>
+            </property>
+            <property name="statusTip">
+             <string>User Initialization Lasso button. Click to start a new predefined area.</string>
             </property>
             <property name="text">
              <string/>
@@ -674,8 +747,17 @@
         </item>
         <item>
          <layout class="QHBoxLayout" name="horizontalLayout_4">
+          <property name="spacing">
+           <number>-1</number>
+          </property>
           <item>
            <widget class="QComboBox" name="imageDisplayCombo">
+            <property name="toolTip">
+             <string>Select which image to view</string>
+            </property>
+            <property name="statusTip">
+             <string>Select which image to view</string>
+            </property>
             <item>
              <property name="text">
               <string>Original</string>
@@ -698,6 +780,12 @@
             <property name="enabled">
              <bool>false</bool>
             </property>
+            <property name="toolTip">
+             <string>Select the type of compositing of the original and segmented images</string>
+            </property>
+            <property name="statusTip">
+             <string>Select the type of compositing of the original and segmented images</string>
+            </property>
            </widget>
           </item>
           <item>
@@ -710,6 +798,12 @@
               <width>25</width>
               <height>0</height>
              </size>
+            </property>
+            <property name="toolTip">
+             <string>Sets the level of transparency of the segmented image over the original image</string>
+            </property>
+            <property name="statusTip">
+             <string>Sets the level of transparency of the segmented image over the original image</string>
             </property>
             <property name="maximum">
              <number>255</number>
@@ -735,7 +829,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1032</width>
+     <width>1025</width>
      <height>22</height>
     </rect>
    </property>
@@ -835,6 +929,12 @@
             <height>0</height>
            </size>
           </property>
+          <property name="toolTip">
+           <string>The number of EM/MPM classes to segment into</string>
+          </property>
+          <property name="statusTip">
+           <string>The number of EM/MPM classes to segment into</string>
+          </property>
           <property name="text">
            <string>Classes:</string>
           </property>
@@ -866,6 +966,12 @@
             <height>16777215</height>
            </size>
           </property>
+          <property name="toolTip">
+           <string>The number of EM/MPM classes to segment into</string>
+          </property>
+          <property name="statusTip">
+           <string>The number of EM/MPM classes to segment into</string>
+          </property>
           <property name="minimum">
            <number>1</number>
           </property>
@@ -887,6 +993,12 @@
             <width>0</width>
             <height>0</height>
            </size>
+          </property>
+          <property name="toolTip">
+           <string>The number of EM Loops to use when segmenting</string>
+          </property>
+          <property name="statusTip">
+           <string>The number of EM Loops to use when segmenting</string>
           </property>
           <property name="text">
            <string>EM Loops:</string>
@@ -916,6 +1028,12 @@
             <height>16777215</height>
            </size>
           </property>
+          <property name="toolTip">
+           <string>The number of EM Loops to use when segmenting</string>
+          </property>
+          <property name="statusTip">
+           <string>The number of EM Loops to use when segmenting</string>
+          </property>
           <property name="minimum">
            <number>0</number>
           </property>
@@ -940,6 +1058,12 @@
             <width>0</width>
             <height>0</height>
            </size>
+          </property>
+          <property name="toolTip">
+           <string>The number of MPM Loops to use when Segmenting</string>
+          </property>
+          <property name="statusTip">
+           <string>The number of MPM Loops to use when Segmenting</string>
           </property>
           <property name="text">
            <string>MPM Loops:</string>
@@ -969,6 +1093,12 @@
             <height>16777215</height>
            </size>
           </property>
+          <property name="toolTip">
+           <string>The number of MPM Loops to use when Segmenting</string>
+          </property>
+          <property name="statusTip">
+           <string>The number of MPM Loops to use when Segmenting</string>
+          </property>
           <property name="minimum">
            <number>1</number>
           </property>
@@ -995,7 +1125,10 @@
            </size>
           </property>
           <property name="toolTip">
-           <string>Beta Term in classical EM/MPM</string>
+           <string>The value of Beta for the EM/MPM Algorithm</string>
+          </property>
+          <property name="statusTip">
+           <string>The value of Beta for the EM/MPM Algorithm</string>
           </property>
           <property name="text">
            <string>Beta</string>
@@ -1025,13 +1158,25 @@
             <height>16777215</height>
            </size>
           </property>
+          <property name="toolTip">
+           <string>The value of Beta for the EM/MPM Algorithm</string>
+          </property>
+          <property name="statusTip">
+           <string>The value of Beta for the EM/MPM Algorithm</string>
+          </property>
           <property name="text">
-           <string>5.5</string>
+           <string>0.5</string>
           </property>
          </widget>
         </item>
         <item row="4" column="0">
          <widget class="QLabel" name="label_9">
+          <property name="toolTip">
+           <string>The minimum variance that any class can use during the EM/MPM algorithm</string>
+          </property>
+          <property name="statusTip">
+           <string>The minimum variance that any class can use during the EM/MPM algorithm</string>
+          </property>
           <property name="text">
            <string>Min. Variance:</string>
           </property>
@@ -1056,6 +1201,12 @@
             <width>60</width>
             <height>16777215</height>
            </size>
+          </property>
+          <property name="toolTip">
+           <string>The minimum variance that any class can use during the EM/MPM algorithm</string>
+          </property>
+          <property name="statusTip">
+           <string>The minimum variance that any class can use during the EM/MPM algorithm</string>
           </property>
           <property name="text">
            <string>20</string>
@@ -1097,6 +1248,12 @@
         </property>
         <item row="0" column="0">
          <widget class="QLabel" name="label_18">
+          <property name="toolTip">
+           <string>Use the Simulated Anealing Algorithm</string>
+          </property>
+          <property name="statusTip">
+           <string>Use the Simulated Anealing Algorithm</string>
+          </property>
           <property name="text">
            <string>Use Sim. Annealing</string>
           </property>
@@ -1104,6 +1261,12 @@
         </item>
         <item row="0" column="1">
          <widget class="QCheckBox" name="useSimulatedAnnealing">
+          <property name="toolTip">
+           <string>Use the Simulated Anealing Algorithm</string>
+          </property>
+          <property name="statusTip">
+           <string>Use the Simulated Anealing Algorithm</string>
+          </property>
           <property name="text">
            <string/>
           </property>
@@ -1111,6 +1274,12 @@
         </item>
         <item row="1" column="0">
          <widget class="QLabel" name="gradientPenaltyLabel">
+          <property name="toolTip">
+           <string>Use the Gradient or Edge penalty function</string>
+          </property>
+          <property name="statusTip">
+           <string>Use the Gradient or Edge penalty function</string>
+          </property>
           <property name="text">
            <string>Use Gradient Penalty</string>
           </property>
@@ -1118,6 +1287,12 @@
         </item>
         <item row="1" column="1">
          <widget class="QCheckBox" name="useGradientPenalty">
+          <property name="toolTip">
+           <string>Use the Gradient or Edge penalty function</string>
+          </property>
+          <property name="statusTip">
+           <string>Use the Gradient or Edge penalty function</string>
+          </property>
           <property name="text">
            <string/>
           </property>
@@ -1127,6 +1302,12 @@
          <widget class="QLabel" name="label_20">
           <property name="enabled">
            <bool>false</bool>
+          </property>
+          <property name="toolTip">
+           <string>The weight of the Gradient or Edge cost</string>
+          </property>
+          <property name="statusTip">
+           <string>The weight of the Gradient or Edge cost</string>
           </property>
           <property name="text">
            <string>Beta E</string>
@@ -1144,6 +1325,12 @@
             <height>0</height>
            </size>
           </property>
+          <property name="toolTip">
+           <string>The weight of the Gradient or Edge cost</string>
+          </property>
+          <property name="statusTip">
+           <string>The weight of the Gradient or Edge cost</string>
+          </property>
           <property name="decimals">
            <number>4</number>
           </property>
@@ -1157,6 +1344,12 @@
         </item>
         <item row="3" column="0">
          <widget class="QLabel" name="label_19">
+          <property name="toolTip">
+           <string>Use a Curvature Penalty function</string>
+          </property>
+          <property name="statusTip">
+           <string>Use a Curvature Penalty function</string>
+          </property>
           <property name="text">
            <string>Use Curvature Penalty</string>
           </property>
@@ -1164,6 +1357,12 @@
         </item>
         <item row="3" column="1">
          <widget class="QCheckBox" name="useCuravturePenalty">
+          <property name="toolTip">
+           <string>Use a Curvature Penalty function</string>
+          </property>
+          <property name="statusTip">
+           <string>Use a Curvature Penalty function</string>
+          </property>
           <property name="text">
            <string/>
           </property>
@@ -1173,6 +1372,12 @@
          <widget class="QLabel" name="label_21">
           <property name="enabled">
            <bool>false</bool>
+          </property>
+          <property name="toolTip">
+           <string>The weight of the curvature Penalty</string>
+          </property>
+          <property name="statusTip">
+           <string>The weight of the curvature Penalty</string>
           </property>
           <property name="text">
            <string>Beta C</string>
@@ -1190,6 +1395,12 @@
             <height>0</height>
            </size>
           </property>
+          <property name="toolTip">
+           <string>The weight of the curvature Penalty</string>
+          </property>
+          <property name="statusTip">
+           <string>The weight of the curvature Penalty</string>
+          </property>
           <property name="decimals">
            <number>4</number>
           </property>
@@ -1205,6 +1416,12 @@
          <widget class="QLabel" name="label_22">
           <property name="enabled">
            <bool>false</bool>
+          </property>
+          <property name="toolTip">
+           <string>The maximum radius to use for the curvature morphological filter</string>
+          </property>
+          <property name="statusTip">
+           <string>The maximum radius to use for the curvature morphological filter</string>
           </property>
           <property name="text">
            <string>R Max</string>
@@ -1222,6 +1439,12 @@
             <height>0</height>
            </size>
           </property>
+          <property name="toolTip">
+           <string>The maximum radius to use for the curvature morphological filter</string>
+          </property>
+          <property name="statusTip">
+           <string>The maximum radius to use for the curvature morphological filter</string>
+          </property>
           <property name="correctionMode">
            <enum>QAbstractSpinBox::CorrectToPreviousValue</enum>
           </property>
@@ -1237,6 +1460,12 @@
          <widget class="QLabel" name="label_23">
           <property name="enabled">
            <bool>false</bool>
+          </property>
+          <property name="toolTip">
+           <string>Number of EM loops to delay before applying the curvature penalty</string>
+          </property>
+          <property name="statusTip">
+           <string>Number of EM loops to delay before applying the curvature penalty</string>
           </property>
           <property name="text">
            <string>EM Loop Delay</string>
@@ -1254,6 +1483,12 @@
             <height>0</height>
            </size>
           </property>
+          <property name="toolTip">
+           <string>Number of EM loops to delay before applying the curvature penalty</string>
+          </property>
+          <property name="statusTip">
+           <string>Number of EM loops to delay before applying the curvature penalty</string>
+          </property>
           <property name="minimum">
            <number>0</number>
           </property>
@@ -1264,6 +1499,12 @@
         </item>
         <item row="7" column="0">
          <widget class="QLabel" name="label">
+          <property name="toolTip">
+           <string>Predefine areas of the image to determine the initial mean and variance for each class.</string>
+          </property>
+          <property name="statusTip">
+           <string>Predefine areas of the image to determine the initial mean and variance for each class.</string>
+          </property>
           <property name="text">
            <string>User Initialization Areas</string>
           </property>
@@ -1271,6 +1512,12 @@
         </item>
         <item row="7" column="1">
          <widget class="QCheckBox" name="enableUserDefinedAreas">
+          <property name="toolTip">
+           <string>Predefine areas of the image to determine the initial mean and variance for each class.</string>
+          </property>
+          <property name="statusTip">
+           <string>Predefine areas of the image to determine the initial mean and variance for each class.</string>
+          </property>
           <property name="text">
            <string/>
           </property>
@@ -1347,6 +1594,9 @@
            <height>16777215</height>
           </size>
          </property>
+         <property name="statusTip">
+          <string>Click this to start the segmentation</string>
+         </property>
          <property name="text">
           <string>Segment</string>
          </property>
@@ -1417,7 +1667,7 @@
     <set>Qt::AllDockWidgetAreas</set>
    </property>
    <property name="windowTitle">
-    <string>Histogram</string>
+    <string>Histogram &amp; Gaussian Plot</string>
    </property>
    <attribute name="dockWidgetArea">
     <number>2</number>
@@ -1444,10 +1694,19 @@
        <property name="toolTip">
         <string>Image Histogram and Mixture of Gaussians Plots</string>
        </property>
+       <property name="statusTip">
+        <string>Image Histogram and Mixture of Gaussians Plots</string>
+       </property>
       </widget>
      </item>
      <item row="1" column="0">
       <widget class="QToolButton" name="axisSettingsBtn">
+       <property name="toolTip">
+        <string>Allows adjustment of the axis min and max values</string>
+       </property>
+       <property name="statusTip">
+        <string>Allows adjustment of the axis min and max values</string>
+       </property>
        <property name="text">
         <string>Plot Settings</string>
        </property>
@@ -1455,6 +1714,12 @@
      </item>
      <item row="1" column="2">
       <widget class="QToolButton" name="clearTempHistograms">
+       <property name="toolTip">
+        <string>Removes any extra Gaussian curves from the plot</string>
+       </property>
+       <property name="statusTip">
+        <string>Removes any extra Gaussian curves from the plot</string>
+       </property>
        <property name="text">
         <string>Clear Curves</string>
        </property>
@@ -1592,9 +1857,6 @@
   <tabstop>outputDirectoryLE</tabstop>
   <tabstop>outputDirectoryBtn</tabstop>
   <tabstop>outputPrefix</tabstop>
-  <tabstop>outputSuffix</tabstop>
-  <tabstop>outputImageType</tabstop>
-  <tabstop>filterPatternLineEdit</tabstop>
   <tabstop>fileListView</tabstop>
   <tabstop>processBtn</tabstop>
   <tabstop>addUserInitArea</tabstop>
