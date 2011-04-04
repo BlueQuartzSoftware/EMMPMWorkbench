@@ -73,8 +73,8 @@ project="SCMService"
 cp $workspace/EIM-Guides/$project/$project.docx $archive_destination/4.3/.
 
 echo "4.4: Copying Datasets MNML-3 and MNML-5"
-cp /Users/Shared/Data/MNML-3_769_780.zip $archive_destination/4.4/.
-cp /Users/Shared/Data/MNML-5_610_640.zip $archive_destination/4.4/.
+cp /Users/Shared/Data/MNML-3_769_780_Aligned.zip $archive_destination/4.4/.
+cp /Users/Shared/Data/MNML-5_610_640_Aligned.zip $archive_destination/4.4/.
 
 echo "4.5: Assembling All Software source codes"
 # Move into the archive_destination/DATE/Source directory
