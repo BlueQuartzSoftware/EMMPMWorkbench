@@ -94,6 +94,7 @@
 #include "AxisSettingsDialog.h"
 #include "License/LicenseFiles.h"
 #include "UserInitAreaWidget.h"
+#include "LayersDockWidget.h"
 
 #define READ_STRING_SETTING(prefs, var, emptyValue)\
   var->setText( prefs.value(#var).toString() );\
@@ -137,6 +138,7 @@ m_ShowCombinedGaussians(false),
 m_ProxyModel(NULL),
 m_OutputExistsCheck(false),
 m_QueueController(NULL),
+m_LayersPalette(NULL),
 #if defined(Q_WS_WIN)
 m_OpenDialogLastDirectory("C:\\")
 #else
@@ -264,6 +266,39 @@ void EmMpmGui::writeSettings()
   prefs.endGroup();
 }
 
+#define ZOOM_MENU(var, menu, slot)\
+  {\
+  QAction* action = new QAction(menu);\
+  action->setText( #var );\
+  QString actionName("action_z" #var "Action");\
+  action->setObjectName(actionName);\
+  zoomMenu->addAction(action);\
+  connect(action, SIGNAL(triggered()), this, SLOT(slot())); \
+}
+
+#define ZOOM_MENU_SLOT_DEF(var, index)\
+void EmMpmGui::z##var##_triggered() {\
+  zoomButton->setText(#var " % ");\
+  m_GraphicsView->setZoomIndex(index);\
+}
+
+ZOOM_MENU_SLOT_DEF(10, 0);
+ZOOM_MENU_SLOT_DEF(25, 1);
+ZOOM_MENU_SLOT_DEF(50, 2);
+ZOOM_MENU_SLOT_DEF(100, 3);
+ZOOM_MENU_SLOT_DEF(125, 4);
+ZOOM_MENU_SLOT_DEF(150, 5);
+ZOOM_MENU_SLOT_DEF(200, 6);
+ZOOM_MENU_SLOT_DEF(400, 7);
+ZOOM_MENU_SLOT_DEF(600, 8);
+
+// -----------------------------------------------------------------------------
+//
+// -----------------------------------------------------------------------------
+void EmMpmGui::on_fitToWindow_clicked()
+{
+  m_GraphicsView->setZoomIndex(9);
+}
 
 // -----------------------------------------------------------------------------
 //
@@ -277,6 +312,19 @@ void EmMpmGui::setupGui()
   resize(mySize);
 #endif
 
+  QMenu* zoomMenu = new QMenu(this);
+  ZOOM_MENU(10, zoomMenu, z10_triggered);
+  ZOOM_MENU(25, zoomMenu, z25_triggered);
+  ZOOM_MENU(50, zoomMenu, z50_triggered);
+  ZOOM_MENU(100, zoomMenu, z100_triggered);
+  ZOOM_MENU(125, zoomMenu, z125_triggered);
+  ZOOM_MENU(150, zoomMenu, z150_triggered);
+  ZOOM_MENU(200, zoomMenu, z200_triggered);
+  ZOOM_MENU(400, zoomMenu, z400_triggered);
+  ZOOM_MENU(600, zoomMenu, z600_triggered);
+
+  zoomButton->setMenu(zoomMenu);
+
   m_UserInitAreaVector = new QVector<UserInitArea*>;
 
   m_AxisSettingsDialog = new AxisSettingsDialog(this);
@@ -284,11 +332,26 @@ void EmMpmGui::setupGui()
 
   m_GraphicsView->setEmMpmGui(this);
   m_GraphicsView->setUserInitAreaTableModel(m_UserInitAreaVector);
+
+  if (m_LayersPalette == NULL)
+  {
+    m_LayersPalette = new LayersDockWidget(this);
+    m_LayersPalette->setGraphicsView(m_GraphicsView);
+    m_LayersPalette->setFloating(false);
+    m_LayersPalette->setVisible(false);
+    m_LayersPalette->setFeatures(QDockWidget::AllDockWidgetFeatures);
+    m_LayersPalette->setAllowedAreas(Qt::AllDockWidgetAreas);
+  }
+
+
+#if 0
   compositeModeCB->blockSignals(true);
 
   compositeModeCB->insertItem(0, "Exclusion", QVariant(EmMpm_Constants::Exclusion));
   compositeModeCB->insertItem(1, "Difference", QVariant(EmMpm_Constants::Difference));
   compositeModeCB->insertItem(2, "Alpha Blend", QVariant(EmMpm_Constants::Alpha_Blend));
+#endif
+
 
 #if 0
   compositeModeCB->insertItem(2, "Plus");
@@ -315,16 +378,20 @@ void EmMpmGui::setupGui()
   compositeModeCB->insertItem(20, "Overlay");
   compositeModeCB->insertItem(21, "Clear");
 #endif
+
+#if 0
   compositeModeCB->setCurrentIndex(2);
   compositeModeCB->blockSignals(false);
 
   compositeModeCB->setEnabled(false);
+#endif
 
-  connect (m_GraphicsView, SIGNAL(fireBaseImageFileLoaded(const QString &)),
-           this, SLOT(baseImageFileLoaded(const QString &)), Qt::QueuedConnection);
+//  connect (m_GraphicsView, SIGNAL(fireBaseImageFileLoaded(const QString &)),
+//           this, SLOT(baseImageFileLoaded(const QString &)), Qt::QueuedConnection);
 
   connect (m_GraphicsView, SIGNAL(fireOverlayImageFileLoaded(const QString &)),
            this, SLOT(overlayImageFileLoaded(const QString &)), Qt::QueuedConnection);
+
   connect (m_GraphicsView, SIGNAL(fireUserInitAreaLostFocus()),
            this, SLOT(userInitAreaLostFocus()), Qt::QueuedConnection);
 
@@ -338,13 +405,11 @@ void EmMpmGui::setupGui()
            m_GraphicsView, SLOT(zoomIn()), Qt::QueuedConnection);
   connect(zoomOut, SIGNAL(clicked()),
           m_GraphicsView, SLOT(zoomOut()), Qt::QueuedConnection);
-  connect (zoomCB, SIGNAL(currentIndexChanged(int)),
-           m_GraphicsView, SLOT(setZoomIndex(int)), Qt::QueuedConnection);
-  connect(fitToWindow, SIGNAL(clicked()),
-          m_GraphicsView, SLOT(fitToWindow()), Qt::QueuedConnection);
+//  connect (zoomCB, SIGNAL(currentIndexChanged(int)),
+//           m_GraphicsView, SLOT(setZoomIndex(int)), Qt::QueuedConnection);
+//  connect(fitToWindow, SIGNAL(clicked()),
+//          m_GraphicsView, SLOT(fitToWindow()), Qt::QueuedConnection);
 
-  connect(imageDisplayCombo, SIGNAL(currentIndexChanged(int)),
-          m_GraphicsView, SLOT(setImageDisplayType(int)));
 
   QFileCompleter* com = new QFileCompleter(this, false);
   inputImageFilePath->setCompleter(com);
@@ -388,7 +453,7 @@ void EmMpmGui::setupGui()
   m_WidgetList << gradientPenaltyLabel << gradientBetaE;
   setWidgetListEnabled(false);
 
-  m_ImageWidgets << zoomIn << zoomOut << fitToWindow << zoomCB << imageDisplayCombo;
+  m_ImageWidgets << zoomIn << zoomOut << fitToWindow << layersPalette;
   setImageWidgetsEnabled(false);
 
   m_ProcessFolderWidgets <<  sourceDirectoryLE << sourceDirectoryBtn << outputDirectoryLE
@@ -414,9 +479,17 @@ void EmMpmGui::setupGui()
   m_picker->setRubberBandPen(QColor(Qt::green));
   m_picker->setRubberBand(QwtPicker::CrossRubberBand);
   m_picker->setTrackerPen(QColor(Qt::blue));
-
-
 }
+
+// -----------------------------------------------------------------------------
+//
+// -----------------------------------------------------------------------------
+void EmMpmGui::on_layersPalette_clicked()
+{
+  m_LayersPalette->setFloating(true);
+  m_LayersPalette->setVisible(true);
+}
+
 
 
 // -----------------------------------------------------------------------------
@@ -665,6 +738,18 @@ void EmMpmGui::on_processBtn_clicked()
         }
       }
     }
+
+    fi = QFileInfo(outputImageFile->text());
+    QDir outputDir(fi.absolutePath());
+    if (outputDir.exists() == false)
+    {
+      bool ok = outputDir.mkpath(".");
+      if (ok == false)
+      {
+        QMessageBox::critical(this, tr("Output Directory Creation"), tr("The output directory could not be created."), QMessageBox::Ok);
+        return;
+      }
+    }
   }
 
 
@@ -679,13 +764,13 @@ void EmMpmGui::on_processBtn_clicked()
 
   InputOutputFilePairList filepairs;
 
- //   Need to get the size of the image in order to properly set the m_data->cols, rows, dims
- //    and image channels so we can allocate all the memory properly
-  // Setup for Composited Alpha Blending by default
-  imageDisplayCombo->setCurrentIndex(EmMpm_Constants::CompositedImage);
-  compositeModeCB->setCurrentIndex(EmMpm_Constants::Alpha_Blend);
-  on_imageDisplayCombo_currentIndexChanged();
-
+ // m_LayersPalette->getSegmentedImageCheckBox()->blockSignals(true);
+  m_LayersPalette->getSegmentedImageCheckBox()->setEnabled(true);
+  m_LayersPalette->getSegmentedImageCheckBox()->setChecked(true);
+ // m_LayersPalette->getSegmentedImageCheckBox()->blockSignals(false);
+  m_LayersPalette->getCompositeTypeComboBox()->setEnabled(true);
+  m_LayersPalette->getUseColorTable()->setEnabled(true);
+  //m_GraphicsView->setImageDisplayType(EmMpm_Constants::CompositedImage);
 
   if (this->processFolder->isChecked() == false)
   {
@@ -754,6 +839,7 @@ void EmMpmGui::on_processBtn_clicked()
   cancelBtn->setVisible(true);
 
   setWidgetListEnabled(false);
+  setImageWidgetsEnabled(true);
 
   queueController->start();
 }
@@ -870,7 +956,20 @@ void EmMpmGui::processingMessage(QString str)
 // -----------------------------------------------------------------------------
 void EmMpmGui::queueControllerFinished()
 {
-//  m_QueueDialog->setVisible(false);
+
+#if 0
+  if (m_LayersPalette != NULL)
+  {
+    m_LayersPalette->getSegmentedImageCheckBox()->setEnabled(true);
+    m_LayersPalette->getOriginalImageCheckBox()->setChecked(true);
+    m_LayersPalette->getSegmentedImageCheckBox()->setChecked(false);
+    m_LayersPalette->getCompositeTypeComboBox()->setCurrentIndex(EmMpm_Constants::Alpha_Blend);
+    m_LayersPalette->getOpacitySlider()->setEnabled(true);
+    m_LayersPalette->getOpacitySpinBox()->setEnabled(true);
+    m_LayersPalette->getCompositeTypeComboBox()->setEnabled(true);
+  }
+#endif
+
   if (this->processFolder->isChecked() == false)
   {
     setCurrentImageFile (inputImageFilePath->text());
@@ -919,6 +1018,9 @@ void EmMpmGui::queueControllerFinished()
 
   /* Gradient Penalty widgets  */
   gradientBetaE->setEnabled(useGradientPenalty->isChecked());
+
+  // Make sure the image manipulating widgets are enabled
+  setImageWidgetsEnabled(true);
 }
 
 // -----------------------------------------------------------------------------
@@ -1127,6 +1229,7 @@ void EmMpmGui::on_outputDirectoryLE_textChanged(const QString & text)
   verifyPathExists(outputDirectoryLE->text(), outputDirectoryLE);
 }
 
+#if 0
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
@@ -1169,7 +1272,7 @@ void EmMpmGui::on_compositeModeCB_currentIndexChanged()
     transparency->setEnabled(false);
   }
 }
-
+#endif
 
 // -----------------------------------------------------------------------------
 //
@@ -1289,35 +1392,6 @@ void EmMpmGui::openRecentBaseImageFile()
   }
 }
 
-// -----------------------------------------------------------------------------
-//
-// -----------------------------------------------------------------------------
-void EmMpmGui::openBaseImageFile(QString imageFile)
-{
-  if ( true == imageFile.isEmpty() ) // User cancelled the operation
-  {
-    return;
-  }
-
-  UserInitArea::deleteAllUserInitAreas(m_GraphicsView->scene());
-
-  // Delete all the User Init Areas from the Scene
-  enableUserDefinedAreas->setCheckState(Qt::Unchecked);
-  on_enableUserDefinedAreas_stateChanged(Qt::Unchecked);
-  //Clear out the UserInitAreas that we are tracking. They have all been released
-  // in memory we just simply need to clear the tracking vector. This class does
-  // not own the pointer so we don't worry about cleaning up the memory.
-  m_UserInitAreaVector->clear();
-
-  m_GraphicsView->loadBaseImageFile(imageFile);
-  setWindowTitle(imageFile);
-
-  // Tell the RecentFileList to update itself then broadcast those changes.
-  QRecentFileList::instance()->addFile(imageFile);
-  setWidgetListEnabled(true);
-  setImageWidgetsEnabled(true);
-  updateBaseRecentFileList(imageFile);
-}
 
 // -----------------------------------------------------------------------------
 //
@@ -1360,7 +1434,8 @@ void EmMpmGui::on_actionOpenOverlayImage_triggered()
 void EmMpmGui::on_actionSaveCanvas_triggered()
 {
   QImage image = m_GraphicsView->getOverlayImage();
-  if (imageDisplayCombo->currentIndex() == EmMpm_Constants::CompositedImage)
+  if (m_LayersPalette->getOriginalImageCheckBox()->isChecked()
+       && m_LayersPalette->getSegmentedImageCheckBox()->isChecked())
   {
     image = m_GraphicsView->getCompositedImage();
   }
@@ -1406,6 +1481,48 @@ void EmMpmGui::on_actionExit_triggered()
   this->close();
 }
 
+// -----------------------------------------------------------------------------
+//
+// -----------------------------------------------------------------------------
+void EmMpmGui::openBaseImageFile(QString imageFile)
+{
+  if ( true == imageFile.isEmpty() ) // User cancelled the operation
+  {
+    return;
+  }
+
+  inputImageFilePath->blockSignals(true);
+  inputImageFilePath->setText(imageFile);
+  inputImageFilePath->blockSignals(false);
+
+  setWindowTitle(imageFile);
+  this->setWindowFilePath(imageFile);
+
+  m_LayersPalette->getOriginalImageCheckBox()->setChecked(true);
+
+  // Tell the RecentFileList to update itself then broadcast those changes.
+  QRecentFileList::instance()->addFile(imageFile);
+  setWidgetListEnabled(true);
+  setImageWidgetsEnabled(true);
+  updateBaseRecentFileList(imageFile);
+
+  UserInitArea::deleteAllUserInitAreas(m_GraphicsView->scene());
+
+  // Delete all the User Init Areas from the Scene
+  enableUserDefinedAreas->setCheckState(Qt::Unchecked);
+  on_enableUserDefinedAreas_stateChanged(Qt::Unchecked);
+  //Clear out the UserInitAreas that we are tracking. They have all been released
+  // in memory we just simply need to clear the tracking vector. This class does
+  // not own the pointer so we don't worry about cleaning up the memory.
+  m_UserInitAreaVector->clear();
+
+  m_GraphicsView->loadBaseImageFile(imageFile);
+  m_GraphicsView->setOverlayImage(QImage());
+
+  clearProcessHistograms();
+  plotImageHistogram();
+}
+
 
 // -----------------------------------------------------------------------------
 //
@@ -1417,29 +1534,25 @@ void EmMpmGui::openOverlayImage(QString processedImage)
     return;
   }
   m_GraphicsView->loadOverlayImageFile(processedImage);
-  imageDisplayCombo->setCurrentIndex(EmMpm_Constants::CompositedImage);
-  compositeModeCB->setCurrentIndex(EmMpm_Constants::Alpha_Blend);
-  on_imageDisplayCombo_currentIndexChanged();
+
+  if (m_LayersPalette != NULL)
+  {
+    m_LayersPalette->getOriginalImageCheckBox()->setChecked(true);
+    m_LayersPalette->getSegmentedImageCheckBox()->setChecked(true);
+    m_LayersPalette->getCompositeTypeComboBox()->setCurrentIndex(EmMpm_Constants::Alpha_Blend);
+    m_LayersPalette->getOpacitySlider()->setEnabled(true);
+    m_LayersPalette->getOpacitySpinBox()->setEnabled(true);
+    m_LayersPalette->getCompositeTypeComboBox()->setEnabled(true);
+  }
 
   setWidgetListEnabled(true);
+  setImageWidgetsEnabled(true);
 
   updateBaseRecentFileList(processedImage);
 }
 
 
-// -----------------------------------------------------------------------------
-//
-// -----------------------------------------------------------------------------
-void EmMpmGui::baseImageFileLoaded(const QString &filename)
-{
- // std::cout << "Loaded Image file " << filename.toStdString() << std::endl;
-  this->setWindowFilePath(filename);
-  setWindowTitle(filename);
-  imageDisplayCombo->setCurrentIndex(EmMpm_Constants::OriginalImage);
-  inputImageFilePath->setText(filename);
-  clearProcessHistograms();
-  plotImageHistogram();
-}
+
 
 // -----------------------------------------------------------------------------
 //
@@ -1447,7 +1560,9 @@ void EmMpmGui::baseImageFileLoaded(const QString &filename)
 void EmMpmGui::overlayImageFileLoaded(const QString &filename)
 {
   // std::cout << "EmMpmGui::overlayImageFileLoaded" << std::endl;
+  outputImageFile->blockSignals(true);
   outputImageFile->setText(filename);
+  outputImageFile->blockSignals(false);
 }
 
 
@@ -1553,58 +1668,13 @@ void EmMpmGui::userInitAreaUpdated(UserInitArea* uia)
   }
 
  // m_UserInitAreaWidget->setUserInitArea(uia);
-
-  QPoint p = uia->pos().toPoint();
-  QRect b = uia->boundingRect().toAlignedRect();
-
-  QPoint upLeft(b.x() + p.x(), b.y() + p.y());
-  QPoint lowRight(b.x() + p.x() + b.width(), b.y() + p.y() + b.height());
-
-  QImage image = m_GraphicsView->getBaseImage();
-  qint32 height = image.height();
-  qint32 width = image.width();
-  QRgb rgbPixel;
-  int gray;
-  qint32 index;
-  double max = std::numeric_limits<double>::min();
-
-  int xStart = b.x() + p.x();
-  int xEnd = b.x() + p.x() + b.width();
-  int yStart = b.y() + p.y();
-  int yEnd = b.y() + p.y() + b.height();
-
-  double mu, sig;
-  mu = 0.0;
-  sig = 0.0;
-  //Calculate Mu
-  for (qint32 y = yStart; y < yEnd; y++)
-  {
-    for (qint32 x = xStart; x < xEnd; x++)
-    {
-      index = (y * width) + x;
-      rgbPixel = image.pixel(x, y);
-      gray = qGray(rgbPixel);
-      mu += gray;
-    }
-  }
-  mu /= ((yEnd - yStart)*(xEnd - xStart));
+  double mu = 0.0;
+  double sig = 0.0;
+  int err = m_GraphicsView->calculateMuSigma(uia, mu, sig);
   uia->setMu(mu);
-
-  // Calculate Sigma
-  for (qint32 y = yStart; y < yEnd; y++)
-  {
-    for (qint32 x = xStart; x < xEnd; x++)
-    {
-      index = (y * width) + x;
-      rgbPixel = image.pixel(x, y);
-      gray = qGray(rgbPixel);
-      sig += (gray-mu)*(gray-mu);
-    }
-  }
-  sig /= ((yEnd - yStart)*(xEnd - xStart));
-  //Calculate Std Dev (Squart Root of Variance)
-  sig = sqrt(sig);
   uia->setSigma(sig);
+
+  double max = std::numeric_limits<double>::min();
 
   // Generate the Histogram Bins
   const int numValues = 256;
@@ -1827,15 +1897,6 @@ void EmMpmGui::userInitAreaAdded(UserInitArea* uia)
   userInitAreaUpdated(uia);
 }
 
-// -----------------------------------------------------------------------------
-//
-// -----------------------------------------------------------------------------
-void EmMpmGui::on_fitToWindow_clicked()
-{
-  zoomCB->blockSignals(true);
-  zoomCB->setCurrentIndex(zoomCB->count()-1);
-  zoomCB->blockSignals(false);
-}
 
 // -----------------------------------------------------------------------------
 //
@@ -1918,6 +1979,7 @@ void EmMpmGui::on_axisSettingsBtn_clicked()
 }
 
 
+#if 0
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
@@ -1926,6 +1988,8 @@ void EmMpmGui::on_transparency_valueChanged(int value)
   float f = (float)value/255.0;
   m_GraphicsView->setOverlayTransparency(f);
 }
+#endif
+
 
 
 // -----------------------------------------------------------------------------

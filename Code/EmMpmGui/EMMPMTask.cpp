@@ -76,7 +76,7 @@ void EMMPMTask::EMMPMUpdate_CallBackWrapper(EMMPM_Data* data)
 
  // std::cout << "EMMPMUpdate_CallBackWrapper: Progress=" << data->progress << std::endl;
   emit mySelf->progressValueChanged((int)data->progress);
-  
+
   QString msg("EM Loop: ");
   msg.append(QString::number(data->currentEMLoop)).append(" - MPM Loop: ").append(QString::number(data->currentMPMLoop));
 
@@ -282,9 +282,6 @@ void EMMPMTask::run()
   // Set the initialization function based on the command line arguments
   switch(m_data->initType)
   {
-    case EMMPM_UserInitArea:
-      m_callbacks->EMMPM_InitializationFunc = EMMPM_UserDefinedAreasInitialization;
-      break;
     case EMMPM_Basic:
       m_callbacks->EMMPM_InitializationFunc = EMMPM_BasicInitialization;
       break;
@@ -311,7 +308,7 @@ void EMMPMTask::run()
 
   EMMPM_Run(m_data, m_callbacks);
 
-  // Set the inputimage pointer to NULL so it does not get freed twice
+  // Set the input image pointer to NULL so it does not get freed twice
   m_data->inputImage = NULL;
 
   QImage outQImage(m_data->outputImage, width, height, width, QImage::Format_Indexed8);

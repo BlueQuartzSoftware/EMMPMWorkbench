@@ -99,13 +99,13 @@ void UserInitAreaWidget::on_m_MinVariance_valueChanged(double v)
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
-void UserInitAreaWidget::on_m_Class_valueChanged(int v)
-{
-  if (m_uia != NULL)
-  {
-    m_uia->setEmMpmClass(m_Class->value());
-  }
-}
+//void UserInitAreaWidget::on_m_Class_valueChanged(int v)
+//{
+//  if (m_uia != NULL)
+//  {
+//    m_uia->setEmMpmClass(m_Class->value());
+//  }
+//}
 
 // -----------------------------------------------------------------------------
 //
@@ -138,7 +138,7 @@ void UserInitAreaWidget::setUserInitArea(UserInitArea* uia)
   {
     setWidgetListEnabled(false);
     m_GrayLevel->setValue(0);
-    m_Class->setValue(0);
+    m_Class->setText(QString("0"));
     bool ok = false;
     m_Mu->setText(0);
     m_Sigma->setText(0);
@@ -151,7 +151,7 @@ void UserInitAreaWidget::setUserInitArea(UserInitArea* uia)
   }
   setWidgetListEnabled(true);
   m_GrayLevel->setValue(uia->getEmMpmGrayLevel());
-  m_Class->setValue(uia->getEmMpmClass());
+  m_Class->setText(QString::number(uia->getEmMpmClass()));
   bool ok = false;
   m_Mu->setText(QString::number(uia->getMu()));
   m_Sigma->setText(QString::number(uia->getSigma()));

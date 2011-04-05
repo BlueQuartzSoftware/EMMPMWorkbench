@@ -57,8 +57,10 @@ class QwtPlotMarker;
 class EMMPMTask;
 class AxisSettingsDialog;
 class UserInitAreaWidget;
+class LayersDockWidget;
 
 #include "IPHelper/plugins/QImageProcessingInputFrame.h"
+
 
 /**
  * @class EmMpmGui EmMpmGui.h Code/EmMpmGui/EmMpmGui.h
@@ -122,20 +124,39 @@ class EmMpmGui :  public QMainWindow, private Ui::EmMpmGui
 
     void updateHistogramAxis();
 
-    signals:
+    /**
+     * @brief Opens an Image file
+     * @param imageFile The path to the image file to open.
+     */
+    void openBaseImageFile(QString imageFile);
+
+    void openOverlayImage(QString mountImage);
+
+  signals:
     void cancelTask();
     void cancelProcessQueue();
 
   public slots:
 
   // Manual hookup slots to get signals from the graphics view
-    void baseImageFileLoaded(const QString &filename);
+  //  void baseImageFileLoaded(const QString &filename);
     void overlayImageFileLoaded(const QString &filename);
     void userInitAreaAdded(UserInitArea* uia);
     void deleteUserInitArea(UserInitArea* uia);
     void userInitAreaUpdated(UserInitArea* uia);
     void userInitAreaSelected(UserInitArea* uia);
     void userInitAreaLostFocus();
+
+
+    void z10_triggered();
+    void z25_triggered();
+    void z50_triggered();
+    void z100_triggered();
+    void z125_triggered();
+    void z150_triggered();
+    void z200_triggered();
+    void z400_triggered();
+    void z600_triggered();
 
   protected slots:
   //Manual Hookup Menu Actions
@@ -157,13 +178,19 @@ class EmMpmGui :  public QMainWindow, private Ui::EmMpmGui
 
 
     /* slots for the buttons in the GUI */
-    void on_imageDisplayCombo_currentIndexChanged();
-    void on_compositeModeCB_currentIndexChanged();
+    // void on_imageDisplayCombo_currentIndexChanged();
+    // void on_compositeModeCB_currentIndexChanged();
+    // void on_transparency_valueChanged(int value);
+
+
     void on_fitToWindow_clicked();
-    void on_transparency_valueChanged(int value);
+
     void on_clearTempHistograms_clicked();
 
     void on_enableUserDefinedAreas_stateChanged(int state);
+
+    void on_layersPalette_clicked();
+
 
     /**
      * @brief Qt Slot that fires in response to a click on a "Recent File' Menu entry.
@@ -262,14 +289,6 @@ class EmMpmGui :  public QMainWindow, private Ui::EmMpmGui
     */
    void populateFileTable(QLineEdit* sourceDirectoryLE, QListView *fileListView);
 
-    /**
-     * @brief Opens an Image file
-     * @param imageFile The path to the image file to open.
-     */
-    void openBaseImageFile(QString imageFile);
-
-    void openOverlayImage(QString mountImage);
-
     qint32 initImageViews();
 
     void plotImageHistogram();
@@ -305,6 +324,7 @@ class EmMpmGui :  public QMainWindow, private Ui::EmMpmGui
   QList<QWidget*> m_ImageWidgets;
   QList<QWidget*> m_ProcessFolderWidgets;
 
+  LayersDockWidget*  m_LayersPalette;
 
 
   EmMpmGui(const EmMpmGui&); // Copy Constructor Not Implemented

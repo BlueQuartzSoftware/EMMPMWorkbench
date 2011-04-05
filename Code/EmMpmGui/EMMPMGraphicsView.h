@@ -111,6 +111,7 @@ class EMMPMGraphicsView : public QGraphicsView
 
     QImage& blend(QImage& src, QImage& dst, float opacity);
 
+    int calculateMuSigma(UserInitArea* uia, double &mu, double &sigma);
 
   public slots:
     void zoomIn();
@@ -118,17 +119,21 @@ class EMMPMGraphicsView : public QGraphicsView
 
     void setOverlayTransparency(float f);
 
-    void fitToWindow();
+    void useColorTable(bool b);
 
     void setZoomIndex(int index);
 
-    void setImageDisplayType(int displayType);
+    void setImageDisplayType(EmMpm_Constants::ImageDisplayType displayType);
 
     void setCompositeMode(EmMpm_Constants::CompositeType mode);
 
     void addUserInitArea(bool b);
 
     void setOverlayImage(QImage image);
+
+    void updateDisplay();
+
+    void userInitAreaUpdated(UserInitArea* uia);
 
   signals:
    void fireBaseImageFileLoaded(const QString &filename);
@@ -150,7 +155,6 @@ class EMMPMGraphicsView : public QGraphicsView
    QRubberBand*   m_RubberBand;
    QPoint         m_MouseClickOrigin;
    float          m_ZoomFactors[10];
-  // UserInitAreaTableModel* m_UserInitAreaTableModel;
    QVector<UserInitArea*>*      m_UserInitAreaVector;
 
    EmMpmGui*      m_MainGui;
@@ -158,6 +162,11 @@ class EMMPMGraphicsView : public QGraphicsView
    bool           m_ShowOverlayImage;
    QPainter::CompositionMode m_composition_mode;
    float          m_OverlayTransparency;
+
+   bool           m_UseColorTable;
+   QVector<QRgb> m_ColorTable;
+   QVector<QRgb> m_GrayScaleTable;
+
 
    EMMPMGraphicsView(const EMMPMGraphicsView&); // Copy Constructor Not Implemented
    void operator=(const EMMPMGraphicsView&); // Operator '=' Not Implemented

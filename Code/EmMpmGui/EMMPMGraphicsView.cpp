@@ -52,7 +52,8 @@
 EMMPMGraphicsView::EMMPMGraphicsView(QWidget *parent)
 : QGraphicsView(parent),
   m_ImageGraphicsItem(NULL),
-  m_UserInitAreaVector(NULL)
+  m_UserInitAreaVector(NULL),
+  m_UseColorTable(false)
 {
   setAcceptDrops(true);
   setDragMode(RubberBandDrag);
@@ -71,8 +72,17 @@ EMMPMGraphicsView::EMMPMGraphicsView(QWidget *parent)
   m_MainGui = NULL;
   m_RubberBand = NULL;
   m_ImageDisplayType = EmMpm_Constants::OriginalImage;
-  m_composition_mode = QPainter::CompositionMode_Exclusion;
+  m_composition_mode = QPainter::CompositionMode_SourceOver;
   m_OverlayTransparency = 1.0f; // Fully opaque
+
+  m_ColorTable.resize(256);
+  m_GrayScaleTable.resize(256);
+  for (quint32 i = 0; i < 256; ++i)
+  {
+    m_GrayScaleTable[i] = qRgb(i, i, i);
+    m_ColorTable[i] = qRgb(i, i, i);
+  }
+
 }
 
 // -----------------------------------------------------------------------------
@@ -81,16 +91,14 @@ EMMPMGraphicsView::EMMPMGraphicsView(QWidget *parent)
 void EMMPMGraphicsView::setOverlayTransparency(float f)
 {
   m_OverlayTransparency = f;
-  setImageDisplayType(m_ImageDisplayType);
 }
 
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
-void EMMPMGraphicsView::fitToWindow()
+void EMMPMGraphicsView::useColorTable(bool b)
 {
-  QRectF r = scene()->sceneRect();
-  fitInView(r, Qt::KeepAspectRatio);
+  m_UseColorTable = b;
 }
 
 // -----------------------------------------------------------------------------
@@ -123,18 +131,45 @@ void EMMPMGraphicsView::zoomOut()
 // -----------------------------------------------------------------------------
 void EMMPMGraphicsView::setZoomIndex(int index)
 {
-  if (index == 3)
+  if (index == 9)
   {
-    resetMatrix();
-    resetTransform();
+    QRectF r = scene()->sceneRect();
+    fitInView(r, Qt::KeepAspectRatio);
   }
   else
   {
-    resetMatrix();
-    resetTransform();
-    scale(m_ZoomFactors[index], m_ZoomFactors[index]);
+    QTransform transform;
+    transform.scale(m_ZoomFactors[index], m_ZoomFactors[index]);
+    setTransform(transform);
   }
+
 }
+
+// -----------------------------------------------------------------------------
+//
+// -----------------------------------------------------------------------------
+void EMMPMGraphicsView::userInitAreaUpdated(UserInitArea* uia)
+{
+  // Update the Color Table for this new user init area
+  for (quint32 i = 0; i < 256; ++i)
+  {
+    m_ColorTable[i] = qRgb(i, i, i);
+  }
+
+  qint32 size = m_UserInitAreaVector->size();
+  UserInitArea* u = NULL;
+  for (qint32 i = 0; i < size; ++i)
+  {
+    u = m_UserInitAreaVector->at(i);
+    if (NULL != u)
+    {
+      int index = u->getEmMpmGrayLevel();
+      m_ColorTable[index] = u->getColor().rgb();
+    }
+  }
+  updateDisplay();
+}
+
 
 // -----------------------------------------------------------------------------
 //
@@ -187,7 +222,7 @@ void EMMPMGraphicsView::dropEvent(QDropEvent *event)
           || ext.compare("png") == 0
           || ext.compare("bmp") == 0)
       {
-        loadBaseImageFile(fName);
+        m_MainGui->openBaseImageFile(fName);
       }
     }
   }
@@ -202,7 +237,9 @@ QImage EMMPMGraphicsView::getCompositedImage()
   return m_CompositedImage;
 }
 
-// Nice and fast direct pixel manipulation
+// -----------------------------------------------------------------------------
+//
+// -----------------------------------------------------------------------------
 QImage& EMMPMGraphicsView::blend(QImage& src, QImage& dst, float opacity)
 {
     if (src.width() <= 0 || src.height() <= 0)
@@ -228,175 +265,6 @@ QImage& EMMPMGraphicsView::blend(QImage& src, QImage& dst, float opacity)
     if (dst.depth() != 32) dst = dst.convertToFormat(QImage::Format_ARGB32);
 
     int pixels = src.width() * src.height();
-
-#ifdef USE_SSE2_INLINE_ASM
-    if ( KCPUInfo::haveExtension( KCPUInfo::IntelSSE2 ) && pixels > 16 ) {
-        Q_UINT16 alpha = Q_UINT16( opacity * 256.0 );
-        KIE8Pack packedalpha = { { alpha, alpha, alpha, 0,
-                                   alpha, alpha, alpha, 0 } };
-
-        // Prepare the XMM6 and XMM7 registers for unpacking and blending
-        __asm__ __volatile__(
-        "pxor      %%xmm7, %%xmm7\n\t" // Zero out XMM7 for unpacking
-        "movdqu      (%0), %%xmm6\n\t" // Set up alpha * 256 in XMM6
-        : : "r"(&packedalpha), "m"(packedalpha) );
-
-        Q_UINT32 *data1 = reinterpret_cast<Q_UINT32*>( src.bits() );
-        Q_UINT32 *data2 = reinterpret_cast<Q_UINT32*>( dst.bits() );
-
-        // Check how many pixels we need to process to achieve 16 byte alignment
-        int offset = (16 - (Q_UINT32( data2 ) & 0x0f)) / 4;
-
-        // The main loop processes 4 pixels / iteration
-        int remainder = (pixels - offset) % 4;
-        pixels -= remainder;
-
-        // Alignment loop
-        for ( int i = 0; i < offset; i++ ) {
-            __asm__ __volatile__(
-            "movd       (%1,%2,4),    %%xmm1\n\t"  // Load one dst pixel to XMM1
-            "punpcklbw     %%xmm7,    %%xmm1\n\t"  // Unpack the pixel
-            "movd       (%0,%2,4),    %%xmm0\n\t"  // Load one src pixel to XMM0
-            "punpcklbw     %%xmm7,    %%xmm0\n\t"  // Unpack the pixel
-            "psubw         %%xmm1,    %%xmm0\n\t"  // Subtract dst from src
-            "pmullw        %%xmm6,    %%xmm0\n\t"  // Multiply the result with alpha * 256
-            "psllw             $8,    %%xmm1\n\t"  // Multiply dst with 256
-            "paddw         %%xmm1,    %%xmm0\n\t"  // Add dst to result
-            "psrlw             $8,    %%xmm0\n\t"  // Divide by 256
-            "packuswb      %%xmm1,    %%xmm0\n\t"  // Pack the pixel to a dword
-            "movd          %%xmm0, (%1,%2,4)\n\t"  // Write the pixel to the image
-            : : "r"(data1), "r"(data2), "r"(i) );
-        }
-
-        // Main loop
-        for ( int i = offset; i < pixels; i += 4 ) {
-            __asm__ __volatile__(
-            // Load 4 src pixels to XMM0 and XMM2 and 4 dst pixels to XMM1 and XMM3
-            "movq       (%0,%2,4),    %%xmm0\n\t"  // Load two src pixels to XMM0
-            "movq       (%1,%2,4),    %%xmm1\n\t"  // Load two dst pixels to XMM1
-            "movq      8(%0,%2,4),    %%xmm2\n\t"  // Load two src pixels to XMM2
-            "movq      8(%1,%2,4),    %%xmm3\n\t"  // Load two dst pixels to XMM3
-
-            // Prefetch the pixels for the iteration after the next one
-            "prefetchnta 32(%0,%2,4)        \n\t"
-            "prefetchnta 32(%1,%2,4)        \n\t"
-
-            // Blend the first two pixels
-            "punpcklbw     %%xmm7,    %%xmm1\n\t"  // Unpack the dst pixels
-            "punpcklbw     %%xmm7,    %%xmm0\n\t"  // Unpack the src pixels
-            "psubw         %%xmm1,    %%xmm0\n\t"  // Subtract dst from src
-            "pmullw        %%xmm6,    %%xmm0\n\t"  // Multiply the result with alpha * 256
-            "psllw             $8,    %%xmm1\n\t"  // Multiply dst with 256
-            "paddw         %%xmm1,    %%xmm0\n\t"  // Add dst to the result
-            "psrlw             $8,    %%xmm0\n\t"  // Divide by 256
-
-            // Blend the next two pixels
-            "punpcklbw     %%xmm7,    %%xmm3\n\t"  // Unpack the dst pixels
-            "punpcklbw     %%xmm7,    %%xmm2\n\t"  // Unpack the src pixels
-            "psubw         %%xmm3,    %%xmm2\n\t"  // Subtract dst from src
-            "pmullw        %%xmm6,    %%xmm2\n\t"  // Multiply the result with alpha * 256
-            "psllw             $8,    %%xmm3\n\t"  // Multiply dst with 256
-            "paddw         %%xmm3,    %%xmm2\n\t"  // Add dst to the result
-            "psrlw             $8,    %%xmm2\n\t"  // Divide by 256
-
-            // Write the pixels back to the image
-            "packuswb      %%xmm2,    %%xmm0\n\t"  // Pack the pixels to a double qword
-            "movdqa        %%xmm0, (%1,%2,4)\n\t"  // Store the pixels
-            : : "r"(data1), "r"(data2), "r"(i) );
-        }
-
-        // Cleanup loop
-        for ( int i = pixels; i < pixels + remainder; i++ ) {
-            __asm__ __volatile__(
-            "movd       (%1,%2,4),    %%xmm1\n\t"  // Load one dst pixel to XMM1
-            "punpcklbw     %%xmm7,    %%xmm1\n\t"  // Unpack the pixel
-            "movd       (%0,%2,4),    %%xmm0\n\t"  // Load one src pixel to XMM0
-            "punpcklbw     %%xmm7,    %%xmm0\n\t"  // Unpack the pixel
-            "psubw         %%xmm1,    %%xmm0\n\t"  // Subtract dst from src
-            "pmullw        %%xmm6,    %%xmm0\n\t"  // Multiply the result with alpha * 256
-            "psllw             $8,    %%xmm1\n\t"  // Multiply dst with 256
-            "paddw         %%xmm1,    %%xmm0\n\t"  // Add dst to result
-            "psrlw             $8,    %%xmm0\n\t"  // Divide by 256
-            "packuswb      %%xmm1,    %%xmm0\n\t"  // Pack the pixel to a dword
-            "movd          %%xmm0, (%1,%2,4)\n\t"  // Write the pixel to the image
-            : : "r"(data1), "r"(data2), "r"(i) );
-        }
-    } else
-#endif // USE_SSE2_INLINE_ASM
-
-#ifdef USE_MMX_INLINE_ASM
-    if ( KCPUInfo::haveExtension( KCPUInfo::IntelMMX ) && pixels > 1 ) {
-        Q_UINT16 alpha = Q_UINT16( opacity * 256.0 );
-        KIE4Pack packedalpha = { { alpha, alpha, alpha, 0 } };
-
-        // Prepare the MM6 and MM7 registers for blending and unpacking
-        __asm__ __volatile__(
-        "pxor       %%mm7,   %%mm7\n\t"      // Zero out MM7 for unpacking
-        "movq        (%0),   %%mm6\n\t"      // Set up alpha * 256 in MM6
-        : : "r"(&packedalpha), "m"(packedalpha) );
-
-        Q_UINT32 *data1 = reinterpret_cast<Q_UINT32*>( src.bits() );
-        Q_UINT32 *data2 = reinterpret_cast<Q_UINT32*>( dst.bits() );
-
-        // The main loop processes 2 pixels / iteration
-        int remainder = pixels % 2;
-        pixels -= remainder;
-
-        // Main loop
-        for ( int i = 0; i < pixels; i += 2 ) {
-            __asm__ __volatile__(
-            // Load 2 src pixels to MM0 and MM2 and 2 dst pixels to MM1 and MM3
-            "movd        (%0,%2,4),     %%mm0\n\t"  // Load the 1st src pixel to MM0
-            "movd        (%1,%2,4),     %%mm1\n\t"  // Load the 1st dst pixel to MM1
-            "movd       4(%0,%2,4),     %%mm2\n\t"  // Load the 2nd src pixel to MM2
-            "movd       4(%1,%2,4),     %%mm3\n\t"  // Load the 2nd dst pixel to MM3
-
-            // Blend the first pixel
-            "punpcklbw       %%mm7,     %%mm0\n\t"  // Unpack the src pixel
-            "punpcklbw       %%mm7,     %%mm1\n\t"  // Unpack the dst pixel
-            "psubw           %%mm1,     %%mm0\n\t"  // Subtract dst from src
-            "pmullw          %%mm6,     %%mm0\n\t"  // Multiply the result with alpha * 256
-            "psllw              $8,     %%mm1\n\t"  // Multiply dst with 256
-            "paddw           %%mm1,     %%mm0\n\t"  // Add dst to the result
-            "psrlw              $8,     %%mm0\n\t"  // Divide by 256
-
-            // Blend the second pixel
-            "punpcklbw       %%mm7,     %%mm2\n\t"  // Unpack the src pixel
-            "punpcklbw       %%mm7,     %%mm3\n\t"  // Unpack the dst pixel
-            "psubw           %%mm3,     %%mm2\n\t"  // Subtract dst from src
-            "pmullw          %%mm6,     %%mm2\n\t"  // Multiply the result with alpha * 256
-            "psllw              $8,     %%mm3\n\t"  // Multiply dst with 256
-            "paddw           %%mm3,     %%mm2\n\t"  // Add dst to the result
-            "psrlw              $8,     %%mm2\n\t"  // Divide by 256
-
-            // Write the pixels back to the image
-            "packuswb        %%mm2,     %%mm0\n\t"  // Pack the pixels to a qword
-            "movq            %%mm0, (%1,%2,4)\n\t"  // Store the pixels
-            : : "r"(data1), "r"(data2), "r"(i) );
-        }
-
-        // Blend the remaining pixel (if there is one)
-        if ( remainder ) {
-             __asm__ __volatile__(
-            "movd             (%0),     %%mm0\n\t"  // Load one src pixel to MM0
-            "punpcklbw       %%mm7,     %%mm0\n\t"  // Unpack the src pixel
-            "movd             (%1),     %%mm1\n\t"  // Load one dst pixel to MM1
-            "punpcklbw       %%mm7,     %%mm1\n\t"  // Unpack the dst pixel
-            "psubw           %%mm1,     %%mm0\n\t"  // Subtract dst from src
-            "pmullw          %%mm6,     %%mm0\n\t"  // Multiply the result with alpha * 256
-            "psllw              $8,     %%mm1\n\t"  // Multiply dst with 256
-            "paddw           %%mm1,     %%mm0\n\t"  // Add dst to result
-            "psrlw              $8,     %%mm0\n\t"  // Divide by 256
-            "packuswb        %%mm0,     %%mm0\n\t"  // Pack the pixel to a dword
-            "movd            %%mm0,      (%1)\n\t"  // Write the pixel to the image
-            : : "r"(data1 + pixels), "r"(data2 + pixels) );
-        }
-
-        // Empty the MMX state
-        __asm__ __volatile__("emms");
-    } else
-#endif // USE_MMX_INLINE_ASM
-
     {
 #ifdef WORDS_BIGENDIAN   // ARGB (skip alpha)
         register unsigned char *data1 = (unsigned char *)dst.bits() + 1;
@@ -434,27 +302,41 @@ QImage& EMMPMGraphicsView::blend(QImage& src, QImage& dst, float opacity)
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
-void EMMPMGraphicsView::setImageDisplayType(int displayType)
+void EMMPMGraphicsView::updateDisplay()
 {
-  if (1 == displayType)
+ // QVector<QRgb > colorTable(256);
+  if (m_OverlayImage.isNull() == false)
   {
-    std::cout << "Here" << std::endl;
+    if (m_UseColorTable == true)
+    {
+      m_OverlayImage.setColorTable(m_ColorTable);
+    }
+    else
+    {
+      m_OverlayImage.setColorTable(m_GrayScaleTable);
+    }
   }
-  m_ImageDisplayType = (EmMpm_Constants::ImageDisplayType)displayType;
+
+//  std::cout << "EMMPMGraphicsView::updateDisplay()" << std::endl;
   QPainter painter;
-  QImage paintImage(m_BaseImage.size(), QImage::Format_ARGB32_Premultiplied);
+  QSize pSize(0, 0);
+  if (m_BaseImage.isNull() == false)
+  {
+   pSize = m_BaseImage.size();
+  }
+  QImage paintImage(pSize, QImage::Format_ARGB32_Premultiplied);
   QPoint point(0, 0);
   painter.begin(&paintImage);
   painter.setPen(Qt::NoPen);
-  if (displayType == EmMpm_Constants::OriginalImage)
+  if (m_ImageDisplayType == EmMpm_Constants::OriginalImage)
   {
     painter.drawImage(point, m_BaseImage);
   }
-  else if (displayType == EmMpm_Constants::SegmentedImage)
+  else if (m_ImageDisplayType == EmMpm_Constants::SegmentedImage)
   {
     painter.drawImage(point, m_OverlayImage);
   }
-  else if (displayType == EmMpm_Constants::CompositedImage)
+  else if (m_ImageDisplayType == EmMpm_Constants::CompositedImage)
   {
 
     if (m_composition_mode == QPainter::CompositionMode_SourceOver)
@@ -477,6 +359,14 @@ void EMMPMGraphicsView::setImageDisplayType(int displayType)
   pixItem->setPixmap(QPixmap::fromImage(paintImage));
 
   this->update();
+}
+
+// -----------------------------------------------------------------------------
+//
+// -----------------------------------------------------------------------------
+void EMMPMGraphicsView::setImageDisplayType(EmMpm_Constants::ImageDisplayType displayType)
+{
+  m_ImageDisplayType = displayType;
 }
 
 // -----------------------------------------------------------------------------
@@ -512,9 +402,7 @@ void EMMPMGraphicsView::loadBaseImageFile(const QString &filename)
   QRectF rect = m_ImageGraphicsItem->boundingRect();
   gScene->setSceneRect(rect);
   centerOn(m_ImageGraphicsItem);
-
-  setImageDisplayType(m_ImageDisplayType);
-
+  this->updateDisplay();
   emit fireBaseImageFileLoaded(filename);
 }
 
@@ -528,6 +416,7 @@ void EMMPMGraphicsView::loadOverlayImageFile(const QString &filename)
   m_OverlayImage = QImage(filename);
   if (m_OverlayImage.isNull() == true)
   {
+    std::cout << "Error Loading image: " << filename.toStdString() << std::endl;
     return;
   }
   QVector<QRgb > colorTable(256);
@@ -536,18 +425,19 @@ void EMMPMGraphicsView::loadOverlayImageFile(const QString &filename)
     colorTable[i] = qRgb(i, i, i);
   }
 
-#if 0
-  qint32 size = m_UserInitAreaVector->size();
-  UserInitArea* u = NULL;
-  for(qint32 i = 0; i < size; ++i)
+  if (m_UseColorTable)
   {
-    u = m_UserInitAreaVector->at(i);
-    if (NULL != u) {
-      int index = u->getEmMpmGrayLevel();
-      colorTable[index] = u->getColor().rgb();
+    qint32 size = m_UserInitAreaVector->size();
+    UserInitArea* u = NULL;
+    for(qint32 i = 0; i < size; ++i)
+    {
+      u = m_UserInitAreaVector->at(i);
+      if (NULL != u) {
+        int index = u->getEmMpmGrayLevel();
+        colorTable[index] = u->getColor().rgb();
+      }
     }
   }
-#endif
 
   m_OverlayImage.setColorTable(colorTable);
   m_OverlayImage.convertToFormat(QImage::Format_ARGB32_Premultiplied);
@@ -571,10 +461,8 @@ void EMMPMGraphicsView::loadOverlayImageFile(const QString &filename)
   //centerOn(m_ImageGraphicsItem);
 
   m_ImageDisplayType = EmMpm_Constants::CompositedImage;
-
-  setImageDisplayType(m_ImageDisplayType);
-
   emit fireOverlayImageFileLoaded(filename);
+  updateDisplay();
 }
 
 // -----------------------------------------------------------------------------
@@ -602,14 +490,8 @@ void EMMPMGraphicsView::setOverlayImage(QImage image)
   m_ImageGraphicsItem->setZValue(-1);
   QRectF rect = m_ImageGraphicsItem->boundingRect();
   gScene->setSceneRect(rect);
- // centerOn(m_ImageGraphicsItem);
-
- // m_ImageDisplayType = EmMpm_Constants::SegmentedImage;
-
-  setImageDisplayType(m_ImageDisplayType);
-
+  updateDisplay();
 }
-
 
 // -----------------------------------------------------------------------------
 //
@@ -728,6 +610,11 @@ void EMMPMGraphicsView::addNewInitArea(const QPolygonF &polygon)
   userInitArea->setParentItem(m_ImageGraphicsItem);
   userInitArea->setZValue(1);
   userInitArea->setCacheMode(QGraphicsItem::DeviceCoordinateCache);
+  double mu = 0.0;
+  double sig = 0.0;
+  int err = calculateMuSigma(userInitArea, mu, sig);
+  userInitArea->setMu(mu);
+  userInitArea->setSigma(sig);
 
   // Show a dialog to let the user set the values
   UserInitAreaDialog initDialog;
@@ -746,6 +633,26 @@ void EMMPMGraphicsView::addNewInitArea(const QPolygonF &polygon)
     connect (userInitArea, SIGNAL(fireUserInitAreaSelected(UserInitArea*)),
              m_MainGui, SLOT(userInitAreaSelected(UserInitArea*)), Qt::QueuedConnection);
 
+    connect (userInitArea, SIGNAL (fireUserInitAreaUpdated(UserInitArea*)),
+             this, SLOT(userInitAreaUpdated(UserInitArea*)), Qt::QueuedConnection);
+
+    // Update the Color Table for this new user init area
+    for (quint32 i = 0; i < 256; ++i)
+    {
+      m_ColorTable[i] = qRgb(i, i, i);
+    }
+
+    qint32 size = m_UserInitAreaVector->size();
+    UserInitArea* u = NULL;
+    for(qint32 i = 0; i < size; ++i)
+    {
+      u = m_UserInitAreaVector->at(i);
+      if (NULL != u) {
+        int index = u->getEmMpmGrayLevel();
+        m_ColorTable[index] = u->getColor().rgb();
+      }
+    }
+
     emit fireUserInitAreaAdded(userInitArea);
   }
   else
@@ -757,13 +664,16 @@ void EMMPMGraphicsView::addNewInitArea(const QPolygonF &polygon)
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
-void EMMPMGraphicsView::setCompositeMode(EmMpm_Constants::CompositeType mode) {
-
+void EMMPMGraphicsView::setCompositeMode(EmMpm_Constants::CompositeType mode)
+{
+  m_ImageDisplayType = EmMpm_Constants::CompositedImage;
   switch(mode)
   {
     case EmMpm_Constants::Exclusion: m_composition_mode = QPainter::CompositionMode_Exclusion; break;
     case EmMpm_Constants::Difference: m_composition_mode = QPainter::CompositionMode_Difference; break;
-    case EmMpm_Constants::Alpha_Blend: m_composition_mode = QPainter::CompositionMode_SourceOver; break;
+    case EmMpm_Constants::Alpha_Blend:
+      m_composition_mode = QPainter::CompositionMode_SourceOver;
+      break;
 #if 0
     case 2: m_composition_mode = QPainter::CompositionMode_Plus; break;
     case 3: m_composition_mode = QPainter::CompositionMode_Multiply; break;
@@ -793,5 +703,61 @@ void EMMPMGraphicsView::setCompositeMode(EmMpm_Constants::CompositeType mode) {
   this->setImageDisplayType(m_ImageDisplayType);
 }
 
+// -----------------------------------------------------------------------------
+//
+// -----------------------------------------------------------------------------
+int EMMPMGraphicsView::calculateMuSigma(UserInitArea* uia, double &mu, double &sig)
+{
+  if (NULL == uia)
+  {
+    return -1;
+  }
+  QPoint p = uia->pos().toPoint();
+  QRect b = uia->boundingRect().toAlignedRect();
 
+  QPoint upLeft(b.x() + p.x(), b.y() + p.y());
+  QPoint lowRight(b.x() + p.x() + b.width(), b.y() + p.y() + b.height());
 
+  QImage image = getBaseImage();
+  qint32 height = image.height();
+  qint32 width = image.width();
+  QRgb rgbPixel;
+  int gray;
+  qint32 index;
+
+  int xStart = b.x() + p.x();
+  int xEnd = b.x() + p.x() + b.width();
+  int yStart = b.y() + p.y();
+  int yEnd = b.y() + p.y() + b.height();
+
+  mu = 0.0;
+  sig = 0.0;
+  //Calculate Mu
+  for (qint32 y = yStart; y < yEnd; y++)
+  {
+    for (qint32 x = xStart; x < xEnd; x++)
+    {
+      index = (y * width) + x;
+      rgbPixel = image.pixel(x, y);
+      gray = qGray(rgbPixel);
+      mu += gray;
+    }
+  }
+  mu /= ((yEnd - yStart) * (xEnd - xStart));
+
+  // Calculate Sigma
+  for (qint32 y = yStart; y < yEnd; y++)
+  {
+    for (qint32 x = xStart; x < xEnd; x++)
+    {
+      index = (y * width) + x;
+      rgbPixel = image.pixel(x, y);
+      gray = qGray(rgbPixel);
+      sig += (gray - mu) * (gray - mu);
+    }
+  }
+  sig /= ((yEnd - yStart) * (xEnd - xStart));
+  //Calculate Std Dev (Squart Root of Variance)
+  sig = sqrt(sig);
+  return 0;
+}

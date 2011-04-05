@@ -47,7 +47,13 @@ namespace UIA
 }
 
 
-
+/**
+ * @class UserInitAreaWidget UserInitAreaWidget.h Code/EmMpmGui/UserInitAreaWidget.h
+ * @brief
+ * @author Michael A. Jackson for BlueQuartz Software
+ * @date Oct 5, 2010
+ * @version 1.0
+ */
 class UserInitAreaWidget  : public QWidget, public Ui::UserInitAreaWidget
 {
   Q_OBJECT;
@@ -61,7 +67,7 @@ class UserInitAreaWidget  : public QWidget, public Ui::UserInitAreaWidget
 
   protected slots:
     void on_m_GrayLevel_valueChanged(int v);
-    void on_m_Class_valueChanged(int v);
+ //   void on_m_Class_valueChanged(int v);
     void on_m_Gamma_valueChanged(double v);
     void on_m_MinVariance_valueChanged(double v);
     void on_colorButton_clicked();
