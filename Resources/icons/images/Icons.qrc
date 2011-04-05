@@ -6,6 +6,11 @@
     <file>zoomOut.png</file>
     <file>fitToWindow.png</file>
     <file>addUserInitArea.png</file>
-    
+<file>magnifyingglass.png</file>
+<file>minus.png</file>
+<file>plus.png</file>
+<file>preferences.png</file>
+<file>reload.png</file>
+<file>photos.png</file> 
  </qresource>
  </RCC>
