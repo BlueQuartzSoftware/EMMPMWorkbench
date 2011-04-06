@@ -169,8 +169,12 @@ class EmMpmGui :  public QMainWindow, private Ui::EmMpmGui
     void on_actionParameters_triggered();
     void on_actionHistogram_triggered();
     void on_actionUser_Initialization_triggered();
+    void on_actionLayers_Palette_triggered();
 
     void on_axisSettingsBtn_clicked();
+
+    void on_saveCurves_clicked();
+
 
     /* slots for the buttons in the GUI */
     void on_processBtn_clicked();

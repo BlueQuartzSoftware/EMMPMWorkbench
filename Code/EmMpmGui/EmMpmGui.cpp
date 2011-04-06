@@ -451,6 +451,7 @@ void EmMpmGui::setupGui()
   m_WidgetList << useCuravturePenalty << useGradientPenalty;
   m_WidgetList << curvatureBetaC << curvatureRMax << ccostLoopDelay;
   m_WidgetList << gradientPenaltyLabel << gradientBetaE;
+  m_WidgetList << axisSettingsBtn << clearTempHistograms << saveCurves;
   setWidgetListEnabled(false);
 
   m_ImageWidgets << zoomIn << zoomOut << fitToWindow << layersPalette;
@@ -1978,19 +1979,111 @@ void EmMpmGui::on_axisSettingsBtn_clicked()
   }
 }
 
-
-#if 0
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
-void EmMpmGui::on_transparency_valueChanged(int value)
+void EmMpmGui::on_saveCurves_clicked()
 {
-  float f = (float)value/255.0;
-  m_GraphicsView->setOverlayTransparency(f);
+  QString outputFile = getOpenDialogLastDirectory() + QDir::separator() + "Curves.csv";
+  outputFile = QFileDialog::getSaveFileName(this, tr("Save Plot Curve File As ..."), outputFile, tr("CSV (*.csv)"));
+  if (outputFile.isNull())
+  {
+    return;
+  }
+
+  QwtPlotCurve* curve = NULL;
+  int count = m_Gaussians.size();
+
+  int columns = count + 2;
+
+  // Set up a row major array
+  double* data = new double[columns * 256];
+  // Generate the Histogram Data array
+  const int numValues = 256;
+
+  // Write the bin values to the array
+  for (int i = 0; i < numValues; ++i)
+  {
+    data[i * columns] = (double)i;
+  }
+
+  // Generate the Histogram frequency values
+  QwtArray<double> values(numValues);
+  QImage image = m_GraphicsView->getBaseImage();
+  qint32 height = image.height();
+  qint32 width = image.width();
+  float totalPixels = height * width;
+  QRgb rgbPixel;
+  int gray;
+  qint32 index;
+ // double max = std::numeric_limits<double>::min();
+
+  for (qint32 y = 0; y < height; y++)
+  {
+    for (qint32 x = 0; x < width; x++)
+    {
+      index = (y * width) + x;
+      rgbPixel = image.pixel(x, y);
+      gray = qGray(rgbPixel);
+      values[gray]++;
+     // if (values[gray] > max) { max = values[gray]; }
+    }
+  }
+
+  // Normalize the bin counts by the total number of pixels
+  // and write the values into the data array
+ // max = 0.0;
+  for (int i = 0; i < 256; ++i)
+  {
+    values[i] = values[i] / totalPixels;
+    data[i*columns + 1] = values[i];
+  }
+
+  // Now step through all the Gaussian Curves and extrat the data
+ // if (count < 2) { return; } // only one Gaussian is the same as the user init Gaussian and is meaningless
+  for (int i = 0; i < numValues; ++i)
+  {
+    for (int c = 0; c < count; ++c)
+    {
+      curve = m_Gaussians[c];
+      QwtArrayData* dd = static_cast<QwtArrayData*> (&(curve->data()));
+    //  values[i] += data->y(i);
+      data[i*columns + 2 + c] = dd->y(i);
+    }
+  }
+
+  // We now have a table of data, lets write it to a file
+  FILE* f = fopen(outputFile.toAscii().data(), "wb");
+  if (NULL == f)
+  {
+    std::cout << "Error trying to write the Histogram and Gaussian data to a file" << std::endl;
+    this->statusBar()->setStatusTip(QString("Error trying to write the Histogram and Gaussian data to a file"));
+    return;
+  }
+  double d;
+  char comma[2] = {',', 0};
+
+  fprintf(f, "Bins,Histogram");
+  for (int c = 2; c < columns; ++c)
+  {
+    fprintf(f, ",Class %d", (c-2));
+  }
+  fprintf(f, "\n");
+
+
+  for (int i = 0; i < 256; ++i)
+  {
+    for (int c = 0; c < columns; ++c)
+    {
+      if (c < columns - 1) { comma[0] = ',';}
+      else { comma[0] = '\n';}
+      d = data[i*columns + c];
+      fprintf(f, "%f%s", d, comma);
+    }
+  }
+
+  fclose(f);
 }
-#endif
-
-
 
 // -----------------------------------------------------------------------------
 //
@@ -2080,6 +2173,14 @@ void EmMpmGui::on_actionHistogram_triggered()
 void EmMpmGui::on_actionParameters_triggered()
 {
   ParametersDockWidget->show();
+}
+
+// -----------------------------------------------------------------------------
+//
+// -----------------------------------------------------------------------------
+void EmMpmGui::on_actionLayers_Palette_triggered()
+{
+  m_LayersPalette->show();
 }
 
 // -----------------------------------------------------------------------------

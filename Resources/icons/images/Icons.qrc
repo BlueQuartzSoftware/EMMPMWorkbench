@@ -11,6 +11,7 @@
 <file>plus.png</file>
 <file>preferences.png</file>
 <file>reload.png</file>
-<file>photos.png</file> 
+<file>photos.png</file>
+<file>disk.png</file> 
  </qresource>
  </RCC>

@@ -792,6 +792,7 @@
     <addaction name="actionParameters"/>
     <addaction name="actionHistogram"/>
     <addaction name="actionUser_Initialization"/>
+    <addaction name="actionLayers_Palette"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuWindow"/>
@@ -1644,7 +1645,7 @@
      <property name="margin">
       <number>4</number>
      </property>
-     <item row="0" column="0" colspan="3">
+     <item row="0" column="0" colspan="4">
       <widget class="QwtPlot" name="m_HistogramPlot">
        <property name="sizePolicy">
         <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
@@ -1703,7 +1704,7 @@
        </property>
       </widget>
      </item>
-     <item row="1" column="2">
+     <item row="1" column="3">
       <spacer name="horizontalSpacer_4">
        <property name="orientation">
         <enum>Qt::Horizontal</enum>
@@ -1715,6 +1716,23 @@
         </size>
        </property>
       </spacer>
+     </item>
+     <item row="1" column="2">
+      <widget class="QToolButton" name="saveCurves">
+       <property name="toolTip">
+        <string>Removes Gaussian curves generated during the segmentation</string>
+       </property>
+       <property name="statusTip">
+        <string>Removes Gaussian curves generated during the segmentation</string>
+       </property>
+       <property name="text">
+        <string>Clear Curves</string>
+       </property>
+       <property name="icon">
+        <iconset resource="../../../Resources/icons/images/Icons.qrc">
+         <normaloff>:/disk.png</normaloff>:/disk.png</iconset>
+       </property>
+      </widget>
      </item>
     </layout>
    </widget>
@@ -1771,6 +1789,11 @@
   <action name="actionUser_Initialization">
    <property name="text">
     <string>User Initialization</string>
+   </property>
+  </action>
+  <action name="actionLayers_Palette">
+   <property name="text">
+    <string>Layers Palette</string>
    </property>
   </action>
  </widget>
