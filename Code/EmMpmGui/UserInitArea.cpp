@@ -62,7 +62,8 @@ QGraphicsPolygonItem(polygon, parent)
   m_Class = userIndex;
   m_Mu = 1.0;
   m_Sigma = 0.1;
-  m_Gamma = 1.0;
+  m_Gamma = 0.0;
+  m_MinVariance = 20.0;
   m_LineWidth = 1.0;
   m_Visible = true;
 

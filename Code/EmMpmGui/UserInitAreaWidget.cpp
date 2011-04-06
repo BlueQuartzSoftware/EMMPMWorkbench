@@ -147,21 +147,35 @@ void UserInitAreaWidget::setUserInitArea(UserInitArea* uia)
     m_LowerRight->setText("-1, -1");
     colorButton->setStyleSheet(QString(""));
     m_LineWidth->setValue(1);
+    m_MinVariance->setValue(20.0);
     return;
   }
   setWidgetListEnabled(true);
-  m_GrayLevel->setValue(uia->getEmMpmGrayLevel());
+
   m_Class->setText(QString::number(uia->getEmMpmClass()));
+
+  m_GrayLevel->blockSignals(true);
+  m_GrayLevel->setValue(uia->getEmMpmGrayLevel());
+  m_GrayLevel->blockSignals(false);
+
   bool ok = false;
   m_Mu->setText(QString::number(uia->getMu()));
   m_Sigma->setText(QString::number(uia->getSigma()));
+
+  m_Gamma->blockSignals(true);
   m_Gamma->setValue(uia->getGamma());
-  m_LineWidth->setValue(uia->getLineWidth());
+  m_Gamma->blockSignals(false);
+
+  m_MinVariance->blockSignals(true);
+  m_MinVariance->setValue(uia->getMinVariance());
+  m_MinVariance->blockSignals(false);
 
   QColor c = m_uia->getColor();
   QString cssColor = "border: 1px solid #101010; background-color: ";
   cssColor.append(c.name());
   colorButton->setStyleSheet(cssColor);
+
+  m_LineWidth->setValue(uia->getLineWidth());
 
   unsigned int x, y;
   uia->getUpperLeft(x, y);
