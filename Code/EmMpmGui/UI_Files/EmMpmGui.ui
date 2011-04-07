@@ -1720,10 +1720,10 @@
      <item row="1" column="2">
       <widget class="QToolButton" name="saveCurves">
        <property name="toolTip">
-        <string>Removes Gaussian curves generated during the segmentation</string>
+        <string>Saves the Histogram and Gaussian Data to a CSV file</string>
        </property>
        <property name="statusTip">
-        <string>Removes Gaussian curves generated during the segmentation</string>
+        <string>Saves the Histogram and Gaussian Data to a CSV file</string>
        </property>
        <property name="text">
         <string>Clear Curves</string>
