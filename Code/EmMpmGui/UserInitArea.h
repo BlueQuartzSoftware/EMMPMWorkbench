@@ -32,6 +32,7 @@
 #define _UIA_H_
 
 #include <QtCore/QObject>
+#include <QtCore/QSettings>
 #include <QtGui/QGraphicsPolygonItem>
 #include <QtGui/QGraphicsRectItem>
 #include <QtGui/QBrush>
@@ -56,6 +57,11 @@ public:
 
 
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget = 0);
+
+    static void deleteAllUserInitAreas(QGraphicsScene* scene);
+
+    void writeSettings(QSettings &prefs);
+    static UserInitArea* NewUserInitArea(QSettings &prefs, int index, QGraphicsItem *parent = 0);
 
  public slots:
 
@@ -94,7 +100,7 @@ public:
 
     void setVisible(bool visible);
 
-    static void deleteAllUserInitAreas(QGraphicsScene* scene);
+
 
  signals:
 

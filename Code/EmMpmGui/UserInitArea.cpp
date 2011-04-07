@@ -86,12 +86,106 @@ UserInitArea::~UserInitArea()
 
 }
 
-//void UserInitArea::setUpperLeft(unsigned int x, unsigned int y)
-//{
-//   m_UpperLeft[0] = x;
-//   m_UpperLeft[1] = y;
-//}
+#define READ_VALUE(prefs, var, ok, temp, default, type)\
+  ok = false;\
+  temp = prefs.value(#var).to##type(&ok);\
+  if (false == ok) {temp = default;}\
+  var = temp;
 
+// -----------------------------------------------------------------------------
+//
+// -----------------------------------------------------------------------------
+UserInitArea* UserInitArea::NewUserInitArea(QSettings &prefs, int index, QGraphicsItem *parent)
+{
+  bool ok = false;
+  int m_Class = index;
+  int m_GrayLevel = 0;
+  double m_Gamma = 0.0;
+  double m_MinVariance = 20.0;
+  double m_LineWidth = 1.0;
+  QColor color;
+  int r, g, b;
+  unsigned int x, y;
+  unsigned int width, height;
+  QString group("UserInitArea-");
+  group.append(QString::number(index));
+  prefs.beginGroup(group);
+
+  m_Class = prefs.value("Class").toInt(&ok);
+  m_GrayLevel = prefs.value("GrayLevel").toInt(&ok);
+  m_Gamma = prefs.value("Gamma").toDouble(&ok);
+  m_MinVariance = prefs.value("MinVariance").toDouble(&ok);
+
+  x = prefs.value("X").toInt(&ok);
+  y = prefs.value("Y").toInt(&ok);
+  width = prefs.value("Width").toInt(&ok);
+  height = prefs.value("Height").toInt(&ok);
+
+  QRectF rect(x, y, width, height);
+
+  m_LineWidth = prefs.value("LineWidth").toInt(&ok);
+  r = prefs.value("Red").toInt(&ok);
+  g = prefs.value("Gree").toInt(&ok);
+  b = prefs.value("Blue").toInt(&ok);
+
+  QColor c = QColor(r, g, b, UIA::Alpha);
+  prefs.endGroup();
+
+  UserInitArea* uia = new UserInitArea(m_Class, rect, parent);
+  uia->setEmMpmGrayLevel(m_GrayLevel);
+  uia->setGamma(m_Gamma);
+  uia->setMinVariance(m_MinVariance);
+  uia->setLineWidth(m_LineWidth);
+  uia->setColor(c);
+
+  // GraphicsView related stuff
+  // Line Color
+  uia->setPen(QPen(QColor(225, 225, 225, UIA::Alpha)));
+  // Fill Color
+  uia->setBrush(QBrush(c));
+  uia->setZValue(1);
+  uia->setCacheMode(QGraphicsItem::DeviceCoordinateCache);
+
+  return uia;
+}
+
+// -----------------------------------------------------------------------------
+//
+// -----------------------------------------------------------------------------
+void UserInitArea::writeSettings(QSettings &prefs)
+{
+  QString group("UserInitArea-");
+  group.append(QString::number(m_Class));
+
+  prefs.beginGroup(group);
+  prefs.setValue("Class", m_Class);
+  prefs.setValue("GrayLevel", m_GrayLevel);
+  prefs.setValue("Gamma", m_Gamma);
+  prefs.setValue("MinVariance", m_MinVariance);
+
+  unsigned int x, y;
+  unsigned int width, height;
+  getUpperLeft(x, y);
+  getLowerRight(width, height);
+  width = width - x;
+  height = height - y;
+  prefs.setValue("X", x);
+  prefs.setValue("Y", y);
+  prefs.setValue("Width", width);
+  prefs.setValue("Height", height);
+
+  prefs.setValue("LineWidth", m_LineWidth);
+  QRgb rgb = getColor().rgb();
+  prefs.setValue("Red", qRed(rgb));
+  prefs.setValue("Greeb", qGreen(rgb));
+  prefs.setValue("Blue", qBlue(rgb));
+
+  prefs.endGroup();
+}
+
+// -----------------------------------------------------------------------------
+//
+// -----------------------------------------------------------------------------
 void UserInitArea::getUpperLeft(unsigned int &x, unsigned int &y)
 {
   QPoint p = pos().toPoint();

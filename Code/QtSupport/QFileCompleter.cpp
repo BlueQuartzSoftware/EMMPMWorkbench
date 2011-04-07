@@ -63,7 +63,7 @@ static QDirModel* pathDirModel()
   if (!m)
   {
     m = new QDirModel();
-    m->setFilter(QDir::AllDirs | QDir::Drives | QDir::NoDotAndDotDot);
+    m->setFilter(QDir::AllDirs | QDir::Drives | QDir::NoDotAndDotDot | QDir::System);
   }
   return m;
 }

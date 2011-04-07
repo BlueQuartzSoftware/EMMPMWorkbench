@@ -77,21 +77,21 @@ class EMMPMGraphicsView : public QGraphicsView
     void setEmMpmGui(EmMpmGui* gui);
 
     /**
-     * @brief Over-riding implementation from base class
-     * @param event QDragEnterEvent Event fired when dragging enters the QGraphicsView
-     */
+    * @brief Over-riding implementation from base class
+    * @param event QDragEnterEvent Event fired when dragging enters the QGraphicsView
+    */
     void dragEnterEvent(QDragEnterEvent *event);
 
     /**
-     * @brief Over-riding implementation from base class
-     * @param event QDropEvent Event fired when object is dropped on QGraphicsView
-     */
+    * @brief Over-riding implementation from base class
+    * @param event QDropEvent Event fired when object is dropped on QGraphicsView
+    */
     void dropEvent(QDropEvent *event);
 
     /**
-     * @brief Over-riding implementation from base class
-     * @param event QDragLeaveEvent Event fired when dragging leaves QGraphicsView
-     */
+    * @brief Over-riding implementation from base class
+    * @param event QDragLeaveEvent Event fired when dragging leaves QGraphicsView
+    */
     void dragLeaveEvent(QDragLeaveEvent *event);
 
     void mousePressEvent( QMouseEvent* event );
@@ -113,6 +113,9 @@ class EMMPMGraphicsView : public QGraphicsView
 
     int calculateMuSigma(UserInitArea* uia, double &mu, double &sigma);
 
+    void addNewInitArea(UserInitArea* uia);
+    void createNewUserInitArea(const QPolygonF &polygon);
+
   public slots:
     void zoomIn();
     void zoomOut();
@@ -126,6 +129,7 @@ class EMMPMGraphicsView : public QGraphicsView
     void setImageDisplayType(EmMpm_Constants::ImageDisplayType displayType);
 
     void setCompositeMode(EmMpm_Constants::CompositeType mode);
+
 
     void addUserInitArea(bool b);
 
@@ -143,7 +147,6 @@ class EMMPMGraphicsView : public QGraphicsView
 
   protected:
 
-    void addNewInitArea(const QPolygonF &box);
 
   private:
    QGraphicsItem* m_ImageGraphicsItem;

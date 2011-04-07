@@ -568,7 +568,7 @@ void EMMPMGraphicsView::mouseReleaseEvent(QMouseEvent *event)
     m_RubberBand->hide();
     QRect box = QRect(m_MouseClickOrigin, event->pos()).normalized();
     QPolygonF sceneBox = mapToScene(box);
-    addNewInitArea(sceneBox);
+    createNewUserInitArea(sceneBox);
     m_AddUserInitArea = false;
   }
   else
@@ -597,7 +597,7 @@ void EMMPMGraphicsView::setEmMpmGui(EmMpmGui* gui)
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
-void EMMPMGraphicsView::addNewInitArea(const QPolygonF &polygon)
+void EMMPMGraphicsView::createNewUserInitArea(const QPolygonF &polygon)
 {
   QRectF brect = polygon.boundingRect();
 
@@ -607,9 +607,10 @@ void EMMPMGraphicsView::addNewInitArea(const QPolygonF &polygon)
   userInitArea->setPen(QPen(QColor(225, 225, 225, UIA::Alpha)));
   // Fill Color
   userInitArea->setBrush(QBrush(QColor(28, 28, 200, UIA::Alpha)));
-  userInitArea->setParentItem(m_ImageGraphicsItem);
   userInitArea->setZValue(1);
   userInitArea->setCacheMode(QGraphicsItem::DeviceCoordinateCache);
+
+  //Calculate the Mean and Standard Deviation
   double mu = 0.0;
   double sig = 0.0;
   int err = calculateMuSigma(userInitArea, mu, sig);
@@ -622,43 +623,59 @@ void EMMPMGraphicsView::addNewInitArea(const QPolygonF &polygon)
   int ret =initDialog.exec();
   if (ret == QDialog::Accepted)
   {
-    m_UserInitAreaVector->push_back(userInitArea);
 
-    connect (userInitArea, SIGNAL(fireUserInitAreaAboutToDelete(UserInitArea*)),
-             m_MainGui, SLOT(deleteUserInitArea(UserInitArea*)), Qt::DirectConnection);
-
-    connect (userInitArea, SIGNAL (fireUserInitAreaUpdated(UserInitArea*)),
-             m_MainGui, SLOT(userInitAreaUpdated(UserInitArea*)), Qt::QueuedConnection);
-
-    connect (userInitArea, SIGNAL(fireUserInitAreaSelected(UserInitArea*)),
-             m_MainGui, SLOT(userInitAreaSelected(UserInitArea*)), Qt::QueuedConnection);
-
-    connect (userInitArea, SIGNAL (fireUserInitAreaUpdated(UserInitArea*)),
-             this, SLOT(userInitAreaUpdated(UserInitArea*)), Qt::QueuedConnection);
-
-    // Update the Color Table for this new user init area
-    for (quint32 i = 0; i < 256; ++i)
-    {
-      m_ColorTable[i] = qRgb(i, i, i);
-    }
-
-    qint32 size = m_UserInitAreaVector->size();
-    UserInitArea* u = NULL;
-    for(qint32 i = 0; i < size; ++i)
-    {
-      u = m_UserInitAreaVector->at(i);
-      if (NULL != u) {
-        int index = u->getEmMpmGrayLevel();
-        m_ColorTable[index] = u->getColor().rgb();
-      }
-    }
-
-    emit fireUserInitAreaAdded(userInitArea);
+    addNewInitArea(userInitArea);
   }
   else
   {
     delete userInitArea;
   }
+}
+
+// -----------------------------------------------------------------------------
+//
+// -----------------------------------------------------------------------------
+void EMMPMGraphicsView::addNewInitArea(UserInitArea* userInitArea)
+{
+ // std::cout << "EMMPMGraphicsView::addNewInitArea()" << std::endl;
+
+
+  // Set the Parent Item
+  userInitArea->setParentItem(m_ImageGraphicsItem);
+  // Add it to the vector of UserInitAreas
+  m_UserInitAreaVector->push_back(userInitArea);
+
+  // Hook up the signals and slots
+  connect (userInitArea, SIGNAL(fireUserInitAreaAboutToDelete(UserInitArea*)),
+           m_MainGui, SLOT(deleteUserInitArea(UserInitArea*)), Qt::DirectConnection);
+
+  connect (userInitArea, SIGNAL (fireUserInitAreaUpdated(UserInitArea*)),
+           m_MainGui, SLOT(userInitAreaUpdated(UserInitArea*)), Qt::QueuedConnection);
+
+  connect (userInitArea, SIGNAL(fireUserInitAreaSelected(UserInitArea*)),
+           m_MainGui, SLOT(userInitAreaSelected(UserInitArea*)), Qt::QueuedConnection);
+
+  connect (userInitArea, SIGNAL (fireUserInitAreaUpdated(UserInitArea*)),
+           this, SLOT(userInitAreaUpdated(UserInitArea*)), Qt::QueuedConnection);
+
+  // Update the Color Table for this new user init area
+  for (quint32 i = 0; i < 256; ++i)
+  {
+    m_ColorTable[i] = qRgb(i, i, i);
+  }
+
+  qint32 size = m_UserInitAreaVector->size();
+  UserInitArea* u = NULL;
+  for(qint32 i = 0; i < size; ++i)
+  {
+    u = m_UserInitAreaVector->at(i);
+    if (NULL != u) {
+      int index = u->getEmMpmGrayLevel();
+      m_ColorTable[index] = u->getColor().rgb();
+    }
+  }
+
+  emit fireUserInitAreaAdded(userInitArea);
 }
 
 // -----------------------------------------------------------------------------

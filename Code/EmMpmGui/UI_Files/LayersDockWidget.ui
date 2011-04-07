@@ -10,6 +10,9 @@
     <height>271</height>
    </rect>
   </property>
+  <property name="floating">
+   <bool>true</bool>
+  </property>
   <property name="features">
    <set>QDockWidget::AllDockWidgetFeatures</set>
   </property>

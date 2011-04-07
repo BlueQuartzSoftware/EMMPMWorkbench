@@ -784,6 +784,9 @@
     <addaction name="actionAbout"/>
     <addaction name="actionExit"/>
     <addaction name="separator"/>
+    <addaction name="actionSave_Config_File"/>
+    <addaction name="actionLoad_Config_File"/>
+    <addaction name="separator"/>
    </widget>
    <widget class="QMenu" name="menuWindow">
     <property name="title">
@@ -1794,6 +1797,16 @@
   <action name="actionLayers_Palette">
    <property name="text">
     <string>Layers Palette</string>
+   </property>
+  </action>
+  <action name="actionSave_Config_File">
+   <property name="text">
+    <string>Save Configuration</string>
+   </property>
+  </action>
+  <action name="actionLoad_Config_File">
+   <property name="text">
+    <string>Load Configuration</string>
    </property>
   </action>
  </widget>

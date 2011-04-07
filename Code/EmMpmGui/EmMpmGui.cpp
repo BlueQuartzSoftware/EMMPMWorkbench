@@ -41,7 +41,6 @@
 #include <QtCore/QFile>
 #include <QtCore/QDir>
 #include <QtCore/QString>
-#include <QtCore/QSettings>
 #include <QtCore/QUrl>
 #include <QtCore/QThread>
 #include <QtCore/QThreadPool>
@@ -107,6 +106,11 @@
   if (false == ok) {temp = default;}\
   var->setValue(temp);
 
+#define READ_VALUE(prefs, var, ok, temp, default, type)\
+  ok = false;\
+  temp = prefs.value(#var).to##type(&ok);\
+  if (false == ok) {temp = default;}\
+  var = temp;
 
 #define WRITE_STRING_SETTING(prefs, var)\
   prefs.setValue(#var , this->var->text());
@@ -122,6 +126,12 @@
 
 #define WRITE_BOOL_SETTING(prefs, var, b)\
     prefs.setValue(#var, (b) );
+
+#define WRITE_CHECKBOX_SETTING(prefs, var)\
+    prefs.setValue(#var, var->isChecked() );
+
+#define WRITE_VALUE(prefs, var)\
+    prefs.setValue(#var, var);
 
 // -----------------------------------------------------------------------------
 //
@@ -148,7 +158,14 @@ m_OpenDialogLastDirectory("~/")
   setupUi(this);
   setupGui();
 
-  readSettings();
+#if defined (Q_OS_MAC)
+  QSettings prefs(QSettings::NativeFormat, QSettings::UserScope, QCoreApplication::organizationDomain(), QCoreApplication::applicationName());
+#else
+  QSettings prefs(QSettings::IniFormat, QSettings::UserScope, QCoreApplication::organizationDomain(), QCoreApplication::applicationName());
+#endif
+  readIOSettings(prefs);
+  readSettings(prefs);
+  readWindowSettings(prefs);
 
   QRecentFileList* recentFileList = QRecentFileList::instance();
   connect(recentFileList, SIGNAL (fileListChanged(const QString &)), this, SLOT(updateBaseRecentFileList(const QString &)));
@@ -178,46 +195,158 @@ void EmMpmGui::closeEvent(QCloseEvent *event)
   }
   else
   {
-    writeSettings();
-    event->accept();
-  }
-}
-
-// -----------------------------------------------------------------------------
-//  Read the prefs from the local storage file
-// -----------------------------------------------------------------------------
-void EmMpmGui::readSettings()
-{
 #if defined (Q_OS_MAC)
   QSettings prefs(QSettings::NativeFormat, QSettings::UserScope, QCoreApplication::organizationDomain(), QCoreApplication::applicationName());
 #else
   QSettings prefs(QSettings::IniFormat, QSettings::UserScope, QCoreApplication::organizationDomain(), QCoreApplication::applicationName());
 #endif
+    writeIOSettings(prefs);
+    writeSettings(prefs);
+    writeWindowSettings(prefs);
+    event->accept();
+  }
+}
 
-  QString val;
-  bool ok;
-  qint32 i;
-  prefs.beginGroup("EmMpmGui");
-  READ_STRING_SETTING(prefs, m_Beta, "0.5");
-  READ_SETTING(prefs, m_MpmIterations, ok, i, 5, Int);
-  READ_SETTING(prefs, m_EmIterations, ok, i, 5, Int);
-  READ_SETTING(prefs, m_NumClasses, ok, i, 2, Int);
-  READ_BOOL_SETTING(prefs, useSimulatedAnnealing, true);
-  READ_BOOL_SETTING(prefs, processFolder, false);
- // READ_STRING_SETTING(prefs, inputImageFilePath, "");
+// -----------------------------------------------------------------------------
+//
+// -----------------------------------------------------------------------------
+void EmMpmGui::writeIOSettings(QSettings &prefs)
+{
+  prefs.beginGroup("Input_Output");
+  WRITE_BOOL_SETTING(prefs, processFolder, processFolder->isChecked());
+  WRITE_STRING_SETTING(prefs, inputImageFilePath);
+  WRITE_STRING_SETTING(prefs, outputImageFile);
+  WRITE_STRING_SETTING(prefs, sourceDirectoryLE);
+  WRITE_STRING_SETTING(prefs, outputDirectoryLE);
+  WRITE_STRING_SETTING(prefs, outputPrefix);
+  WRITE_STRING_SETTING(prefs, outputSuffix);
+  prefs.endGroup();
+}
+
+// -----------------------------------------------------------------------------
+//
+// -----------------------------------------------------------------------------
+void EmMpmGui::readIOSettings(QSettings &prefs)
+{
+  prefs.beginGroup("Input_Output");
+//  inputImageFilePath->blockSignals(true);
+//  READ_STRING_SETTING(prefs, inputImageFilePath, "");
+//  inputImageFilePath->blockSignals(false);
   READ_STRING_SETTING(prefs, outputImageFile, "");
+
+  READ_BOOL_SETTING(prefs, processFolder, false);
   READ_STRING_SETTING(prefs, sourceDirectoryLE, "");
   READ_STRING_SETTING(prefs, outputDirectoryLE, "");
   READ_STRING_SETTING(prefs, outputPrefix, "Segmented_");
   READ_STRING_SETTING(prefs, outputSuffix, "");
   prefs.endGroup();
 
+
   on_processFolder_stateChanged(processFolder->checkState());
   if (this->sourceDirectoryLE->text().isEmpty() == false)
   {
     this->populateFileTable(this->sourceDirectoryLE, this->fileListView);
   }
+}
 
+// -----------------------------------------------------------------------------
+//  Read the prefs from the local storage file
+// -----------------------------------------------------------------------------
+void EmMpmGui::readSettings(QSettings &prefs)
+{
+  QString val;
+  bool ok;
+  qint32 i;
+  double d;
+  int userInitAreaCount;
+  prefs.beginGroup("Parameters");
+  READ_SETTING(prefs, m_NumClasses, ok, i, 2, Int);
+  READ_SETTING(prefs, m_EmIterations, ok, i, 5, Int);
+  READ_SETTING(prefs, m_MpmIterations, ok, i, 5, Int);
+  READ_STRING_SETTING(prefs, m_Beta, "0.5");
+  READ_STRING_SETTING(prefs, m_MinVariance, "20");
+
+  READ_BOOL_SETTING(prefs, useSimulatedAnnealing, false);
+
+  READ_BOOL_SETTING(prefs, useGradientPenalty, false);
+  READ_SETTING(prefs, gradientBetaE, ok, d, 1.0, Double);
+
+  READ_BOOL_SETTING(prefs, useCuravturePenalty, false);
+  READ_SETTING(prefs, curvatureBetaC, ok, d, 1.0, Double);
+  READ_SETTING(prefs, curvatureRMax, ok, d, 15.0, Double);
+  READ_SETTING(prefs, ccostLoopDelay, ok, i, 1, Int);
+  READ_VALUE(prefs, userInitAreaCount, ok, i, 0, Int);
+  enableUserDefinedAreas->blockSignals(true);
+  READ_BOOL_SETTING(prefs, enableUserDefinedAreas, false);
+  enableUserDefinedAreas->blockSignals(false);
+
+  prefs.endGroup();
+
+  // We only load the User Init Areas if there is an image loaded
+  // and the checkbox was set
+  if (m_GraphicsView != NULL
+      && m_GraphicsView->getBaseImage().isNull() == false
+      && enableUserDefinedAreas->isChecked() )
+  {
+    addUserInitArea->setEnabled(true);
+    UserInitArea::deleteAllUserInitAreas(m_GraphicsView->scene());
+    m_UserInitAreaVector->clear();
+    for (int i = 0; i < userInitAreaCount; ++i)
+    {
+      UserInitArea* uia = UserInitArea::NewUserInitArea(prefs, i);
+      //Calculate the Mean and Standard Deviation
+      double mu = 0.0;
+      double sig = 0.0;
+      int err = m_GraphicsView->calculateMuSigma(uia, mu, sig);
+      uia->setMu(mu);
+      uia->setSigma(sig);
+      addUserInitArea->toggle();
+      m_GraphicsView->addNewInitArea(uia);
+    }
+  }
+}
+
+// -----------------------------------------------------------------------------
+//  Write our prefs to file
+// -----------------------------------------------------------------------------
+void EmMpmGui::writeSettings(QSettings &prefs)
+{
+
+  prefs.beginGroup("Parameters");
+  WRITE_SETTING(prefs, m_NumClasses);
+  WRITE_SETTING(prefs, m_EmIterations);
+  WRITE_SETTING(prefs, m_MpmIterations);
+  WRITE_STRING_SETTING(prefs, m_Beta);
+  WRITE_STRING_SETTING(prefs, m_MinVariance);
+
+  WRITE_CHECKBOX_SETTING(prefs, useSimulatedAnnealing);
+  WRITE_CHECKBOX_SETTING(prefs, useGradientPenalty);
+  WRITE_SETTING(prefs, gradientBetaE);
+  WRITE_CHECKBOX_SETTING(prefs, useCuravturePenalty);
+  WRITE_SETTING(prefs, curvatureBetaC);
+  WRITE_SETTING(prefs, curvatureRMax);
+  WRITE_SETTING(prefs, ccostLoopDelay);
+
+  WRITE_CHECKBOX_SETTING(prefs, enableUserDefinedAreas);
+  int userInitAreaCount = this->m_UserInitAreaVector->size();
+  WRITE_VALUE(prefs, userInitAreaCount);
+  prefs.endGroup();
+
+
+  for (int i = 0; i < this->m_UserInitAreaVector->size(); ++i)
+  {
+    UserInitArea* uia = m_UserInitAreaVector->at(i);
+    uia->writeSettings(prefs);
+  }
+
+}
+
+// -----------------------------------------------------------------------------
+//
+// -----------------------------------------------------------------------------
+void EmMpmGui::readWindowSettings(QSettings &prefs)
+{
+  bool ok = false;
   prefs.beginGroup("WindodwSettings");
   if (prefs.contains(QString("Geometry")) )
   {
@@ -234,30 +363,10 @@ void EmMpmGui::readSettings()
 }
 
 // -----------------------------------------------------------------------------
-//  Write our prefs to file
+//
 // -----------------------------------------------------------------------------
-void EmMpmGui::writeSettings()
+void EmMpmGui::writeWindowSettings(QSettings &prefs)
 {
-#if defined (Q_OS_MAC)
-  QSettings prefs(QSettings::NativeFormat, QSettings::UserScope, QCoreApplication::organizationDomain(), QCoreApplication::applicationName());
-#else
-  QSettings prefs(QSettings::IniFormat, QSettings::UserScope, QCoreApplication::organizationDomain(), QCoreApplication::applicationName());
-#endif
-  prefs.beginGroup("EmMpmGui");
-  WRITE_STRING_SETTING(prefs, m_Beta);
-  WRITE_SETTING(prefs, m_MpmIterations);
-  WRITE_SETTING(prefs, m_EmIterations);
-  WRITE_SETTING(prefs, m_NumClasses);
-  WRITE_BOOL_SETTING(prefs, useSimulatedAnnealing, useSimulatedAnnealing->isChecked());
-  WRITE_BOOL_SETTING(prefs, processFolder, processFolder->isChecked());
-  WRITE_STRING_SETTING(prefs, inputImageFilePath);
-  WRITE_STRING_SETTING(prefs, outputImageFile);
-  WRITE_STRING_SETTING(prefs, sourceDirectoryLE);
-  WRITE_STRING_SETTING(prefs, outputDirectoryLE);
-  WRITE_STRING_SETTING(prefs, outputPrefix);
-  WRITE_STRING_SETTING(prefs, outputSuffix);
-  prefs.endGroup();
-
   prefs.beginGroup("WindodwSettings");
   QByteArray geo_data = saveGeometry();
   QByteArray layout_data = saveState();
@@ -266,6 +375,42 @@ void EmMpmGui::writeSettings()
   prefs.endGroup();
 }
 
+// -----------------------------------------------------------------------------
+//
+// -----------------------------------------------------------------------------
+void EmMpmGui::on_actionSave_Config_File_triggered()
+{
+  QString proposedFile = m_OpenDialogLastDirectory + QDir::separator() + "EMMPM-Config.txt";
+  QString file = QFileDialog::getSaveFileName(this, tr("Save EM/MPM Configuration"),
+                                              proposedFile,
+                                              tr("*.txt") );
+  if ( true == file.isEmpty() ){ return;  }
+  QFileInfo fi(file);
+  m_OpenDialogLastDirectory = fi.absolutePath();
+  QSettings prefs(file, QSettings::IniFormat, this);
+  writeSettings(prefs);
+}
+
+// -----------------------------------------------------------------------------
+//
+// -----------------------------------------------------------------------------
+void EmMpmGui::on_actionLoad_Config_File_triggered()
+{
+  QString file = QFileDialog::getOpenFileName(this, tr("Select Configuration File"),
+                                                 m_OpenDialogLastDirectory,
+                                                 tr("Configuration File (*.txt)") );
+  if ( true == file.isEmpty() ){return;  }
+  QFileInfo fi(file);
+  m_OpenDialogLastDirectory = fi.absolutePath();
+  QSettings prefs(file, QSettings::IniFormat, this);
+  readSettings(prefs);
+}
+
+
+
+// -----------------------------------------------------------------------------
+//
+// -----------------------------------------------------------------------------
 #define ZOOM_MENU(var, menu, slot)\
   {\
   QAction* action = new QAction(menu);\
@@ -337,7 +482,7 @@ void EmMpmGui::setupGui()
   {
     m_LayersPalette = new LayersDockWidget(this);
     m_LayersPalette->setGraphicsView(m_GraphicsView);
-    m_LayersPalette->setFloating(false);
+  //  m_LayersPalette->setFloating(false);
     m_LayersPalette->setVisible(false);
     m_LayersPalette->setFeatures(QDockWidget::AllDockWidgetFeatures);
     m_LayersPalette->setAllowedAreas(Qt::AllDockWidgetAreas);
@@ -487,7 +632,7 @@ void EmMpmGui::setupGui()
 // -----------------------------------------------------------------------------
 void EmMpmGui::on_layersPalette_clicked()
 {
-  m_LayersPalette->setFloating(true);
+  //m_LayersPalette->setFloating(true);
   m_LayersPalette->setVisible(true);
 }
 
@@ -986,7 +1131,7 @@ void EmMpmGui::queueControllerFinished()
     m_GraphicsView->loadBaseImageFile(m_CurrentImageFile);
     m_GraphicsView->blockSignals(false);
 
-    std::cout << "Setting current Image file: " << getCurrentImageFile().toStdString() << std::endl;
+    //std::cout << "Setting current Image file: " << getCurrentImageFile().toStdString() << std::endl;
     QFileInfo fileInfo(fileList.at(0));
     QString basename = fileInfo.completeBaseName();
     QString extension = fileInfo.suffix();
@@ -1230,51 +1375,6 @@ void EmMpmGui::on_outputDirectoryLE_textChanged(const QString & text)
   verifyPathExists(outputDirectoryLE->text(), outputDirectoryLE);
 }
 
-#if 0
-// -----------------------------------------------------------------------------
-//
-// -----------------------------------------------------------------------------
-void EmMpmGui::on_imageDisplayCombo_currentIndexChanged()
-{
-  bool ok = false;
-  if (imageDisplayCombo->currentIndex() == EmMpm_Constants::CompositedImage)
-  {
-    compositeModeCB->setEnabled(true);
-    EmMpm_Constants::CompositeType cType = static_cast<EmMpm_Constants::CompositeType>(compositeModeCB->itemData(compositeModeCB->currentIndex()).toInt(&ok));
-    on_compositeModeCB_currentIndexChanged();
-    if (cType == EmMpm_Constants::Alpha_Blend)
-    {
-      transparency->setEnabled(true);
-      float value = static_cast<float>(transparency->value()/255.0f);
-      on_transparency_valueChanged(value);
-    }
-  }
-  else
-  {
-    compositeModeCB->setEnabled(false);
-    transparency->setEnabled(false);
-  }
-}
-
-// -----------------------------------------------------------------------------
-//
-// -----------------------------------------------------------------------------
-void EmMpmGui::on_compositeModeCB_currentIndexChanged()
-{
-  bool ok = false;
-  EmMpm_Constants::CompositeType cType = static_cast<EmMpm_Constants::CompositeType>(compositeModeCB->itemData(compositeModeCB->currentIndex()).toInt(&ok));
-  m_GraphicsView->setCompositeMode(cType);
-  if (cType == EmMpm_Constants::Alpha_Blend)
-  {
-    transparency->setEnabled(true);
-  }
-  else
-  {
-    transparency->setEnabled(false);
-  }
-}
-#endif
-
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
@@ -1393,7 +1493,6 @@ void EmMpmGui::openRecentBaseImageFile()
   }
 }
 
-
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
@@ -1408,6 +1507,8 @@ void EmMpmGui::on_actionOpenBaseImage_triggered()
   {
     return;
   }
+  QFileInfo fi(imageFile);
+  m_OpenDialogLastDirectory = fi.absolutePath();
   openBaseImageFile(imageFile);
 }
 
@@ -1425,9 +1526,10 @@ void EmMpmGui::on_actionOpenOverlayImage_triggered()
   {
     return;
   }
+  QFileInfo fi(imageFile);
+  m_OpenDialogLastDirectory = fi.absolutePath();
   openOverlayImage(imageFile);
 }
-
 
 // -----------------------------------------------------------------------------
 //
@@ -1459,7 +1561,6 @@ void EmMpmGui::on_actionSaveCanvas_triggered()
   }
 
 }
-
 
 // -----------------------------------------------------------------------------
 //
@@ -1524,7 +1625,6 @@ void EmMpmGui::openBaseImageFile(QString imageFile)
   plotImageHistogram();
 }
 
-
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
@@ -1552,9 +1652,6 @@ void EmMpmGui::openOverlayImage(QString processedImage)
   updateBaseRecentFileList(processedImage);
 }
 
-
-
-
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
@@ -1565,8 +1662,6 @@ void EmMpmGui::overlayImageFileLoaded(const QString &filename)
   outputImageFile->setText(filename);
   outputImageFile->blockSignals(false);
 }
-
-
 
 // -----------------------------------------------------------------------------
 //
@@ -1635,9 +1730,6 @@ void EmMpmGui::addProcessHistogram(QVector<double> data)
   {
       plotCombinedGaussian();
   }
-
-
-
   m_HistogramPlot->replot();
 }
 
@@ -1868,7 +1960,7 @@ void EmMpmGui::deleteUserInitArea(UserInitArea* uia)
 // -----------------------------------------------------------------------------
 void EmMpmGui::userInitAreaAdded(UserInitArea* uia)
 {
- // std::cout << "EmMpmGui::userInitAreaAdded(UserInitArea* uia)" << std::endl;
+ // std::cout << "EmMpmGui::userInitAreaAdded()" << std::endl;
   m_UserInitAreaWidget->setUserInitArea(uia);
 
   if (NULL == uia) { return; }
@@ -1898,7 +1990,6 @@ void EmMpmGui::userInitAreaAdded(UserInitArea* uia)
   userInitAreaUpdated(uia);
 }
 
-
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
@@ -1918,7 +2009,6 @@ void EmMpmGui::populateFileTable(QLineEdit* sourceDirectoryLE, QListView *fileLi
   m_ProxyModel->setFilterKeyColumn(0);
   fileListView->setModel(m_ProxyModel);
 }
-
 
 // -----------------------------------------------------------------------------
 //
@@ -1956,7 +2046,6 @@ void EmMpmGui::updateHistogramAxis()
   m_HistogramPlot->replot();
 }
 
-
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
@@ -1990,6 +2079,10 @@ void EmMpmGui::on_saveCurves_clicked()
   {
     return;
   }
+
+  // Update the last directory the user visited
+  QFileInfo fi(outputFile);
+  setOpenDialogLastDirectory(fi.absolutePath());
 
   QwtPlotCurve* curve = NULL;
   int count = m_Gaussians.size();
@@ -2063,6 +2156,7 @@ void EmMpmGui::on_saveCurves_clicked()
   double d;
   char comma[2] = {',', 0};
 
+  // Write the header to the file
   fprintf(f, "Bins,Histogram");
   for (int c = 2; c < columns; ++c)
   {
@@ -2070,7 +2164,7 @@ void EmMpmGui::on_saveCurves_clicked()
   }
   fprintf(f, "\n");
 
-
+  // write the data to the file
   for (int i = 0; i < 256; ++i)
   {
     for (int c = 0; c < columns; ++c)
@@ -2149,7 +2243,6 @@ UserInitAreaWidget* EmMpmGui::getUserInitAreaWidget()
   return m_UserInitAreaWidget;
 }
 
-
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
@@ -2166,7 +2259,6 @@ void EmMpmGui::on_actionHistogram_triggered()
   HistogramDockWidget->show();
 }
 
-
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
@@ -2181,84 +2273,4 @@ void EmMpmGui::on_actionParameters_triggered()
 void EmMpmGui::on_actionLayers_Palette_triggered()
 {
   m_LayersPalette->show();
-}
-
-// -----------------------------------------------------------------------------
-//
-// -----------------------------------------------------------------------------
-void EmMpmGui::saveLayout()
-{
-    QString fileName
-        = QFileDialog::getSaveFileName(this, tr("Save layout"));
-    if (fileName.isEmpty())
-        return;
-    QFile file(fileName);
-    if (!file.open(QFile::WriteOnly)) {
-        QString msg = tr("Failed to open %1\n%2")
-                        .arg(fileName)
-                        .arg(file.errorString());
-        QMessageBox::warning(this, tr("Error"), msg);
-        return;
-    }
-
-    QByteArray geo_data = saveGeometry();
-    QByteArray layout_data = saveState();
-
-    QSettings prefs;
-
-    bool ok = file.putChar((uchar)geo_data.size());
-    if (ok)
-        ok = file.write(geo_data) == geo_data.size();
-    if (ok)
-        ok = file.write(layout_data) == layout_data.size();
-
-    if (!ok) {
-        QString msg = tr("Error writing to %1\n%2")
-                        .arg(fileName)
-                        .arg(file.errorString());
-        QMessageBox::warning(this, tr("Error"), msg);
-        return;
-    }
-}
-
-void EmMpmGui::loadLayout()
-{
-    QString fileName
-        = QFileDialog::getOpenFileName(this, tr("Load layout"));
-    if (fileName.isEmpty())
-        return;
-    QFile file(fileName);
-    if (!file.open(QFile::ReadOnly)) {
-        QString msg = tr("Failed to open %1\n%2")
-                        .arg(fileName)
-                        .arg(file.errorString());
-        QMessageBox::warning(this, tr("Error"), msg);
-        return;
-    }
-
-    uchar geo_size;
-    QByteArray geo_data;
-    QByteArray layout_data;
-
-    bool ok = file.getChar((char*)&geo_size);
-    if (ok) {
-        geo_data = file.read(geo_size);
-        ok = geo_data.size() == geo_size;
-    }
-    if (ok) {
-        layout_data = file.readAll();
-        ok = layout_data.size() > 0;
-    }
-
-    if (ok)
-        ok = restoreGeometry(geo_data);
-    if (ok)
-        ok = restoreState(layout_data);
-
-    if (!ok) {
-        QString msg = tr("Error reading %1")
-                        .arg(fileName);
-        QMessageBox::warning(this, tr("Error"), msg);
-        return;
-    }
 }

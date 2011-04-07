@@ -34,6 +34,7 @@
 //-- Qt Includes
 #include <QtCore/QObject>
 #include <QtCore/QString>
+#include <QtCore/QSettings>
 #include <QtGui/QCloseEvent>
 #include <QtGui/QMainWindow>
 #include <QtGui/QWidget>
@@ -93,12 +94,18 @@ class EmMpmGui :  public QMainWindow, private Ui::EmMpmGui
     /**
      * @brief Reads the Preferences from the users pref file
      */
-    void readSettings();
+    void readSettings(QSettings &prefs);
 
     /**
      * @brief Writes the preferences to the users pref file
      */
-    void writeSettings();
+    void writeSettings(QSettings &prefs);
+
+    void readIOSettings(QSettings &prefs);
+    void writeIOSettings(QSettings &prefs);
+
+    void readWindowSettings(QSettings &prefs);
+    void writeWindowSettings(QSettings &prefs);
 
     typedef QPair<QString, QString>        InputOutputFilePair;
     typedef QList<InputOutputFilePair>     InputOutputFilePairList;
@@ -147,6 +154,38 @@ class EmMpmGui :  public QMainWindow, private Ui::EmMpmGui
     void userInitAreaSelected(UserInitArea* uia);
     void userInitAreaLostFocus();
 
+  protected slots:
+  //Manual Hookup Menu Actions
+  // File Menu
+    void on_actionOpenBaseImage_triggered(); // Open a Data File
+    void on_actionOpenOverlayImage_triggered();
+    void on_actionSaveCanvas_triggered();
+    void on_actionAbout_triggered();
+    void on_actionExit_triggered();
+    void on_actionSave_Config_File_triggered();
+    void on_actionLoad_Config_File_triggered();
+
+//Window Menu
+    void on_actionParameters_triggered();
+    void on_actionHistogram_triggered();
+    void on_actionUser_Initialization_triggered();
+    void on_actionLayers_Palette_triggered();
+
+ // Histogram Related Slots - Auto Hookup
+    void on_axisSettingsBtn_clicked();
+    void on_clearTempHistograms_clicked();
+    void on_saveCurves_clicked();
+ // Histogram/Gaussian Plot related Manual Hookup
+    void clearProcessHistograms();
+    void addProcessHistogram(QVector<double> data);
+    void plotCombinedGaussian();
+
+
+    /* slots for the buttons in the GUI */
+    void on_processBtn_clicked();
+    void on_cancelBtn_clicked();
+
+    void on_enableUserDefinedAreas_stateChanged(int state);
 
     void z10_triggered();
     void z25_triggered();
@@ -157,42 +196,7 @@ class EmMpmGui :  public QMainWindow, private Ui::EmMpmGui
     void z200_triggered();
     void z400_triggered();
     void z600_triggered();
-
-  protected slots:
-  //Manual Hookup Menu Actions
-    void on_actionOpenBaseImage_triggered(); // Open a Data File
-    void on_actionOpenOverlayImage_triggered();
-    void on_actionSaveCanvas_triggered();
-    void on_actionAbout_triggered();
-    void on_actionExit_triggered();
-
-    void on_actionParameters_triggered();
-    void on_actionHistogram_triggered();
-    void on_actionUser_Initialization_triggered();
-    void on_actionLayers_Palette_triggered();
-
-    void on_axisSettingsBtn_clicked();
-
-    void on_saveCurves_clicked();
-
-
-    /* slots for the buttons in the GUI */
-    void on_processBtn_clicked();
-    void on_cancelBtn_clicked();
-
-
-    /* slots for the buttons in the GUI */
-    // void on_imageDisplayCombo_currentIndexChanged();
-    // void on_compositeModeCB_currentIndexChanged();
-    // void on_transparency_valueChanged(int value);
-
-
     void on_fitToWindow_clicked();
-
-    void on_clearTempHistograms_clicked();
-
-    void on_enableUserDefinedAreas_stateChanged(int state);
-
     void on_layersPalette_clicked();
 
 
@@ -210,7 +214,6 @@ class EmMpmGui :  public QMainWindow, private Ui::EmMpmGui
 
     // -----------------------------------------------------------------------------
     //  Input Tab Widgets
-    // -----------------------------------------------------------------------------
     void on_inputImageFilePathBtn_clicked();
     void on_outputImageButton_clicked();
 
@@ -231,17 +234,15 @@ class EmMpmGui :  public QMainWindow, private Ui::EmMpmGui
     void on_loadFirstImageBtn_clicked();
 
 
-    // Over rides from Parent Class
     /* Slots to receive events from the ProcessQueueController */
     void queueControllerFinished();
+
     // These slots get called when the plugin starts and finishes processing
     void processingStarted();
     void processingFinished();
     void processingMessage(QString str);
 
-    void clearProcessHistograms();
-    void addProcessHistogram(QVector<double> data);
-    void plotCombinedGaussian();
+
 
   protected:
 
@@ -302,37 +303,35 @@ class EmMpmGui :  public QMainWindow, private Ui::EmMpmGui
     void setImageWidgetsEnabled(bool b);
     void setProcessFolderWidgetsEnabled(bool b);
 
-    void saveLayout();
-    void loadLayout();
+//    void saveLayout();
+//    void loadLayout();
 
   private:
+    QVector<UserInitArea*>*      m_UserInitAreaVector;
+    qint32                       m_CurrentHistogramClass;
 
- // UserInitAreaTableModel*     m_UserInitAreaTableModel;
-  QVector<UserInitArea*>*      m_UserInitAreaVector;
-  qint32                       m_CurrentHistogramClass;
+    QwtPlotZoomer* m_zoomer;
+    QwtPlotPicker* m_picker;
+    QwtPlotPanner* m_panner;
+    QwtPlotGrid*   m_grid;
 
-  QwtPlotZoomer* m_zoomer;
-  QwtPlotPicker* m_picker;
-  QwtPlotPanner* m_panner;
-  QwtPlotGrid*   m_grid;
+    QwtPlotCurve*           m_histogram;
+    QList<QwtPlotCurve*>    m_Gaussians;
+    QwtPlotCurve*           m_CombinedGaussians;
+    bool                    m_ShowCombinedGaussians;
+    QList<QwtPlotCurve*>    m_ProcessGaussians;
+    AxisSettingsDialog*     m_AxisSettingsDialog;
+    QMap<QObject*, QWidget*> m_TasksMap;
 
-  QwtPlotCurve*           m_histogram;
-  QList<QwtPlotCurve*>    m_Gaussians;
-  QwtPlotCurve*           m_CombinedGaussians;
-  bool                    m_ShowCombinedGaussians;
-  QList<QwtPlotCurve*>    m_ProcessGaussians;
-  AxisSettingsDialog*     m_AxisSettingsDialog;
-  QMap<QObject*, QWidget*> m_TasksMap;
+    QList<QWidget*> m_WidgetList;
+    QList<QWidget*> m_ImageWidgets;
+    QList<QWidget*> m_ProcessFolderWidgets;
 
-  QList<QWidget*> m_WidgetList;
-  QList<QWidget*> m_ImageWidgets;
-  QList<QWidget*> m_ProcessFolderWidgets;
-
-  LayersDockWidget*  m_LayersPalette;
+    LayersDockWidget*  m_LayersPalette;
 
 
-  EmMpmGui(const EmMpmGui&); // Copy Constructor Not Implemented
-  void operator=(const EmMpmGui&); // Operator '=' Not Implemented
+    EmMpmGui(const EmMpmGui&); // Copy Constructor Not Implemented
+    void operator=(const EmMpmGui&); // Operator '=' Not Implemented
 };
 
 #endif /* EMMPMGUI_H_ */
