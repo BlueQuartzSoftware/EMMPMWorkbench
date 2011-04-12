@@ -1,9 +1,9 @@
-#/* --------------------------------------------------------------------------*
-#* This source code has been cleared for public release by the                *
-#* US Air Force 88th Air Base Wing Public Affairs Office under                *
-#* case number 88ABW-2010-4857 on Sept. 7, 2010.                              *
-#* -------------------------------------------------------------------------- */
-# This code is released under the BSD open source license 
+#--////////////////////////////////////////////////////////////////////////////
+#-- Copyright (c) 2009, Michael A. Jackson. BlueQuartz Software
+#-- All rights reserved.
+#-- BSD License: http://www.opensource.org/licenses/bsd-license.html
+#-- This code was partly written under US Air Force Contract FA8650-07-D-5800
+#--////////////////////////////////////////////////////////////////////////////
 PROJECT( EmMpmGui )
 cmake_minimum_required(VERSION 2.8)
 
