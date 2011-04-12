@@ -116,20 +116,25 @@ class EMMPMGraphicsView : public QGraphicsView
     void addNewInitArea(UserInitArea* uia);
     void createNewUserInitArea(const QPolygonF &polygon);
 
+    void updateColorTables();
+ //   void setCustomColorTable(QVector<QRgb> colorTable);
+    void useCustomColorTable(bool b);
+    void useCustomGrayScaleTable(bool b);
+
   public slots:
     void zoomIn();
+
     void zoomOut();
 
     void setOverlayTransparency(float f);
 
-    void useColorTable(bool b);
+
 
     void setZoomIndex(int index);
 
     void setImageDisplayType(EmMpm_Constants::ImageDisplayType displayType);
 
     void setCompositeMode(EmMpm_Constants::CompositeType mode);
-
 
     void addUserInitArea(bool b);
 
@@ -167,9 +172,11 @@ class EMMPMGraphicsView : public QGraphicsView
    float          m_OverlayTransparency;
 
    bool           m_UseColorTable;
-   QVector<QRgb> m_ColorTable;
-   QVector<QRgb> m_GrayScaleTable;
+   bool           m_UseGrayScaleTable;
 
+   QVector<QRgb> m_CustomColorTable;
+   QVector<QRgb> m_CustomGrayScaleTable;
+   QVector<QRgb> m_OriginalColorTable;
 
    EMMPMGraphicsView(const EMMPMGraphicsView&); // Copy Constructor Not Implemented
    void operator=(const EMMPMGraphicsView&); // Operator '=' Not Implemented

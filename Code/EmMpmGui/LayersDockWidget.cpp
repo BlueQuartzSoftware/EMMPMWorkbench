@@ -71,7 +71,20 @@ void LayersDockWidget::updateDisplayState()
   float f = (float)opacitySlider->value()/100.0;
   m_GraphicsView->setOverlayTransparency(f);
 
-  m_GraphicsView->useColorTable(useColorTable->isChecked() );
+  if (useColorTable->isEnabled() && useColorTable->isChecked())
+  {
+    m_GraphicsView->useCustomColorTable(true);
+  }
+  else if (useColorTable->isEnabled() && !useColorTable->isChecked())
+  {
+    m_GraphicsView->useCustomGrayScaleTable(true);
+  }
+  else
+  {
+    m_GraphicsView->useCustomColorTable(false);
+    m_GraphicsView->useCustomGrayScaleTable(false);
+  }
+
   bool ok = false;
   // Display only the original image only
   if (originalImage->isChecked() && !segmentedImage->isChecked())

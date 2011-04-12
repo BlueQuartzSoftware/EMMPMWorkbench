@@ -486,8 +486,8 @@ void EmMpmGui::setupGui()
     m_LayersPalette->setVisible(false);
     m_LayersPalette->setFeatures(QDockWidget::AllDockWidgetFeatures);
     m_LayersPalette->setAllowedAreas(Qt::AllDockWidgetAreas);
+    m_LayersPalette->getUseColorTable()->setEnabled(enableUserDefinedAreas->isChecked());
   }
-
 
 #if 0
   compositeModeCB->blockSignals(true);
@@ -620,8 +620,7 @@ void EmMpmGui::setupGui()
   m_panner = new QwtPlotPanner(m_HistogramPlot->canvas());
   m_panner->setMouseButton(Qt::MidButton);
 #endif
-  m_picker
-  = new QwtPlotPicker(QwtPlot::xBottom, QwtPlot::yLeft, QwtPicker::PointSelection, QwtPlotPicker::CrossRubberBand, QwtPicker::AlwaysOn, m_HistogramPlot->canvas());
+  m_picker = new QwtPlotPicker(QwtPlot::xBottom, QwtPlot::yLeft, QwtPicker::PointSelection, QwtPlotPicker::CrossRubberBand, QwtPicker::AlwaysOn, m_HistogramPlot->canvas());
   m_picker->setRubberBandPen(QColor(Qt::green));
   m_picker->setRubberBand(QwtPicker::CrossRubberBand);
   m_picker->setTrackerPen(QColor(Qt::blue));
@@ -915,7 +914,7 @@ void EmMpmGui::on_processBtn_clicked()
   m_LayersPalette->getSegmentedImageCheckBox()->setChecked(true);
  // m_LayersPalette->getSegmentedImageCheckBox()->blockSignals(false);
   m_LayersPalette->getCompositeTypeComboBox()->setEnabled(true);
-  m_LayersPalette->getUseColorTable()->setEnabled(true);
+  m_LayersPalette->getUseColorTable()->setEnabled(enableUserDefinedAreas->isChecked());
   //m_GraphicsView->setImageDisplayType(EmMpm_Constants::CompositedImage);
 
   if (this->processFolder->isChecked() == false)
@@ -1121,6 +1120,7 @@ void EmMpmGui::queueControllerFinished()
     setCurrentImageFile (inputImageFilePath->text());
     setCurrentProcessedFile(outputImageFile->text());
     m_GraphicsView->loadOverlayImageFile(outputImageFile->text());
+    m_LayersPalette->getSegmentedImageCheckBox()->setChecked(true);
   }
   else
   {
@@ -1144,6 +1144,7 @@ void EmMpmGui::queueControllerFinished()
     filepath.append(outputImageType->currentText());
     setCurrentProcessedFile(filepath);
     m_GraphicsView->loadOverlayImageFile(m_CurrentProcessedFile);
+    m_LayersPalette->getSegmentedImageCheckBox()->setChecked(true);
   //  std::cout << "Setting processed Image file: " << filepath.toStdString() << std::endl;
   }
   setWindowTitle(m_CurrentImageFile);
@@ -1965,7 +1966,7 @@ void EmMpmGui::userInitAreaAdded(UserInitArea* uia)
 
   if (NULL == uia) { return; }
 
-  addUserInitArea->toggle();
+  addUserInitArea->setChecked(false);
   QColor color = uia->getColor();
   color.setAlpha(255);
 
@@ -2206,6 +2207,8 @@ void EmMpmGui::on_enableUserDefinedAreas_stateChanged(int state)
 {
   m_NumClasses->setEnabled( !enableUserDefinedAreas->isChecked() );
   m_MinVariance->setEnabled( !enableUserDefinedAreas->isChecked() );
+  m_LayersPalette->getUseColorTable()->setEnabled(enableUserDefinedAreas->isChecked());
+  m_LayersPalette->getUseColorTable()->setChecked(enableUserDefinedAreas->isChecked());
 
   int size = m_UserInitAreaVector->count();
   UserInitArea* uia = NULL;

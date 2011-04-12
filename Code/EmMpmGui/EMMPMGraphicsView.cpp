@@ -53,7 +53,8 @@ EMMPMGraphicsView::EMMPMGraphicsView(QWidget *parent)
 : QGraphicsView(parent),
   m_ImageGraphicsItem(NULL),
   m_UserInitAreaVector(NULL),
-  m_UseColorTable(false)
+  m_UseColorTable(false),
+  m_UseGrayScaleTable(false)
 {
   setAcceptDrops(true);
   setDragMode(RubberBandDrag);
@@ -75,12 +76,12 @@ EMMPMGraphicsView::EMMPMGraphicsView(QWidget *parent)
   m_composition_mode = QPainter::CompositionMode_SourceOver;
   m_OverlayTransparency = 1.0f; // Fully opaque
 
-  m_ColorTable.resize(256);
-  m_GrayScaleTable.resize(256);
+  m_CustomGrayScaleTable.resize(256);
+  m_CustomColorTable.resize(256);
   for (quint32 i = 0; i < 256; ++i)
   {
-    m_GrayScaleTable[i] = qRgb(i, i, i);
-    m_ColorTable[i] = qRgb(i, i, i);
+    m_CustomColorTable[i] = qRgb(i, i, i);
+    m_CustomGrayScaleTable[i] = qRgb(i,i,i);
   }
 
 }
@@ -96,10 +97,34 @@ void EMMPMGraphicsView::setOverlayTransparency(float f)
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
-void EMMPMGraphicsView::useColorTable(bool b)
+void EMMPMGraphicsView::useCustomColorTable(bool b)
 {
   m_UseColorTable = b;
+  if (m_UseColorTable == true)
+  {
+    m_UseGrayScaleTable = false;
+  }
 }
+
+// -----------------------------------------------------------------------------
+//
+// -----------------------------------------------------------------------------
+void EMMPMGraphicsView::useCustomGrayScaleTable(bool b)
+{
+  m_UseGrayScaleTable = b;
+  if (m_UseGrayScaleTable == true)
+  {
+    m_UseColorTable = false;
+  }
+}
+
+// -----------------------------------------------------------------------------
+//
+// -----------------------------------------------------------------------------
+//void EMMPMGraphicsView::setCustomColorTable(QVector<QRgb> colorTable)
+//{
+//  m_CustomColorTable = colorTable;
+//}
 
 // -----------------------------------------------------------------------------
 //
@@ -150,23 +175,7 @@ void EMMPMGraphicsView::setZoomIndex(int index)
 // -----------------------------------------------------------------------------
 void EMMPMGraphicsView::userInitAreaUpdated(UserInitArea* uia)
 {
-  // Update the Color Table for this new user init area
-  for (quint32 i = 0; i < 256; ++i)
-  {
-    m_ColorTable[i] = qRgb(i, i, i);
-  }
-
-  qint32 size = m_UserInitAreaVector->size();
-  UserInitArea* u = NULL;
-  for (qint32 i = 0; i < size; ++i)
-  {
-    u = m_UserInitAreaVector->at(i);
-    if (NULL != u)
-    {
-      int index = u->getEmMpmGrayLevel();
-      m_ColorTable[index] = u->getColor().rgb();
-    }
-  }
+  updateColorTables();
   updateDisplay();
 }
 
@@ -309,11 +318,15 @@ void EMMPMGraphicsView::updateDisplay()
   {
     if (m_UseColorTable == true)
     {
-      m_OverlayImage.setColorTable(m_ColorTable);
+      m_OverlayImage.setColorTable(m_CustomColorTable);
+    }
+    else if (m_UseGrayScaleTable == true)
+    {
+      m_OverlayImage.setColorTable(m_CustomGrayScaleTable);
     }
     else
     {
-      m_OverlayImage.setColorTable(m_GrayScaleTable);
+      m_OverlayImage.setColorTable(m_OriginalColorTable);
     }
   }
 
@@ -419,50 +432,10 @@ void EMMPMGraphicsView::loadOverlayImageFile(const QString &filename)
     std::cout << "Error Loading image: " << filename.toStdString() << std::endl;
     return;
   }
-  QVector<QRgb > colorTable(256);
-  for (quint32 i = 0; i < 256; ++i)
-  {
-    colorTable[i] = qRgb(i, i, i);
-  }
-
-  if (m_UseColorTable)
-  {
-    qint32 size = m_UserInitAreaVector->size();
-    UserInitArea* u = NULL;
-    for(qint32 i = 0; i < size; ++i)
-    {
-      u = m_UserInitAreaVector->at(i);
-      if (NULL != u) {
-        int index = u->getEmMpmGrayLevel();
-        colorTable[index] = u->getColor().rgb();
-      }
-    }
-  }
-
-  m_OverlayImage.setColorTable(colorTable);
-  m_OverlayImage.convertToFormat(QImage::Format_ARGB32_Premultiplied);
-
-  QGraphicsScene* gScene = scene();
-  if (gScene == NULL)
-  {
-    gScene = new QGraphicsScene(this);
-    setScene(gScene);
-  }
-
-  // If the GraphicsScene Item does not exist yet lets make one. This would happen
-  // if the user loads a segmented image first.
-  if (NULL == m_ImageGraphicsItem) {
-    m_ImageGraphicsItem = gScene->addPixmap(QPixmap::fromImage(m_OverlayImage));
-  }
-  m_ImageGraphicsItem->setAcceptDrops(true);
-  m_ImageGraphicsItem->setZValue(-1);
-  QRectF rect = m_ImageGraphicsItem->boundingRect();
-  gScene->setSceneRect(rect);
-  //centerOn(m_ImageGraphicsItem);
 
   m_ImageDisplayType = EmMpm_Constants::CompositedImage;
+  setOverlayImage(m_OverlayImage);
   emit fireOverlayImageFileLoaded(filename);
-  updateDisplay();
 }
 
 // -----------------------------------------------------------------------------
@@ -471,7 +444,12 @@ void EMMPMGraphicsView::loadOverlayImageFile(const QString &filename)
 void EMMPMGraphicsView::setOverlayImage(QImage image)
 {
   m_OverlayImage = image;
-// Convert to an Premultiplied Image for faster rendering
+
+
+  // Save the original Color Table
+  m_OriginalColorTable = m_OverlayImage.colorTable();
+
+// Convert to an Pre multiplied Image for faster rendering
   m_OverlayImage.convertToFormat(QImage::Format_ARGB32_Premultiplied);
 
   QGraphicsScene* gScene = scene();
@@ -658,10 +636,21 @@ void EMMPMGraphicsView::addNewInitArea(UserInitArea* userInitArea)
   connect (userInitArea, SIGNAL (fireUserInitAreaUpdated(UserInitArea*)),
            this, SLOT(userInitAreaUpdated(UserInitArea*)), Qt::QueuedConnection);
 
-  // Update the Color Table for this new user init area
+  updateColorTables();
+  emit fireUserInitAreaAdded(userInitArea);
+}
+
+// -----------------------------------------------------------------------------
+//
+// -----------------------------------------------------------------------------
+void EMMPMGraphicsView::updateColorTables()
+{
+  // Write Gray Scale values for each entry from 0 to 255 to initialize the table
+  // to something. Also initialize the Gray Scale table to the same thing
   for (quint32 i = 0; i < 256; ++i)
   {
-    m_ColorTable[i] = qRgb(i, i, i);
+    m_CustomColorTable[i] = qRgb(i, i, i);
+    m_CustomGrayScaleTable[i] = qRgb(i, i, i);
   }
 
   qint32 size = m_UserInitAreaVector->size();
@@ -670,13 +659,13 @@ void EMMPMGraphicsView::addNewInitArea(UserInitArea* userInitArea)
   {
     u = m_UserInitAreaVector->at(i);
     if (NULL != u) {
-      int index = u->getEmMpmGrayLevel();
-      m_ColorTable[index] = u->getColor().rgb();
+      int index = u->getEmMpmClass(); // Get the class value which will be the index values that are written to the indexed image
+      m_CustomColorTable[index] = u->getColor().rgb();
+      m_CustomGrayScaleTable[index] = qRgb(u->getEmMpmGrayLevel(), u->getEmMpmGrayLevel(), u->getEmMpmGrayLevel());
     }
   }
-
-  emit fireUserInitAreaAdded(userInitArea);
 }
+
 
 // -----------------------------------------------------------------------------
 //

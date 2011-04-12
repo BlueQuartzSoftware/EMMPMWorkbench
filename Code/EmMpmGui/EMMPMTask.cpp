@@ -90,20 +90,24 @@ void EMMPMTask::EMMPMUpdate_CallBackWrapper(EMMPM_Data* data)
     {
       return;
     }
-    QVector<QRgb > colorTable(256);
-    for (quint32 i = 0; i < 256; ++i)
+
+    image.fill(0);
+    uchar* front = NULL;
+    for (int y = 0; y < data->rows; ++y)
     {
-      colorTable[i] = qRgb(i, i, i);
-    }
-    image.setColorTable(colorTable);
-    size_t index = 0;
-    for (unsigned int y = 0; y < data->rows; ++y)
-    {
-      for (unsigned int x = 0; x < data->columns; ++x)
+      front = image.scanLine(y);
+      int bytesPerLine = image.bytesPerLine();
+      for (int x = 0; x < data->columns; ++x)
       {
-        image.setPixel(x, y, data->outputImage[index]);
-        ++index;
+        front[x] = data->xt[data->columns*y + x];
       }
+    }
+    image.setColorCount(data->classes);
+
+    // Now overwrite the beginning of the color table with the gray scale values for each class
+    for (int g = 0; g < data->classes; ++g)
+    {
+      image.setColor(g, qRgb(data->grayTable[g], data->grayTable[g], data->grayTable[g]) );
     }
     emit mySelf->updateImageAvailable(image);
 
@@ -311,37 +315,57 @@ void EMMPMTask::run()
   // Set the input image pointer to NULL so it does not get freed twice
   m_data->inputImage = NULL;
 
-  QImage outQImage(m_data->outputImage, width, height, width, QImage::Format_Indexed8);
-  m_data->outputImage = NULL; // set this to NULL so it does not get freed twice.
-  QVector<QRgb> colorTable(256);
-  for (quint32 i = 0; i < 256; ++i)
+  QImage outQImage(width, height, QImage::Format_Indexed8);
+  outQImage.fill(0);
+  uchar* front = NULL;
+  for (int y = 0; y < height; ++y)
   {
-    colorTable[i] = qRgb(i, i, i);
+    front = outQImage.scanLine(y);
+    int bytesPerLine = outQImage.bytesPerLine();
+    for (int x = 0; x < width; ++x)
+    {
+      front[x] = m_data->xt[width*y + x];
+    }
   }
-  outQImage.setColorTable(colorTable);
-  bool success = outQImage.save(m_data->output_file_name);
-  if (false == success)
+   outQImage.setColorCount(m_data->classes);
+
+  // Now overwrite the beginning of the color table with the gray scale values for each class
+  for (int g = 0; g < m_data->classes; ++g)
   {
-    UPDATE_PROGRESS(QString("EM/MPM Error Writing Output Image"), 100); emit
-    emit taskFinished(this);
-    return;
+    outQImage.setColor(g, qRgb(m_data->grayTable[g], m_data->grayTable[g], m_data->grayTable[g]) );
   }
 
-#if 0
-  err = EMMPM_WriteOutputImage(m_data, m_callbacks);
-  if (err < 0)
+  QFileInfo fi (QString(m_data->output_file_name));
+  QString ext = fi.suffix();
+  if (ext.compare(QString("tif"), Qt::CaseInsensitive) == 0
+      || ext.compare(QString("tiff"), Qt::CaseInsensitive) == 0)
   {
-    UPDATE_PROGRESS(QString("EM/MPM Error Writing Output Image"), 100); emit
-    emit taskFinished(this);
-    return;
+    err = EMMPM_WriteOutputImage(m_data, m_callbacks);
+    if (err < 0)
+    {
+      UPDATE_PROGRESS(QString("EM/MPM Error Writing Output Image"), 100); emit
+      emit taskFinished(this);
+      return;
+    }
   }
-#endif
+  else
+  {
+    outQImage.convertToFormat(QImage::Format_RGB32);
+    bool success = outQImage.save(m_data->output_file_name);
+     if (false == success)
+     {
+       UPDATE_PROGRESS(QString("EM/MPM Error Writing Output Image"), 95);
+     }
+  }
 
   UPDATE_PROGRESS(QString("Ending Segmentation"), 100);
   emit taskFinished(this);
 
   //Clean up the Memory as this class will NOT get deleted right away. This will
   // deallocate the bulk of the memory
+  // The AIMArray is managing this memory so set it to NULL so it does not get freed twice.
+  m_data->outputImage = NULL;
+
   EMMPM_FreeDataStructure(m_data);
   EMMPM_FreeCallbackFunctionStructure(m_callbacks);
 }
