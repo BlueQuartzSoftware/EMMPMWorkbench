@@ -15,6 +15,19 @@ Resources/MXACMake - All Files
 Resources/OSX_Tools - All Files
 Resources/icons - All Files
 
+** Getting the complete Source Code **
+When you cloned this source code repository you should have used the --recursive flag
+git clone --recursive git://scm.bluequartz.net/eim/emmpmgui.gi
+This will make sure to also checkout a couple of supporting projects into the "Support"
+subfolder. The EMMPM Library is one of those and the "CMP" project is another. Both
+are required in order to compile the EMMPMGui application. If you did not use the 
+--recursive flag you can run the following commands from the top level directory of the
+EMMPM Gui project:
+
+git submodule init
+git submodule update
+
+Those 2 commands will checkout the appropriate versions of those projects.
 
 Notes for Compilation:
 
@@ -23,10 +36,8 @@ pulled in what was needed for this project. For the shared_pointers the implemen
 from Qt is being used instead of the boost implementation. This reduces the number of
 dependencies of the project.
 
-The Code/IPHelper/plugins/CrossCorrelation will depend on the libTiff library being present although
-it is only needed for the bmp to tiff file conversion utility. If you do not need to 
-convert your bmp files to tiff files first then you will not need the libTiff library
-as the one from the Qt distribution will be used instead. The Cross Correlation is
-dependent on the ITK (www.itk.org) software library. ITK should be compiled and ready
-to use before trying to compile the Cross Correlation GUI.
+You should have used git submodules to checkout the "CMP" and "emmpm" library projects
+with the following command:
+
+git submodu
 
