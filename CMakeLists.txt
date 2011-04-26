@@ -40,9 +40,11 @@ SET (CMAKE_ARCHIVE_OUTPUT_DIRECTORY
 
 
 # Bring in the EM/MPM Library first
-set (CMP_SOURCE_DIR ${QEMMPM_SOURCE_DIR}/Resources/cmp)
+set (CMP_SOURCE_DIR ${QEMMPM_SOURCE_DIR}/Support/cmp)
 
-add_subdirectory(${QEMMPM_SOURCE_DIR}/Libs/emmpm ${QEMMPM_BINARY_DIR}/emmpm)
+add_subdirectory(${QEMMPM_SOURCE_DIR}/Support/emmpm ${QEMMPM_BINARY_DIR}/emmpm)
+include_directories(${QEMMPM_SOURCE_DIR}/Support/emmpm/Code)
+include_directories(${QEMMPM_BINARY_DIR}/emmpm)
 
 
 SET (PROJECT_CODE_DIR ${PROJECT_SOURCE_DIR}/Code)
@@ -66,7 +68,7 @@ set (CMP_PROJECT_NAME "MXA")
 SET (CMP_INSTALL_FILES "1")
 set (CMP_ENABLE_PLUGINS "0")
 #set (CMP_PLUGIN_LIST_FILE ${PROJECT_BINARY_DIR}/QEMMPMPluginList.txt)
-INCLUDE (${PROJECT_RESOURCES_DIR}/cmp/cmpProject.cmake)
+INCLUDE (${CMP_SOURCE_DIR}/cmpProject.cmake)
 
 # --------------------------------------------------------------------
 # Generate a Header file with Compile Version variables

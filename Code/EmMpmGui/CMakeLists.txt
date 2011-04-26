@@ -50,14 +50,14 @@ INCLUDE_DIRECTORIES(${TIFF_INCLUDE_DIRS})
 # ------------------------------------------------------------------------------
 #  EM/MPM Library Section
 # ------------------------------------------------------------------------------
-find_package(EMMPM)
-if (EMMPM_FOUND)
-    include_directories(${EMMPM_INCLUDE_DIR})
-    CMP_COPY_DEPENDENT_LIBRARIES("EMMPM")
-    CMP_LIBRARIES_INSTALL_RULES("EMMPM" ".")
-else()
-    message(FATAL_ERROR "EMMPM is required for this project")
-endif()
+#find_package(EMMPM)
+#if (EMMPM_FOUND)
+#    include_directories(${EMMPM_INCLUDE_DIR})
+#    CMP_COPY_DEPENDENT_LIBRARIES("EMMPM")
+#    CMP_LIBRARIES_INSTALL_RULES("EMMPM" ".")
+#else()
+#    message(FATAL_ERROR "EMMPM is required for this project")
+#endif()
 
 # Set some Win32 Specific Settings
 IF(WIN32)
@@ -181,7 +181,7 @@ BuildQtAppBundle(
     VERSION_MINOR ${QEMMPM_VER_MINOR}
     VERSION_PATCH ${QEMMPM_VER_PATCH}
     BINARY_DIR    ${${PROJECT_NAME}_BINARY_DIR}
-    LINK_LIBRARIES ${QT_LIBRARIES} QtSupport ${QWT_LIBRARIES} ${TIFF_LIBRARIES} ${EMMPM_LIBRARIES}
+    LINK_LIBRARIES ${QT_LIBRARIES} QtSupport ${QWT_LIBRARIES} ${TIFF_LIBRARIES} EMMPMLib
     LIB_SEARCH_DIRS ${CMAKE_LIBRARY_OUTPUT_DIRECTORY} ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
     QT_PLUGINS    ${QT_PLUGINS}
 #        OTHER_PLUGINS ${OTHER_PLUGINS}
