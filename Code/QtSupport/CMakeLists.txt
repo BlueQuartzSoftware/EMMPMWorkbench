@@ -53,8 +53,6 @@ SET( MXA_QT_UI_FILES
 )
 cmp_IDE_SOURCE_PROPERTIES( "QtSupport/UI_Files" "${MXA_QT_UI_FILES}" "" "0")
 
-
-
 # and finally any resource files
 #SET( QtSupport_RCS ${PROJECT_RESOURCES_DIR}/icons/images/Icons.qrc)
 

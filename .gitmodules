@@ -1,3 +1,6 @@
-[submodule "Resources/cmp"]
-	path = Resources/cmp
+[submodule "Support/emmpm"]
+	path = Support/emmpm
+	url = git://scm.bluequartz.net/eim/emmpm.git
+[submodule "Support/cmp"]
+	path = Support/cmp
 	url = git://scm.bluequartz.net/support-libraries/cmp.git

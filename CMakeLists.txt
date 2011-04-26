@@ -38,9 +38,15 @@ SET (CMAKE_ARCHIVE_OUTPUT_DIRECTORY
   "Single Directory for all static libraries."
   )
 
+
+# Bring in the EM/MPM Library first
+set (CMP_SOURCE_DIR ${QEMMPM_SOURCE_DIR}/Resources/cmp)
+
+add_subdirectory(${QEMMPM_SOURCE_DIR}/Libs/emmpm ${QEMMPM_BINARY_DIR}/emmpm)
+
+
 SET (PROJECT_CODE_DIR ${PROJECT_SOURCE_DIR}/Code)
 SET (PROJECT_RESOURCES_DIR ${QEMMPM_SOURCE_DIR}/Resources)
-SET (PROJECT_PREFIX "MXA" CACHE STRING "The Prefix to be used for Preprocessor definitions")
 SET (EXE_DEBUG_EXTENSION "_debug")
 SET (PROJECT_INSTALL_HEADERS "0")
 SET (PROJECT_INSTALL_EXECUTABLES "1")
@@ -48,7 +54,8 @@ SET (PROJECT_INSTALL_EXECUTABLES "1")
 #-------------------------------------------------------------------------------
 # Include the cmp project to perform all the basic configuration tests for the 
 # project.
-#------------------------------------------------------------------------------- 
+#-------------------------------------------------------------------------------
+SET (PROJECT_PREFIX "MXA" CACHE STRING "The Prefix to be used for Preprocessor definitions")
 set (CMP_HEADER_DIR ${QEMMPM_BINARY_DIR}/MXA)
 set (CMP_CONFIGURATION_FILE_NAME "CMPConfiguration.h")
 set (CMP_TYPES_FILE_NAME "MXATypes.h")
