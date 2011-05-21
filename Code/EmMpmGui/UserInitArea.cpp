@@ -177,7 +177,7 @@ void UserInitArea::writeSettings(QSettings &prefs)
   prefs.setValue("LineWidth", m_LineWidth);
   QRgb rgb = getColor().rgb();
   prefs.setValue("Red", qRed(rgb));
-  prefs.setValue("Greeb", qGreen(rgb));
+  prefs.setValue("Green", qGreen(rgb));
   prefs.setValue("Blue", qBlue(rgb));
 
   prefs.endGroup();
