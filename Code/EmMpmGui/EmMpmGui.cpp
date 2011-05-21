@@ -1602,6 +1602,7 @@ void EmMpmGui::openBaseImageFile(QString imageFile)
   this->setWindowFilePath(imageFile);
 
   m_LayersPalette->getOriginalImageCheckBox()->setChecked(true);
+  m_LayersPalette->getSegmentedImageCheckBox()->setChecked(false);
 
   // Tell the RecentFileList to update itself then broadcast those changes.
   QRecentFileList::instance()->addFile(imageFile);
@@ -1620,7 +1621,7 @@ void EmMpmGui::openBaseImageFile(QString imageFile)
   m_UserInitAreaVector->clear();
 
   m_GraphicsView->loadBaseImageFile(imageFile);
-  m_GraphicsView->setOverlayImage(QImage());
+  //m_GraphicsView->setOverlayImage(QImage());
 
   clearProcessHistograms();
   plotImageHistogram();

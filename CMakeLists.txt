@@ -39,9 +39,9 @@ SET (CMAKE_ARCHIVE_OUTPUT_DIRECTORY
   )
 
 
-# Bring in the EM/MPM Library first
-set (CMP_SOURCE_DIR ${QEMMPM_SOURCE_DIR}/Support/cmp)
 
+set (CMP_SOURCE_DIR ${QEMMPM_SOURCE_DIR}/Support/cmp)
+# Bring in the EM/MPM Library first
 add_subdirectory(${QEMMPM_SOURCE_DIR}/Support/emmpm ${QEMMPM_BINARY_DIR}/emmpm)
 include_directories(${QEMMPM_SOURCE_DIR}/Support/emmpm/Code)
 include_directories(${QEMMPM_BINARY_DIR}/emmpm)

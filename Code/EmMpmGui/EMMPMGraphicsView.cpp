@@ -361,8 +361,10 @@ void EMMPMGraphicsView::updateDisplay()
     else
     {
       painter.drawImage(point, m_BaseImage);
+      if (m_OverlayImage.isNull() == false) {
       painter.setCompositionMode(m_composition_mode);
       painter.drawImage(point, m_OverlayImage);
+      }
     }
   }
   painter.end();
@@ -392,6 +394,14 @@ void EMMPMGraphicsView::loadBaseImageFile(const QString &filename)
   {
     return;
   }
+  QSize pSize(0, 0);
+  //pSize = m_BaseImage.size();
+  m_OverlayImage = m_BaseImage;
+  m_CompositedImage = m_BaseImage;
+
+//  m_OverlayImage = QImage(pSize, QImage::Format_ARGB32_Premultiplied);
+//  m_CompositedImage = QImage(pSize, QImage::Format_ARGB32_Premultiplied);
+
   QVector<QRgb > colorTable(256);
   for (quint32 i = 0; i < 256; ++i)
   {
@@ -406,6 +416,15 @@ void EMMPMGraphicsView::loadBaseImageFile(const QString &filename)
   {
     gScene = new QGraphicsScene(this);
     setScene(gScene);
+  }
+  else
+  {
+    setScene(NULL);
+    gScene->deleteLater();
+    gScene = new QGraphicsScene(this);
+    setScene(gScene);
+    delete m_ImageGraphicsItem;
+    m_ImageGraphicsItem = NULL;
   }
   if (NULL == m_ImageGraphicsItem) {
     m_ImageGraphicsItem = gScene->addPixmap(QPixmap::fromImage(m_BaseImage));
@@ -445,6 +464,12 @@ void EMMPMGraphicsView::setOverlayImage(QImage image)
 {
   m_OverlayImage = image;
 
+  QSize size = m_OverlayImage.size();
+ // std::cout << "Overlay Image Size: " << size.width() << " x " << size.height() << std::endl;
+  if (size.width() == 0 || size.height() == 0)
+  {
+    return;
+  }
 
   // Save the original Color Table
   m_OriginalColorTable = m_OverlayImage.colorTable();
