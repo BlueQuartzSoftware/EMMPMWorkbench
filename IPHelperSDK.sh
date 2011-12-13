@@ -208,7 +208,7 @@ then
 # Compile the emmpm Library
 cd $SDK_SOURCE
 # Remove any previous emmpm
-#rm -rf EMMPMGui
+rm -rf EMMPMGui
 git clone --recursive git://scm.bluequartz.net/EMMPMGui.git
 cd EMMPMGui
 mkdir Build
