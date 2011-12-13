@@ -27,7 +27,7 @@ SDK_INSTALL=$SDK_ROOT/Toolkits
 PARALLEL_BUILD=16
 
 HOST_SYSTEM=`uname`
-
+echo "Host System: $HOST_SYSTEM"
 # Adjust these to "0" if you want to skip those compilations. The default is to build
 # everything.
 BUILD_CMAKE="1"
@@ -123,7 +123,7 @@ fi
 
 
 
-if [ "$BUILD_QWT" == "1" ]
+if [ "$BUILD_QWT" = "1" ]
 then
 #------------------------------------------------------------------------------
 cd $SDK_SOURCE
@@ -135,10 +135,11 @@ mkdir Build
 cd Build
 # On OS X we need to set the "install_name" correctly on Libraries that will get used which is
 # what the variable will do.
-if ["$HOST_SYSTEM" == "Darwin" ]
+if [ "$HOST_SYSTEM" = "Darwin" ];
   then
   ADDITIONAL_ARGS="-DCMP_BUILD_WITH_INSTALL_NAME=ON"
 fi
+echo "Additional Args: $ADDITIONAL_ARGS"
 cmake $ADDITIONAL_ARGS -DCMAKE_BUILD_TYPE=Debug -DCMAKE_INSTALL_PREFIX=$SDK_INSTALL/Qwt -DBUILD_SHARED_LIBS=ON ../
 make -j $PARALLEL_BUILD
 make install
@@ -153,7 +154,7 @@ echo "export QWT_INSTALL=$SDK_INSTALL/Qwt" >> $SDK_INSTALL/initvars.sh
 fi
 
 
-if [ "$BUILD_ITK" == "1" ]
+if [ "$BUILD_ITK" = "1" ];
 then
 #------------------------------------------------------------------------------
 # Pull Down ITK and compile/Install it
@@ -184,7 +185,7 @@ mkdir Build
 cd Build
 # On OS X we need to set the "install_name" correctly on Libraries that will get used which is
 # what the variable will do.
-if ["$HOST_SYSTEM" == "Darwin" ]
+if [ "$HOST_SYSTEM" = "Darwin" ];
   then
   ADDITIONAL_ARGS="-DCMP_BUILD_WITH_INSTALL_NAME=ON"
 fi
@@ -215,7 +216,7 @@ mkdir Build
 cd Build
 # On OS X we need to set the "install_name" correctly on Libraries that will get used which is
 # what the variable will do.
-if ["$HOST_SYSTEM" == "Darwin" ]
+if [ "$HOST_SYSTEM" = "Darwin" ];
   then
   ADDITIONAL_ARGS="-DCMP_BUILD_WITH_INSTALL_NAME=ON"
 fi
