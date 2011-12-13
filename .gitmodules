@@ -1,6 +1,6 @@
 [submodule "Support/emmpm"]
 	path = Support/emmpm
-	url = git://scm.bluequartz.net/emmpm.git
+	url = git://scm.bluequartz.net/EMMPM.git
 [submodule "Support/cmp"]
 	path = Support/cmp
 	url = git://scm.bluequartz.net/CMP.git
