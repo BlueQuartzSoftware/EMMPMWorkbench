@@ -12,7 +12,7 @@
 if (MSVC)
     # Skip the install rules, we only want to gather a list of the system libraries
     SET(CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS_SKIP 1)
-    #SET(CMAKE_INSTALL_DEBUG_LIBRARIES OFF)
+ #   SET(CMAKE_INSTALL_DEBUG_LIBRARIES ON)
     
     # Gather the list of system level runtime libraries
     INCLUDE (InstallRequiredSystemLibraries)
