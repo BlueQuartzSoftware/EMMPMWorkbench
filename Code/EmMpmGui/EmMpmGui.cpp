@@ -1085,7 +1085,7 @@ void EmMpmGui::processingFinished()
   processBtn->setText("Segment");
   processBtn->setVisible(true);
   cancelBtn->setVisible(false);
-  this->statusBar()->showMessage("Processing Complete");
+//  this->statusBar()->showMessage("Processing Complete");
 }
 
 // -----------------------------------------------------------------------------

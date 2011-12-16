@@ -42,6 +42,7 @@
 #include <QtCore/QLocale>
 #include <QtCore/QMutex>
 #include <QtCore/QMutexLocker>
+#include <QtGui/QMessageBox>
 
 //-- EMMPMLib Includes
 #include "emmpm/public/EMMPM.h"
@@ -229,12 +230,19 @@ void EMMPMTask::run()
  // this->setOutputFilePath(QString(m_data->output_file_name));
   // Get our input image from the Image IO functions
   QImage image = QImage(m_data->input_file_name);
+  if (image.isNull() == true)
+  {
+    UPDATE_PROGRESS(QString("There was an issue loading the image. Either the input image does not exist or low memory prevented the loading of the image"), 100);
+    emit taskFinished(this);
+    return;
+  }
   qint32 height = image.height();
   qint32 width = image.width();
   AIMArray<unsigned char>::Pointer inImageBufferPtr = AIMArray<unsigned char>::New();
   quint8* inImage = inImageBufferPtr->allocateDataArray(width*height, true);
   if (NULL == inImage)
   {
+    emit taskFinished(this);
     return;
   }
 
@@ -267,6 +275,7 @@ void EMMPMTask::run()
   quint8* outImagePtr = outImageBufferPtr->allocateDataArray(width*height, true);
   if (NULL == outImagePtr)
   {
+    emit taskFinished(this);
     return;
   }
   m_data->outputImage = outImagePtr;

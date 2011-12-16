@@ -329,6 +329,10 @@ void EMMPMGraphicsView::updateDisplay()
       m_OverlayImage.setColorTable(m_OriginalColorTable);
     }
   }
+  else
+  {
+    return;
+  }
 
 //  std::cout << "EMMPMGraphicsView::updateDisplay()" << std::endl;
   QPainter painter;
@@ -336,7 +340,12 @@ void EMMPMGraphicsView::updateDisplay()
   if (m_BaseImage.isNull() == false)
   {
    pSize = m_BaseImage.size();
+  } 
+  else
+  {
+    return;
   }
+
   QImage paintImage(pSize, QImage::Format_ARGB32_Premultiplied);
   QPoint point(0, 0);
   painter.begin(&paintImage);
@@ -370,6 +379,10 @@ void EMMPMGraphicsView::updateDisplay()
   painter.end();
   m_CompositedImage = paintImage;
 
+  if (paintImage.isNull() == true)
+  {
+    return;
+  }
   QGraphicsPixmapItem *pixItem = qgraphicsitem_cast<QGraphicsPixmapItem*> (m_ImageGraphicsItem);
   pixItem->setPixmap(QPixmap::fromImage(paintImage));
 
