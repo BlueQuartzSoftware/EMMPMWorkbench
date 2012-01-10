@@ -102,7 +102,6 @@ SET( EmMpmGui_MOC_HDRS
   ${EmMpmGui_SOURCE_DIR}/LayersDockWidget.h
   ${EmMpmGui_SOURCE_DIR}/UserInitAreaItemDelegate.h
   ${EmMpmGui_SOURCE_DIR}/EMMPMTask.h
-
 )
 cmp_IDE_SOURCE_PROPERTIES(EmMpmGui "${EmMpmGui_MOC_HDRS}" "${EmMpmGui_SRCS}" "0")
 
