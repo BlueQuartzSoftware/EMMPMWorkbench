@@ -189,7 +189,7 @@ class EmMpmGui :  public QMainWindow, private Ui::EmMpmGui
 
     void on_useGradientPenalty_clicked();
     void on_useCurvaturePenalty_clicked();
-
+    void on_m_NumClasses_valueChanged(int i);
 
     void on_enableUserDefinedAreas_stateChanged(int state);
 

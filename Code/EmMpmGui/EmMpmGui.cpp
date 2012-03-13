@@ -1723,6 +1723,15 @@ void EmMpmGui::on_useGradientPenalty_clicked()
 
   estimateMemoryUse(size);
 }
+// -----------------------------------------------------------------------------
+//
+// -----------------------------------------------------------------------------
+void EmMpmGui::on_m_NumClasses_valueChanged(int i)
+{
+  QSize size = m_GraphicsView->getBaseImage().size();
+
+  estimateMemoryUse(size);
+}
 
 // -----------------------------------------------------------------------------
 //
