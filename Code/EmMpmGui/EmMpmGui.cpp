@@ -77,6 +77,7 @@
 #include "QtSupport/ProcessQueueController.h"
 #include "QtSupport/ProcessQueueDialog.h"
 
+#include "MXA/Common/MXAMemory.h"
 
 //
 #include <emmpm/public/InitializationFunctions.h>
@@ -271,7 +272,7 @@ void EmMpmGui::readSettings(QSettings &prefs)
   READ_BOOL_SETTING(prefs, useGradientPenalty, false);
   READ_SETTING(prefs, gradientBetaE, ok, d, 1.0, Double);
 
-  READ_BOOL_SETTING(prefs, useCuravturePenalty, false);
+  READ_BOOL_SETTING(prefs, useCurvaturePenalty, false);
   READ_SETTING(prefs, curvatureBetaC, ok, d, 1.0, Double);
   READ_SETTING(prefs, curvatureRMax, ok, d, 15.0, Double);
   READ_SETTING(prefs, ccostLoopDelay, ok, i, 1, Int);
@@ -322,7 +323,7 @@ void EmMpmGui::writeSettings(QSettings &prefs)
   WRITE_CHECKBOX_SETTING(prefs, useSimulatedAnnealing);
   WRITE_CHECKBOX_SETTING(prefs, useGradientPenalty);
   WRITE_SETTING(prefs, gradientBetaE);
-  WRITE_CHECKBOX_SETTING(prefs, useCuravturePenalty);
+  WRITE_CHECKBOX_SETTING(prefs, useCurvaturePenalty);
   WRITE_SETTING(prefs, curvatureBetaC);
   WRITE_SETTING(prefs, curvatureRMax);
   WRITE_SETTING(prefs, ccostLoopDelay);
@@ -593,7 +594,7 @@ void EmMpmGui::setupGui()
   // setup the Widget List
   m_WidgetList << m_NumClasses << m_EmIterations << m_MpmIterations << m_Beta << m_MinVariance;
   m_WidgetList << enableUserDefinedAreas << useSimulatedAnnealing;
-  m_WidgetList << useCuravturePenalty << useGradientPenalty;
+  m_WidgetList << useCurvaturePenalty << useGradientPenalty;
   m_WidgetList << curvatureBetaC << curvatureRMax << ccostLoopDelay;
   m_WidgetList << gradientPenaltyLabel << gradientBetaE;
   m_WidgetList << axisSettingsBtn << clearTempHistograms << saveCurves;
@@ -1036,12 +1037,12 @@ EMMPMTask* EmMpmGui::newEmMpmTask( QString inputFile, QString outputFile, Proces
     copyGammaValues(data);
     copyMinVarianceValues(data);
   }
-  data->useCurvaturePenalty = (useCuravturePenalty->isChecked()) ? 1 : 0;
+  data->useCurvaturePenalty = (useCurvaturePenalty->isChecked()) ? 1 : 0;
   data->useGradientPenalty = (useGradientPenalty->isChecked()) ? 1 : 0;
   data->beta_e = (useGradientPenalty->isChecked()) ? gradientBetaE->value() : 0.0;
-  data->beta_c = (useCuravturePenalty->isChecked()) ? curvatureBetaC->value() : 0.0;
-  data->r_max = (useCuravturePenalty->isChecked()) ? curvatureRMax->value() : 0.0;
-  data->ccostLoopDelay = (useCuravturePenalty->isChecked()) ? ccostLoopDelay->value() : m_MpmIterations->value() + 1;
+  data->beta_c = (useCurvaturePenalty->isChecked()) ? curvatureBetaC->value() : 0.0;
+  data->r_max = (useCurvaturePenalty->isChecked()) ? curvatureRMax->value() : 0.0;
+  data->ccostLoopDelay = (useCurvaturePenalty->isChecked()) ? ccostLoopDelay->value() : m_MpmIterations->value() + 1;
 
   return task;
 }
@@ -1159,9 +1160,9 @@ void EmMpmGui::queueControllerFinished()
   setQueueController(NULL);
 
   /* Curvature Penalty Widgets */
-  curvatureBetaC->setEnabled(useCuravturePenalty->isChecked());
-  curvatureRMax->setEnabled(useCuravturePenalty->isChecked());
-  ccostLoopDelay->setEnabled(useCuravturePenalty->isChecked());
+  curvatureBetaC->setEnabled(useCurvaturePenalty->isChecked());
+  curvatureRMax->setEnabled(useCurvaturePenalty->isChecked());
+  ccostLoopDelay->setEnabled(useCurvaturePenalty->isChecked());
 
   /* Gradient Penalty widgets  */
   gradientBetaE->setEnabled(useGradientPenalty->isChecked());
@@ -1388,9 +1389,9 @@ void EmMpmGui::setWidgetListEnabled(bool b)
 
   if (b == true) {
     /* Curvature Penalty Widgets */
-    curvatureBetaC->setEnabled(useCuravturePenalty->isChecked());
-    curvatureRMax->setEnabled(useCuravturePenalty->isChecked());
-    ccostLoopDelay->setEnabled(useCuravturePenalty->isChecked());
+    curvatureBetaC->setEnabled(useCurvaturePenalty->isChecked());
+    curvatureRMax->setEnabled(useCurvaturePenalty->isChecked());
+    ccostLoopDelay->setEnabled(useCurvaturePenalty->isChecked());
 
     /* Gradient Penalty widgets  */
     gradientBetaE->setEnabled(useGradientPenalty->isChecked());
@@ -1621,10 +1622,106 @@ void EmMpmGui::openBaseImageFile(QString imageFile)
   m_UserInitAreaVector->clear();
 
   m_GraphicsView->loadBaseImageFile(imageFile);
-  //m_GraphicsView->setOverlayImage(QImage());
 
   clearProcessHistograms();
   plotImageHistogram();
+  QSize size = m_GraphicsView->getBaseImage().size();
+
+  estimateMemoryUse(size);
+}
+
+// -----------------------------------------------------------------------------
+//
+// -----------------------------------------------------------------------------
+void EmMpmGui::estimateMemoryUse(QSize size)
+{
+  int rows = size.height();
+  int cols = size.width();
+  int dims = 1;
+  int classes = m_NumClasses->value();
+  qint64 total = 0;
+  total += sizeof(char) * dims * rows * cols; // Input Image
+  total += sizeof(char) * dims * rows * cols; // Output image
+  total += sizeof(char) * dims * rows * cols; // y
+  total += sizeof(char) * rows * cols; // xt
+  total += sizeof(double) * dims * classes; // xt
+  total += sizeof(double) * dims * classes; // v
+  total += sizeof(double) * rows * cols * classes; // probs
+  total += sizeof(double) * dims * classes; // histograms
+
+  if (useCurvaturePenalty->isChecked() == true)
+  {
+    total += sizeof(double) * rows * cols * classes; // curvature cost
+  }
+  if (useGradientPenalty->isChecked() == true)
+  {
+    total += sizeof(double) * rows * cols; // ns
+    total += sizeof(double) * rows * cols; // ew
+    total += sizeof(double) * rows * cols; // sw
+    total += sizeof(double) * rows * cols; // nw
+  }
+
+  qulonglong totalPhysical = MXAMemory::totalPhysical();
+  if (totalPhysical > 1E9)
+  {
+    totalPhysical = totalPhysical / 1E9;
+    QString est = QString::number(totalPhysical);
+    est.append(" GB");
+    memoryInstalled->setText(est);
+  }
+  else if (totalPhysical > 1E6 && totalPhysical < 1E9)
+  {
+    totalPhysical = totalPhysical / 1E6;
+    QString est = QString::number(totalPhysical);
+    est.append(" MB");
+    memoryInstalled->setText(est);
+  }
+  else
+  {
+    QString est = QString::number(totalPhysical);
+    est.append(" Bytes");
+    memoryInstalled->setText(est);
+  }
+
+  if (total > 1E9)
+  {
+    total = total / 1E9;
+    QString est = QString::number(total);
+    est.append(" GB");
+    estimatedMemory->setText(est);
+  }
+  else if (total > 1E6 && total < 1E9)
+  {
+    total = total / 1E6;
+    QString est = QString::number(total);
+    est.append(" MB");
+    estimatedMemory->setText(est);
+  }
+  else
+  {
+    QString est = QString::number(total);
+    est.append(" Bytes");
+    estimatedMemory->setText(est);
+  }
+}
+
+// -----------------------------------------------------------------------------
+//
+// -----------------------------------------------------------------------------
+void EmMpmGui::on_useCurvaturePenalty_clicked()
+{
+  QSize size = m_GraphicsView->getBaseImage().size();
+
+  estimateMemoryUse(size);
+}
+// -----------------------------------------------------------------------------
+//
+// -----------------------------------------------------------------------------
+void EmMpmGui::on_useGradientPenalty_clicked()
+{
+  QSize size = m_GraphicsView->getBaseImage().size();
+
+  estimateMemoryUse(size);
 }
 
 // -----------------------------------------------------------------------------

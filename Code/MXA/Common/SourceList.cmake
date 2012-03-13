@@ -1,5 +1,5 @@
 SET (MXA_Common_SOURCES
-
+  ${MXA_SOURCE_DIR}/MXA/Common/MXAMemory.cpp
 )
 
 SET (MXA_Common_HEADERS
@@ -13,6 +13,7 @@ SET (MXA_Common_HEADERS
     ${MXA_SOURCE_DIR}/MXA/Common/IO/MXAFileWriter64.h
     ${MXA_SOURCE_DIR}/MXA/Common/Cast/Cast.h
     ${MXA_SOURCE_DIR}/MXA/Common/Win32Defines.h
+    ${MXA_SOURCE_DIR}/MXA/Common/MXAMemory.h
 )
 
 
@@ -45,7 +46,7 @@ endif()
 SET (MXA_Common_SRCS
     ${MXA_WIN_COMMON_SRCS}
     ${MXA_UNIX_COMMON_SRCS}
-	${MXA_Common_SOURCES}
+    ${MXA_Common_SOURCES}
 )
 
 SET (MXA_Common_HDRS 

@@ -37,7 +37,7 @@ BUILD_ITK="0"
 BUILD_TIFF="1"
 BUILD_EMMPM="1"
 BUILD_IPHELPER="1"
-
+BUILD_HDF5="1"
 
 GIT=`type -P git`
 if [ $GIT == "" ]
@@ -84,9 +84,6 @@ fi
 
 if [ "$BUILD_CMAKE" == "1" ]
 then
-
-
-
 #Download and Compile CMake
 $DOWNLOAD_PROG "http://www.cmake.org/files/v2.8/cmake-2.8.6.tar.gz" $DOWNLOAD_ARGS
 tar -xvzf cmake-2.8.6.tar.gz
@@ -122,6 +119,28 @@ echo "export BOOST_ROOT=$SDK_INSTALL/MXABoost-1.44" >> $SDK_INSTALL/initvars.sh
 fi
 
 
+if [ "$BUILD_HDF5" == "1"]
+  then
+# Build the HDF5 libraries we need and set our Environment Variable.
+cd $sourcedir
+$DOWNLOAD_PROG  "http://www.hdfgroup.org/ftp/HDF5/current/src/hdf5-1.8.8.tar.gz" -o hdf5-1.8.8.tar.gz
+tar -xvzf hdf5-1.8.8.tar.gz
+# We assume we already have downloaded the source for HDF5 Version 1.8.7 and have it in a folder
+# called hdf5-187
+cd hdf5-1.8.8
+mkdir Build
+cd Build
+cmake -DBUILD_SHARED_LIBS=OFF -DCMAKE_INSTALL_PREFIX=$sandbox/hdf5-188 -DCMAKE_BUILD_TYPE=Debug  -DHDF5_ENABLE_DEPRECATED_SYMBOLS=OFF ../
+make -j$makeJobs
+make install
+cd ../
+mkdir zRel
+cd zRel
+cmake -DBUILD_SHARED_LIBS=OFF -DCMAKE_INSTALL_PREFIX=$sandbox/hdf5-188 -DCMAKE_BUILD_TYPE=Release   -DHDF5_ENABLE_DEPRECATED_SYMBOLS=OFF ../
+make -j$makeJobs
+make install
+export HDF5_INSTALL=$sandbox/hdf5-188
+fi
 
 if [ "$BUILD_QWT" = "1" ]
 then
@@ -153,23 +172,6 @@ export QWT_INSTALL=$SDK_INSTALL/Qwt
 echo "export QWT_INSTALL=$SDK_INSTALL/Qwt" >> $SDK_INSTALL/initvars.sh
 fi
 
-
-if [ "$BUILD_ITK" = "1" ];
-then
-#------------------------------------------------------------------------------
-# Pull Down ITK and compile/Install it
-cd $SDK_SOURCE
-DOWNLOAD_ARGS="-o InsightToolkit-3.20.0.tar.gz"
-$DOWNLOAD_PROG "http://voxel.dl.sourceforge.net/project/itk/itk/3.20/InsightToolkit-3.20.0.tar.gz" $DOWNLOAD_ARGS
-tar -xvzf InsightToolkit-3.20.0.tar.gz
-cd InsightToolkit-3.20.0
-mkdir Build
-cd Build
-cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=$SDK_INSTALL/ITK-3.20.0 -DBUILD_SHARED_LIBS=OFF -DBUILD_TESTING=OFF -DBUILD_EXAMPLES=OFF ../
-make -j $PARALLEL_BUILD install
-export ITK_DIR=$SDK_INSTALL/ITK-3.20.0/lib/InsightToolkit
-echo "export ITK_DIR=$SDK_INSTALL/ITK-3.20.0/lib/InsightToolkit" >> $SDK_INSTALL/initvars.sh
-fi
 
 
 if [ "$BUILD_TIFF" == "1" ]

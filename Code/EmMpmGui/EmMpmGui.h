@@ -139,6 +139,8 @@ class EmMpmGui :  public QMainWindow, private Ui::EmMpmGui
 
     void openOverlayImage(QString mountImage);
 
+    void estimateMemoryUse(QSize size);
+
   signals:
     void cancelTask();
     void cancelProcessQueue();
@@ -184,6 +186,10 @@ class EmMpmGui :  public QMainWindow, private Ui::EmMpmGui
     /* slots for the buttons in the GUI */
     void on_processBtn_clicked();
     void on_cancelBtn_clicked();
+
+    void on_useGradientPenalty_clicked();
+    void on_useCurvaturePenalty_clicked();
+
 
     void on_enableUserDefinedAreas_stateChanged(int state);
 

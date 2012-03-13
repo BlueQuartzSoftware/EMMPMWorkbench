@@ -1299,7 +1299,7 @@
          </widget>
         </item>
         <item row="3" column="1">
-         <widget class="QCheckBox" name="useCuravturePenalty">
+         <widget class="QCheckBox" name="useCurvaturePenalty">
           <property name="toolTip">
            <string>Use a Curvature Penalty function</string>
           </property>
@@ -1479,6 +1479,34 @@
           </property>
           <property name="checkable">
            <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+        <item row="9" column="0">
+         <widget class="QLabel" name="label">
+          <property name="text">
+           <string>Estimated Memory Use:</string>
+          </property>
+         </widget>
+        </item>
+        <item row="9" column="1">
+         <widget class="QLabel" name="estimatedMemory">
+          <property name="text">
+           <string>0</string>
+          </property>
+         </widget>
+        </item>
+        <item row="8" column="0">
+         <widget class="QLabel" name="label_24">
+          <property name="text">
+           <string>Memory Installed:</string>
+          </property>
+         </widget>
+        </item>
+        <item row="8" column="1">
+         <widget class="QLabel" name="memoryInstalled">
+          <property name="text">
+           <string>0</string>
           </property>
          </widget>
         </item>
@@ -1818,6 +1846,11 @@
    <container>1</container>
   </customwidget>
   <customwidget>
+   <class>QFSDropLineEdit</class>
+   <extends>QLineEdit</extends>
+   <header location="global">QFSDropLineEdit.h</header>
+  </customwidget>
+  <customwidget>
    <class>EMMPMGraphicsView</class>
    <extends>QWidget</extends>
    <header location="global">EMMPMGraphicsView.h</header>
@@ -1828,11 +1861,6 @@
    <extends>QWidget</extends>
    <header location="global">ProcessQueueDialog.h</header>
    <container>1</container>
-  </customwidget>
-  <customwidget>
-   <class>QFSDropLineEdit</class>
-   <extends>QLineEdit</extends>
-   <header location="global">QFSDropLineEdit.h</header>
   </customwidget>
   <customwidget>
    <class>UserInitAreaWidget</class>
@@ -1864,7 +1892,7 @@
  </resources>
  <connections>
   <connection>
-   <sender>useCuravturePenalty</sender>
+   <sender>useCurvaturePenalty</sender>
    <signal>clicked(bool)</signal>
    <receiver>curvatureBetaC</receiver>
    <slot>setEnabled(bool)</slot>
@@ -1880,7 +1908,7 @@
    </hints>
   </connection>
   <connection>
-   <sender>useCuravturePenalty</sender>
+   <sender>useCurvaturePenalty</sender>
    <signal>clicked(bool)</signal>
    <receiver>label_21</receiver>
    <slot>setEnabled(bool)</slot>
@@ -1896,7 +1924,7 @@
    </hints>
   </connection>
   <connection>
-   <sender>useCuravturePenalty</sender>
+   <sender>useCurvaturePenalty</sender>
    <signal>clicked(bool)</signal>
    <receiver>label_22</receiver>
    <slot>setEnabled(bool)</slot>
@@ -1912,7 +1940,7 @@
    </hints>
   </connection>
   <connection>
-   <sender>useCuravturePenalty</sender>
+   <sender>useCurvaturePenalty</sender>
    <signal>clicked(bool)</signal>
    <receiver>curvatureRMax</receiver>
    <slot>setEnabled(bool)</slot>
@@ -1928,7 +1956,7 @@
    </hints>
   </connection>
   <connection>
-   <sender>useCuravturePenalty</sender>
+   <sender>useCurvaturePenalty</sender>
    <signal>clicked(bool)</signal>
    <receiver>ccostLoopDelay</receiver>
    <slot>setEnabled(bool)</slot>
@@ -1944,7 +1972,7 @@
    </hints>
   </connection>
   <connection>
-   <sender>useCuravturePenalty</sender>
+   <sender>useCurvaturePenalty</sender>
    <signal>clicked(bool)</signal>
    <receiver>label_23</receiver>
    <slot>setEnabled(bool)</slot>
