@@ -84,17 +84,19 @@
 #include "EMMPMLib/public/ProgressFunctions.h"
 #include "EMMPMLib/tiff/EMTiffIO.h"
 #include "EMMPMLib/public/EMMPM_Structures.h"
-#include "EMMPMLib//public/EMMPM.h"
+#include "EMMPMLib/public/EMMPM.h"
 
 //
 #include "EmMpmGuiVersion.h"
-//#include "UserInitAreaTableModel.h"
 #include "UserInitArea.h"
 #include "EMMPMTask.h"
 #include "AxisSettingsDialog.h"
 #include "License/EmMpmGuiLicenseFiles.h"
 #include "UserInitAreaWidget.h"
 #include "LayersDockWidget.h"
+#include "ImageOpenDialog.h"
+
+
 
 #define READ_STRING_SETTING(prefs, var, emptyValue)\
   var->setText( prefs.value(#var).toString() );\
@@ -156,6 +158,7 @@ m_OpenDialogLastDirectory("C:\\")
 m_OpenDialogLastDirectory("~/")
 #endif
 {
+
   setupUi(this);
   setupGui();
 
@@ -625,6 +628,7 @@ void EmMpmGui::setupGui()
   m_picker->setRubberBandPen(QColor(Qt::green));
   m_picker->setRubberBand(QwtPicker::CrossRubberBand);
   m_picker->setTrackerPen(QColor(Qt::blue));
+
 }
 
 // -----------------------------------------------------------------------------
@@ -1621,12 +1625,32 @@ void EmMpmGui::openBaseImageFile(QString imageFile)
   // not own the pointer so we don't worry about cleaning up the memory.
   m_UserInitAreaVector->clear();
 
+  ImageOpenDialog d(this);
+
+  d.show();
+  d.raise();
+  d.activateWindow();
+  d.setModal(false);
+
+  d.setStatus("Loading Image File....");
   m_GraphicsView->loadBaseImageFile(imageFile);
-
   clearProcessHistograms();
+  d.setStatus("Generating Histogram....");
   plotImageHistogram();
-  QSize size = m_GraphicsView->getBaseImage().size();
 
+  QSize size = m_GraphicsView->getBaseImage().size();
+  estimateMemoryUse(size);
+}
+
+// -----------------------------------------------------------------------------
+//
+// -----------------------------------------------------------------------------
+void EmMpmGui::imageLoadingComplete()
+{
+  clearProcessHistograms();
+  plotImageHistogram(); // <== This can take a while if the image is large
+
+  QSize size = m_GraphicsView->getBaseImage().size();
   estimateMemoryUse(size);
 }
 
@@ -1644,22 +1668,29 @@ void EmMpmGui::estimateMemoryUse(QSize size)
   total += sizeof(char) * dims * rows * cols; // Output image
   total += sizeof(char) * dims * rows * cols; // y
   total += sizeof(char) * rows * cols; // xt
-  total += sizeof(double) * dims * classes; // xt
-  total += sizeof(double) * dims * classes; // v
-  total += sizeof(double) * rows * cols * classes; // probs
-  total += sizeof(double) * dims * classes; // histograms
+  total += sizeof(real_t) * dims * classes; // m
+  total += sizeof(real_t) * dims * classes; // v
+  total += sizeof(real_t) * rows * cols * classes; // probs
+  total += sizeof(real_t) * dims * classes; // histograms
+  total += sizeof(real_t) * rows * cols * classes; // yk (internal to mpm)
+
 
   if (useCurvaturePenalty->isChecked() == true)
   {
-    total += sizeof(double) * rows * cols * classes; // curvature cost
+    total += sizeof(real_t) * rows * cols * classes; // curvature cost
   }
   if (useGradientPenalty->isChecked() == true)
   {
-    total += sizeof(double) * rows * cols; // ns
-    total += sizeof(double) * rows * cols; // ew
-    total += sizeof(double) * rows * cols; // sw
-    total += sizeof(double) * rows * cols; // nw
+    total += sizeof(real_t) * rows * cols; // ns
+    total += sizeof(real_t) * rows * cols; // ew
+    total += sizeof(real_t) * rows * cols; // sw
+    total += sizeof(real_t) * rows * cols; // nw
   }
+  // Major GUI memory allocations to display image
+  total += sizeof(int) * rows * cols * 6; // Displayed Image
+//  total += sizeof(int) * rows * cols; // Displayed Segmented Image
+//  total += sizeof(int) * rows * cols; // Displayed Composited Image
+//  total += sizeof(int) * rows * cols; // Displayed QPixMap
 
   qulonglong totalPhysical = MXAMemory::totalPhysical();
   if (totalPhysical > 1E9)

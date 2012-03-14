@@ -60,6 +60,7 @@ class AxisSettingsDialog;
 class UserInitAreaWidget;
 class LayersDockWidget;
 
+
 #include "IPHelper/plugins/QImageProcessingInputFrame.h"
 
 
@@ -155,6 +156,11 @@ class EmMpmGui :  public QMainWindow, private Ui::EmMpmGui
     void userInitAreaUpdated(UserInitArea* uia);
     void userInitAreaSelected(UserInitArea* uia);
     void userInitAreaLostFocus();
+  // Histogram/Gaussian Plot related Manual Hookup
+     void clearProcessHistograms();
+     void addProcessHistogram(QVector<double> data);
+     void plotCombinedGaussian();
+     void plotImageHistogram();
 
   protected slots:
   //Manual Hookup Menu Actions
@@ -177,10 +183,7 @@ class EmMpmGui :  public QMainWindow, private Ui::EmMpmGui
     void on_axisSettingsBtn_clicked();
     void on_clearTempHistograms_clicked();
     void on_saveCurves_clicked();
- // Histogram/Gaussian Plot related Manual Hookup
-    void clearProcessHistograms();
-    void addProcessHistogram(QVector<double> data);
-    void plotCombinedGaussian();
+
 
 
     /* slots for the buttons in the GUI */
@@ -205,6 +208,7 @@ class EmMpmGui :  public QMainWindow, private Ui::EmMpmGui
     void on_fitToWindow_clicked();
     void on_layersPalette_clicked();
 
+    void imageLoadingComplete();
 
     /**
      * @brief Qt Slot that fires in response to a click on a "Recent File' Menu entry.
@@ -302,7 +306,7 @@ class EmMpmGui :  public QMainWindow, private Ui::EmMpmGui
 
     qint32 initImageViews();
 
-    void plotImageHistogram();
+
 
     QStringList generateInputFileList();
 
@@ -334,6 +338,7 @@ class EmMpmGui :  public QMainWindow, private Ui::EmMpmGui
     QList<QWidget*> m_ProcessFolderWidgets;
 
     LayersDockWidget*  m_LayersPalette;
+
 
 
     EmMpmGui(const EmMpmGui&); // Copy Constructor Not Implemented

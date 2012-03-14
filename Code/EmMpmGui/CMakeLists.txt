@@ -76,6 +76,7 @@ SET( EmMpmGui_SRCS
   ${EmMpmGui_SOURCE_DIR}/AxisSettingsDialog.cpp
   ${EmMpmGui_SOURCE_DIR}/LayersDockWidget.cpp
   ${EmMpmGui_SOURCE_DIR}/EMMPMTask.cpp
+  ${EmMpmGui_SOURCE_DIR}/ImageOpenDialog.cpp
   ${PROJECT_CODE_DIR}/AIM/Common/AIMImage.cpp
 )
 
@@ -91,6 +92,7 @@ SET( EmMpmGui_MOC_HDRS
   ${EmMpmGui_SOURCE_DIR}/AxisSettingsDialog.h
   ${EmMpmGui_SOURCE_DIR}/LayersDockWidget.h
   ${EmMpmGui_SOURCE_DIR}/UserInitAreaItemDelegate.h
+  ${EmMpmGui_SOURCE_DIR}/ImageOpenDialog.h
   ${EmMpmGui_SOURCE_DIR}/EMMPMTask.h
 )
 cmp_IDE_SOURCE_PROPERTIES(EmMpmGui "${EmMpmGui_MOC_HDRS}" "${EmMpmGui_SRCS}" "0")
@@ -111,6 +113,7 @@ SET( EmMpmGui_UIS
  ${EmMpmGui_SOURCE_DIR}/UI_Files/UserInitAreaWidget.ui
  ${EmMpmGui_SOURCE_DIR}/UI_Files/AxisSettingsDialog.ui
  ${EmMpmGui_SOURCE_DIR}/UI_Files/LayersDockWidget.ui
+ ${EmMpmGui_SOURCE_DIR}/UI_Files/ImageOpenDialog.ui
 )
 cmp_IDE_SOURCE_PROPERTIES(EmMpmGui/UI_Files "${EmMpmGui_UIS}" "" "0")
 
