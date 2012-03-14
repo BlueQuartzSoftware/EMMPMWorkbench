@@ -6,6 +6,7 @@
 #//
 #///////////////////////////////////////////////////////////////////////////////
 
+
 # ------------------------------------------------------------------------------ 
 # This CMake code sets up for CPack to be used to generate native installers
 # ------------------------------------------------------------------------------
@@ -27,6 +28,15 @@ if (MSVC)
     ENDIF (CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS)
 endif()
 
+# Add a short ReadMe file for OS X that warns of moving the applications
+if (APPLE)
+install(FILES ${PROJECT_RESOURCES_DIR}/CPack/OS_X_ReadMe.txt DESTINATION .)
+endif()
+
+# Get a shorter version number:
+set(QEMMPM_VERSION_SHORT "${QEMMPM_VER_MAJOR}.${QEMMPM_VER_MINOR}")
+
+
 SET(CPACK_PACKAGE_DESCRIPTION_SUMMARY "GUI Application that runs the EM/MPM image segmentation algorithms through a GUI interface.")
 SET(CPACK_PACKAGE_VENDOR "BlueQuartz Software, Michael A. Jackson")
 SET(CPACK_PACKAGE_DESCRIPTION_FILE "${PROJECT_BINARY_DIR}/ReadMe.txt")
@@ -43,26 +53,32 @@ set(CPACK_PACKAGE_EXECUTABLES
     EM/MPM Gui EM/MPM Gui EmMpmGui EmMpmGui
 )
 
-#set(PACKAGE_VERSION "RC6")
-set (PACKAGE_VERSION "${QEMMPM_VERSION}")
+set(UPLOAD_FILE_NAME "")
 
 IF (APPLE)
-    set(CPACK_PACKAGE_FILE_NAME "EmMpmGui-${PACKAGE_VERSION}-OSX")
+    set(CPACK_PACKAGE_FILE_NAME "EmMpmGui-${QEMMPM_VERSION_SHORT}-OSX")
+    # This ASSUMES we are creating a tar.gz package. If you change that below to
+    # anything else then you need to update this.
+    set (UPLOAD_FILE_NAME ${CPACK_PACKAGE_FILE_NAME}.tar.gz)
 elseif(WIN32)
-    if ( CMAKE_SIZEOF_VOID_P EQUAL 8 )
-        set(CPACK_PACKAGE_FILE_NAME "EmMpmGui-${PACKAGE_VERSION}-Win64")
+    if ( "${CMAKE_SIZEOF_VOID_P}" EQUAL "8" )
+        set(CPACK_PACKAGE_FILE_NAME "EmMpmGui-${QEMMPM_VERSION_SHORT}-Win64")
+        set (UPLOAD_FILE_NAME ${CPACK_PACKAGE_FILE_NAME}.zip)        
+    elseif( "${CMAKE_SIZEOF_VOID_P}" EQUAL "4" )
+        set(CPACK_PACKAGE_FILE_NAME "EmMpmGui-${QEMMPM_VERSION_SHORT}-Win32")
+        set (UPLOAD_FILE_NAME ${CPACK_PACKAGE_FILE_NAME}.zip)
     else()
-        set(CPACK_PACKAGE_FILE_NAME "EmMpmGui-${PACKAGE_VERSION}-Win32")
+        set(CPACK_PACKAGE_FILE_NAME "EmMpmGui-${QEMMPM_VERSION_SHORT}-Unknown")
+        set (UPLOAD_FILE_NAME ${CPACK_PACKAGE_FILE_NAME}.zip)   
     endif()
 else()
-  set(CPACK_PACKAGE_FILE_NAME "EmMpmGui-${PACKAGE_VERSION}-${CMAKE_SYSTEM_NAME}")
+  set(CPACK_PACKAGE_FILE_NAME "EmMpmGui-${QEMMPM_VERSION_SHORT}-${CMAKE_SYSTEM_NAME}")
+  set (UPLOAD_FILE_NAME ${CPACK_PACKAGE_FILE_NAME}.tar.gz)
 endif()
 # Create an NSID based installer for Windows Systems
 IF(WIN32 AND NOT UNIX)
-  # There is a bug in NSI that does not handle full unix paths properly. Make
+  # There is a bug in NSIS that does not handle full unix paths properly. Make
   # sure there is at least one set of four (4) backlasshes.
-# SET(CPACK_PACKAGE_ICON "${EmMpmProj_SOURCE_DIR}/Resources/InstallerIcon.bmp")
-# SET(CPACK_NSIS_INSTALLED_ICON_NAME "bin\\\\MyExecutable.exe")
   SET(CPACK_NSIS_DISPLAY_NAME "EM/MPM Gui Software Tools")
   SET(CPACK_NSIS_HELP_LINK "http:\\\\\\\\www.bluequartz.net")
   SET(CPACK_NSIS_URL_INFO_ABOUT "http:\\\\\\\\www.bluequartz.net")
@@ -75,6 +91,7 @@ ELSE(WIN32 AND NOT UNIX)
     SET(CPACK_BINARY_BUNDLE "OFF")
     SET(CPACK_BINARY_CYGWIN "OFF")
     SET(CPACK_BINARY_DEB "OFF")
+    SET(CPACK_INCLUDE_TOPLEVEL_DIRECTORY 0)
     SET(CPACK_BINARY_DRAGNDROP "OFF")
     SET(CPACK_BINARY_NSIS "OFF")
     SET(CPACK_BINARY_OSXX11 "OFF")
@@ -82,13 +99,13 @@ ELSE(WIN32 AND NOT UNIX)
     SET(CPACK_BINARY_RPM "OFF")
     SET(CPACK_BINARY_STGZ "OFF")
     SET(CPACK_BINARY_TBZ2 "OFF")
-    SET(CPACK_BINARY_TGZ "OFF")
+    SET(CPACK_BINARY_TGZ "ON")
     SET(CPACK_BINARY_TZ "OFF")
-    SET(CPACK_BINARY_ZIP "ON")
+    SET(CPACK_BINARY_ZIP "OFF")
 ENDIF(WIN32 AND NOT UNIX)
 
 SET(CPACK_SOURCE_GENERATOR "ZIP")
-SET(CPACK_SOURCE_PACKAGE_FILE_NAME "EM/MPM Gui-${QEMMPM_VERSION}-Source")
+SET(CPACK_SOURCE_PACKAGE_FILE_NAME "EM/MPM Gui-${QEMMPM_VERSION_SHORT}-Source")
 SET(CPACK_SOURCE_TOPLEVEL_TAG "Source")
 SET(CPACK_IGNORE_FILES "/i386/;/x64/;/VS2008/;/zRel/;/Build/;/\\\\.git/;\\\\.*project")
 SET(CPACK_SOURCE_IGNORE_FILES "/i386/;/x64/;/VS2008/;/zRel/;/Build/;/\\\\.git/;\\\\.*project")
