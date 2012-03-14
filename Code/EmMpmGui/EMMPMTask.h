@@ -55,8 +55,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "QtSupport/ProcessQueueTask.h"
 
-#include "emmpm/public/EMMPM_Structures.h"
-#include "emmpm/public/EMMPM.h"
+#include "EMMPMLib/public/EMMPM_Structures.h"
+#include "EMMPMLib/public/EMMPM.h"
 
 // #define PI  3.14159265358979323846
 // #define MAX_CLASSES 15

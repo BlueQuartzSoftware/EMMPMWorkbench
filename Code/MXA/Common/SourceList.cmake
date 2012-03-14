@@ -29,12 +29,13 @@ endif()
 
 
 SET (MXA_Common_SOURCES
-
+    ${MXA_SOURCE_DIR}/Common/MXAMemory.cpp
 )
 
 SET (MXA_Common_HEADERS
     ${MXA_SOURCE_DIR}/Common/LogTime.h
-    ${MXA_SOURCE_DIR}/Common/DLLExport.h
+#    ${MXA_SOURCE_DIR}/Common/DLLExport.h
+    ${MXA_SOURCE_DIR}/Common/MXAMemory.h
     ${MXA_SOURCE_DIR}/Common/MXAEndian.h
     ${MXA_SOURCE_DIR}/Common/MXATypeDefs.h
     ${MXA_SOURCE_DIR}/Common/MXAErrorDefinitions.h

@@ -41,7 +41,7 @@
 #include <QtGui/QGraphicsScene>
 
 
-#include <emmpm/public/EMMPM_Structures.h>
+#include "EMMPMLib/public/EMMPM_Structures.h"
 
 //-- UIC generated Header
 #include <ui_EmMpmGui.h>

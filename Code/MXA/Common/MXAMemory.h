@@ -28,7 +28,7 @@
 
 #include <string>
 
-#include "MXA/MXATypes.h"
+#include "MXA/MXA.h"
 
 
 

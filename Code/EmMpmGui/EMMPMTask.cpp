@@ -45,12 +45,12 @@
 #include <QtGui/QMessageBox>
 
 //-- EMMPMLib Includes
-#include "emmpm/public/EMMPM.h"
-#include "emmpm/common/random.h"
+#include "EMMPMLib/public/EMMPM.h"
+#include "EMMPMLib/common/random.h"
 
-#include "emmpm/public/InitializationFunctions.h"
-#include "emmpm/public/ProgressFunctions.h"
-#include "emmpm/tiff/EMTiffIO.h"
+#include "EMMPMLib/public/InitializationFunctions.h"
+#include "EMMPMLib/public/ProgressFunctions.h"
+#include "EMMPMLib/tiff/EMTiffIO.h"
 #include "AIM/Common/AIMArray.hpp"
 
 QMutex EMMPMTask_CallBackWrapperMutex;

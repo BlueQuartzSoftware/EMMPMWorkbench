@@ -6,16 +6,9 @@
 #
 #///////////////////////////////////////////////////////////////////////////////
 
-# ------------------------------------------------------------------------------
-# This project has dependencies on ITK. If you build ITK as Dynamic Libraries then
-# the app bundling cmake code (at least for OS X) will most likely NOT be able to
-# find those libraries. Building ITK as STATIC libraries will alleviate this 
-# problem and allow you to create a self contained OS X app bundle with out any
-# additional issues.
-# ------------------------------------------------------------------------------
-
 project (QEMMPM)
 cmake_minimum_required(VERSION 2.8)
+include (CMakeParseArguments)
 
 # ---------- Setup output Directories -------------------------
 SET (CMAKE_LIBRARY_OUTPUT_DIRECTORY
@@ -39,57 +32,39 @@ SET (CMAKE_ARCHIVE_OUTPUT_DIRECTORY
   )
 
 
-
-set (CMP_SOURCE_DIR ${QEMMPM_SOURCE_DIR}/Support/cmp)
-# Bring in the EM/MPM Library first
-add_subdirectory(${QEMMPM_SOURCE_DIR}/Support/emmpm ${QEMMPM_BINARY_DIR}/emmpm)
-include_directories(${QEMMPM_SOURCE_DIR}/Support/emmpm/Code)
-include_directories(${QEMMPM_BINARY_DIR}/emmpm)
-
-
 SET (PROJECT_CODE_DIR ${PROJECT_SOURCE_DIR}/Code)
 SET (PROJECT_RESOURCES_DIR ${QEMMPM_SOURCE_DIR}/Resources)
 SET (EXE_DEBUG_EXTENSION "_debug")
 SET (PROJECT_INSTALL_HEADERS "0")
 SET (PROJECT_INSTALL_EXECUTABLES "1")
 
-#-------------------------------------------------------------------------------
-# Include the cmp project to perform all the basic configuration tests for the 
-# project.
-#-------------------------------------------------------------------------------
-SET (PROJECT_PREFIX "MXA" CACHE STRING "The Prefix to be used for Preprocessor definitions")
-set (CMP_HEADER_DIR ${QEMMPM_BINARY_DIR}/MXA)
-set (CMP_CONFIGURATION_FILE_NAME "CMPConfiguration.h")
-set (CMP_TYPES_FILE_NAME "MXATypes.h")
-set (CMP_VERSION_HEADER_FILE_NAME "MXAVersion.h")
-set (CMP_EXTRA_CONFIGURATION_FILE "MXAConfiguration.h")
-set (CMP_PROJECT_NAMESPACE "MXA")
-set (CMP_PROJECT_NAME "MXA")
-SET (CMP_INSTALL_FILES "1")
-set (CMP_ENABLE_PLUGINS "0")
-#set (CMP_PLUGIN_LIST_FILE ${PROJECT_BINARY_DIR}/QEMMPMPluginList.txt)
-INCLUDE (${CMP_SOURCE_DIR}/cmpProject.cmake)
+set (CMP_SOURCE_DIR ${QEMMPM_SOURCE_DIR}/Support/cmp)
+INCLUDE (${CMP_SOURCE_DIR}/cmpCMakeMacros.cmake )
+set (CMP_ENABLE_PLUGINS "1")
+set (CMP_PLUGIN_LIST_FILE ${PROJECT_BINARY_DIR}/QEMMPM_PluginList.txt)
+file(WRITE ${CMP_PLUGIN_LIST_FILE} "")
+set (CMP_PLUGIN_SEARCHDIR_FILE ${PROJECT_BINARY_DIR}/libsearchdirs.txt)
+file(WRITE ${CMP_PLUGIN_SEARCHDIR_FILE} "${PROJECT_BINARY_DIR}/Bin/plugins;")
+file(APPEND ${CMP_PLUGIN_SEARCHDIR_FILE} "${PROJECT_BINARY_DIR}/Bin;")
+set (CMP_LIB_SEARCH_DIRS "")
+set(CMP_MODULES_SOURCE_DIR ${CMP_SOURCE_DIR}/Modules CACHE INTERNAL "")
 
 # --------------------------------------------------------------------
-# Generate a Header file with Compile Version variables
+# In order to increment the version of QEMMPM simply adjust these variables.
+# we are using a 3 part Version scheme commonly found in software development. The
+# example would be Version 2.1.6543 which translates to Version [major].[minor].[patch].
+# The Major version is set here in the CMake file. We will use Git 
+# to figure out the "patch" leve of the version by using "git describe" which will
+# calculate how many commits since the last "tag" was applied to the repository.
+# this basically gives us an always incrementing number for the patch level
+# and we can set the Major and Minor versions as we see fit. 
+set(CMP_VERSION_MAJOR "v2")
+
+
 # --------------------------------------------------------------------
-cmpGenerateVersionString( "${QEMMPM_BINARY_DIR}/${PROJECT_NAME}/Common/${PROJECT_NAME}Version.h" 
-                          "QEMMPM" 
-                          "QEMMPM")
-                          
-# --------------------------------------------------------------------
-# Generate our ReadMe and License Files
-configure_file(${PROJECT_SOURCE_DIR}/License.txt.in
-                ${PROJECT_BINARY_DIR}/License.txt )
-configure_file(${PROJECT_SOURCE_DIR}/ReadMe.txt.in
-                ${PROJECT_BINARY_DIR}/ReadMe.txt )
-
-SET (MXA_INSTALL_FILES "0")
-SET (MXA_SOURCE_DIR ${PROJECT_CODE_DIR})
-
-# Include some directories for the compiler
-include_directories(${PROJECT_BINARY_DIR})
-
+# Over ride CMake's built in module directory by prepending cmp's module
+# directory first
+SET (CMAKE_MODULE_PATH ${CMP_MODULES_SOURCE_DIR} ${CMAKE_MODULE_PATH})
 
 # Build shared libraries
 OPTION (BUILD_SHARED_LIBS "Build Shared Libraries" OFF)
@@ -141,13 +116,26 @@ IF (QT4_FOUND)
     # FindQt4Plugins("qgif;qjpeg;qtiff" "${PROJECT_BINARY_DIR}/QTPLUGINS.txt" "${CMP_PLUGIN_SEARCHDIR_FILE}" "imageformats" )
 endif()
 
+# We do NOT want to install any of the headers
+SET (QEMMPM_INSTALL_FILES "${PROJECT_INSTALL_HEADERS}")
+
 # --------------------------------------------------------------------
-# Generate the License File Headers
-include(${PROJECT_SOURCE_DIR}/License/License.cmake)
+# Generate our ReadMe and License Files
+configure_file(${PROJECT_SOURCE_DIR}/License.txt.in
+                ${PROJECT_BINARY_DIR}/License.txt )
+configure_file(${PROJECT_SOURCE_DIR}/ReadMe.txt.in
+                ${PROJECT_BINARY_DIR}/ReadMe.txt )
+                
+# Include some directories for the compiler
+include_directories(${PROJECT_BINARY_DIR})
+
+# Bring in the EM/MPM Library first
+add_subdirectory(${QEMMPM_SOURCE_DIR}/Support/emmpm ${QEMMPM_BINARY_DIR}/emmpm)
+include_directories(${QEMMPM_SOURCE_DIR}/Support/emmpm/Code)
+include_directories(${QEMMPM_BINARY_DIR}/emmpm)
 
 # --------------------------------------------------------------------
 # Compile the support libraries
-#add_subdirectory(${PROJECT_CODE_DIR}/AIM ${PROJECT_BINARY_DIR}/AIMLib)
 add_subdirectory(${PROJECT_CODE_DIR}/QtSupport ${PROJECT_BINARY_DIR}/QtSupport)
 add_subdirectory(${PROJECT_CODE_DIR}/MXA ${PROJECT_BINARY_DIR}/MXA)
 

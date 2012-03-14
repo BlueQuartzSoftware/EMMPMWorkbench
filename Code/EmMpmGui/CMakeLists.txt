@@ -7,7 +7,6 @@
 PROJECT( EmMpmGui )
 cmake_minimum_required(VERSION 2.8)
 
-
 cmpGenerateVersionString ( ${EmMpmGui_BINARY_DIR}/EmMpmGuiVersion.h "EmMpm_Gui" "EmMpmGui")
 
 # ------------------------------------------------------------------------------
@@ -47,17 +46,8 @@ ENDIF (NOT TIFF_FOUND)
 #CMP_LIBRARIES_INSTALL_RULES("tiff" ".")
 INCLUDE_DIRECTORIES(${TIFF_INCLUDE_DIRS})
 
-# ------------------------------------------------------------------------------
-#  EM/MPM Library Section
-# ------------------------------------------------------------------------------
-#find_package(EMMPM)
-#if (EMMPM_FOUND)
-#    include_directories(${EMMPM_INCLUDE_DIR})
-#    CMP_COPY_DEPENDENT_LIBRARIES("EMMPM")
-#    CMP_LIBRARIES_INSTALL_RULES("EMMPM" ".")
-#else()
-#    message(FATAL_ERROR "EMMPM is required for this project")
-#endif()
+set(PROJECT_PREFIX "QEMMPM")
+include(${QEMMPM_SOURCE_DIR}/License/License.cmake)
 
 # Set some Win32 Specific Settings
 IF(WIN32)
@@ -146,6 +136,9 @@ QT4_WRAP_CPP( Generated_MOC_SRCS ${EmMpmGui_MOC_HDRS} )
 cmp_IDE_GENERATED_PROPERTIES(EmMpmGui/Generated "${Generated_UI_HDRS}" "${Generated_MOC_SRCS};${Generated_RC_SRCS}")
 
 
+                      
+
+
 # -- Finally set the Project Sources to include all the sources
 SET (${PROJECT_NAME}_PROJECT_SRCS 
   ${EmMpmGui_SRCS} 
@@ -180,7 +173,7 @@ BuildQtAppBundle(
     VERSION_MINOR ${QEMMPM_VER_MINOR}
     VERSION_PATCH ${QEMMPM_VER_PATCH}
     BINARY_DIR    ${${PROJECT_NAME}_BINARY_DIR}
-    LINK_LIBRARIES ${QT_LIBRARIES} MXADataModel QtSupport ${QWT_LIBRARIES} EMMPMLib
+    LINK_LIBRARIES ${QT_LIBRARIES} MXA QtSupport ${QWT_LIBRARIES} EMMPMLib
     LIB_SEARCH_DIRS ${CMAKE_LIBRARY_OUTPUT_DIRECTORY} ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
     QT_PLUGINS    ${QT_PLUGINS}
 #        OTHER_PLUGINS ${OTHER_PLUGINS}

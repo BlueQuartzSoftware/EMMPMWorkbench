@@ -80,11 +80,11 @@
 #include "MXA/Common/MXAMemory.h"
 
 //
-#include <emmpm/public/InitializationFunctions.h>
-#include <emmpm/public/ProgressFunctions.h>
-#include <emmpm/tiff/EMTiffIO.h>
-#include <emmpm/public/EMMPM_Structures.h>
-#include <emmpm/public/EMMPM.h>
+#include "EMMPMLib/public/InitializationFunctions.h"
+#include "EMMPMLib/public/ProgressFunctions.h"
+#include "EMMPMLib/tiff/EMTiffIO.h"
+#include "EMMPMLib/public/EMMPM_Structures.h"
+#include "EMMPMLib//public/EMMPM.h"
 
 //
 #include "EmMpmGuiVersion.h"
@@ -92,7 +92,7 @@
 #include "UserInitArea.h"
 #include "EMMPMTask.h"
 #include "AxisSettingsDialog.h"
-#include "License/LicenseFiles.h"
+#include "License/EmMpmGuiLicenseFiles.h"
 #include "UserInitAreaWidget.h"
 #include "LayersDockWidget.h"
 
