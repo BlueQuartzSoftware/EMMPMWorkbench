@@ -1,15 +1,15 @@
-///////////////////////////////////////////////////////////////////////////////
+
 //
-//  Copyright (c) 2008, mjackson
+//  Copyright (c) 2008, Michael A. Jackson for BlueQuartz Software
 //  All rights reserved.
 //  BSD License: http://www.opensource.org/licenses/bsd-license.html
 //
 //
-///////////////////////////////////////////////////////////////////////////////
+
 #ifndef _FILEWRITER_H_
 #define _FILEWRITER_H_
 
-#include <MXA/MXATypes.h>
+#include "MXA/MXA.h"
 
 #include <fstream>
 #define WRITER64_OUTPUT_STREAM std::ofstream

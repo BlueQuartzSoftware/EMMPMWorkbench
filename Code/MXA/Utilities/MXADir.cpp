@@ -1,10 +1,10 @@
-///////////////////////////////////////////////////////////////////////////////
+
 //
 //  Copyright (c) 2010, Michael A. Jackson. BlueQuartz Software
 //  All rights reserved.
 //  BSD License: http://www.opensource.org/licenses/bsd-license.html
 //
-///////////////////////////////////////////////////////////////////////////////
+
 
 #include "MXADir.h"
 
@@ -84,34 +84,39 @@ bool MXA_FILESYSTEM_BASE_CLASS::mkdir(const std::string &name, bool createParent
 #else
 
   std::string dirName = name;
-  if (createParentDirectories) {
-      dirName = MXA_FILESYSTEM_BASE_CLASS::cleanPath(dirName);
-      std::string::size_type slash = 0;
-      for(std::string::size_type oldslash = 1; slash != std::string::npos; oldslash = slash)
+  if (createParentDirectories)
+  {
+    dirName = MXA_FILESYSTEM_BASE_CLASS::cleanPath(dirName);
+    std::string::size_type slash = 0;
+    for (std::string::size_type oldslash = 1; slash != std::string::npos; oldslash = slash)
+    {
+      slash = dirName.find(MXA_FILESYSTEM_BASE_CLASS::Separator, oldslash + 1);
+      if (slash == std::string::npos)
       {
-          slash = dirName.find(MXA_FILESYSTEM_BASE_CLASS::Separator, oldslash+1);
-          if (slash == std::string::npos) {
-              if (oldslash == dirName.length())
-                  break;
-              slash = dirName.length();
-          }
-          if (slash != std::string::npos) {
-              std::string chunk = dirName.substr(0, slash);
-              MXA_STATBUF st;
-              if (MXA_STAT(chunk.c_str(), &st) != -1)
-              {
-                if ((st.st_mode & S_IFMT) != S_IFDIR)
-                {
-                      return false;
-                }
-              }
-              else if (::mkdir(chunk.c_str(), 0777) != 0)
-              {
-                      return false;
-              }
-          }
+        if (oldslash == dirName.length()) break;
+        slash = dirName.length();
       }
-      return true;
+      if (slash != std::string::npos)
+      {
+        std::string chunk = dirName.substr(0, slash);
+        if (exists(chunk) == false)
+        {
+          MXA_STATBUF st;
+          if (MXA_STAT(chunk.c_str(), &st) != -1)
+          {
+            if ((st.st_mode & S_IFMT) != S_IFDIR)
+            {
+              return false;
+            }
+          }
+          else if (::mkdir(chunk.c_str(), 0777) != 0)
+          {
+            return false;
+          }
+        }
+      }
+    }
+    return true;
   }
 #if defined(__APPLE__)  // Mac X doesn't support trailing /'s
     if (dirName[dirName.length() - 1] == '/')

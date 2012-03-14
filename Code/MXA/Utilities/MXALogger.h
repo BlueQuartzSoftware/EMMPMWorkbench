@@ -1,11 +1,11 @@
-///////////////////////////////////////////////////////////////////////////////
+
 //
 //  Copyright (c) 2009, Michael A. Jackson. BlueQuartz Software
 //  All rights reserved.
 //  BSD License: http://www.opensource.org/licenses/bsd-license.html
 //
 //
-///////////////////////////////////////////////////////////////////////////////
+
 #ifndef _MXALogger_H_
 #define _MXALogger_H_
 
@@ -13,16 +13,14 @@
 #error REMOVE THE DEFINITION YOU DONT NEED IT ANYMORE
 #endif
 
+#include "MXA/MXA.h"
+#include <MXA/Common/LogTime.h>
+#include <MXA/Common/MXASetGetMacros.h>
 
 #include <string>
 #include <iostream>
 #include <fstream>
 #include <sstream>
-
-
-#include <MXA/MXATypes.h>
-#include <MXA/Common/LogTime.h>
-#include <MXA/Common/MXASetGetMacros.h>
 
 
 /**
@@ -107,7 +105,7 @@ class MXA_EXPORT MXALogger_Implementation
 * used to log debug information into a log file or to std::cout.
 *
 * @details To use this class you should use the macros provided in this class header.
-*   To get an instance of the global logger use the following in your code:
+*   To get an instance of the global logger use the folling in your code:
 *    <code> MXALOGGER_METHOD_VARIABLE_INSTANCE</code>
 *    Then to use to the logger it can be syntactically the same as 'std::cout <<'
 *    style by using the 'mxa_log' macro definition.
@@ -139,23 +137,4 @@ class MXA_EXPORT MXALogger
 
 };
 
-
-
-
-class MyPrivateTest
-{
-public:
-  MyPrivateTest() {};
-  virtual ~MyPrivateTest() {};
-
-  void test()
-  {
-MXALOGGER_METHOD_VARIABLE_INSTANCE;
-mxa_log << "Testing" << std::endl;
-  }
-
-private:
-  MyPrivateTest(const MyPrivateTest&);
-  void operator=(const MyPrivateTest&);
-};
 #endif

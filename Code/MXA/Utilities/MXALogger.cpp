@@ -1,11 +1,11 @@
-///////////////////////////////////////////////////////////////////////////////
+
 //
 //  Copyright (c) 2009, Michael A. Jackson. BlueQuartz Software
 //  All rights reserved.
 //  BSD License: http://www.opensource.org/licenses/bsd-license.html
 //
 //
-///////////////////////////////////////////////////////////////////////////////
+
 
 #include "MXALogger.h"
 
@@ -31,13 +31,13 @@ MXALogger::~MXALogger()
 // -----------------------------------------------------------------------------
 MXALogger::Pointer MXALogger::instance()
 {
-	static MXALogger::Pointer singleton;
-	if (singleton.get() == NULL)
-	  {
-	//	std::cout << "MXALogger constructing singleton instance" << std::endl;
-	    singleton.reset (new MXALogger() );
-	  }
-	  return singleton;
+  static MXALogger::Pointer singleton;
+  if (singleton.get() == NULL)
+    {
+  //  std::cout << "MXALogger constructing singleton instance" << std::endl;
+      singleton.reset (new MXALogger() );
+    }
+    return singleton;
 }
 
 
@@ -49,7 +49,7 @@ MXALogger_Implementation::MXALogger_Implementation() :
   m_IsFileBased(false),
   m_FileName("NO FILE SET")
 {
-	//std::cout << "MXALogger_Implementation constructing" << std::endl;
+  //std::cout << "MXALogger_Implementation constructing" << std::endl;
 }
 
 // -----------------------------------------------------------------------------

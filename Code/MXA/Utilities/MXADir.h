@@ -1,10 +1,10 @@
-///////////////////////////////////////////////////////////////////////////////
+
 //
 //  Copyright (c) 2010, Michael A. Jackson. BlueQuartz Software
 //  All rights reserved.
 //  BSD License: http://www.opensource.org/licenses/bsd-license.html
 //
-///////////////////////////////////////////////////////////////////////////////
+
 
 #ifndef MXADIR_H_
 #define MXADIR_H_
@@ -14,7 +14,7 @@
 #include <vector>
 
 //-- MXA Includes
-#include "MXA/MXATypes.h"
+#include "MXA/MXA.h"
 
 
 class  MXADir

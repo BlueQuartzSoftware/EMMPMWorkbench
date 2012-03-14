@@ -1,11 +1,11 @@
-///////////////////////////////////////////////////////////////////////////////
+
 //
 //  Copyright (c) 2009, Michael A. Jackson. BlueQuartz Software
 //  All rights reserved.
 //  BSD License: http://www.opensource.org/licenses/bsd-license.html
 //
 //
-///////////////////////////////////////////////////////////////////////////////
+
 #ifndef WINDOWSFILEREADER_H_
 #define WINDOWSFILEREADER_H_
 
@@ -14,7 +14,7 @@
   please file a bug report.
 #endif
 
-#include <MXA/MXATypes.h>
+#include "MXA/MXA.h"
 #include <MXA/Common/Win32Defines.h> // This will define WINDOWS_LARGE_FILE_SUPPORT to true, which is what we want
 
 

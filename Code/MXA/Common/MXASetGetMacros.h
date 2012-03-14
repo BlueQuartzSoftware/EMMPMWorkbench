@@ -1,39 +1,36 @@
-///////////////////////////////////////////////////////////////////////////////
+
 //
 //  Copyright (c) 2009, Michael A. Jackson. BlueQuartz Software
 //  All rights reserved.
 //  BSD License: http://www.opensource.org/licenses/bsd-license.html
 //
 //
-///////////////////////////////////////////////////////////////////////////////
+
 #ifndef _MXASetGetMacros_h_
 #define _MXASetGetMacros_h_
+
+#include <string.h>
 
 #include <string>
 #include <iostream>
 #include <sstream>
 #include <stdexcept>
 
-#ifdef QT_CORE_LIB
-#undef QT_CORE_LIB
-#define redef_QT_CORE_LIB
-#endif
 
 
 #if defined(QT_CORE_LIB)
 //-- Qt includes
 #include <QtCore/QSharedPointer>
-#define RAW_PTR  data
-#else
+//#define RAW_PTR  data
+#endif
+
 //-- Boost Includes
 #include <boost/shared_ptr.hpp>
 #include <boost/weak_ptr.hpp>
-#define RAW_PTR  get
-#endif
+
 
 #define SHARED_IS_NULL(ptr)\
   (  (ptr).get() == NULL )
-
 
 /**
  * @brief Creates a static method that returns a NULL pointer wrapped in a
@@ -46,18 +43,20 @@
     return Pointer(static_cast<thisClass*>(NULL));\
   }
 
-#if defined(QT_CORE_LIB)
+
+#ifndef QT_SHARED_POINTERS
 /**
  * @brief Creates some basic typedefs that can be used throughout the code to
  * reference the class.
  */
-#define MXA_SHARED_POINTERS(thisClass)\
+#define QT_SHARED_POINTERS(thisClass)\
   typedef thisClass                      Self;\
   typedef QSharedPointer< Self >        Pointer;\
   typedef QSharedPointer<const Self >  ConstPointer;\
   MXA_NULL_SHARED_POINTER(thisClass)
 
-#else
+#endif
+
 /**
  * @brief Creates some basic typedefs that can be used throughout the code to
  * reference the class.
@@ -70,7 +69,15 @@
   typedef boost::weak_ptr<thisClass > ConstWeakPointer;\
   MXA_NULL_SHARED_POINTER(thisClass)
 
-#endif
+
+#define MXA_STATIC_NEW_SUPERCLASS(superclass, theclass)\
+  static superclass::Pointer New()\
+  {\
+    theclass* ptr = new theclass();\
+    superclass::Pointer shared_ptr (dynamic_cast<superclass*>(ptr) );\
+    return shared_ptr;\
+  }
+
 
 /**
  * @brief Creates a typedef that points to the superclass of this class
@@ -110,8 +117,58 @@ static Pointer New args \
 /** Macro used to add standard methods to all classes, mainly type
  * information. */
 #define MXA_TYPE_MACRO(thisClass) \
-    virtual const char* getNameOfClass() const \
-        {return #thisClass;}
+public: \
+virtual const std::string getNameOfClass() {return std::string(#thisClass);}\
+static int IsTypeOf(const char *type) \
+{ \
+if ( !strcmp(#thisClass,type) ) \
+{ \
+return 1; \
+} \
+return 0; \
+} \
+virtual int IsA(const char *type) \
+{ \
+return this->thisClass::IsTypeOf(type); \
+} \
+template <class Source, class Target>\
+inline Target SafeObjectDownCast(Source x) { \
+if( dynamic_cast<Target>(x) != x ) { \
+return NULL;\
+}\
+return static_cast<Target>(x);\
+}
+
+
+#define MXA_TYPE_MACRO_SUPER(thisClass,superclass) \
+public: \
+virtual const std::string getNameOfClass() {return std::string(#thisClass);}\
+static std::string ClassName() {return std::string(#thisClass);}\
+static int IsTypeOf(const char *type) \
+{ \
+if ( !strcmp(#thisClass,type) ) \
+{ \
+return 1; \
+} \
+return superclass::IsTypeOf(type); \
+} \
+virtual int IsA(const char *type) \
+{ \
+return this->thisClass::IsTypeOf(type); \
+} \
+template <class Source, class Target>\
+static Target SafeObjectDownCast(Source x) { \
+if( dynamic_cast<Target>(x) != x ) { \
+return NULL;\
+}\
+return static_cast<Target>(x);\
+}\
+static thisClass* SafePointerDownCast(superclass* s) {\
+return SafeObjectDownCast<superclass*, thisClass*>(s);\
+}
+
+
+
 
 //------------------------------------------------------------------------------
 // Macros for Properties
@@ -173,6 +230,35 @@ static Pointer New args \
   public:\
     MXA_SET_2DVECTOR_PROPERTY(type, prpty, m_##prpty)\
     MXA_GET_2DVECTOR_PROPERTY(type, prpty, m_##prpty)
+
+
+#define MXA_SET_VEC3_PROPERTY(type, prpty, varname)\
+  void set##prpty(type value[3]) {\
+      varname[0] = value[0]; varname[1] = value[1]; varname[2] = value[2]; }\
+  void set##prpty(type value_0, type value_1, type value_2) {\
+      varname[0] = value_0; varname[1] = value_1; varname[2] = value_2; }
+
+#define MXA_GET_VEC3_PROPERTY(type, prpty, varname)\
+  void get##prpty(type value[3]) {\
+      value[0] = varname[0]; value[1] = varname[1]; value[2] = varname[2]; }\
+  void get##prpty(type &value_0, type &value_1, type &value_2) {\
+      value_0 = varname[0]; value_1 = varname[1]; value_2 = varname[2]; }
+
+
+#define MXA_INSTANCE_VEC3_PROPERTY(type, prpty)\
+  private:\
+    type   m_##prpty[3];\
+  public:\
+    MXA_SET_VEC3_PROPERTY(type, prpty, m_##prpty)\
+    MXA_GET_VEC3_PROPERTY(type, prpty, m_##prpty)
+
+
+
+#define MXA_CONTAINER_TYPE(thisClass, container) \
+    typedef container<thisClass >     ContainerT; \
+    typedef boost::shared_ptr< container<thisClass > > ContainerPType;
+
+
 
 /**
 * @brief Creates a "setter" method to set the property.
@@ -268,24 +354,19 @@ namespace MXA
 * @param value The value of the property
 */
 
-#define GET_PROPERTY_BODY(name_space, type, prpty, varname, key, value)\
-  if (name_space::prpty.compare(key) == 0) {  \
-  try { value = *(reinterpret_cast<T*>( &(varname))); return 1;} \
+#define GET_PROPERTY_BODY(name_space, type, prpty, key, value)\
+    if (name_space::prpty.compare(key) == 0) {  \
+      try { value = *(reinterpret_cast<T*>( &(m_##prpty))); return 1;} \
   catch(MXA::bad_any_cast &) { std::cout << "Could not cast value '" << value << "' to type '" << #type << "' for property '" << #prpty << "'" << std::endl; } }
 
-#define GET_STRING_PROPERTY_BODY2(name_space, type, prpty, varname, key, value)\
+#define GET_STRING_PROPERTY_BODY2(name_space, type, prpty, key, value)\
   if (name_space::prpty.compare(key) == 0) {  \
-  try { value = varname; return 1;} \
+    try { value = m_##prpty; return 1;} \
   catch(MXA::bad_any_cast &) { std::cout << "Could not cast value '" << value << "' to type '" << #type << "' for property '" << #prpty << "'" << std::endl; } }
 
 
-//
-////////////////////////////////////////////////////////////////////////////////
 
 #endif
 
-#ifdef redef_QT_CORE_LIB
-#define QT_CORE_LIB
-#endif
 
 #endif /* _MXASetGetMacros_h_  */

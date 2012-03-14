@@ -1,18 +1,17 @@
-///////////////////////////////////////////////////////////////////////////////
+
 //
-//  Copyright (c) 2006, Shawn Nicholson
+//  Copyright (c) 2006, Michael A. Jackson for BlueQuartz Software
 //  All rights reserved.
 //  BSD License: http://www.opensource.org/licenses/bsd-license.html
 //
 //  This code was written under United States Air Force Contract number
 //                           FA8650-04-C-5229
 //
-///////////////////////////////////////////////////////////////////////////////
+
 #ifndef STRINGUTILITIES_H_
 #define STRINGUTILITIES_H_
 
-//-- MXA Includes
-#include <MXA/Common/DLLExport.h>
+
 
 
 //-- STL Includes
@@ -23,6 +22,7 @@
 #include <iostream>
 #include <algorithm>
 
+#include "MXA/MXA.h"
 
 //TODO: Create Test Suite for these Methods
 
