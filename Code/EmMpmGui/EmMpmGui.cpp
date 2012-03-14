@@ -1955,9 +1955,11 @@ void EmMpmGui::plotImageHistogram()
     {
       index = (y * width) + x;
       rgbPixel = image.pixel(x, y);
-      gray = qGray(rgbPixel);
+
+      gray = (((rgbPixel >> 16) & 0xff)*11
+          + ((rgbPixel >> 8) & 0xff)*16
+          + (rgbPixel & 0xff)*5)/32;
       values[gray]++;
-      if (values[gray] > max) { max = values[gray]; }
     }
   }
 
