@@ -67,8 +67,8 @@ void EMMPMTask::EMMPMUpdate_CallBackWrapper(EMMPM_Data* data)
    */
   QMutexLocker locker(&EMMPMTask_CallBackWrapperMutex);
 
-  // explicitly cast global variable <globalSHPTask> to a pointer to TClassB
-  // warning: <globalSHPTask> MUST point to an appropriate object!
+  // explicitly cast global variable <EMMPMTask> to a pointer to EMMPMTask
+  // warning: <EMMPMTask> MUST point to an appropriate object!
   EMMPMTask* mySelf = static_cast<EMMPMTask* > (data->userData);
 
 //  float total = data->emIterations * data->mpmIterations;
@@ -120,8 +120,8 @@ void EMMPMTask::EMMPMUpdate_CallBackWrapper(EMMPM_Data* data)
       for (int l = 0; l < data->classes; ++l)
       {
         histIdx = (256*data->classes*d) + (256*l);
-        QVector<double> values(256);
-        ::memcpy(values.data(), &(data->histograms[histIdx]), 256*sizeof(double));
+        QVector<real_t> values(256);
+        ::memcpy(values.data(), &(data->histograms[histIdx]), 256*sizeof(real_t));
         emit mySelf->updateHistogramAvailable(values);
       }
     }

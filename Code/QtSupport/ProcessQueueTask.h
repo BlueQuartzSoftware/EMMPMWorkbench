@@ -38,6 +38,7 @@
 
 #include <MXA/Common/MXASetGetMacros.h>
 #include "AIM/Common/AIMImage.h"
+#include "EMMPMLib/Public/EMMPM_Structures.h"
 
 /**
  * @class ProcessQueueTask ProcessQueueTask.h QtSupport/ProcessQueueTask.h
@@ -119,7 +120,7 @@ class ProcessQueueTask : public QThread
        *
        * @param values
        */
-      void updateHistogramAvailable(QVector<double> values);
+      void updateHistogramAvailable(QVector<real_t> values);
 
     public slots:
 

@@ -934,7 +934,8 @@ void EmMpmGui::on_processBtn_clicked()
     connect(task, SIGNAL(progressTextChanged(QString )), this, SLOT(processingMessage(QString )), Qt::QueuedConnection);
     connect(task, SIGNAL(updateImageAvailable(QImage)), m_GraphicsView, SLOT(setOverlayImage(QImage)));
     connect(task, SIGNAL(histogramsAboutToBeUpdated()), this, SLOT(clearProcessHistograms()));
-    connect(task, SIGNAL(updateHistogramAvailable(QVector<double>)), this, SLOT(addProcessHistogram(QVector<double>)));
+    qRegisterMetaType<QVector<real_t> >("QVector<real_t>");
+    connect(task, SIGNAL(updateHistogramAvailable(QVector<real_t>)), this, SLOT(addProcessHistogram(QVector<real_t>)));
     this->addProcess(task);
   }
   else
@@ -966,7 +967,7 @@ void EmMpmGui::on_processBtn_clicked()
       {
         connect(task, SIGNAL(updateImageAvailable(QImage)), m_GraphicsView, SLOT(setOverlayImage(QImage)));
         connect(task, SIGNAL(histogramsAboutToBeUpdated()), this, SLOT(clearProcessHistograms()));
-        connect(task, SIGNAL(updateHistogramAvailable(QVector<double>)), this, SLOT(addProcessHistogram(QVector<double>)));
+        connect(task, SIGNAL(updateHistogramAvailable(QVector<real_t>)), this, SLOT(addProcessHistogram(QVector<real_t>)));
 
       }
       this->addProcess(task);
@@ -1033,8 +1034,8 @@ EMMPMTask* EmMpmGui::newEmMpmTask( QString inputFile, QString outputFile, Proces
   {
     data->initType = EMMPM_ManualInit;
     // Allocate memory to hold the values - The EMMPM Task will free the memory
-    data->m = (double*)malloc(data->classes * data->dims * sizeof(double));
-    data->v = (double*)malloc(data->classes * data->dims * sizeof(double));
+    data->m = (real_t*)malloc(data->classes * data->dims * sizeof(real_t));
+    data->v = (real_t*)malloc(data->classes * data->dims * sizeof(real_t));
     copyGrayValues(data);
     copyInitCoords(data);
     copyIntializationValues(data);
@@ -1831,18 +1832,21 @@ void EmMpmGui::clearProcessHistograms()
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
-void EmMpmGui::addProcessHistogram(QVector<double> data)
+void EmMpmGui::addProcessHistogram(QVector<real_t> data)
 {
   //std::cout << "EmMpmGui::setProcessHistograms..... " << std::endl;
   QwtPlotCurve* curve = NULL;
   const int numValues = data.size();
   double max = 0;
   // Generate the Histogram Bins (X Axis)
-  QwtArray<double > intervals(numValues);
+  QwtArray<double> intervals(numValues);
+  QwtArray<double> dValues(numValues);
+
   for (int i = 0; i < numValues; ++i)
   {
     intervals[i] = (double)i;
     if (data[i] > max) { max = data[i]; }
+    dValues[i] = data[i];
   }
 
   QPen pen(Qt::red, 1.5, Qt::SolidLine);
@@ -1859,7 +1863,8 @@ void EmMpmGui::addProcessHistogram(QVector<double> data)
   curve->setPen(pen);
   curve->attach(m_HistogramPlot);
   m_Gaussians.append(curve);
-  curve->setData(intervals, data);
+
+  curve->setData(intervals, dValues);
 
   updateHistogramAxis();
   ++m_CurrentHistogramClass;
