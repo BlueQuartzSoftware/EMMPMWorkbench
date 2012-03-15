@@ -38,7 +38,7 @@
 
 #include <MXA/Common/MXASetGetMacros.h>
 #include "AIM/Common/AIMImage.h"
-#include "EMMPMLib/Public/EMMPM_Structures.h"
+#include "EMMPMLib/public/EMMPM_Structures.h"
 
 /**
  * @class ProcessQueueTask ProcessQueueTask.h QtSupport/ProcessQueueTask.h

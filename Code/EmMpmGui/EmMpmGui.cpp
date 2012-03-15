@@ -81,7 +81,7 @@
 
 //
 #include "EMMPMLib/EMMPMLib.h"
-#include "EMMPMLib/Common/MSVCDefines.h"
+#include "EMMPMLib/common/MSVCDefines.h"
 #include "EMMPMLib/public/InitializationFunctions.h"
 #include "EMMPMLib/public/ProgressFunctions.h"
 #include "EMMPMLib/tiff/EMTiffIO.h"
