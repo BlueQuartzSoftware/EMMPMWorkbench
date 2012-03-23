@@ -7,7 +7,7 @@
 PROJECT( EmMpmGui )
 cmake_minimum_required(VERSION 2.8)
 
-cmpGenerateVersionString ( ${EmMpmGui_BINARY_DIR}/EmMpmGuiVersion.h "EmMpm_Gui" "EmMpmGui")
+#cmpGenerateVersionString ( ${EmMpmGui_BINARY_DIR}/EmMpmGuiVersion.h "EmMpm_Gui" "EmMpmGui")
 
 # ------------------------------------------------------------------------------
 #  Qt 4 Section
