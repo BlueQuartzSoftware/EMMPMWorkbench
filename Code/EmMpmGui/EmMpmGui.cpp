@@ -1115,6 +1115,7 @@ void EmMpmGui::queueControllerFinished()
   {
     QStringList fileList = generateInputFileList();
 
+
     setCurrentImageFile (sourceDirectoryLE->text() + QDir::separator() + fileList.at(0) );
     m_GraphicsView->blockSignals(true);
     m_GraphicsView->loadBaseImageFile(m_CurrentImageFile);

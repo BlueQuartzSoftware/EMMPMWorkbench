@@ -371,7 +371,9 @@ void EMMPMTask::segmentImage(int i)
   if (NULL != m_data->y) {free(m_data->y); m_data->y = NULL; }
   if (NULL != m_data->xt) {free(m_data->xt); m_data->xt = NULL; }
   if (NULL != m_data->probs) {free(m_data->probs); m_data->probs = NULL; }
-  if (NULL != m_data->ccost) {free(m_data->ccost); m_data->ccost = NULL; }
+  if (m_data->useCurvaturePenalty != 0) {
+    if (NULL != m_data->ccost) {free(m_data->ccost); m_data->ccost = NULL; }
+  }
   if (NULL != m_data->histograms) {free(m_data->histograms); m_data->histograms = NULL; }
 
   int err = m_data->allocateDataStructureMemory();

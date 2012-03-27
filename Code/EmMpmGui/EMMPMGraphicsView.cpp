@@ -424,7 +424,6 @@ void EMMPMGraphicsView::loadBaseImageFile(const QString &filename)
 
   m_BaseImage.convertToFormat(QImage::Format_ARGB32_Premultiplied);
 
-  std::cout << "m_UserInitAreaVector->size(): " << m_UserInitAreaVector->size() << std::endl;
   QGraphicsScene* gScene = scene();
   if (gScene == NULL)
   {
@@ -433,10 +432,21 @@ void EMMPMGraphicsView::loadBaseImageFile(const QString &filename)
   }
   else
   {
+    for(int i = 0; i < m_UserInitAreaVector->size(); ++i)
+    {
+      UserInitArea* ui = m_UserInitAreaVector->at(i);
+      if(ui)
+      {
+        scene()->removeItem(ui);
+        ui->setParentItem(NULL);
+      }
+    }
     setScene(NULL);
     gScene->deleteLater();
     gScene = new QGraphicsScene(this);
     setScene(gScene);
+    std::cout << "m_UserInitAreaVector->size(): " << m_UserInitAreaVector->size() << std::endl;
+
     delete m_ImageGraphicsItem;
     m_ImageGraphicsItem = NULL;
   }
@@ -446,8 +456,6 @@ void EMMPMGraphicsView::loadBaseImageFile(const QString &filename)
   m_ImageGraphicsItem->setAcceptDrops(true);
   m_ImageGraphicsItem->setZValue(-1);
 
-  std::cout << "m_UserInitAreaVector->size(): " << m_UserInitAreaVector->size() << std::endl;
-
   for(int i = 0; i < m_UserInitAreaVector->size(); ++i)
   {
     UserInitArea* ui = m_UserInitAreaVector->at(i);
@@ -455,6 +463,8 @@ void EMMPMGraphicsView::loadBaseImageFile(const QString &filename)
       ui->setParentItem(m_ImageGraphicsItem);
     }
   }
+
+
   QRectF rect = m_ImageGraphicsItem->boundingRect();
   gScene->setSceneRect(rect);
   centerOn(m_ImageGraphicsItem);
