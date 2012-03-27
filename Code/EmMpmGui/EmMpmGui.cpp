@@ -251,6 +251,11 @@ void EmMpmGui::readIOSettings(QSettings &prefs)
   {
     this->populateFileTable(this->sourceDirectoryLE, this->fileListView);
   }
+  // Try and load the first image
+  if (processFolder->isChecked() == true)
+  {
+    on_loadFirstImageBtn_clicked();
+  }
 }
 
 // -----------------------------------------------------------------------------
@@ -280,6 +285,7 @@ void EmMpmGui::readSettings(QSettings &prefs)
   READ_SETTING(prefs, curvatureRMax, ok, d, 15.0, Double);
   READ_SETTING(prefs, ccostLoopDelay, ok, i, 1, Int);
   READ_VALUE(prefs, userInitAreaCount, ok, i, 0, Int);
+  READ_BOOL_SETTING(prefs, muSigmaFeedback, false);
   enableUserDefinedAreas->blockSignals(true);
   READ_BOOL_SETTING(prefs, enableUserDefinedAreas, false);
   enableUserDefinedAreas->blockSignals(false);
@@ -332,6 +338,7 @@ void EmMpmGui::writeSettings(QSettings &prefs)
   WRITE_SETTING(prefs, ccostLoopDelay);
 
   WRITE_CHECKBOX_SETTING(prefs, enableUserDefinedAreas);
+  WRITE_CHECKBOX_SETTING(prefs, muSigmaFeedback);
   int userInitAreaCount = this->m_UserInitAreaVector->size();
   WRITE_VALUE(prefs, userInitAreaCount);
   prefs.endGroup();

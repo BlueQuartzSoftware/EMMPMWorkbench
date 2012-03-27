@@ -231,7 +231,6 @@ void EMMPMTask::run()
   if (m_data->cancel == 1)
   {
     UPDATE_PROGRESS(QString("Ending Segmentation"), 100);
-    emit finished();
     emit finished(this);
     return;
   }
@@ -262,7 +261,7 @@ void EMMPMTask::run()
   m_data = EMMPM_Data::NullPointer();
 
   UPDATE_PROGRESS(QString("Ending Segmentation"), 100);
-  emit finished();
+
   emit finished(this);
 }
 
@@ -287,7 +286,7 @@ void EMMPMTask::segmentImage(int i)
   if (image.isNull() == true)
   {
     UPDATE_PROGRESS(QString("There was an issue loading the image. Either the input image does not exist or low memory prevented the loading of the image"), 100);
-    emit finished();
+
     emit finished(this);
     return;
   }
@@ -297,7 +296,7 @@ void EMMPMTask::segmentImage(int i)
   quint8* inImage = inImageBufferPtr->allocateDataArray(width*height, true);
   if (NULL == inImage)
   {
-    emit finished();
+
     emit finished(this);
     return;
   }
@@ -331,7 +330,7 @@ void EMMPMTask::segmentImage(int i)
   quint8* outImagePtr = outImageBufferPtr->allocateDataArray(width*height, true);
   if (NULL == outImagePtr)
   {
-    emit finished();
+
     emit finished(this);
     return;
   }
@@ -344,7 +343,7 @@ void EMMPMTask::segmentImage(int i)
   if (err < 0)
   {
     UPDATE_PROGRESS(QString("EM/MPM Error Reading Input Image"), 100); emit
-    emit finished();
+
     emit finished(this);
     return;
   }
@@ -380,7 +379,7 @@ void EMMPMTask::segmentImage(int i)
   if (err)
   {
     UPDATE_PROGRESS(QString("Error allocating memory for the EMMPM Data Structure"), 0);
-    emit finished();
+
     emit finished(this);
     return;
   }
@@ -427,7 +426,7 @@ void EMMPMTask::segmentImage(int i)
     if (err < 0)
     {
       UPDATE_PROGRESS(QString("EM/MPM Error Writing Output Image"), 100); emit
-      emit finished();
+
       emit finished(this);
       return;
     }
@@ -446,9 +445,16 @@ void EMMPMTask::segmentImage(int i)
   // deallocate the bulk of the memory
   // The AIMArray is managing this memory so set it to NULL so it does not get freed twice.
   m_data->outputImage = NULL;
-  if (NULL != m_data->input_file_name) {free(m_data->input_file_name); m_data->input_file_name = NULL; }
-  if (NULL != m_data->output_file_name) {free(m_data->output_file_name); m_data->output_file_name = NULL; }
-
+  if(NULL != m_data->input_file_name)
+  {
+    free(m_data->input_file_name);
+    m_data->input_file_name = NULL;
+  }
+  if(NULL != m_data->output_file_name)
+  {
+    free(m_data->output_file_name);
+    m_data->output_file_name = NULL;
+  }
 
 }
 

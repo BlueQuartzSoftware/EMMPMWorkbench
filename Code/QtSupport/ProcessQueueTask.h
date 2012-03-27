@@ -153,7 +153,6 @@ class ProcessQueueTask : public QThread , public Observer
      */
     virtual void pipelineFinished()
     {
-      emit finished();
       emit finished(this);
     }
 
@@ -165,7 +164,6 @@ class ProcessQueueTask : public QThread , public Observer
       void warningMessage(QString message);
       void errorMessage(QString message);
       void updateProgress(int value);
-      void finished();
       void finished(QObject *o);
       void updateImageAvailable(QImage image);
       void histogramsAboutToBeUpdated();
