@@ -131,6 +131,12 @@ configure_file(${PROJECT_SOURCE_DIR}/ReadMe.txt.in
 # Include some directories for the compiler
 include_directories(${PROJECT_BINARY_DIR})
 
+
+# Tell Emmpm Where the MXA Directory is
+set (MXA_SOURCE_DIR ${QEMMPM_SOURCE_DIR}/Support/MXA)
+include_directories(${QEMMPM_SOURCE_DIR}/Support)
+include_directories(${QEMMPM_BINARY_DIR})
+
 # Bring in the EM/MPM Library first
 add_subdirectory(${QEMMPM_SOURCE_DIR}/Support/emmpm ${QEMMPM_BINARY_DIR}/emmpm)
 include_directories(${QEMMPM_SOURCE_DIR}/Support/emmpm/Code)
@@ -139,8 +145,6 @@ include_directories(${QEMMPM_BINARY_DIR}/emmpm)
 # --------------------------------------------------------------------
 # Compile the support libraries
 add_subdirectory(${PROJECT_CODE_DIR}/QtSupport ${PROJECT_BINARY_DIR}/QtSupport)
-add_subdirectory(${PROJECT_CODE_DIR}/MXA ${PROJECT_BINARY_DIR}/MXA)
-
 
 # --------------------------------------------------------------------
 # Compile the Enhanced EM/MPM Qt Base GUI application

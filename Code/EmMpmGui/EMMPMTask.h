@@ -44,10 +44,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef _EMMPM_TASK_H_
 #define _EMMPM_TASK_H_
 
-//#include <stdio.h>
-//#include <stdlib.h>
-//#include <math.h>
-
 #include <QtCore/QObject>
 #include <QtCore/QThread>
 #include <QtCore/QString>
@@ -55,17 +51,17 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "QtSupport/ProcessQueueTask.h"
 
-#include "EMMPMLib/public/EMMPM_Structures.h"
-#include "EMMPMLib/public/EMMPM.h"
+//-- EMMPM Lib Includes
+#include "EMMPMLib/EMMPMLib.h"
+#include "EMMPMLib/Common/EMMPM_Data.h"
+#include "EMMPMLib/Common/EMMPM.h"
+#include "EMMPMLib/Common/StatsDelegate.h"
 
-// #define PI  3.14159265358979323846
-// #define MAX_CLASSES 15
 
-// #define MAXPRIME  2147483647       /*  MAXPRIME = (2^31)-1     */
 
 #define UPDATE_PROGRESS(m, p)\
-  emit progressTextChanged( (m) );\
-  emit progressValueChanged( (p) );
+  emit progressMessage( (m) );\
+  emit updateProgress( (p) );
 
 /**
 * @class EMMPMTask EMMPMTask.h EmMpm/GUI/EMMPMTask.h
@@ -75,7 +71,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 * @date Dec 20, 2009
 * @version 1.0
 */
-class EMMPMTask : public ProcessQueueTask
+class EMMPMTask : public ProcessQueueTask, public StatsDelegate
 {
 
   Q_OBJECT;
@@ -84,12 +80,17 @@ class EMMPMTask : public ProcessQueueTask
     EMMPMTask(QObject* parent = 0);
     virtual ~EMMPMTask();
 
-    static void EMMPMUpdate_CallBackWrapper(EMMPM_Data* data);
+    /**
+     * @brief StatsDelegate Implementation
+     * @param data The Incoming data from the EM/MPM Process
+     */
+    virtual void reportProgress(EMMPM_Data::Pointer data);
 
-    EMMPM_Data* getEMMPM_Data();
-
+    EMMPM_Data::Pointer getEMMPM_Data();
 
     virtual void run();
+
+    void segmentImage(int i);
 
   public slots:
 
@@ -97,22 +98,17 @@ class EMMPMTask : public ProcessQueueTask
      * @brief Slot to receive a signal to cancel the operation
      */
     void cancel();
-  
-signals:
-     /**
-     * @brief Signal sent when the encoder has a message to relay to the GUI or other output device.
-     */
-   //   void progressTextChanged (QString progressText );
-
 
 
   private:
 
-    EMMPM_Data* m_data;
-    EMMPM_CallbackFunctions* m_callbacks;
-
+    EMMPM_Data::Pointer m_data;
     AIMImage::Pointer m_OriginalImage;
     AIMImage::Pointer m_SegmentedImage;
+
+    char* copyStringToNewBuffer(const QString &fname);
+
+
 
     EMMPMTask(const EMMPMTask&); // Copy Constructor Not Implemented
     void operator=(const EMMPMTask&); // Operator '=' Not Implemented

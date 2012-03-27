@@ -79,16 +79,14 @@
 
 #include "MXA/Common/MXAMemory.h"
 
-//
+//-- EMMPM Lib Includes
 #include "EMMPMLib/EMMPMLib.h"
-#include "EMMPMLib/common/MSVCDefines.h"
-#include "EMMPMLib/public/InitializationFunctions.h"
-#include "EMMPMLib/public/ProgressFunctions.h"
-#include "EMMPMLib/tiff/EMTiffIO.h"
-#include "EMMPMLib/public/EMMPM_Structures.h"
-#include "EMMPMLib/public/EMMPM.h"
+#include "EMMPMLib/Common/MSVCDefines.h"
+#include "EMMPMLib/Common/InitializationFunctions.h"
+#include "EMMPMLib/tiff/TiffUtilities.h"
+#include "EMMPMLib/Common/EMMPM.h"
 
-//
+//-- EMMPM Gui Includes
 #include "EmMpmGuiVersion.h"
 #include "UserInitArea.h"
 #include "EMMPMTask.h"
@@ -642,28 +640,10 @@ void EmMpmGui::on_layersPalette_clicked()
   m_LayersPalette->setVisible(true);
 }
 
-
-
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
-char* EmMpmGui::copyStringToNewBuffer(const QString &fname)
-{
-  std::string::size_type size = fname.size() + 1;
-  char* buf = NULL;
-  if (size > 1)
-  {
-    buf = (char*)malloc(size);
-    ::memset(buf, 0, size);
-    strncpy(buf, fname.toAscii().constData(), size - 1);
-  }
-  return buf;
-}
-
-// -----------------------------------------------------------------------------
-//
-// -----------------------------------------------------------------------------
-void EmMpmGui::copyGrayValues( EMMPM_Data* inputs)
+void EmMpmGui::copyGrayValues( EMMPM_Data::Pointer inputs)
 {
   int size = m_UserInitAreaVector->count();
   UserInitArea* uia = NULL;
@@ -677,7 +657,7 @@ void EmMpmGui::copyGrayValues( EMMPM_Data* inputs)
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
-void EmMpmGui::copyInitCoords( EMMPM_Data* inputs)
+void EmMpmGui::copyInitCoords( EMMPM_Data::Pointer inputs)
 {
   int size = m_UserInitAreaVector->count();
   UserInitArea* uia = NULL;
@@ -694,7 +674,7 @@ void EmMpmGui::copyInitCoords( EMMPM_Data* inputs)
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
-void EmMpmGui::copyIntializationValues(EMMPM_Data* inputs)
+void EmMpmGui::copyIntializationValues(EMMPM_Data::Pointer inputs)
 {
   int size = m_UserInitAreaVector->count();
 
@@ -711,7 +691,7 @@ void EmMpmGui::copyIntializationValues(EMMPM_Data* inputs)
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
-void EmMpmGui::copyGammaValues(EMMPM_Data* inputs)
+void EmMpmGui::copyGammaValues(EMMPM_Data::Pointer inputs)
 {
   int size = m_UserInitAreaVector->count();
   UserInitArea* uia = NULL;
@@ -726,7 +706,7 @@ void EmMpmGui::copyGammaValues(EMMPM_Data* inputs)
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
-void EmMpmGui::copyMinVarianceValues(EMMPM_Data* inputs)
+void EmMpmGui::copyMinVarianceValues(EMMPM_Data::Pointer inputs)
 {
   int size = m_UserInitAreaVector->count();
   UserInitArea* uia = NULL;
@@ -741,7 +721,7 @@ void EmMpmGui::copyMinVarianceValues(EMMPM_Data* inputs)
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
-void EMMPMUpdateStats(EMMPM_Data* data)
+void EMMPMUpdateStats(EMMPM_Data::Pointer data)
 {
   // Check to make sure we are at the end of an em loop
   if ( data->inside_mpm_loop == 0 && NULL != data->outputImage)
@@ -749,7 +729,8 @@ void EMMPMUpdateStats(EMMPM_Data* data)
     char buff[256];
     memset(buff, 0, 256);
     snprintf(buff, 256, "/tmp/emmpm_out_%d.tif", data->currentEMLoop);
-    int err = EMMPM_WriteGrayScaleImage(buff, data->rows, data->columns, "Intermediate Image", data->outputImage);
+    TiffUtilities tifUtil;
+    int err = tifUtil.writeGrayScaleImage(buff, data->rows, data->columns, "Intermediate Image", data->outputImage);
     if (err < 0)
     {
       std::cout << "Error writing intermediate tiff image." << std::endl;
@@ -924,34 +905,42 @@ void EmMpmGui::on_processBtn_clicked()
   m_LayersPalette->getUseColorTable()->setEnabled(enableUserDefinedAreas->isChecked());
   //m_GraphicsView->setImageDisplayType(EmMpm_Constants::CompositedImage);
 
+  EMMPMTask* task = newEmMpmTask(queueController);
+  queueController->addTask(static_cast<QThread*> (task));
+
   if (this->processFolder->isChecked() == false)
   {
     QString inputFile = inputImageFilePath->text();
     QString outputFile = outputImageFile->text();
-    EMMPMTask* task = newEmMpmTask(inputFile, outputFile, queueController);
-
-    queueController->addTask(static_cast<QThread*> (task));
-    connect(cancelBtn, SIGNAL(clicked()), task, SLOT(cancel()));
-
-    connect(task, SIGNAL(progressTextChanged(QString )), this, SLOT(processingMessage(QString )), Qt::QueuedConnection);
-    connect(task, SIGNAL(updateImageAvailable(QImage)), m_GraphicsView, SLOT(setOverlayImage(QImage)));
-    connect(task, SIGNAL(histogramsAboutToBeUpdated()), this, SLOT(clearProcessHistograms()));
-    qRegisterMetaType<QVector<real_t> >("QVector<real_t>");
-    connect(task, SIGNAL(updateHistogramAvailable(QVector<real_t>)), this, SLOT(addProcessHistogram(QVector<real_t>)));
-    this->addProcess(task);
+    filepairs.append(InputOutputFilePair(inputFile, outputFile));
   }
   else
   {
     QStringList fileList = generateInputFileList();
-    int32_t count = fileList.count();
-    for (int32_t i = 0; i < count; ++i)
-    {
-      QString inputFile = (sourceDirectoryLE->text() + QDir::separator() + fileList.at(i));
 
-      QFileInfo fileInfo(fileList.at(i));
-      QString basename = fileInfo.completeBaseName();
-      QString extension = fileInfo.suffix();
-      QString outputFile = outputDirectoryLE->text();
+    QString inputFile = (sourceDirectoryLE->text() + QDir::separator() + fileList.at(0));
+    QFileInfo fileInfo(fileList.at(0));
+    QString basename = fileInfo.completeBaseName();
+    QString extension = fileInfo.suffix();
+    QString outputFile = outputDirectoryLE->text();
+    outputFile.append(QDir::separator());
+    outputFile.append(outputPrefix->text());
+    outputFile.append(basename);
+    outputFile.append(outputSuffix->text());
+    outputFile.append(".");
+    outputFile.append(outputImageType->currentText());
+
+    filepairs.append(InputOutputFilePair(inputFile, outputFile));
+
+    int32_t count = fileList.count();
+    for (int32_t i = 1; i < count; ++i)
+    {
+      inputFile = (sourceDirectoryLE->text() + QDir::separator() + fileList.at(i));
+
+      fileInfo = QFileInfo(fileList.at(i));
+      basename = fileInfo.completeBaseName();
+      extension = fileInfo.suffix();
+      outputFile = outputDirectoryLE->text();
       outputFile.append(QDir::separator());
       outputFile.append(outputPrefix->text());
       outputFile.append(basename);
@@ -959,24 +948,22 @@ void EmMpmGui::on_processBtn_clicked()
       outputFile.append(".");
       outputFile.append(outputImageType->currentText());
 
-      EMMPMTask* task = newEmMpmTask(inputFile, outputFile, queueController);
-      queueController->addTask(static_cast<QThread*> (task));
-      connect(cancelBtn, SIGNAL(clicked()), task, SLOT(cancel()));
-
-      filepairs.append(InputOutputFilePair(task->getInputFilePath(), task->getOutputFilePath()));
-      queueController->addTask(static_cast<QThread* > (task));
-      if (i == 0)
-      {
-        connect(task, SIGNAL(updateImageAvailable(QImage)), m_GraphicsView, SLOT(setOverlayImage(QImage)));
-        connect(task, SIGNAL(histogramsAboutToBeUpdated()), this, SLOT(clearProcessHistograms()));
-        connect(task, SIGNAL(updateHistogramAvailable(QVector<real_t>)), this, SLOT(addProcessHistogram(QVector<real_t>)));
-
-      }
-      this->addProcess(task);
+      filepairs.append(InputOutputFilePair(inputFile, outputFile));
     }
 
   }
+  task->setInputOutputFilePairList(filepairs);
   setInputOutputFilePairList(filepairs);
+
+  connect(cancelBtn, SIGNAL(clicked()), task, SLOT(cancel()));
+
+  connect(task, SIGNAL(progressMessage(QString )), this, SLOT(processingMessage(QString )), Qt::QueuedConnection);
+  connect(task, SIGNAL(updateImageAvailable(QImage)), m_GraphicsView, SLOT(setOverlayImage(QImage)));
+  connect(task, SIGNAL(histogramsAboutToBeUpdated()), this, SLOT(clearProcessHistograms()));
+  qRegisterMetaType<QVector<real_t> >("QVector<real_t>");
+  connect(task, SIGNAL(updateHistogramAvailable(QVector<real_t>)), this, SLOT(addProcessHistogram(QVector<real_t>)));
+  this->addProcess(task);
+
 
   // When the event loop of the controller starts it will signal the ProcessQueue to run
   connect(queueController, SIGNAL(started()), queueController, SLOT(processTask()));
@@ -986,8 +973,6 @@ void EmMpmGui::on_processBtn_clicked()
   connect(queueController, SIGNAL(started()), this, SLOT(processingStarted()));
   connect(queueController, SIGNAL(finished()), this, SLOT(processingFinished()));
 
-//  getQueueDialog()->setParent(this);
-//  m_QueueDialog->setVisible(true);
   processBtn->setVisible(false);
   cancelBtn->setVisible(true);
 
@@ -1000,17 +985,13 @@ void EmMpmGui::on_processBtn_clicked()
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
-EMMPMTask* EmMpmGui::newEmMpmTask( QString inputFile, QString outputFile, ProcessQueueController* queueController)
+EMMPMTask* EmMpmGui::newEmMpmTask( ProcessQueueController* queueController)
 {
   bool ok = false;
   EMMPMTask* task = new EMMPMTask(NULL);
-  EMMPM_Data* data = task->getEMMPM_Data();
+  EMMPM_Data::Pointer data = task->getEMMPM_Data();
 
-  data->input_file_name = copyStringToNewBuffer(inputFile);
-  data->output_file_name = copyStringToNewBuffer(outputFile);
-  task->setInputFilePath(inputFile);
-  task->setOutputFilePath(outputFile);
-
+  task->setFeedBackInitialization(muSigmaFeedback->isChecked());
   data->in_beta = m_Beta->text().toFloat(&ok);
 
   for (int i = 0; i < EMMPM_MAX_CLASSES; i++)

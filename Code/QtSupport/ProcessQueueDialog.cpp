@@ -60,6 +60,7 @@ void ProcessQueueDialog::clearTable()
   m_TasksMap.clear();
 }
 
+
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
@@ -72,8 +73,7 @@ void ProcessQueueDialog::addProcess(ProcessQueueTask* task)
   progBar->setRange(0, 100);
   progBar->setAlignment(Qt::AlignBottom);
 
-  QFileInfo fileInfo(task->getInputFilePath());
-  progBar->setText(fileInfo.fileName());
+
 
   QSizePolicy sizePolicy1(QSizePolicy::Preferred, QSizePolicy::Fixed);
   sizePolicy1.setHorizontalStretch(0);
@@ -93,8 +93,10 @@ void ProcessQueueDialog::addProcess(ProcessQueueTask* task)
 
   verticalLayout->addSpacerItem(verticalSpacer);
 
-  connect(task, SIGNAL(progressValueChanged(int)), progBar, SLOT(setValue(int)));
-  connect(task, SIGNAL(taskFinished(QObject*)), this, SLOT(removeRow(QObject*)));
+  connect(task, SIGNAL(updateProgress(int)), progBar, SLOT(setValue(int)));
+  connect(task, SIGNAL(finished(QObject*)), this, SLOT(removeRow(QObject*)));
+  connect(task, SIGNAL(imageStarted(QString)), progBar, SLOT(setText(QString)));
+
  // connect(cancelBtn, SIGNAL(clicked()), task, SLOT(cancel()));
   m_TasksMap[task] = progBar;
 

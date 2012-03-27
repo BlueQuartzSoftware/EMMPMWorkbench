@@ -41,7 +41,7 @@
 #include <QtGui/QGraphicsScene>
 
 
-#include "EMMPMLib/public/EMMPM_Structures.h"
+#include "EMMPMLib/Common/EMMPM_Data.h"
 
 //-- UIC generated Header
 #include <ui_EmMpmGui.h>
@@ -123,12 +123,11 @@ class EmMpmGui :  public QMainWindow, private Ui::EmMpmGui
 
     UserInitAreaWidget* getUserInitAreaWidget();
 
-    char* copyStringToNewBuffer(const QString &fname);
-    void copyGrayValues( EMMPM_Data* inputs);
-    void copyInitCoords( EMMPM_Data* inputs);
-    void copyIntializationValues(EMMPM_Data* inputs);
-    void copyGammaValues(EMMPM_Data* inputs);
-    void copyMinVarianceValues(EMMPM_Data* inputs);
+    void copyGrayValues( EMMPM_Data::Pointer inputs);
+    void copyInitCoords( EMMPM_Data::Pointer inputs);
+    void copyIntializationValues(EMMPM_Data::Pointer inputs);
+    void copyGammaValues(EMMPM_Data::Pointer inputs);
+    void copyMinVarianceValues(EMMPM_Data::Pointer inputs);
 
     void updateHistogramAxis();
 
@@ -256,7 +255,7 @@ class EmMpmGui :  public QMainWindow, private Ui::EmMpmGui
 
   protected:
 
-    EMMPMTask* newEmMpmTask( QString inputFile, QString outputFile, ProcessQueueController* queueController);
+    EMMPMTask* newEmMpmTask(ProcessQueueController* queueController);
 
     void addProcess(EMMPMTask* name);
     /**

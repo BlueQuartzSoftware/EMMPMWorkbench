@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1014</width>
-    <height>644</height>
+    <width>1063</width>
+    <height>685</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -160,45 +160,14 @@
           <property name="verticalSpacing">
            <number>6</number>
           </property>
-          <item row="1" column="1">
-           <widget class="QLabel" name="label_5">
-            <property name="text">
-             <string>Input Folder</string>
-            </property>
-           </widget>
-          </item>
-          <item row="2" column="1">
+          <item row="2" column="0">
            <widget class="QLabel" name="label_15">
             <property name="text">
              <string>Output Folder</string>
             </property>
            </widget>
           </item>
-          <item row="2" column="2">
-           <widget class="QLineEdit" name="outputDirectoryLE">
-            <property name="text">
-             <string/>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="2">
-           <widget class="QLineEdit" name="sourceDirectoryLE"/>
-          </item>
-          <item row="1" column="3">
-           <widget class="QPushButton" name="sourceDirectoryBtn">
-            <property name="text">
-             <string>Input Folder</string>
-            </property>
-           </widget>
-          </item>
-          <item row="2" column="3">
-           <widget class="QPushButton" name="outputDirectoryBtn">
-            <property name="text">
-             <string>Output Folder</string>
-            </property>
-           </widget>
-          </item>
-          <item row="0" column="1" colspan="2">
+          <item row="0" column="0">
            <widget class="QCheckBox" name="processFolder">
             <property name="enabled">
              <bool>true</bool>
@@ -214,10 +183,48 @@
             </property>
            </widget>
           </item>
-          <item row="0" column="3">
+          <item row="1" column="0">
+           <widget class="QLabel" name="label_5">
+            <property name="text">
+             <string>Input Folder</string>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="0" colspan="2">
+           <widget class="QCheckBox" name="muSigmaFeedback">
+            <property name="text">
+             <string>Use Mu/Sigma from previous image asinitialization of next image</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="1">
+           <widget class="QLineEdit" name="sourceDirectoryLE"/>
+          </item>
+          <item row="2" column="1">
+           <widget class="QLineEdit" name="outputDirectoryLE">
+            <property name="text">
+             <string/>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="2">
            <widget class="QPushButton" name="loadFirstImageBtn">
             <property name="text">
              <string>Load First Image</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="2">
+           <widget class="QPushButton" name="sourceDirectoryBtn">
+            <property name="text">
+             <string>Input Folder</string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="2">
+           <widget class="QPushButton" name="outputDirectoryBtn">
+            <property name="text">
+             <string>Output Folder</string>
             </property>
            </widget>
           </item>
@@ -258,7 +265,7 @@
             </property>
            </widget>
           </item>
-          <item row="0" column="4" rowspan="2">
+          <item row="0" column="2" rowspan="2" colspan="3">
            <spacer name="horizontalSpacer_8">
             <property name="orientation">
              <enum>Qt::Horizontal</enum>
@@ -341,6 +348,9 @@
         </item>
         <item>
          <layout class="QHBoxLayout" name="_6">
+          <property name="spacing">
+           <number>5</number>
+          </property>
           <item>
            <widget class="QLabel" name="label_14">
             <property name="text">
@@ -762,7 +772,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1014</width>
+     <width>1063</width>
      <height>22</height>
     </rect>
    </property>
@@ -1878,10 +1888,6 @@
   <tabstop>inputImageFilePathBtn</tabstop>
   <tabstop>outputImageFile</tabstop>
   <tabstop>outputImageButton</tabstop>
-  <tabstop>sourceDirectoryLE</tabstop>
-  <tabstop>sourceDirectoryBtn</tabstop>
-  <tabstop>outputDirectoryLE</tabstop>
-  <tabstop>outputDirectoryBtn</tabstop>
   <tabstop>outputPrefix</tabstop>
   <tabstop>fileListView</tabstop>
   <tabstop>processBtn</tabstop>

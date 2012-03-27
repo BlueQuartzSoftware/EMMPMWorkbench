@@ -34,11 +34,19 @@
 #include <QtCore/QObject>
 #include <QtCore/QThread>
 #include <QtCore/QString>
+#include <QtCore/QList>
+#include <QtCore/QPair>
 #include <QtGui/QImage>
 
-#include <MXA/Common/MXASetGetMacros.h>
+#include "MXA/MXA.h"
+#include "MXA/Common/MXASetGetMacros.h"
+
 #include "AIM/Common/AIMImage.h"
-#include "EMMPMLib/public/EMMPM_Structures.h"
+
+#include "EMMPMLib/EMMPMLib.h"
+#include "EMMPMLib/Common/EMMPM_Data.h"
+#include "EMMPMLib/Common/Observer.h"
+
 
 /**
  * @class ProcessQueueTask ProcessQueueTask.h QtSupport/ProcessQueueTask.h
@@ -53,7 +61,7 @@
  * @date Jul 26, 2010
  * @version 1.0
  */
-class ProcessQueueTask : public QThread
+class ProcessQueueTask : public QThread , public Observer
 {
     Q_OBJECT;
 
@@ -67,10 +75,16 @@ class ProcessQueueTask : public QThread
      */
     bool isCanceled();
 
+    typedef QPair<QString, QString>        InputOutputFilePair;
+    typedef QList<InputOutputFilePair>     InputOutputFilePairList;
 
     MXA_INSTANCE_PROPERTY(bool, Debug);
-    MXA_VIRTUAL_INSTANCE_PROPERTY(QString, InputFilePath);
-    MXA_VIRTUAL_INSTANCE_PROPERTY(QString, OutputFilePath);
+//    MXA_VIRTUAL_INSTANCE_PROPERTY(QString, InputFilePath);
+//    MXA_VIRTUAL_INSTANCE_PROPERTY(QString, OutputFilePath);
+
+    MXA_INSTANCE_PROPERTY(InputOutputFilePairList, InputOutputFilePairList)
+
+    MXA_INSTANCE_PROPERTY(bool, FeedBackInitialization);
 
     /**
      * @brief Converts a QImage to a Gray Scale (8 bit) AIMImage object
@@ -80,47 +94,83 @@ class ProcessQueueTask : public QThread
      */
     AIMImage::Pointer convertQImageToGrayScaleAIMImage(QImage image);
 
-    signals:
 
     /**
-     * @brief Signal sent when the encoder has a message to relay to the GUI or other output device.
+     * @brief Either prints a message or sends the message to the User Interface
+     * @param message The message to print
+     * @param progress The progress of the GrainGenerator normalized to a value between 0 and 100
      */
-      void progressTextChanged ( QString progressText );
+    virtual void updateProgressAndMessage(const char* message, int value)
+    {
+      emit updateProgress(value);
+      emit progressMessage(QString(message));
+    }
 
-      /**
-       * @brief Signal sent to the GUI to indicate progress of the encoder which is an integer value between 0 and 100.
-       * @param value
-       */
-      void progressValueChanged(int value);
+    /**
+     * @brief This method reports progress such that a user interface element such
+     * as a progress bar could be updated. It is assumed the value will fluctuate
+     * between 0 and 100.
+     * @param value
+     */
+    virtual void pipelineProgress(int value)
+    {
+      emit updateProgress(value);
+    }
 
-      /**
-       * @brief Signal sent when the encoding task is complete
-       */
-    //  void finished();
+    /**
+     * @brief This message reports some human readable message suitable for display
+     * on a GUI or printed to a console or possibly saved to a log file
+     * @param message
+     */
+    virtual void pipelineProgressMessage(const char* message)
+    {
+      emit progressMessage(QString(message));
+    }
 
-      /**
-       * @brief Signal sent when the encoding task is complete
-       * @param o A QObject to send with the signal
-       */
-      void taskFinished(QObject *o);
+    /**
+     * @brief This message reports some human readable message suitable for display
+     * on a GUI or printed to a console or possibly saved to a log file
+     * @param message
+     */
+    virtual void pipelineWarningMessage(const char* message)
+    {
+      emit warningMessage(QString(message));
+    }
 
+    /**
+     * @brief This message reports some human readable message suitable for display
+     * on a GUI or printed to a console or possibly saved to a log file
+     * @param message
+     */
+    virtual void pipelineErrorMessage(const char* message)
+    {
+      emit errorMessage(QString(message));
+    }
 
-      /**
-       * @brief Sends an intermediate image to another thread or process via signal
-       * @param image
-       */
+    /**
+     * @brief This method is called from the run() method just before exiting and
+     * signals the end of the pipeline execution
+     */
+    virtual void pipelineFinished()
+    {
+      emit finished();
+      emit finished(this);
+    }
+
+    /**
+     * Qt Signals for connections
+     */
+    signals:
+      void progressMessage(QString message);
+      void warningMessage(QString message);
+      void errorMessage(QString message);
+      void updateProgress(int value);
+      void finished();
+      void finished(QObject *o);
       void updateImageAvailable(QImage image);
-
-      /**
-       *
-       */
       void histogramsAboutToBeUpdated();
-
-      /**
-       *
-       * @param values
-       */
       void updateHistogramAvailable(QVector<real_t> values);
+      void imageStarted(QString s);
 
     public slots:
 

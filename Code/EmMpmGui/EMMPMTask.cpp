@@ -45,12 +45,10 @@
 #include <QtGui/QMessageBox>
 
 //-- EMMPMLib Includes
-#include "EMMPMLib/public/EMMPM.h"
-#include "EMMPMLib/common/random.h"
+#include "EMMPMLib/Common/EMMPM.h"
+#include "EMMPMLib/Common/InitializationFunctions.h"
+#include "EMMPMLib/tiff/TiffUtilities.h"
 
-#include "EMMPMLib/public/InitializationFunctions.h"
-#include "EMMPMLib/public/ProgressFunctions.h"
-#include "EMMPMLib/tiff/EMTiffIO.h"
 #include "AIM/Common/AIMArray.hpp"
 
 QMutex EMMPMTask_CallBackWrapperMutex;
@@ -58,9 +56,9 @@ QMutex EMMPMTask_CallBackWrapperMutex;
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
-void EMMPMTask::EMMPMUpdate_CallBackWrapper(EMMPM_Data* data)
-//void UpdateStats(EMMPM_Update* update)
+void EMMPMTask::reportProgress(EMMPM_Data::Pointer data)
 {
+
   /* this is here because this static function could be called from mutliple
    * threads. We use a mutex to ensure that only a single function is able
    * to execute this code at a time.
@@ -76,12 +74,12 @@ void EMMPMTask::EMMPMUpdate_CallBackWrapper(EMMPM_Data* data)
 //  data->progress = 100.0 * (current/total);
 
  // std::cout << "EMMPMUpdate_CallBackWrapper: Progress=" << data->progress << std::endl;
-  emit mySelf->progressValueChanged((int)data->progress);
+  emit mySelf->updateProgress((int)data->progress);
 
   QString msg("EM Loop: ");
   msg.append(QString::number(data->currentEMLoop)).append(" - MPM Loop: ").append(QString::number(data->currentMPMLoop));
 
-  emit mySelf->progressTextChanged(msg);
+  emit mySelf->progressMessage(msg);
 
   // Check to make sure we are at the end of an em loop
   if ( /* data->inside_mpm_loop == 0 && */ NULL != data->outputImage)
@@ -180,7 +178,9 @@ void EMMPMTask::EMMPMUpdate_CallBackWrapper(EMMPM_Data* data)
     }
   }
 #endif
+
 }
+
 
 // -----------------------------------------------------------------------------
 //
@@ -188,9 +188,9 @@ void EMMPMTask::EMMPMUpdate_CallBackWrapper(EMMPM_Data* data)
 EMMPMTask::EMMPMTask(QObject* parent) :
   ProcessQueueTask(parent)
 {
-  m_data = EMMPM_CreateDataStructure();
+  m_data = EMMPM_Data::New();
   m_data->userData = this;
-  m_callbacks = EMMPM_AllocateCallbackFunctionStructure();
+
 }
 
 // -----------------------------------------------------------------------------
@@ -203,7 +203,7 @@ EMMPMTask::~EMMPMTask()
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
-EMMPM_Data* EMMPMTask::getEMMPM_Data()
+EMMPM_Data::Pointer EMMPMTask::getEMMPM_Data()
 {
   return m_data;
 }
@@ -226,14 +226,69 @@ void EMMPMTask::run()
 {
   UPDATE_PROGRESS(QString("Starting Segmentation"), 0);
 
- // this->setInputFilePath(QString(m_data->input_file_name));
- // this->setOutputFilePath(QString(m_data->output_file_name));
+  // Run the first image using all the settings from the user interface
+  segmentImage(0);
+  if (m_data->cancel == 1)
+  {
+    UPDATE_PROGRESS(QString("Ending Segmentation"), 100);
+    emit finished();
+    emit finished(this);
+    return;
+  }
+
+
+  // Now run the next set of images possibly using the output from the previous
+  // image's final mu and sigma values as the initial conditions into the next
+  // image in the sequence
+  InputOutputFilePairList fileList = getInputOutputFilePairList();
+  int count = fileList.count();
+
+  for(int i = 1; i < count; ++i)
+  {
+    if (true == getFeedBackInitialization() )
+    {
+      m_data->initType = EMMPM_ManualInit;
+    }
+
+    segmentImage(i);
+    if (m_data->cancel == 1)
+    {
+      break;
+    }
+  }
+
+
+  // Forcibly release our reference to the EMMPM_Data object
+  m_data = EMMPM_Data::NullPointer();
+
+  UPDATE_PROGRESS(QString("Ending Segmentation"), 100);
+  emit finished();
+  emit finished(this);
+}
+
+// -----------------------------------------------------------------------------
+//
+// -----------------------------------------------------------------------------
+void EMMPMTask::segmentImage(int i)
+{
+  InputOutputFilePairList fileList = getInputOutputFilePairList();
+
+  QString inputFile = fileList.at(i).first;
+  QString outputFile = fileList.at(i).second;
+  m_data->input_file_name = copyStringToNewBuffer(inputFile);
+  m_data->output_file_name = copyStringToNewBuffer(outputFile);
+
+  std::cout << "Segmenting Image: " << inputFile.toStdString() << std::endl;
+  QFileInfo fileInfo(inputFile);
+  emit imageStarted(fileInfo.fileName());
+
   // Get our input image from the Image IO functions
   QImage image = QImage(m_data->input_file_name);
   if (image.isNull() == true)
   {
     UPDATE_PROGRESS(QString("There was an issue loading the image. Either the input image does not exist or low memory prevented the loading of the image"), 100);
-    emit taskFinished(this);
+    emit finished();
+    emit finished(this);
     return;
   }
   qint32 height = image.height();
@@ -242,7 +297,8 @@ void EMMPMTask::run()
   quint8* inImage = inImageBufferPtr->allocateDataArray(width*height, true);
   if (NULL == inImage)
   {
-    emit taskFinished(this);
+    emit finished();
+    emit finished(this);
     return;
   }
 
@@ -275,7 +331,8 @@ void EMMPMTask::run()
   quint8* outImagePtr = outImageBufferPtr->allocateDataArray(width*height, true);
   if (NULL == outImagePtr)
   {
-    emit taskFinished(this);
+    emit finished();
+    emit finished(this);
     return;
   }
   m_data->outputImage = outImagePtr;
@@ -287,39 +344,53 @@ void EMMPMTask::run()
   if (err < 0)
   {
     UPDATE_PROGRESS(QString("EM/MPM Error Reading Input Image"), 100); emit
-    taskFinished(this);
+    emit finished();
+    emit finished(this);
     return;
   }
 #endif
+
+  // This takes care of the manual initialization case
+  InitializationFunction::Pointer initFunction = InitializationFunction::New();
+
 
   // Set the initialization function based on the command line arguments
   switch(m_data->initType)
   {
     case EMMPM_Basic:
-      m_callbacks->EMMPM_InitializationFunc = EMMPM_BasicInitialization;
+      initFunction = BasicInitialization::New();
       break;
-    case EMMPM_ManualInit:
-      m_callbacks->EMMPM_InitializationFunc = EMMPM_ManualInitialization;
+    case EMMPM_UserInitArea:
+      initFunction = UserDefinedAreasInitialization::New();
       break;
     default:
       break;
   }
 
-  // Set the Update Stats Callback function
-   m_callbacks->EMMPM_ProgressStatsFunc = EMMPMTask::EMMPMUpdate_CallBackWrapper;
-
   // Allocate all the memory here
-  int err = EMMPM_AllocateDataStructureMemory(m_data);
+  if (NULL != m_data->y) {free(m_data->y); m_data->y = NULL; }
+  if (NULL != m_data->xt) {free(m_data->xt); m_data->xt = NULL; }
+  if (NULL != m_data->probs) {free(m_data->probs); m_data->probs = NULL; }
+  if (NULL != m_data->ccost) {free(m_data->ccost); m_data->ccost = NULL; }
+  if (NULL != m_data->histograms) {free(m_data->histograms); m_data->histograms = NULL; }
+
+  int err = m_data->allocateDataStructureMemory();
   if (err)
   {
     UPDATE_PROGRESS(QString("Error allocating memory for the EMMPM Data Structure"), 0);
-    emit taskFinished(this);
+    emit finished();
+    emit finished(this);
     return;
   }
 
   // Run the EM/MPM algorithm on the input image
+  EMMPM::Pointer emmpm = EMMPM::New();
+  emmpm->addObserver(this);
+  emmpm->setData(m_data);
+  emmpm->setStatsDelegate(static_cast<StatsDelegate*>(this) );
+  emmpm->setInitializationFunction(initFunction);
+  emmpm->execute();
 
-  EMMPM_Run(m_data, m_callbacks);
 
   // Set the input image pointer to NULL so it does not get freed twice
   m_data->inputImage = NULL;
@@ -349,11 +420,13 @@ void EMMPMTask::run()
   if (ext.compare(QString("tif"), Qt::CaseInsensitive) == 0
       || ext.compare(QString("tiff"), Qt::CaseInsensitive) == 0)
   {
-    err = EMMPM_WriteOutputImage(m_data, m_callbacks);
+    TiffUtilities tifUtil;
+    int err = tifUtil.writeOutputImage(m_data);
     if (err < 0)
     {
       UPDATE_PROGRESS(QString("EM/MPM Error Writing Output Image"), 100); emit
-      emit taskFinished(this);
+      emit finished();
+      emit finished(this);
       return;
     }
   }
@@ -367,15 +440,29 @@ void EMMPMTask::run()
      }
   }
 
-  UPDATE_PROGRESS(QString("Ending Segmentation"), 100);
-  emit taskFinished(this);
-
   //Clean up the Memory as this class will NOT get deleted right away. This will
   // deallocate the bulk of the memory
   // The AIMArray is managing this memory so set it to NULL so it does not get freed twice.
   m_data->outputImage = NULL;
+  if (NULL != m_data->input_file_name) {free(m_data->input_file_name); m_data->input_file_name = NULL; }
+  if (NULL != m_data->output_file_name) {free(m_data->output_file_name); m_data->output_file_name = NULL; }
 
-  EMMPM_FreeDataStructure(m_data);
-  EMMPM_FreeCallbackFunctionStructure(m_callbacks);
+
 }
 
+
+// -----------------------------------------------------------------------------
+//
+// -----------------------------------------------------------------------------
+char* EMMPMTask::copyStringToNewBuffer(const QString &fname)
+{
+  std::string::size_type size = fname.size() + 1;
+  char* buf = NULL;
+  if (size > 1)
+  {
+    buf = (char*)malloc(size);
+    ::memset(buf, 0, size);
+    strncpy(buf, fname.toAscii().constData(), size - 1);
+  }
+  return buf;
+}
