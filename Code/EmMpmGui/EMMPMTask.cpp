@@ -277,7 +277,7 @@ void EMMPMTask::segmentImage(int i)
   m_data->input_file_name = copyStringToNewBuffer(inputFile);
   m_data->output_file_name = copyStringToNewBuffer(outputFile);
 
-  std::cout << "Segmenting Image: " << inputFile.toStdString() << std::endl;
+ // std::cout << "Segmenting Image: " << inputFile.toStdString() << std::endl;
   QFileInfo fileInfo(inputFile);
   emit imageStarted(fileInfo.fileName());
 

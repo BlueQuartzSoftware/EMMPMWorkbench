@@ -445,7 +445,6 @@ void EMMPMGraphicsView::loadBaseImageFile(const QString &filename)
     gScene->deleteLater();
     gScene = new QGraphicsScene(this);
     setScene(gScene);
-    std::cout << "m_UserInitAreaVector->size(): " << m_UserInitAreaVector->size() << std::endl;
 
     delete m_ImageGraphicsItem;
     m_ImageGraphicsItem = NULL;
