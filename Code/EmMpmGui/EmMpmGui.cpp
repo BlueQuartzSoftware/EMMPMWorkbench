@@ -920,6 +920,14 @@ void EmMpmGui::on_processBtn_clicked()
     QString inputFile = inputImageFilePath->text();
     QString outputFile = outputImageFile->text();
     filepairs.append(InputOutputFilePair(inputFile, outputFile));
+
+    QFileInfo fi(outputFile);
+    QString statsFile = fi.path();
+    statsFile.append(QDir::separator());
+    statsFile.append(fi.fileName());
+    statsFile.append("_Stats.txt");
+    task->setOutputStatsFile(statsFile.toStdString());
+
   }
   else
   {
@@ -957,8 +965,13 @@ void EmMpmGui::on_processBtn_clicked()
 
       filepairs.append(InputOutputFilePair(inputFile, outputFile));
     }
-
+    outputFile = outputDirectoryLE->text();
+    outputFile.append(QDir::separator());
+    outputFile.append("Stats.txt");
+    task->setOutputStatsFile(outputFile.toStdString());
   }
+
+
   task->setInputOutputFilePairList(filepairs);
   setInputOutputFilePairList(filepairs);
 
@@ -2140,11 +2153,14 @@ void EmMpmGui::populateFileTable(QLineEdit* sourceDirectoryLE, QListView *fileLi
   QDir sourceDir(sourceDirectoryLE->text());
   sourceDir.setFilter(QDir::Files | QDir::NoDotAndDotDot | QDir::NoSymLinks);
   QStringList strList = sourceDir.entryList();
-  QAbstractItemModel* strModel = new QStringListModel(strList, this->m_ProxyModel);
+  QStringListModel* strModel = new QStringListModel(strList, this->m_ProxyModel);
+  strModel->setSupportedDragActions(Qt::MoveAction);
   m_ProxyModel->setSourceModel(strModel);
   m_ProxyModel->setDynamicSortFilter(true);
   m_ProxyModel->setFilterKeyColumn(0);
+  m_ProxyModel->setSupportedDragActions(Qt::MoveAction);
   fileListView->setModel(m_ProxyModel);
+
 }
 
 // -----------------------------------------------------------------------------

@@ -92,6 +92,8 @@ class EMMPMTask : public ProcessQueueTask, public StatsDelegate
 
     void segmentImage(int i);
 
+    MXA_INSTANCE_STRING_PROPERTY(OutputStatsFile);
+
   public slots:
 
     /**

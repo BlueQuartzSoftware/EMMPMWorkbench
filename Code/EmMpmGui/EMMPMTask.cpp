@@ -226,6 +226,14 @@ void EMMPMTask::run()
 {
   UPDATE_PROGRESS(QString("Starting Segmentation"), 0);
 
+
+  // Clear out the stats file
+  if (m_OutputStatsFile.empty() == false)
+  {
+    FILE* f = fopen(m_OutputStatsFile.c_str(), "wb");
+  }
+
+
   // Run the first image using all the settings from the user interface
   segmentImage(0);
   if (m_data->cancel == 1)
@@ -234,7 +242,6 @@ void EMMPMTask::run()
     emit finished(this);
     return;
   }
-
 
   // Now run the next set of images possibly using the output from the previous
   // image's final mu and sigma values as the initial conditions into the next
@@ -440,6 +447,24 @@ void EMMPMTask::segmentImage(int i)
        UPDATE_PROGRESS(QString("EM/MPM Error Writing Output Image"), 95);
      }
   }
+
+
+  if (m_OutputStatsFile.empty() == false)
+  {
+    FILE* f = fopen(m_OutputStatsFile.c_str(), "wb+");
+    fprintf(f, "InputFile:%s\n", m_data->input_file_name);
+    fprintf(f, "SegmentedFile:%s\n" , m_data->output_file_name);
+    fprintf(f, "NumClasses:%d\n", m_data->classes);
+    fprintf(f, "Class,Mu,Sigma\n");
+    for(int i = 0; i < m_data->classes; ++i)
+    {
+      fprintf(f, "%d,%f,%f\n", i,  m_data->m[i] , m_data->v[i] );
+    }
+
+    fclose(f);
+  }
+
+
 
   //Clean up the Memory as this class will NOT get deleted right away. This will
   // deallocate the bulk of the memory

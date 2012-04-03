@@ -60,8 +60,8 @@ set(CMP_CONFIGURED_FILES_SOURCE_DIR ${CMP_SOURCE_DIR}/ConfiguredFiles CACHE INTE
 # this basically gives us an always incrementing number for the patch level
 # and we can set the Major and Minor versions as we see fit. 
 set(CMP_VERSION_MAJOR "v2")
-cmpVersionStringsFromGit(NAMESPACE QEMMPM cmpProjectName QEMMPM
-                        GENERATED_FILE_PATH ${PROJECT_BINARY_DIR}/TestVersion.h)
+cmpVersionStringsFromGit(NAMESPACE EmMpm_Gui cmpProjectName QEMMPM
+                        GENERATED_FILE_PATH ${PROJECT_BINARY_DIR}/EmMpmGuiVersion.h)
 
 # --------------------------------------------------------------------
 # Over ride CMake's built in module directory by prepending cmp's module

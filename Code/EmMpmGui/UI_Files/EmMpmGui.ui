@@ -190,10 +190,10 @@
             </property>
            </widget>
           </item>
-          <item row="3" column="0" colspan="2">
+          <item row="3" column="0" colspan="3">
            <widget class="QCheckBox" name="muSigmaFeedback">
             <property name="text">
-             <string>Use Mu/Sigma from previous image asinitialization of next image</string>
+             <string>Use Mu/Sigma from previous image as initialization of next image</string>
             </property>
            </widget>
           </item>
@@ -484,11 +484,26 @@
           <property name="statusTip">
            <string>The list of files to be segmented</string>
           </property>
+          <property name="dragEnabled">
+           <bool>true</bool>
+          </property>
+          <property name="dragDropMode">
+           <enum>QAbstractItemView::InternalMove</enum>
+          </property>
+          <property name="defaultDropAction">
+           <enum>Qt::MoveAction</enum>
+          </property>
           <property name="alternatingRowColors">
            <bool>true</bool>
           </property>
           <property name="selectionMode">
-           <enum>QAbstractItemView::NoSelection</enum>
+           <enum>QAbstractItemView::SingleSelection</enum>
+          </property>
+          <property name="movement">
+           <enum>QListView::Snap</enum>
+          </property>
+          <property name="uniformItemSizes">
+           <bool>true</bool>
           </property>
          </widget>
         </item>
