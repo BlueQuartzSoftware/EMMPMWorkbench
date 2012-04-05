@@ -184,6 +184,7 @@ class EmMpmGui :  public QMainWindow, private Ui::EmMpmGui
     void on_saveCurves_clicked();
 
 
+    void on_fileListWidget_itemDoubleClicked(QListWidgetItem * item);
 
     /* slots for the buttons in the GUI */
     void on_processBtn_clicked();
@@ -240,7 +241,7 @@ class EmMpmGui :  public QMainWindow, private Ui::EmMpmGui
     void on_outputPrefix_textChanged();
     void on_outputSuffix_textChanged();
     void on_outputImageType_currentIndexChanged(int index);
-    void on_loadFirstImageBtn_clicked();
+
 
 
     /* Slots to receive events from the ProcessQueueController */

@@ -232,30 +232,26 @@ void EmMpmGui::writeIOSettings(QSettings &prefs)
 void EmMpmGui::readIOSettings(QSettings &prefs)
 {
   prefs.beginGroup("Input_Output");
-//  inputImageFilePath->blockSignals(true);
-//  READ_STRING_SETTING(prefs, inputImageFilePath, "");
-//  inputImageFilePath->blockSignals(false);
+  inputImageFilePath->blockSignals(true);
+  READ_STRING_SETTING(prefs, inputImageFilePath, "");
+  inputImageFilePath->blockSignals(false);
   READ_STRING_SETTING(prefs, outputImageFile, "");
 
-
+  sourceDirectoryLE->blockSignals(true);
   READ_STRING_SETTING(prefs, sourceDirectoryLE, "");
+  sourceDirectoryLE->blockSignals(true);
+
   READ_STRING_SETTING(prefs, outputDirectoryLE, "");
   READ_STRING_SETTING(prefs, outputPrefix, "Segmented_");
   READ_STRING_SETTING(prefs, outputSuffix, "");
-
+  processFolder->blockSignals(true);
   READ_BOOL_SETTING(prefs, processFolder, false);
+  processFolder->blockSignals(false);
   prefs.endGroup();
 
-
-  on_processFolder_stateChanged(processFolder->checkState());
-  if (this->sourceDirectoryLE->text().isEmpty() == false)
-  {
-    this->populateFileTable(this->sourceDirectoryLE, this->fileListWidget);
-  }
-  // Try and load the first image
   if (processFolder->isChecked() == true)
   {
-    on_loadFirstImageBtn_clicked();
+    on_sourceDirectoryLE_textChanged(sourceDirectoryLE->text());
   }
 }
 
@@ -616,7 +612,7 @@ void EmMpmGui::setupGui()
 
   m_ProcessFolderWidgets <<  sourceDirectoryLE << sourceDirectoryBtn << outputDirectoryLE
   << outputDirectoryBtn << outputPrefix << outputSuffix << filterPatternLabel
-  << filterPatternLineEdit << fileListWidget << outputImageTypeLabel << outputImageType << loadFirstImageBtn;
+  << filterPatternLineEdit << fileListWidget << outputImageTypeLabel << outputImageType;
 
   QDoubleValidator* betaValidator = new QDoubleValidator(m_Beta);
   QDoubleValidator* minVarValidator = new QDoubleValidator(m_MinVariance);
@@ -1208,7 +1204,10 @@ void EmMpmGui::on_processFolder_stateChanged(int state)
   }
   else
   {
-    on_loadFirstImageBtn_clicked();
+    if (fileListWidget->count() > 0) {
+      QListWidgetItem* item = fileListWidget->item(0);
+      on_fileListWidget_itemDoubleClicked(item);
+    }
   }
 
 #if 0
@@ -1238,22 +1237,18 @@ void EmMpmGui::on_processFolder_stateChanged(int state)
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
-void EmMpmGui::on_loadFirstImageBtn_clicked()
+void EmMpmGui::on_fileListWidget_itemDoubleClicked(QListWidgetItem * item)
 {
-  // If the input folder exists
-  QFileInfo fileinfo(sourceDirectoryLE->text());
-  if (true == fileinfo.exists())
+  QString path = sourceDirectoryLE->text();
+  path.append(QDir::separator());
+  path.append(item->text());
+  
+  QFileInfo fi(path);
+  if (fi.exists() == true)
   {
-    // Get the first image from the list of images
-    QStringList fileList = generateInputFileList();
-    if (fileList.count() > 0) {
-      QString inputFile = (sourceDirectoryLE->text() + QDir::separator() + fileList.at(0));
-      openBaseImageFile(inputFile);
-    }
+    openBaseImageFile(QDir::toNativeSeparators(path));
   }
 }
-
-
 
 
 // -----------------------------------------------------------------------------
@@ -1288,12 +1283,15 @@ void EmMpmGui::on_sourceDirectoryBtn_clicked()
   QString aDir = QFileDialog::getExistingDirectory(this, tr("Select Source Directory"), getOpenDialogLastDirectory(), QFileDialog::ShowDirsOnly
           | QFileDialog::DontResolveSymlinks);
   setOpenDialogLastDirectory(aDir);
-  loadFirstImageBtn->setEnabled(false);
+
   if (!getOpenDialogLastDirectory().isNull())
   {
     this->sourceDirectoryLE->setText(getOpenDialogLastDirectory() );
     populateFileTable(sourceDirectoryLE, fileListWidget);
-    loadFirstImageBtn->setEnabled(true);
+    if (fileListWidget->count() > 0) {
+      QListWidgetItem* item = fileListWidget->item(0);
+      on_fileListWidget_itemDoubleClicked(item);
+    }
   }
 
 }
@@ -1389,11 +1387,13 @@ void EmMpmGui::on_outputImageFile_textChanged(const QString & text)
 // -----------------------------------------------------------------------------
 void EmMpmGui::on_sourceDirectoryLE_textChanged(const QString & text)
 {
-  loadFirstImageBtn->setEnabled(false);
   if (true == verifyPathExists(sourceDirectoryLE->text(), sourceDirectoryLE) )
   {
     this->populateFileTable(sourceDirectoryLE, fileListWidget);
-    loadFirstImageBtn->setEnabled(true);
+    if (fileListWidget->count() > 0) {
+      QListWidgetItem* item = fileListWidget->item(0);
+      on_fileListWidget_itemDoubleClicked(item);
+    }
   }
 }
 
@@ -2235,10 +2235,11 @@ QStringList EmMpmGui::generateInputFileList()
   int count = fileListWidget->count();
   for(int i = 0; i < count; ++i)
   {
-    QString path = sourceDirectoryLE->text();
-    path.append(QDir::separator());
-    path.append(fileListWidget->item(i)->text());
-    list.append(path);
+    //QString path = sourceDirectoryLE->text();
+    //path.append(QDir::separator());
+    //path.append(fileListWidget->item(i)->text());
+
+    list.append(fileListWidget->item(i)->text());
   }
   return list;
 }

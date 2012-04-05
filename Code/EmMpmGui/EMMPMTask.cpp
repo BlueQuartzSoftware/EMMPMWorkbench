@@ -231,6 +231,7 @@ void EMMPMTask::run()
   if (m_OutputStatsFile.empty() == false)
   {
     FILE* f = fopen(m_OutputStatsFile.c_str(), "wb");
+    fclose(f);
   }
 
 
