@@ -113,7 +113,7 @@ class EmMpmGui :  public QMainWindow, private Ui::EmMpmGui
 
     MXA_INSTANCE_PROPERTY(QString, CurrentImageFile)
     MXA_INSTANCE_PROPERTY(QString, CurrentProcessedFile)
-    MXA_INSTANCE_PROPERTY(QSortFilterProxyModel*, ProxyModel)
+ //   MXA_INSTANCE_PROPERTY(QSortFilterProxyModel*, ProxyModel)
 
     MXA_INSTANCE_PROPERTY(bool, OutputExistsCheck)
     MXA_INSTANCE_PROPERTY(ProcessQueueController*, QueueController)
@@ -301,7 +301,7 @@ class EmMpmGui :  public QMainWindow, private Ui::EmMpmGui
     * @param sourceDirectoryLE
     * @param fileListView
     */
-   void populateFileTable(QLineEdit* sourceDirectoryLE, QListView *fileListView);
+   void populateFileTable(QLineEdit* sourceDirectoryLE, QListWidget *fileListView);
 
     qint32 initImageViews();
 

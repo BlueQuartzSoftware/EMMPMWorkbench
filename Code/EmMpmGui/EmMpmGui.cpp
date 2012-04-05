@@ -148,7 +148,6 @@ m_grid(NULL),
 m_histogram(NULL),
 m_CombinedGaussians(NULL),
 m_ShowCombinedGaussians(false),
-m_ProxyModel(NULL),
 m_OutputExistsCheck(false),
 m_QueueController(NULL),
 m_LayersPalette(NULL),
@@ -238,18 +237,20 @@ void EmMpmGui::readIOSettings(QSettings &prefs)
 //  inputImageFilePath->blockSignals(false);
   READ_STRING_SETTING(prefs, outputImageFile, "");
 
-  READ_BOOL_SETTING(prefs, processFolder, false);
+
   READ_STRING_SETTING(prefs, sourceDirectoryLE, "");
   READ_STRING_SETTING(prefs, outputDirectoryLE, "");
   READ_STRING_SETTING(prefs, outputPrefix, "Segmented_");
   READ_STRING_SETTING(prefs, outputSuffix, "");
+
+  READ_BOOL_SETTING(prefs, processFolder, false);
   prefs.endGroup();
 
 
   on_processFolder_stateChanged(processFolder->checkState());
   if (this->sourceDirectoryLE->text().isEmpty() == false)
   {
-    this->populateFileTable(this->sourceDirectoryLE, this->fileListView);
+    this->populateFileTable(this->sourceDirectoryLE, this->fileListWidget);
   }
   // Try and load the first image
   if (processFolder->isChecked() == true)
@@ -615,7 +616,7 @@ void EmMpmGui::setupGui()
 
   m_ProcessFolderWidgets <<  sourceDirectoryLE << sourceDirectoryBtn << outputDirectoryLE
   << outputDirectoryBtn << outputPrefix << outputSuffix << filterPatternLabel
-  << filterPatternLineEdit << fileListView << outputImageTypeLabel << outputImageType << loadFirstImageBtn;
+  << filterPatternLineEdit << fileListWidget << outputImageTypeLabel << outputImageType << loadFirstImageBtn;
 
   QDoubleValidator* betaValidator = new QDoubleValidator(m_Beta);
   QDoubleValidator* minVarValidator = new QDoubleValidator(m_MinVariance);
@@ -814,7 +815,7 @@ void EmMpmGui::on_processBtn_clicked()
       return;
     }
 
-    if (this->fileListView->model()->rowCount() == 0)
+    if (this->fileListWidget->model()->rowCount() == 0)
     {
       QMessageBox::critical(this, tr("Parameter Error"), tr("No image files are available in the file list view."), QMessageBox::Ok);
       return;
@@ -1191,11 +1192,34 @@ void EmMpmGui::on_processFolder_stateChanged(int state)
     enabled = false;
   }
 
-  QFileInfo fileinfo(inputImageFilePath->text());
-  if (true == fileinfo.exists())
+  // Enable/Disable widgets
+  setProcessFolderWidgetsEnabled(enabled);
+  inputImageFilePath->setEnabled(!enabled);
+  inputImageFilePathBtn->setEnabled(!enabled);
+  outputImageFile->setEnabled(!enabled);
+  outputImageButton->setEnabled(!enabled);
+
+
+  // We are NOT processing a file so load what ever image is in the InputImageFilePath Line Edit
+  if (false == enabled)
   {
-    setWidgetListEnabled(true);
-    setImageWidgetsEnabled(true);
+    on_inputImageFilePath_textChanged(inputImageFilePath->text());
+    return;
+  }
+  else
+  {
+    on_loadFirstImageBtn_clicked();
+  }
+
+#if 0
+  if (inputImageFilePath->text().isEmpty() == false)
+  {
+    QFileInfo fileinfo(inputImageFilePath->text());
+    if (true == fileinfo.exists())
+    {
+      setWidgetListEnabled(true);
+      setImageWidgetsEnabled(true);
+    }
   }
   else
   {
@@ -1207,6 +1231,7 @@ void EmMpmGui::on_processFolder_stateChanged(int state)
   inputImageFilePathBtn->setEnabled(!enabled);
   outputImageFile->setEnabled(!enabled);
   outputImageButton->setEnabled(!enabled);
+#endif
 }
 
 
@@ -1216,26 +1241,20 @@ void EmMpmGui::on_processFolder_stateChanged(int state)
 void EmMpmGui::on_loadFirstImageBtn_clicked()
 {
   // If the input folder exists
-  QFileInfo fileinfo(outputDirectoryLE->text());
+  QFileInfo fileinfo(sourceDirectoryLE->text());
   if (true == fileinfo.exists())
   {
     // Get the first image from the list of images
     QStringList fileList = generateInputFileList();
-    QString inputFile = (sourceDirectoryLE->text() + QDir::separator() + fileList.at(0));
-    openBaseImageFile(inputFile);
+    if (fileList.count() > 0) {
+      QString inputFile = (sourceDirectoryLE->text() + QDir::separator() + fileList.at(0));
+      openBaseImageFile(inputFile);
+    }
   }
 }
 
 
-// -----------------------------------------------------------------------------
-//
-// -----------------------------------------------------------------------------
-void EmMpmGui::on_filterPatternLineEdit_textChanged()
-{
-  // std::cout << "filterPattern: " << std::endl;
-  getProxyModel()->setFilterFixedString(filterPatternLineEdit->text());
-  getProxyModel()->setFilterCaseSensitivity(Qt::CaseInsensitive);
-}
+
 
 // -----------------------------------------------------------------------------
 //
@@ -1273,7 +1292,7 @@ void EmMpmGui::on_sourceDirectoryBtn_clicked()
   if (!getOpenDialogLastDirectory().isNull())
   {
     this->sourceDirectoryLE->setText(getOpenDialogLastDirectory() );
-    populateFileTable(sourceDirectoryLE, fileListView);
+    populateFileTable(sourceDirectoryLE, fileListWidget);
     loadFirstImageBtn->setEnabled(true);
   }
 
@@ -1373,7 +1392,7 @@ void EmMpmGui::on_sourceDirectoryLE_textChanged(const QString & text)
   loadFirstImageBtn->setEnabled(false);
   if (true == verifyPathExists(sourceDirectoryLE->text(), sourceDirectoryLE) )
   {
-    this->populateFileTable(sourceDirectoryLE, fileListView);
+    this->populateFileTable(sourceDirectoryLE, fileListWidget);
     loadFirstImageBtn->setEnabled(true);
   }
 }
@@ -2143,24 +2162,57 @@ void EmMpmGui::userInitAreaAdded(UserInitArea* uia)
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
-void EmMpmGui::populateFileTable(QLineEdit* sourceDirectoryLE, QListView *fileListView)
+void EmMpmGui::populateFileTable(QLineEdit* sourceDirectoryLE, QListWidget *fileListView)
 {
-  if (NULL == m_ProxyModel)
-  {
-    m_ProxyModel = new QSortFilterProxyModel(this);
-  }
+//  if (NULL == m_ProxyModel)
+//  {
+//    m_ProxyModel = new QSortFilterProxyModel(this);
+//  }
 
   QDir sourceDir(sourceDirectoryLE->text());
   sourceDir.setFilter(QDir::Files | QDir::NoDotAndDotDot | QDir::NoSymLinks);
   QStringList strList = sourceDir.entryList();
-  QStringListModel* strModel = new QStringListModel(strList, this->m_ProxyModel);
-  strModel->setSupportedDragActions(Qt::MoveAction);
-  m_ProxyModel->setSourceModel(strModel);
-  m_ProxyModel->setDynamicSortFilter(true);
-  m_ProxyModel->setFilterKeyColumn(0);
-  m_ProxyModel->setSupportedDragActions(Qt::MoveAction);
-  fileListView->setModel(m_ProxyModel);
+//  QStringListModel* strModel = new QStringListModel(strList, this->m_ProxyModel);
+//  strModel->setSupportedDragActions(Qt::MoveAction);
+//  m_ProxyModel->setSourceModel(strModel);
+//  m_ProxyModel->setDynamicSortFilter(true);
+//  m_ProxyModel->setFilterKeyColumn(0);
+//  m_ProxyModel->setSupportedDragActions(Qt::MoveAction);
+//  fileListView->setModel(m_ProxyModel);
 
+
+  // Load the fileListWidget
+  fileListWidget->clear();
+  for(int i = 0; i < strList.count(); ++i)
+  {
+    QListWidgetItem* item  = new QListWidgetItem(strList.at(i));
+    fileListWidget->addItem(item);
+  }
+
+}
+
+// -----------------------------------------------------------------------------
+//
+// -----------------------------------------------------------------------------
+void EmMpmGui::on_filterPatternLineEdit_textChanged()
+{
+
+  QDir sourceDir(sourceDirectoryLE->text());
+  sourceDir.setFilter(QDir::Files | QDir::NoDotAndDotDot | QDir::NoSymLinks);
+  QStringList strList = sourceDir.entryList();
+  strList = strList.filter(filterPatternLineEdit->text(), Qt::CaseInsensitive);
+  // Load the fileListWidget
+  fileListWidget->clear();
+  for(int i = 0; i < strList.count(); ++i)
+  {
+    QListWidgetItem* item  = new QListWidgetItem(strList.at(i));
+    fileListWidget->addItem(item);
+  }
+
+
+  // std::cout << "filterPattern: " << std::endl;
+//  getProxyModel()->setFilterFixedString(filterPatternLineEdit->text());
+//  getProxyModel()->setFilterCaseSensitivity(Qt::CaseInsensitive);
 }
 
 // -----------------------------------------------------------------------------
@@ -2169,6 +2221,7 @@ void EmMpmGui::populateFileTable(QLineEdit* sourceDirectoryLE, QListView *fileLi
 QStringList EmMpmGui::generateInputFileList()
 {
   QStringList list;
+#if 0
   int count = this->m_ProxyModel->rowCount();
   // this->fileListView->selectAll();
   QAbstractItemModel* sourceModel = this->m_ProxyModel->sourceModel();
@@ -2177,6 +2230,15 @@ QStringList EmMpmGui::generateInputFileList()
     QModelIndex proxyIndex = this->m_ProxyModel->index(i,0);
     QModelIndex sourceIndex = this->m_ProxyModel->mapToSource(proxyIndex);
     list.append( sourceModel->data(sourceIndex, 0).toString() );
+  }
+#endif
+  int count = fileListWidget->count();
+  for(int i = 0; i < count; ++i)
+  {
+    QString path = sourceDirectoryLE->text();
+    path.append(QDir::separator());
+    path.append(fileListWidget->item(i)->text());
+    list.append(path);
   }
   return list;
 }

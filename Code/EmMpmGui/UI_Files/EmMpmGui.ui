@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1063</width>
-    <height>685</height>
+    <height>708</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -477,12 +477,9 @@
          </layout>
         </item>
         <item>
-         <widget class="QListView" name="fileListView">
-          <property name="toolTip">
-           <string>The list of files to be segmented</string>
-          </property>
-          <property name="statusTip">
-           <string>The list of files to be segmented</string>
+         <widget class="QListWidget" name="fileListWidget">
+          <property name="editTriggers">
+           <set>QAbstractItemView::NoEditTriggers</set>
           </property>
           <property name="dragEnabled">
            <bool>true</bool>
@@ -491,19 +488,19 @@
            <enum>QAbstractItemView::InternalMove</enum>
           </property>
           <property name="defaultDropAction">
-           <enum>Qt::MoveAction</enum>
+           <enum>Qt::IgnoreAction</enum>
           </property>
           <property name="alternatingRowColors">
            <bool>true</bool>
           </property>
-          <property name="selectionMode">
-           <enum>QAbstractItemView::SingleSelection</enum>
-          </property>
           <property name="movement">
-           <enum>QListView::Snap</enum>
+           <enum>QListView::Free</enum>
           </property>
           <property name="uniformItemSizes">
            <bool>true</bool>
+          </property>
+          <property name="sortingEnabled">
+           <bool>false</bool>
           </property>
          </widget>
         </item>
@@ -1904,7 +1901,6 @@
   <tabstop>outputImageFile</tabstop>
   <tabstop>outputImageButton</tabstop>
   <tabstop>outputPrefix</tabstop>
-  <tabstop>fileListView</tabstop>
   <tabstop>processBtn</tabstop>
   <tabstop>tabWidget</tabstop>
  </tabstops>
