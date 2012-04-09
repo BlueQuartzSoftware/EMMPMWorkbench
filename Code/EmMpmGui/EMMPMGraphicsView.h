@@ -38,7 +38,7 @@
 #include <QtGui/QGraphicsItem>
 #include <QtGui/QRubberBand>
 
-//class UserInitAreaTableModel;
+
 class UserInitArea;
 class EmMpmGui;
 
@@ -69,7 +69,7 @@ class EMMPMGraphicsView : public QGraphicsView
 
     EMMPMGraphicsView( QWidget *parent = NULL);
 
-    void setUserInitAreaTableModel(QVector<UserInitArea*>* userInitAreaVector)
+    void setUserInitAreas(QVector<UserInitArea*>* userInitAreaVector)
     {
       m_UserInitAreaVector = userInitAreaVector;
     }

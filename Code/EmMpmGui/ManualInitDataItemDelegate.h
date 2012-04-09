@@ -27,8 +27,8 @@
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE
  * USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
-#ifndef _USER_INIT_AREA_ITEM_DELEGATE_H_
-#define _USER_INIT_AREA_ITEM_DELEGATE_H_
+#ifndef _MANUAL_INIT_DATA_ITEM_DELEGATE_H_
+#define _MANUAL_INIT_DATA_ITEM_DELEGATE_H_
 
 #include <iostream>
 
@@ -42,21 +42,21 @@
 #include <QtGui/QStyledItemDelegate>
 
 
-#include "UserInitAreaTableModel.h"
+#include "ManualInitTableModel.h"
 
 /**
- * @class UserInitAreaItemDelegate UserInitAreaItemDelegate.h AIM/StatsGenerator/UserInitAreaItemDelegate.h
+ * @class ManualInitDataItemDelegate ManualInitDataItemDelegate.h AIM/StatsGenerator/ManualInitDataItemDelegate.h
  * @brief This class creates the appropriate Editor Widget for the Tables
  * @author Michael A. Jackson for BlueQuartz Software
- * @date Dec 28, 2010
+ * @date April 05, 2012
  * @version 1.0
  */
-class UserInitAreaItemDelegate : public QStyledItemDelegate
+class ManualInitDataItemDelegate : public QStyledItemDelegate
 {
   Q_OBJECT
 
   public:
-    explicit UserInitAreaItemDelegate(QObject *parent = 0) :
+    explicit ManualInitDataItemDelegate(QObject *parent = 0) :
       QStyledItemDelegate(parent)
     {
     }
@@ -74,40 +74,31 @@ class UserInitAreaItemDelegate : public QStyledItemDelegate
     // -----------------------------------------------------------------------------
     QWidget* createEditor(QWidget *parent, const QStyleOptionViewItem &option, const QModelIndex &index) const
     {
-      QLineEdit* classValue;
-      QIntValidator* classValidator;
+      QLineEdit* classValue = NULL;
+      QDoubleValidator* classValidator = NULL;
 
-      QLineEdit* grayValue;
-      QIntValidator* grayValueValidator;
+      QLineEdit* grayValue = NULL;
+      QIntValidator* grayValueValidator = NULL;
 
-      QLineEdit* gamma;
-      QDoubleValidator* gammaValidator;
-
-      QLineEdit* mu;
-      QDoubleValidator* muValidator;
+      QLineEdit* mu = NULL;
+      QDoubleValidator* muValidator = NULL;
 
       qint32 col = index.column();
       switch(col)
       {
-        case UserInitAreaTableModel::Class:
+        case ManualInitTableModel::StdDev:
           classValue = new QLineEdit(parent);
           classValue->setFrame(false);
-          classValidator = new QIntValidator(classValue);
+          classValidator = new QDoubleValidator(classValue);
           classValue->setValidator(classValidator);
           return classValue;
-        case UserInitAreaTableModel::GrayValue:
+        case ManualInitTableModel::GrayValue:
           grayValue = new QLineEdit(parent);
           grayValue->setFrame(false);
           grayValueValidator = new QIntValidator(grayValue);
           grayValue->setValidator(grayValueValidator);
           return grayValue;
-        case UserInitAreaTableModel::Gamma:
-          gamma = new QLineEdit(parent);
-          gamma->setFrame(false);
-          gammaValidator = new QDoubleValidator(gamma);
-          gamma->setValidator(gammaValidator);
-          return gamma;
-        case UserInitAreaTableModel::Mu:
+        case ManualInitTableModel::Mu:
            mu = new QLineEdit(parent);
            mu->setFrame(false);
            muValidator = new QDoubleValidator(mu);
@@ -125,10 +116,9 @@ class UserInitAreaItemDelegate : public QStyledItemDelegate
     void setEditorData(QWidget *editor, const QModelIndex &index) const
     {
       qint32 col = index.column();
-      if (col == UserInitAreaTableModel::Class ||
-          col == UserInitAreaTableModel::GrayValue ||
-          col == UserInitAreaTableModel::Gamma ||
-          col == UserInitAreaTableModel::Mu)
+      if (col == ManualInitTableModel::StdDev ||
+          col == ManualInitTableModel::GrayValue ||
+          col == ManualInitTableModel::Mu )
       {
         QLineEdit* lineEdit = qobject_cast<QLineEdit* > (editor);
         Q_ASSERT(lineEdit);
@@ -143,8 +133,7 @@ class UserInitAreaItemDelegate : public QStyledItemDelegate
     void setModelData(QWidget *editor, QAbstractItemModel *model, const QModelIndex &index) const
     {
       qint32 col = index.column();
-      if (col == UserInitAreaTableModel::Class ||
-          col == UserInitAreaTableModel::GrayValue )
+      if (col == ManualInitTableModel::GrayValue )
       {
         QLineEdit* lineEdit = qobject_cast<QLineEdit* > (editor);
         Q_ASSERT(lineEdit);
@@ -152,15 +141,7 @@ class UserInitAreaItemDelegate : public QStyledItemDelegate
         int v = lineEdit->text().toInt(&ok);
         model->setData(index, v);
       }
-      else if (col == UserInitAreaTableModel::Gamma)
-      {
-        QLineEdit* lineEdit = qobject_cast<QLineEdit* > (editor);
-        Q_ASSERT(lineEdit);
-        bool ok = false;
-        double v = lineEdit->text().toDouble(&ok);
-        model->setData(index, v);
-      }
-      else if (col == UserInitAreaTableModel::Mu)
+      else if (col == ManualInitTableModel::Mu || col == ManualInitTableModel::StdDev)
       {
         QLineEdit* lineEdit = qobject_cast<QLineEdit* > (editor);
         Q_ASSERT(lineEdit);
@@ -178,4 +159,4 @@ class UserInitAreaItemDelegate : public QStyledItemDelegate
 
 };
 
-#endif /* _USER_INIT_AREA_ITEM_DELEGATE_H_ */
+#endif /* _MANUAL_INIT_DATA_ITEM_DELEGATE_H_ */

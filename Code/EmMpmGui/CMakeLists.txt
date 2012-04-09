@@ -73,6 +73,8 @@ SET( EmMpmGui_SRCS
   ${EmMpmGui_SOURCE_DIR}/UserInitAreaTableModel.cpp
   ${EmMpmGui_SOURCE_DIR}/UserInitAreaDialog.cpp
   ${EmMpmGui_SOURCE_DIR}/UserInitAreaWidget.cpp
+  ${EmMpmGui_SOURCE_DIR}/ManualInitTableModel.cpp
+  ${EmMpmGui_SOURCE_DIR}/ManualInitData.cpp
   ${EmMpmGui_SOURCE_DIR}/AxisSettingsDialog.cpp
   ${EmMpmGui_SOURCE_DIR}/LayersDockWidget.cpp
   ${EmMpmGui_SOURCE_DIR}/EMMPMTask.cpp
@@ -89,6 +91,9 @@ SET( EmMpmGui_MOC_HDRS
   ${EmMpmGui_SOURCE_DIR}/UserInitAreaTableModel.h
   ${EmMpmGui_SOURCE_DIR}/UserInitAreaDialog.h
   ${EmMpmGui_SOURCE_DIR}/UserInitAreaWidget.h
+  ${EmMpmGui_SOURCE_DIR}/ManualInitTableModel.h
+  ${EmMpmGui_SOURCE_DIR}/ManualInitData.h
+  ${EmMpmGui_SOURCE_DIR}/ManualInitDataItemDelegate.h
   ${EmMpmGui_SOURCE_DIR}/AxisSettingsDialog.h
   ${EmMpmGui_SOURCE_DIR}/LayersDockWidget.h
   ${EmMpmGui_SOURCE_DIR}/UserInitAreaItemDelegate.h

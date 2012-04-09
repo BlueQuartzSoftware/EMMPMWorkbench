@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1063</width>
-    <height>708</height>
+    <width>1031</width>
+    <height>742</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -777,8 +777,8 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1063</width>
-     <height>21</height>
+     <width>1031</width>
+     <height>22</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -1168,6 +1168,26 @@
           </property>
           <property name="text">
            <string>20</string>
+          </property>
+         </widget>
+        </item>
+        <item row="6" column="0" colspan="2">
+         <widget class="QTableView" name="manualInitTableView">
+          <attribute name="horizontalHeaderDefaultSectionSize">
+           <number>60</number>
+          </attribute>
+          <attribute name="verticalHeaderDefaultSectionSize">
+           <number>20</number>
+          </attribute>
+          <attribute name="verticalHeaderMinimumSectionSize">
+           <number>20</number>
+          </attribute>
+         </widget>
+        </item>
+        <item row="5" column="0" colspan="2">
+         <widget class="QCheckBox" name="manualInit">
+          <property name="text">
+           <string>Use Manual Mu/Sigma/Gray Scale Values</string>
           </property>
          </widget>
         </item>

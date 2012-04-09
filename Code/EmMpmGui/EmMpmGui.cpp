@@ -95,6 +95,7 @@
 #include "UserInitAreaWidget.h"
 #include "LayersDockWidget.h"
 #include "ImageOpenDialog.h"
+#include "ManualInitTableModel.h"
 
 
 
@@ -484,63 +485,18 @@ void EmMpmGui::setupGui()
   m_AxisSettingsDialog->setVisible(false);
 
   m_GraphicsView->setEmMpmGui(this);
-  m_GraphicsView->setUserInitAreaTableModel(m_UserInitAreaVector);
+  m_GraphicsView->setUserInitAreas(m_UserInitAreaVector);
 
   if (m_LayersPalette == NULL)
   {
     m_LayersPalette = new LayersDockWidget(this);
     m_LayersPalette->setGraphicsView(m_GraphicsView);
-  //  m_LayersPalette->setFloating(false);
     m_LayersPalette->setVisible(false);
     m_LayersPalette->setFeatures(QDockWidget::AllDockWidgetFeatures);
     m_LayersPalette->setAllowedAreas(Qt::AllDockWidgetAreas);
     m_LayersPalette->getUseColorTable()->setEnabled(enableUserDefinedAreas->isChecked());
   }
 
-#if 0
-  compositeModeCB->blockSignals(true);
-
-  compositeModeCB->insertItem(0, "Exclusion", QVariant(EmMpm_Constants::Exclusion));
-  compositeModeCB->insertItem(1, "Difference", QVariant(EmMpm_Constants::Difference));
-  compositeModeCB->insertItem(2, "Alpha Blend", QVariant(EmMpm_Constants::Alpha_Blend));
-#endif
-
-
-#if 0
-  compositeModeCB->insertItem(2, "Plus");
-  compositeModeCB->insertItem(3, "Multiply");
-  compositeModeCB->insertItem(4, "Screen");
-  compositeModeCB->insertItem(5, "Darken");
-  compositeModeCB->insertItem(6, "Lighten");
-  compositeModeCB->insertItem(7, "Color Dodge");
-  compositeModeCB->insertItem(8, "Color Burn");
-  compositeModeCB->insertItem(9, "Hard Light");
-  compositeModeCB->insertItem(10, "Soft Light");
-
-
-  compositeModeCB->insertItem(12, "Destination");
-  compositeModeCB->insertItem(13, "Source Over");
-  compositeModeCB->insertItem(14, "Destination Over");
-  compositeModeCB->insertItem(15, "Source In");
-  compositeModeCB->insertItem(16, "Dest In");
-
-  compositeModeCB->insertItem(17, "Dest Out");
-  compositeModeCB->insertItem(18, "Source Atop");
-  compositeModeCB->insertItem(19, "Dest Atop");
-
-  compositeModeCB->insertItem(20, "Overlay");
-  compositeModeCB->insertItem(21, "Clear");
-#endif
-
-#if 0
-  compositeModeCB->setCurrentIndex(2);
-  compositeModeCB->blockSignals(false);
-
-  compositeModeCB->setEnabled(false);
-#endif
-
-//  connect (m_GraphicsView, SIGNAL(fireBaseImageFileLoaded(const QString &)),
-//           this, SLOT(baseImageFileLoaded(const QString &)), Qt::QueuedConnection);
 
   connect (m_GraphicsView, SIGNAL(fireOverlayImageFileLoaded(const QString &)),
            this, SLOT(overlayImageFileLoaded(const QString &)), Qt::QueuedConnection);
@@ -558,11 +514,6 @@ void EmMpmGui::setupGui()
            m_GraphicsView, SLOT(zoomIn()), Qt::QueuedConnection);
   connect(zoomOut, SIGNAL(clicked()),
           m_GraphicsView, SLOT(zoomOut()), Qt::QueuedConnection);
-//  connect (zoomCB, SIGNAL(currentIndexChanged(int)),
-//           m_GraphicsView, SLOT(setZoomIndex(int)), Qt::QueuedConnection);
-//  connect(fitToWindow, SIGNAL(clicked()),
-//          m_GraphicsView, SLOT(fitToWindow()), Qt::QueuedConnection);
-
 
   QFileCompleter* com = new QFileCompleter(this, false);
   inputImageFilePath->setCompleter(com);
@@ -584,13 +535,8 @@ void EmMpmGui::setupGui()
 //  m_QueueDialog->setVisible(false);
   cancelBtn->setVisible(false);
 
-  // Hid the user init table by default
- // m_UserInitAreaWidget->hide();
-
   // Configure the Histogram Plot
   m_HistogramPlot->setCanvasBackground(QColor(Qt::white));
-  //m_HistogramPlot->setTitle("Image Histogram");
-  //  m_HistogramPlot->setAxisTitle(QwtPlot::xBottom, "Gray Scale Value");
   m_grid = new QwtPlotGrid;
   m_grid->enableXMin(true);
   m_grid->enableYMin(true);
@@ -617,22 +563,15 @@ void EmMpmGui::setupGui()
   QDoubleValidator* betaValidator = new QDoubleValidator(m_Beta);
   QDoubleValidator* minVarValidator = new QDoubleValidator(m_MinVariance);
 
-
-#if 0
-  m_zoomer = new QwtPlotZoomer(QwtPlot::xBottom, QwtPlot::yLeft, m_HistogramPlot->canvas());
-  m_zoomer->setRubberBand(QwtPicker::RectRubberBand);
-  m_zoomer->setRubberBandPen(QColor(Qt::green));
-  m_zoomer->setTrackerMode(QwtPicker::ActiveOnly);
-  m_zoomer->setTrackerPen(QColor(Qt::blue));
-
-  m_panner = new QwtPlotPanner(m_HistogramPlot->canvas());
-  m_panner->setMouseButton(Qt::MidButton);
-#endif
   m_picker = new QwtPlotPicker(QwtPlot::xBottom, QwtPlot::yLeft, QwtPicker::PointSelection, QwtPlotPicker::CrossRubberBand, QwtPicker::AlwaysOn, m_HistogramPlot->canvas());
   m_picker->setRubberBandPen(QColor(Qt::green));
   m_picker->setRubberBand(QwtPicker::CrossRubberBand);
   m_picker->setTrackerPen(QColor(Qt::blue));
 
+  ManualInitTableModel* tm = new ManualInitTableModel(manualInitTableView);
+  manualInitTableView->setModel(tm);
+  connect(tm, SIGNAL(dataChanged(const QModelIndex &, const QModelIndex &)),
+          this, SLOT(manualInitDataChanged(const QModelIndex &, const QModelIndex &)));
 }
 
 // -----------------------------------------------------------------------------
@@ -1020,17 +959,33 @@ EMMPMTask* EmMpmGui::newEmMpmTask( ProcessQueueController* queueController)
   data->classes = m_NumClasses->value();
   data->simulatedAnnealing = (useSimulatedAnnealing->isChecked()) ? 1 : 0;
   data->dims = 1; // FORCING A GRAY SCALE IMAGE TO BE USED
-  if (enableUserDefinedAreas->isChecked() == false)
+
+  if (manualInit->isChecked() == true)
   {
-    data->initType = EMMPM_Basic;
-    int n = data->classes - 1;
-    for (int value = 0; value < data->classes; ++value)
+    data->initType = EMMPM_ManualInit;
+    // Allocate memory to hold the values - The EMMPM Task will free the memory
+    data->m = (real_t*)malloc(data->classes * data->dims * sizeof(real_t));
+    data->v = (real_t*)malloc(data->classes * data->dims * sizeof(real_t));
+
+    ManualInitTableModel* model = qobject_cast<ManualInitTableModel*>(manualInitTableView->model());
+    if (NULL == model) { return NULL; }
+    bool ok = false;
+    int rows = model->rowCount();
+    for(int i = 0; i < rows; ++i)
     {
-      data->grayTable[value] = value * 255 / n;
-      data->min_variance[value] = m_MinVariance->text().toFloat(&ok);
+      QModelIndex muIndex = model->index(i, ManualInitTableModel::Mu);
+      double mu = model->data(muIndex).toDouble(&ok);
+      QModelIndex sigIndex = model->index(i, ManualInitTableModel::StdDev);
+      double sig = model->data(sigIndex).toDouble(&ok);
+      QModelIndex gvIndex = model->index(i, ManualInitTableModel::GrayValue);
+      int gv = model->data(gvIndex).toInt(&ok);
+      data->m[i] = mu;
+      data->v[i] = sig;
+      data->grayTable[i] = gv;
     }
+
   }
-  else
+  else if (enableUserDefinedAreas->isChecked() == true)
   {
     data->initType = EMMPM_ManualInit;
     // Allocate memory to hold the values - The EMMPM Task will free the memory
@@ -1042,6 +997,17 @@ EMMPMTask* EmMpmGui::newEmMpmTask( ProcessQueueController* queueController)
     copyGammaValues(data);
     copyMinVarianceValues(data);
   }
+  else
+  {
+    data->initType = EMMPM_Basic;
+    int n = data->classes - 1;
+    for (int value = 0; value < data->classes; ++value)
+    {
+      data->grayTable[value] = value * 255 / n;
+      data->min_variance[value] = m_MinVariance->text().toFloat(&ok);
+    }
+  }
+
   data->useCurvaturePenalty = (useCurvaturePenalty->isChecked()) ? 1 : 0;
   data->useGradientPenalty = (useGradientPenalty->isChecked()) ? 1 : 0;
   data->beta_e = (useGradientPenalty->isChecked()) ? gradientBetaE->value() : 0.0;
@@ -1203,7 +1169,8 @@ void EmMpmGui::on_processFolder_stateChanged(int state)
     return;
   }
   else
-  {
+ {
+    populateFileTable(sourceDirectoryLE, fileListWidget);
     if (fileListWidget->count() > 0) {
       QListWidgetItem* item = fileListWidget->item(0);
       on_fileListWidget_itemDoubleClicked(item);
@@ -1242,7 +1209,7 @@ void EmMpmGui::on_fileListWidget_itemDoubleClicked(QListWidgetItem * item)
   QString path = sourceDirectoryLE->text();
   path.append(QDir::separator());
   path.append(item->text());
-  
+
   QFileInfo fi(path);
   if (fi.exists() == true)
   {
@@ -1660,10 +1627,104 @@ void EmMpmGui::openBaseImageFile(QString imageFile)
   m_GraphicsView->loadBaseImageFile(imageFile);
   clearProcessHistograms();
   d.setStatus("Generating Histogram....");
+
+
+
   plotImageHistogram();
+
+  ManualInitTableModel* tm = new ManualInitTableModel(manualInitTableView);
+  manualInitTableView->setModel(tm);
+  connect(tm, SIGNAL(dataChanged(const QModelIndex &, const QModelIndex &)),
+          this, SLOT(manualInitDataChanged(const QModelIndex &, const QModelIndex &)));
+
+
+  addRemoveManualInitTableRows();
 
   QSize size = m_GraphicsView->getBaseImage().size();
   estimateMemoryUse(size);
+}
+
+// -----------------------------------------------------------------------------
+//
+// -----------------------------------------------------------------------------
+void EmMpmGui::addRemoveManualInitTableRows()
+{
+  ManualInitTableModel* model = qobject_cast<ManualInitTableModel*>(manualInitTableView->model());
+  if (NULL == model) { return; }
+  // Check to see if the model and the number of classes match.
+  if (m_NumClasses->value() == model->rowCount())
+  {
+    return;
+  }
+
+ // std::cout << "m_Gaussians.size(): " << m_Gaussians.count() << std::endl;
+  // The number of classes is less than the model, remove rows
+  while (m_NumClasses->value() < model->rowCount())
+  {
+    model->removeRows(model->rowCount()-1, 1);
+    QwtPlotCurve* curve = m_Gaussians[0];
+    m_Gaussians.removeAll(curve);
+
+    curve->detach();
+    delete curve;
+  }
+
+  while(m_NumClasses->value() > model->rowCount())
+  {
+ //   std::cout << "" << m_NumClasses->value() << "  " << model->rowCount() << std::endl;
+    QColor color = Qt::red;
+    color.setAlpha(255);
+
+    QwtPlotCurve* curve = new QwtPlotCurve("");
+    curve->setPen(QPen(color, 2));
+    curve->setRenderHint(QwtPlotItem::RenderAntialiased);
+    curve->attach(m_HistogramPlot);
+    m_Gaussians.insert(model->rowCount(), curve);
+    model->insertRows(model->rowCount(), 1);
+  }
+  updateManualInitHistograms();
+}
+
+// -----------------------------------------------------------------------------
+//
+// -----------------------------------------------------------------------------
+void EmMpmGui::manualInitDataChanged ( const QModelIndex & topLeft, const QModelIndex & bottomRight )
+{
+  updateManualInitHistograms();
+}
+
+// -----------------------------------------------------------------------------
+//
+// -----------------------------------------------------------------------------
+void EmMpmGui::updateManualInitHistograms()
+{
+  ManualInitTableModel* model = qobject_cast<ManualInitTableModel*>(manualInitTableView->model());
+  if (NULL == model) { return; }
+  bool ok = false;
+  int rows = model->rowCount();
+  for(int i = 0; i < rows; ++i)
+  {
+    QModelIndex muIndex = model->index(i, ManualInitTableModel::Mu);
+    double mu = model->data(muIndex).toDouble(&ok);
+    QModelIndex sigIndex = model->index(i, ManualInitTableModel::StdDev);
+    double sig = model->data(sigIndex).toDouble(&ok);
+    QwtArray<double> intervals;
+    QwtArray<double> values;
+    calcGaussianCurve(mu, sig, intervals, values);
+
+
+    QwtPlotCurve* curve = m_Gaussians[i];
+    curve->setData(intervals, values);
+    QColor c = Qt::red;
+    c.setAlpha(255);
+    curve->setPen(QPen(c, 2, Qt::SolidLine));
+
+    //Update the combine Gaussian Curve
+    plotCombinedGaussian();
+  }
+
+  // Update the plot
+  m_HistogramPlot->replot();
 }
 
 // -----------------------------------------------------------------------------
@@ -1786,6 +1847,7 @@ void EmMpmGui::on_m_NumClasses_valueChanged(int i)
   QSize size = m_GraphicsView->getBaseImage().size();
 
   estimateMemoryUse(size);
+  addRemoveManualInitTableRows();
 }
 
 // -----------------------------------------------------------------------------
@@ -1919,31 +1981,18 @@ void EmMpmGui::userInitAreaLostFocus()
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
-void EmMpmGui::userInitAreaUpdated(UserInitArea* uia)
+void EmMpmGui::calcGaussianCurve(double mu, double sig, QwtArray<double> &intervals, QwtArray<double> &values)
 {
-//  std::cout << "UserInitArea Updated" << std::endl;
-  if (NULL == uia)
-  {
-    return;
-  }
-
- // m_UserInitAreaWidget->setUserInitArea(uia);
-  double mu = 0.0;
-  double sig = 0.0;
-  int err = m_GraphicsView->calculateMuSigma(uia, mu, sig);
-  uia->setMu(mu);
-  uia->setSigma(sig);
-
   double max = std::numeric_limits<double>::min();
 
   // Generate the Histogram Bins
   const int numValues = 256;
-  QwtArray<double> intervals(numValues);
+  intervals.resize(numValues);
   for (int i = 0; i < numValues; ++i)
   {
     intervals[i] = (double)i;
   }
-  QwtArray<double> values(numValues);
+  values.resize(numValues);
   float sqrt2pi = sqrt(2.0 * M_PI);
   float twoSigSqrd = sig * sig * 2.0;
   float constant = 1.0 / (sig * sqrt2pi);
@@ -1967,6 +2016,31 @@ void EmMpmGui::userInitAreaUpdated(UserInitArea* uia)
     values[x] = (values[x]/max) * binSize;
   }
 
+}
+
+// -----------------------------------------------------------------------------
+//
+// -----------------------------------------------------------------------------
+void EmMpmGui::userInitAreaUpdated(UserInitArea* uia)
+{
+//  std::cout << "UserInitArea Updated" << std::endl;
+  if (NULL == uia)
+  {
+    return;
+  }
+
+ // m_UserInitAreaWidget->setUserInitArea(uia);
+  double mu = 0.0;
+  double sig = 0.0;
+  int err = m_GraphicsView->calculateMuSigma(uia, mu, sig);
+  uia->setMu(mu);
+  uia->setSigma(sig);
+
+  QwtArray<double> intervals;
+  QwtArray<double> values;
+  calcGaussianCurve(mu, sig, intervals, values);
+
+
   // Locate our curve object by getting the row from the TableModel that corresponds
   // to the UIA object that was passed in
   int row = m_UserInitAreaVector->indexOf(uia, 0);
@@ -1978,7 +2052,7 @@ void EmMpmGui::userInitAreaUpdated(UserInitArea* uia)
 
   m_UserInitAreaWidget->setUserInitArea(uia);
 
-//Update the combine Gaussian Curve
+  //Update the combine Gaussian Curve
   plotCombinedGaussian();
   // Update the plot
   m_HistogramPlot->replot();
@@ -2164,22 +2238,9 @@ void EmMpmGui::userInitAreaAdded(UserInitArea* uia)
 // -----------------------------------------------------------------------------
 void EmMpmGui::populateFileTable(QLineEdit* sourceDirectoryLE, QListWidget *fileListView)
 {
-//  if (NULL == m_ProxyModel)
-//  {
-//    m_ProxyModel = new QSortFilterProxyModel(this);
-//  }
-
   QDir sourceDir(sourceDirectoryLE->text());
   sourceDir.setFilter(QDir::Files | QDir::NoDotAndDotDot | QDir::NoSymLinks);
   QStringList strList = sourceDir.entryList();
-//  QStringListModel* strModel = new QStringListModel(strList, this->m_ProxyModel);
-//  strModel->setSupportedDragActions(Qt::MoveAction);
-//  m_ProxyModel->setSourceModel(strModel);
-//  m_ProxyModel->setDynamicSortFilter(true);
-//  m_ProxyModel->setFilterKeyColumn(0);
-//  m_ProxyModel->setSupportedDragActions(Qt::MoveAction);
-//  fileListView->setModel(m_ProxyModel);
-
 
   // Load the fileListWidget
   fileListWidget->clear();

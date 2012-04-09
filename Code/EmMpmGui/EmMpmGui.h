@@ -131,6 +131,9 @@ class EmMpmGui :  public QMainWindow, private Ui::EmMpmGui
 
     void updateHistogramAxis();
 
+    void addRemoveManualInitTableRows();
+
+
     /**
      * @brief Opens an Image file
      * @param imageFile The path to the image file to open.
@@ -140,6 +143,8 @@ class EmMpmGui :  public QMainWindow, private Ui::EmMpmGui
     void openOverlayImage(QString mountImage);
 
     void estimateMemoryUse(QSize size);
+
+    void calcGaussianCurve(double mu, double sigma, QwtArray<double> &intervals, QwtArray<double> &values);
 
   signals:
     void cancelTask();
@@ -155,6 +160,10 @@ class EmMpmGui :  public QMainWindow, private Ui::EmMpmGui
     void userInitAreaUpdated(UserInitArea* uia);
     void userInitAreaSelected(UserInitArea* uia);
     void userInitAreaLostFocus();
+
+    void updateManualInitHistograms();
+    void manualInitDataChanged ( const QModelIndex & topLeft, const QModelIndex & bottomRight );
+
   // Histogram/Gaussian Plot related Manual Hookup
      void clearProcessHistograms();
      void addProcessHistogram(QVector<real_t> data);
