@@ -92,11 +92,11 @@ void EMMPMTask::reportProgress(EMMPM_Data::Pointer data)
 
     image.fill(0);
     uchar* front = NULL;
-    for (int y = 0; y < data->rows; ++y)
+    for (unsigned int y = 0; y < data->rows; ++y)
     {
       front = image.scanLine(y);
       int bytesPerLine = image.bytesPerLine();
-      for (int x = 0; x < data->columns; ++x)
+      for (unsigned int x = 0; x < data->columns; ++x)
       {
         front[x] = data->xt[data->columns*y + x];
       }

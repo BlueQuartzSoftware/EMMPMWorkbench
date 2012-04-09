@@ -108,7 +108,7 @@ QVariant ManualInitTableModel::data(const QModelIndex &index, qint32 role) const
     }
 
     QString s;
-    unsigned int x, y;
+  //  unsigned int x, y;
 
     int col = index.column();
     switch(col)
