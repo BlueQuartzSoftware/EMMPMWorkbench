@@ -34,7 +34,11 @@
 //
 // -----------------------------------------------------------------------------
 ManualInitData::ManualInitData(int label, double mu, double sigma, int grayLevel, QObject* parent) :
-    QObject(parent), m_Class(label), m_Mu(mu), m_Sigma(sigma), m_GrayLevel(grayLevel)
+QObject(parent),
+m_Class(label),
+m_Mu(mu),
+m_Sigma(sigma),
+m_GrayLevel(grayLevel)
 {
 
 }
@@ -108,3 +112,40 @@ int ManualInitData::getEmMpmGrayLevel()
 {
   return m_GrayLevel;
 }
+
+// -----------------------------------------------------------------------------
+//
+// -----------------------------------------------------------------------------
+void ManualInitData::writeSettings(QSettings &prefs)
+{
+  QString group("ManualInitData-");
+  group.append(QString::number(m_Class));
+
+  prefs.beginGroup(group);
+
+  prefs.setValue("Class", m_Class);
+  prefs.setValue("Mu", m_Mu);
+  prefs.setValue("Sigma", m_Sigma);
+  prefs.setValue("GrayLevel", m_GrayLevel);
+
+  prefs.endGroup();
+}
+
+// -----------------------------------------------------------------------------
+//
+// -----------------------------------------------------------------------------
+void ManualInitData::readSettings(QSettings &prefs)
+{
+  bool ok = false;
+
+  QString group("ManualInitData-");
+  group.append(QString::number(m_Class));
+  prefs.beginGroup(group);
+
+  m_Class = prefs.value("Class").toInt(&ok);
+  m_Mu = prefs.value("Mu").toDouble(&ok);
+  m_Sigma = prefs.value("Sigma").toDouble(&ok);
+  m_GrayLevel = prefs.value("GrayLevel").toInt(&ok);
+  prefs.endGroup();
+}
+

@@ -236,6 +236,28 @@ bool ManualInitTableModel::insertRows(int row, int count, const QModelIndex& ind
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
+bool ManualInitTableModel::insertManualData(ManualInitData* data, int row, const QModelIndex& index)
+{
+  qint32 binNum = 0;
+  double mu = 128.0;
+  double sigma = 20.0;
+
+  beginInsertRows(QModelIndex(), row, row );
+  for (int i = 0; i < 1; ++i)
+  {
+    // Create a new ManualInitData object
+    m_ManualInitDatas.push_back(data);
+    m_RowCount = m_ManualInitDatas.count();
+  }
+  endInsertRows();
+  emit dataChanged(index, index);
+  return true;
+}
+
+
+// -----------------------------------------------------------------------------
+//
+// -----------------------------------------------------------------------------
 bool ManualInitTableModel::removeRows(int row, int count, const QModelIndex& index)
 {
   if (count < 1)
@@ -291,5 +313,13 @@ void ManualInitTableModel::updateManualInitData(ManualInitData* uia)
 QAbstractItemDelegate* ManualInitTableModel::getItemDelegate()
 {
   return new ManualInitDataItemDelegate;
+}
+
+// -----------------------------------------------------------------------------
+//
+// -----------------------------------------------------------------------------
+QList<ManualInitData*> ManualInitTableModel::getManualInits()
+{
+  return m_ManualInitDatas;
 }
 

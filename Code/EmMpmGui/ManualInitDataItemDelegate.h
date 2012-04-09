@@ -74,7 +74,7 @@ class ManualInitDataItemDelegate : public QStyledItemDelegate
     // -----------------------------------------------------------------------------
     QWidget* createEditor(QWidget *parent, const QStyleOptionViewItem &option, const QModelIndex &index) const
     {
-      QLineEdit* classValue = NULL;
+      QLineEdit* sigma = NULL;
       QDoubleValidator* classValidator = NULL;
 
       QLineEdit* grayValue = NULL;
@@ -87,15 +87,16 @@ class ManualInitDataItemDelegate : public QStyledItemDelegate
       switch(col)
       {
         case ManualInitTableModel::StdDev:
-          classValue = new QLineEdit(parent);
-          classValue->setFrame(false);
-          classValidator = new QDoubleValidator(classValue);
-          classValue->setValidator(classValidator);
-          return classValue;
+          sigma = new QLineEdit(parent);
+          sigma->setFrame(false);
+          classValidator = new QDoubleValidator(sigma);
+          sigma->setValidator(classValidator);
+          return sigma;
         case ManualInitTableModel::GrayValue:
           grayValue = new QLineEdit(parent);
           grayValue->setFrame(false);
           grayValueValidator = new QIntValidator(grayValue);
+          grayValueValidator->setRange(0, 255);
           grayValue->setValidator(grayValueValidator);
           return grayValue;
         case ManualInitTableModel::Mu:

@@ -78,9 +78,13 @@ class ManualInitTableModel : public QAbstractTableModel
     { return false;}
 
     bool insertRows(int row, int count, const QModelIndex &parent=QModelIndex());
+    bool insertManualData(ManualInitData* data, int row, const QModelIndex &parent=QModelIndex());
     bool removeRows(int row, int count, const QModelIndex &parent=QModelIndex());
 
     QAbstractItemDelegate* getItemDelegate();
+
+    QList<ManualInitData*> getManualInits();
+
 
   public slots:
 

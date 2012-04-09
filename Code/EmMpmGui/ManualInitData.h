@@ -44,7 +44,7 @@ public:
     ManualInitData(int label, double mu, double sigma, int grayLevel, QObject* parent = 0);
     virtual ~ManualInitData();
 
-
+    void readSettings(QSettings &prefs);
     void writeSettings(QSettings &prefs);
 
  public slots:

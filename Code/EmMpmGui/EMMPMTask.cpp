@@ -304,7 +304,6 @@ void EMMPMTask::segmentImage(int i)
   quint8* inImage = inImageBufferPtr->allocateDataArray(width*height, true);
   if (NULL == inImage)
   {
-
     emit finished(this);
     return;
   }
@@ -316,9 +315,11 @@ void EMMPMTask::segmentImage(int i)
   QRgb rgbPixel;
   int gray;
   qint32 index;
-  for (qint32 y = 0; y<height; y++) {
-    for (qint32 x = 0; x<width; x++) {
-      index = (y *  width) + x;
+  for (qint32 y = 0; y < height; y++)
+  {
+    for (qint32 x = 0; x < width; x++)
+    {
+      index = (y * width) + x;
       rgbPixel = image.pixel(x, y);
       gray = qGray(rgbPixel);
       inImage[index] = static_cast<unsigned char>(gray);
@@ -331,7 +332,6 @@ void EMMPMTask::segmentImage(int i)
   m_data->inputImageChannels = 1;
 
   // EMMPM_WriteGrayScaleImage("/tmp/TEST_INPUT_IMAGE.tif", m_data->rows, m_data->columns, "Input image as read by QImage", m_data->inputImage);
-
 
   // Allocate our own output image buffer;
   AIMArray<unsigned char>::Pointer outImageBufferPtr = AIMArray<unsigned char>::New();
@@ -452,14 +452,15 @@ void EMMPMTask::segmentImage(int i)
 
   if (m_OutputStatsFile.empty() == false)
   {
-    FILE* f = fopen(m_OutputStatsFile.c_str(), "wb+");
+    FILE* f = fopen(m_OutputStatsFile.c_str(), "ab+");
     fprintf(f, "InputFile:%s\n", m_data->input_file_name);
     fprintf(f, "SegmentedFile:%s\n" , m_data->output_file_name);
     fprintf(f, "NumClasses:%d\n", m_data->classes);
     fprintf(f, "Class,Mu,Sigma\n");
+    // Remember the Sigma is the Square Root of the variance
     for(int i = 0; i < m_data->classes; ++i)
     {
-      fprintf(f, "%d,%f,%f\n", i,  m_data->m[i] , m_data->v[i] );
+      fprintf(f, "%d,%f,%f\n", i,  m_data->m[i] , sqrtf(m_data->v[i]) );
     }
 
     fclose(f);

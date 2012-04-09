@@ -83,7 +83,7 @@ QGraphicsPolygonItem(polygon, parent)
 // -----------------------------------------------------------------------------
 UserInitArea::~UserInitArea()
 {
-  std::cout << "~UserInitArea" << std::endl;
+  //std::cout << "~UserInitArea" << std::endl;
 }
 
 #define READ_VALUE(prefs, var, ok, temp, default, type)\

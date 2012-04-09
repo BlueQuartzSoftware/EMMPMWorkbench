@@ -204,6 +204,7 @@ class EmMpmGui :  public QMainWindow, private Ui::EmMpmGui
     void on_m_NumClasses_valueChanged(int i);
 
     void on_enableUserDefinedAreas_stateChanged(int state);
+    void on_manualInit_stateChanged(int state);
 
     void z10_triggered();
     void z25_triggered();
@@ -336,6 +337,7 @@ class EmMpmGui :  public QMainWindow, private Ui::EmMpmGui
 
     QwtPlotCurve*           m_histogram;
     QList<QwtPlotCurve*>    m_Gaussians;
+    QList<QwtPlotCurve*>    m_ManualInitGaussians;
     QwtPlotCurve*           m_CombinedGaussians;
     bool                    m_ShowCombinedGaussians;
     QList<QwtPlotCurve*>    m_ProcessGaussians;
