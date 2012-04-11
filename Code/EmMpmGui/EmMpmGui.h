@@ -166,6 +166,7 @@ class EmMpmGui :  public QMainWindow, private Ui::EmMpmGui
 
   // Histogram/Gaussian Plot related Manual Hookup
      void clearProcessHistograms();
+     void clearManualInitCurves();
      void addProcessHistogram(QVector<real_t> data);
      void plotCombinedGaussian();
      void plotImageHistogram();

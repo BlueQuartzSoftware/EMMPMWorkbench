@@ -1674,7 +1674,9 @@ void EmMpmGui::openBaseImageFile(QString imageFile)
 
 
   plotImageHistogram();
-
+  // remove the gaussian curves due to the Manual Init values
+  clearManualInitCurves();
+  // Create a new table model
   ManualInitTableModel* tm = new ManualInitTableModel(manualInitTableView);
   manualInitTableView->setModel(tm);
   connect(tm, SIGNAL(dataChanged(const QModelIndex &, const QModelIndex &)),
@@ -1979,8 +1981,34 @@ void EmMpmGui::clearProcessHistograms()
     delete m_CombinedGaussians;
     m_CombinedGaussians = NULL;
   }
+}
 
+// -----------------------------------------------------------------------------
+//
+// -----------------------------------------------------------------------------
+void EmMpmGui::clearManualInitCurves()
+{
+  //Loop over each entry in the table
+  QwtPlotCurve* curve = NULL;
 
+  // Delete all the current histograms
+  qint32 nRows = m_ManualInitGaussians.count();
+  for (qint32 r = nRows - 1; r >= 0; --r)
+  {
+    curve = m_ManualInitGaussians[r];
+    curve->detach();
+    m_ManualInitGaussians.removeAt(r);
+    delete curve;
+  }
+#if 0
+  // This is an internal variable to keep track of the class number
+  m_CurrentHistogramClass = 0;
+  if (NULL != m_CombinedGaussians) {
+    m_CombinedGaussians->detach();
+    delete m_CombinedGaussians;
+    m_CombinedGaussians = NULL;
+  }
+#endif
 }
 
 // -----------------------------------------------------------------------------
