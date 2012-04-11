@@ -8,12 +8,12 @@
 # create Resource files for the various license files that are used and 
 # also create a header file that lists all the License Files
 set(LICENSE_FILES 
-                   ${QEMMPM_SOURCE_DIR}/License.txt.in
-                   ${QEMMPM_SOURCE_DIR}/ReadMe.txt.in
-                   ${QEMMPM_SOURCE_DIR}/License/Boost.license
-                   ${QEMMPM_SOURCE_DIR}/License/MXA.license
-                   ${QEMMPM_SOURCE_DIR}/License/Qt.license
-                   ${QEMMPM_SOURCE_DIR}/License/tiff.license
+                   ${EMMPMGuiProj_SOURCE_DIR}/License.txt.in
+                   ${EMMPMGuiProj_SOURCE_DIR}/ReadMe.txt.in
+                   ${EMMPMGuiProj_SOURCE_DIR}/License/Boost.license
+                   ${EMMPMGuiProj_SOURCE_DIR}/License/MXA.license
+                   ${EMMPMGuiProj_SOURCE_DIR}/License/Qt.license
+                   ${EMMPMGuiProj_SOURCE_DIR}/License/tiff.license
            )
 set(QRC_LICENSE_FILES "")
 set(LICENSE_HEADER_FILE  ${PROJECT_BINARY_DIR}/License/${PROJECT_NAME}LicenseFiles.h)

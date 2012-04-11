@@ -7,8 +7,27 @@
 PROJECT( EmMpmGui )
 cmake_minimum_required(VERSION 2.8)
 
-#cmpGenerateVersionString ( ${EmMpmGui_BINARY_DIR}/EmMpmGuiVersion.h "EmMpm_Gui" "EmMpmGui")
+set (CMP_HEADER_DIR ${EmMpmGui_BINARY_DIR})
+set (CMP_VERSION_HEADER_FILE_NAME "EMMPMGuiVersion.h")
+set (CMP_VERSION_SOURCE_FILE_NAME "EMMPMGuiVersion.cpp")
 
+# --------------------------------------------------------------------
+# In order to increment the version of EMMPMGuiProj simply adjust these variables.
+# we are using a 3 part Version scheme commonly found in software development. The
+# example would be Version 2.1.6543 which translates to Version [major].[minor].[patch].
+# The Major version is set here in the CMake file. We will use Git 
+# to figure out the "patch" leve of the version by using "git describe" which will
+# calculate how many commits since the last "tag" was applied to the repository.
+# this basically gives us an always incrementing number for the patch level
+# and we can set the Major and Minor versions as we see fit. 
+set(CMP_VERSION_MAJOR "v2")
+
+cmpVersionStringsFromGit(GENERATED_HEADER_FILE_PATH ${CMP_HEADER_DIR}/${CMP_VERSION_HEADER_FILE_NAME} 
+                         GENERATED_SOURCE_FILE_PATH ${CMP_HEADER_DIR}/${CMP_VERSION_SOURCE_FILE_NAME}
+                         NAMESPACE EmMpm_Gui 
+                         cmpProjectName EMMPMGui 
+                         WORKING_DIRECTORY ${EMMPMGuiProj_SOURCE_DIR} )
+                         
 # ------------------------------------------------------------------------------
 #  Qt 4 Section
 # ------------------------------------------------------------------------------
@@ -47,7 +66,7 @@ ENDIF (NOT TIFF_FOUND)
 INCLUDE_DIRECTORIES(${TIFF_INCLUDE_DIRS})
 
 set(PROJECT_PREFIX "QEMMPM")
-include(${QEMMPM_SOURCE_DIR}/License/License.cmake)
+include(${EMMPMGuiProj_SOURCE_DIR}/License/License.cmake)
 
 # Set some Win32 Specific Settings
 IF(WIN32)
@@ -60,8 +79,7 @@ include_directories( ${PROJECT_CODE_DIR}/EmMpmGui )
 include_directories( ${PROJECT_CODE_DIR}/QtSupport )
 
 include_directories( ${EmMpmGui_BINARY_DIR} )
-include_directories( ${QEMMPM_BINARY_DIR}/MXA)
-include_directories( ${QEMMPM_BINARY_DIR}/QtSupport )
+
  
 # --------------------------------------------------------------------
 # Set up all the source codes
@@ -143,9 +161,11 @@ QT4_WRAP_CPP( Generated_MOC_SRCS ${EmMpmGui_MOC_HDRS} )
 #-- Put the generated files into their own group for IDEs
 cmp_IDE_GENERATED_PROPERTIES(EmMpmGui/Generated "${Generated_UI_HDRS}" "${Generated_MOC_SRCS};${Generated_RC_SRCS}")
 
-
-                      
-
+set (Generated_Version_SRCS
+    ${CMP_HEADER_DIR}/${CMP_VERSION_HEADER_FILE_NAME}
+    ${CMP_HEADER_DIR}/${CMP_VERSION_SOURCE_FILE_NAME}
+)
+cmp_IDE_GENERATED_PROPERTIES(EmMpmGui/Generated "${Generated_Version_SRCS}" "")
 
 # -- Finally set the Project Sources to include all the sources
 SET (${PROJECT_NAME}_PROJECT_SRCS 
@@ -155,6 +175,7 @@ SET (${PROJECT_NAME}_PROJECT_SRCS
   ${Generated_RC_SRCS} 
   ${Generated_UI_HDRS} 
   ${Generated_MOC_SRCS}
+  ${Generated_Version_SRCS}
 )
 
 IF(APPLE)
@@ -181,7 +202,7 @@ BuildQtAppBundle(
     VERSION_MINOR ${QEMMPM_VER_MINOR}
     VERSION_PATCH ${QEMMPM_VER_PATCH}
     BINARY_DIR    ${${PROJECT_NAME}_BINARY_DIR}
-    LINK_LIBRARIES ${QT_LIBRARIES} MXA QtSupport ${QWT_LIBRARIES} EMMPMLib
+    LINK_LIBRARIES ${QT_LIBRARIES} MXADataModel EMMPMLib QtSupport ${QWT_LIBRARIES} 
     LIB_SEARCH_DIRS ${CMAKE_LIBRARY_OUTPUT_DIRECTORY} ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
     QT_PLUGINS    ${QT_PLUGINS}
 #        OTHER_PLUGINS ${OTHER_PLUGINS}
