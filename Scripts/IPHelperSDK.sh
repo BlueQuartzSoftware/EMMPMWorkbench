@@ -5,12 +5,11 @@
 # The packages downloaded are:
 # CMake - in order to build other projects
 # MXABoost - subset of Boost 1.44
-# ITK 3.20.0 - Image Processing Toolkit
 # Qwt - 2D Plotting Widgets for the Qt toolkit
 # You need to have the following programs already on your system:
 #  curl or wget
 #  git version 1.7 or greater
-#  Qt version 4.5 or greater
+#  Qt version 4.7 or greater
 # The script will create 2 directories as subdirectories of the current working dir: sources and Toolkits
 # All projects are downloaded and compiled into sources and then installed into Toolkits.
 # A bash style shell file can be called from your .bashrc or .bash_profile called 'initvars.sh' which
@@ -18,26 +17,27 @@
 # You can simply 'source "initvars.sh" any time to get the exports.
 
 # If you want to force another directory then change where "SDK_ROOT" points to.
-
-SDK_SOURCE=$HOME/Workspace
-SDK_INSTALL=$HOME/Toolkits
+export WORKDIR=/tmp
+SDK_SOURCE=$WORKDIR/Workspace
+SDK_INSTALL=$WORKDIR/Toolkits
 
 # If you are on a Multicore system and want to build faster set the variable to the number
 # of cores/CPUs available to you.
-PARALLEL_BUILD=4
+PARALLEL_BUILD=16
 
 HOST_SYSTEM=`uname`
 echo "Host System: $HOST_SYSTEM"
 # Adjust these to "0" if you want to skip those compilations. The default is to build
 # everything.
-BUILD_CMAKE="1"
+BUILD_CMAKE="0"
 BUILD_MXABOOST="1"
-BUILD_QWT="1"
-BUILD_ITK="0"
 BUILD_TIFF="1"
-BUILD_EMMPM="1"
-BUILD_IPHELPER="1"
 BUILD_HDF5="1"
+BUILD_MXADATAMODEL="1"
+BUILD_EMMPM="1"
+BUILD_QWT="1"
+BUILD_EMMPMGUI="1"
+
 
 GIT=`type -P git`
 if [ $GIT == "" ]
@@ -89,7 +89,7 @@ $DOWNLOAD_PROG "http://www.cmake.org/files/v2.8/cmake-2.8.6.tar.gz" $DOWNLOAD_AR
 tar -xvzf cmake-2.8.6.tar.gz
 cd cmake-2.8.6
 ./configure --prefix=$SDK_INSTALL/cmake-2.8.6 --parallel $PARALLEL_BUILD
-gmake -j $PARALLEL_BUILD install
+make -j $PARALLEL_BUILD install
 
 # Export these variables for our use and then echo them into a file that people can use
 # to setup their environment
@@ -113,7 +113,7 @@ git checkout master
 mkdir Build
 cd Build
 cmake -DBOOST_INCLUDE_INSTALL_DIR=include/boost-1_44 -DBOOST_LIB_INSTALL_DIR=lib -DCMAKE_INSTALL_PREFIX=$SDK_INSTALL/MXABoost-1.44 -DENABLE_SHARED=OFF -DWINMANGLE_LIBNAMES=ON ../
-gmake -j $PARALLEL_BUILD install
+make -j $PARALLEL_BUILD install
 export BOOST_ROOT=$SDK_INSTALL/MXABoost-1.44
 echo "export BOOST_ROOT=$SDK_INSTALL/MXABoost-1.44" >> $SDK_INSTALL/initvars.sh
 fi
@@ -130,16 +130,16 @@ tar -xvzf hdf5-1.8.8.tar.gz
 cd hdf5-1.8.8
 mkdir Build
 cd Build
-cmake -DBUILD_SHARED_LIBS=OFF -DCMAKE_INSTALL_PREFIX=$sandbox/hdf5-188 -DCMAKE_BUILD_TYPE=Debug  -DHDF5_ENABLE_DEPRECATED_SYMBOLS=OFF ../
+cmake -DBUILD_SHARED_LIBS=OFF -DCMAKE_INSTALL_PREFIX=$SDK_INSTALL/hdf5-188 -DCMAKE_BUILD_TYPE=Debug  -DHDF5_ENABLE_DEPRECATED_SYMBOLS=OFF ../
 make -j$makeJobs
 make install
 cd ../
 mkdir zRel
 cd zRel
-cmake -DBUILD_SHARED_LIBS=OFF -DCMAKE_INSTALL_PREFIX=$sandbox/hdf5-188 -DCMAKE_BUILD_TYPE=Release   -DHDF5_ENABLE_DEPRECATED_SYMBOLS=OFF ../
+cmake -DBUILD_SHARED_LIBS=OFF -DCMAKE_INSTALL_PREFIX=$SDK_INSTALL/hdf5-188 -DCMAKE_BUILD_TYPE=Release   -DHDF5_ENABLE_DEPRECATED_SYMBOLS=OFF ../
 make -j$makeJobs
 make install
-export HDF5_INSTALL=$sandbox/hdf5-188
+export HDF5_INSTALL=$SDK_INSTALL/hdf5-188
 fi
 
 if [ "$BUILD_QWT" = "1" ]
@@ -160,14 +160,14 @@ if [ "$HOST_SYSTEM" = "Darwin" ];
 fi
 echo "Additional Args: $ADDITIONAL_ARGS"
 cmake $ADDITIONAL_ARGS -DCMAKE_BUILD_TYPE=Debug -DCMAKE_INSTALL_PREFIX=$SDK_INSTALL/Qwt -DBUILD_SHARED_LIBS=ON ../
-gmake -j $PARALLEL_BUILD
-gmake install
+make -j $PARALLEL_BUILD
+make install
 cd ../
 mkdir zRel
 cd zRel
 cmake $ADDITIONAL_ARGS -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=$SDK_INSTALL/Qwt -DBUILD_SHARED_LIBS=ON ../
-gmake -j $PARALLEL_BUILD
-gmake install
+make -j $PARALLEL_BUILD
+make install
 export QWT_INSTALL=$SDK_INSTALL/Qwt
 echo "export QWT_INSTALL=$SDK_INSTALL/Qwt" >> $SDK_INSTALL/initvars.sh
 fi
@@ -192,20 +192,85 @@ if [ "$HOST_SYSTEM" = "Darwin" ];
   ADDITIONAL_ARGS="-DCMP_BUILD_WITH_INSTALL_NAME=ON"
 fi
 cmake $ADDITIONAL_ARGS -DCMAKE_BUILD_TYPE=Debug -DCMAKE_INSTALL_PREFIX=$SDK_INSTALL/tiff -DBUILD_SHARED_LIBS=ON ../
-gmake -j $PARALLEL_BUILD
-gmake install
+make -j $PARALLEL_BUILD
+make install
 cd ../
 mkdir zRel
 cd zRel
 cmake $ADDITIONAL_ARGS -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=$SDK_INSTALL/tiff -DBUILD_SHARED_LIBS=ON ../
-gmake -j $PARALLEL_BUILD
-gmake install
+make -j $PARALLEL_BUILD
+make install
 export TIFF_INSTALL=$SDK_INSTALL/tiff
 echo "export TIFF_INSTALL=$SDK_INSTALL/tiff" >> $SDK_INSTALL/initvars.sh
 fi
 
 
+
+if [ "$BUILD_MXADATAMODEL" == "1" ]
+then
+#------------------------------------------------------------------------------
+# Compile MXADataModel
+cd $SDK_SOURCE
+# Remove any previous MXADataModel
+#rm -rf tiff
+git clone --recursive git://scm.bluequartz.net/MXADataModel.git MXADataModel
+cd MXADataModel
+mkdir Build
+cd Build
+# On OS X we need to set the "install_name" correctly on Libraries that will get used which is
+# what the variable will do.
+if [ "$HOST_SYSTEM" = "Darwin" ];
+  then
+  ADDITIONAL_ARGS="-DCMP_BUILD_WITH_INSTALL_NAME=ON"
+fi
+cmake $ADDITIONAL_ARGS -DCMAKE_BUILD_TYPE=Debug -DCMAKE_INSTALL_PREFIX=$SDK_INSTALL/MXADataModel -DBUILD_SHARED_LIBS=ON ../
+make -j $PARALLEL_BUILD
+make install
+cd ../
+mkdir zRel
+cd zRel
+cmake $ADDITIONAL_ARGS -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=$SDK_INSTALL/MXADataModel -DBUILD_SHARED_LIBS=ON ../
+make -j $PARALLEL_BUILD
+make install
+export MXADataModel_INSTALL=$SDK_INSTALL/MXADataModel
+echo "export MXADataModel_INSTALL=$SDK_INSTALL/MXADataModel" >> $SDK_INSTALL/initvars.sh
+fi
+
+
 if [ "$BUILD_EMMPM" == "1" ]
+then
+#------------------------------------------------------------------------------
+# Compile emmpm
+cd $SDK_SOURCE
+# Remove any previous emmpm
+#rm -rf tiff
+git clone --recursive git://scm.bluequartz.net/EMMPM.git emmpm
+cd emmpm
+mkdir Build
+cd Build
+# On OS X we need to set the "install_name" correctly on Libraries that will get used which is
+# what the variable will do.
+if [ "$HOST_SYSTEM" = "Darwin" ];
+  then
+  ADDITIONAL_ARGS="-DCMP_BUILD_WITH_INSTALL_NAME=ON"
+fi
+cmake $ADDITIONAL_ARGS -DCMAKE_BUILD_TYPE=Debug -DCMAKE_INSTALL_PREFIX=$SDK_INSTALL/emmpm -DBUILD_SHARED_LIBS=ON ../
+make -j $PARALLEL_BUILD
+make install
+cd ../
+mkdir zRel
+cd zRel
+cmake $ADDITIONAL_ARGS -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=$SDK_INSTALL/emmpm -DBUILD_SHARED_LIBS=ON ../
+make -j $PARALLEL_BUILD
+make install
+export EMMPM_INSTALL=$SDK_INSTALL/emmpm
+echo "export EMMPM_INSTALL=$SDK_INSTALL/emmpm" >> $SDK_INSTALL/initvars.sh
+fi
+
+
+
+
+if [ "$BUILD_EMMPMGUI" == "1" ]
 then
 #------------------------------------------------------------------------------
 # Compile the emmpm Library
@@ -223,14 +288,14 @@ if [ "$HOST_SYSTEM" = "Darwin" ];
   ADDITIONAL_ARGS="-DCMP_BUILD_WITH_INSTALL_NAME=ON"
 fi
 cmake $ADDITIONAL_ARGS -DCMAKE_BUILD_TYPE=Debug -DCMAKE_INSTALL_PREFIX=$SDK_INSTALL/EMMPMGui -DBUILD_SHARED_LIBS=ON ../
-gmake -j $PARALLEL_BUILD
-gmake install
+make -j $PARALLEL_BUILD
+make install
 cd ../
 mkdir zRel
 cd zRel
 cmake $ADDITIONAL_ARGS -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=$SDK_INSTALL/EMMPMGui -DBUILD_SHARED_LIBS=ON ../
-gmake -j $PARALLEL_BUILD
-gmake install
+make -j $PARALLEL_BUILD
+make install
 #export EMMPM_INSTALL=$SDK_INSTALL/emmpm
 #echo "export EMMPM_INSTALL=$SDK_INSTALL/emmpm" >> $SDK_INSTALL/initvars.sh
 fi

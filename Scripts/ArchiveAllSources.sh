@@ -20,11 +20,13 @@ DATE=`date +%Y.%m.%d`
 mkdir -p $archive_destination
 
 
-project=EIM-EMMPMGui
+project=EMMPMGui
 
 cd $workspace/$project
 version=`git describe`
 cd $workspace/
 
-tar czvf /$archive_destination/$project-$version.tar.gz --exclude .gitmodules --exclude .cproject --exclude .project --exclude .git --exclude Build --exclude zRel $project/
+tar czvf /$archive_destination/$project-$version-Source.tar.gz --exclude .gitmodules --exclude .cproject --exclude .project --exclude .git --exclude Build --exclude zRel EMMPMGui/ emmpm/ MXADataModel/
+
+scp /$archive_destination/$project-$version-Source.tar.gz mjackson@scm.bluequartz.net:/var/www/www.bluequartz.net/binaries/to81/.
 

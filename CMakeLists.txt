@@ -32,7 +32,7 @@ SET (CMAKE_ARCHIVE_OUTPUT_DIRECTORY
   )
 
 
-SET (PROJECT_CODE_DIR ${PROJECT_SOURCE_DIR}/Code)
+SET (PROJECT_CODE_DIR ${EMMPMGuiProj_SOURCE_DIR}/Code)
 SET (PROJECT_RESOURCES_DIR ${EMMPMGuiProj_SOURCE_DIR}/Resources)
 SET (EXE_DEBUG_EXTENSION "_debug")
 SET (PROJECT_INSTALL_HEADERS "0")
@@ -82,6 +82,20 @@ FIND_PACKAGE(Boost)
 INCLUDE_DIRECTORIES(${Boost_INCLUDE_DIRS})
 LINK_DIRECTORIES(${Boost_LIBRARY_DIRS})
 
+# Should we build the HTML documentation using DOxygen
+option(EMMPMGuiProj_BUILD_API_DOCS "Use Doxygen to create the HTML based API documentation" OFF)
+if(EMMPMGuiProj_BUILD_API_DOCS)
+  FIND_PACKAGE(Doxygen)
+  if (NOT DOXYGEN_FOUND)
+    message(FATAL_ERROR "Doxygen is needed to build the documentation. Please install it correctly")
+  endif()
+  configure_file(${PROJECT_RESOURCES_DIR}/EMMPMGuiProj.doxyfile.in 
+                 ${EMMPMGuiProj_BINARY_DIR}/Doxyfile  @ONLY IMMEDIATE)
+  add_custom_target(docs COMMAND ${DOXYGEN_EXECUTABLE} ${PROJECT_BINARY_DIR}/Doxyfile)
+  
+endif()
+
+
 option(EMMPMGuiProj_BUILD_TESTING "Build All unit tests" OFF)
 if (EMMPMGuiProj_BUILD_TESTING)
     ENABLE_TESTING()
@@ -90,8 +104,9 @@ endif()
 # Bring in the MXADataModel Library
 if (NOT TARGET MXADataModel)
     set(MXA_BUILD_TESTING ${EMMPMGuiProj_BUILD_TESTING})
-    set(MXA_BUILD_EXAMPLES OFF)
-    set(MXA_BUILD_UTILITIES OFF)
+    set(MXA_BUILD_EXAMPLES OFF CACHE BOOL "")
+    set(MXA_BUILD_UTILITIES OFF CACHE BOOL "")
+    set(MXA_BUILD_API_DOCS ${EMMPMGuiProj_BUILD_API_DOCS})
     add_subdirectory(${EMMPMGuiProj_SOURCE_DIR}/../MXADataModel ${EMMPMGuiProj_BINARY_DIR}/MXADataModel)
 endif()
 include_directories(${MXADataModel_SOURCE_DIR}/Code)
@@ -100,6 +115,7 @@ include_directories(${MXADataModel_BINARY_DIR})
 # --------------------------------------------------------------------
 # Bring in the EM/MPM Library Next
 if (NOT TARGET EMMPMLib)
+    set (EMMPMLib_BUILD_API_DOCS ${EMMPMGuiProj_BUILD_API_DOCS})
     add_subdirectory(${EMMPMGuiProj_SOURCE_DIR}/../emmpm ${EMMPMGuiProj_BINARY_DIR}/emmpm)
 endif()
 include_directories(${EMMPMProj_SOURCE_DIR}/Code)
@@ -153,19 +169,6 @@ include_directories(${PROJECT_BINARY_DIR}/QtSupport)
 # --------------------------------------------------------------------
 # Compile the Enhanced EM/MPM Qt Base GUI application
 add_subdirectory(${PROJECT_CODE_DIR}/EmMpmGui ${PROJECT_BINARY_DIR}/Applications/EmMpmGui)
-
-
-# Should we build the HTML documentation using DOxygen
-option(EMMPMGuiProj_BUILD_API_DOCS "Use Doxygen to create the HTML based API documentation" OFF)
-if(EMMPMGuiProj_BUILD_API_DOCS)
-  FIND_PACKAGE(Doxygen)
-  if (NOT DOXYGEN_FOUND)
-    message(FATAL_ERROR "Doxygen is needed to build the documentation. Please install it correctly")
-  endif()
-  configure_file(${PROJECT_RESOURCES_DIR}/EMMPMGuiProj.doxyfile.in 
-                 ${PROJECT_BINARY_DIR}/Doxyfile  @ONLY IMMEDIATE)
-  add_custom_target(docs COMMAND ${DOXYGEN_EXECUTABLE} ${PROJECT_BINARY_DIR}/Doxyfile)
-endif()
 
 
 # Include code to Package our Executables into a Zip or NSIS Installer
