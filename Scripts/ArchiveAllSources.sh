@@ -26,7 +26,30 @@ cd $workspace/$project
 version=`git describe`
 cd $workspace/
 
-tar czvf /$archive_destination/$project-$version-Source.tar.gz --exclude .gitmodules --exclude .cproject --exclude .project --exclude .git --exclude Build --exclude zRel EMMPMGui/ emmpm/ MXADataModel/ CMP/
+cd $workspace/CMP
+cmpvers=`git describe`
 
-scp /$archive_destination/$project-$version-Source.tar.gz mjackson@scm.bluequartz.net:/var/www/www.bluequartz.net/binaries/to81/.
+cd $workspace/MXADataModel
+mxavers=`git describe`
+
+cd $workspace/emmpm
+emmpmvers=`git describe`
+
+cd $workspace/EMMPMGui
+guivers=`git describe`
+
+
+cd $workspace/
+
+echo "CMP Version: " $cmpvers > Versions.txt
+echo "MXADataModel Version: " $mxavers >> Versions.txt
+echo "EMMPM Lib Version: " $emmpmvers >> Versions.txt
+echo "EMMPM Gui Version: " $guivers >> Versions.txt
+
+
+tar czvf /$archive_destination/$project-Source.tar.gz --exclude .gitmodules --exclude .cproject --exclude .project --exclude .git --exclude Build --exclude zRel EMMPMGui/ emmpm/ MXADataModel/ CMP/  Versions.txt
+
+scp /$archive_destination/$project-Source.tar.gz mjackson@scm.bluequartz.net:/var/www/www.bluequartz.net/binaries/to81/.
+
+rm  Versions.txt
 

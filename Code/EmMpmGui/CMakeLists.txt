@@ -22,12 +22,24 @@ set (CMP_VERSION_SOURCE_FILE_NAME "EMMPMGuiVersion.cpp")
 # and we can set the Major and Minor versions as we see fit. 
 set(CMP_VERSION_MAJOR "v2")
 
+# --------------------------------------------------------------------
+# Generate a Header file with Compile Version variables
+# --------------------------------------------------------------------
+if (EXISTS ${EMMPMGuiProj_SOURCE_DIR}/.git)
 cmpVersionStringsFromGit(GENERATED_HEADER_FILE_PATH ${CMP_HEADER_DIR}/${CMP_VERSION_HEADER_FILE_NAME} 
                          GENERATED_SOURCE_FILE_PATH ${CMP_HEADER_DIR}/${CMP_VERSION_SOURCE_FILE_NAME}
                          NAMESPACE EmMpm_Gui 
                          cmpProjectName EMMPMGui 
                          WORKING_DIRECTORY ${EMMPMGuiProj_SOURCE_DIR} )
-                         
+else()
+   cmpGenerateVersionString(GENERATED_HEADER_FILE_PATH ${CMP_HEADER_DIR}/${CMP_VERSION_HEADER_FILE_NAME} 
+                         GENERATED_SOURCE_FILE_PATH ${CMP_HEADER_DIR}/${CMP_VERSION_SOURCE_FILE_NAME}
+                         NAMESPACE EmMpm_Gui 
+                         cmpProjectName EMMPMGui 
+                         WORKING_DIRECTORY ${EMMPMGuiProj_SOURCE_DIR} 
+                         MAJOR 0 MINOR 0 PATCH 0) 
+endif() 
+
 # ------------------------------------------------------------------------------
 #  Qt 4 Section
 # ------------------------------------------------------------------------------
