@@ -26,7 +26,7 @@ cd $workspace/$project
 version=`git describe`
 cd $workspace/
 
-tar czvf /$archive_destination/$project-$version-Source.tar.gz --exclude .gitmodules --exclude .cproject --exclude .project --exclude .git --exclude Build --exclude zRel EMMPMGui/ emmpm/ MXADataModel/
+tar czvf /$archive_destination/$project-$version-Source.tar.gz --exclude .gitmodules --exclude .cproject --exclude .project --exclude .git --exclude Build --exclude zRel EMMPMGui/ emmpm/ MXADataModel/ CMP/
 
 scp /$archive_destination/$project-$version-Source.tar.gz mjackson@scm.bluequartz.net:/var/www/www.bluequartz.net/binaries/to81/.
 
