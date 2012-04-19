@@ -87,7 +87,7 @@
 #include "EMMPMLib/Common/EMMPM.h"
 
 //-- EMMPM Gui Includes
-#include "EmMpmGuiVersion.h"
+#include "EMMPMGuiVersion.h"
 #include "UserInitArea.h"
 #include "EMMPMTask.h"
 #include "AxisSettingsDialog.h"
