@@ -5,7 +5,7 @@
 #-- This code was partly written under US Air Force Contract FA8650-07-D-5800
 #--////////////////////////////////////////////////////////////////////////////
 PROJECT( EmMpmGui )
-cmake_minimum_required(VERSION 2.8)
+cmake_minimum_required(VERSION 2.8.6)
 
 set (CMP_HEADER_DIR ${EmMpmGui_BINARY_DIR})
 set (CMP_VERSION_HEADER_FILE_NAME "EMMPMGuiVersion.h")
