@@ -40,6 +40,7 @@
 #include <QtDebug>
 #include <QtGui/QPixmap>
 #include <QtGui/QGraphicsPolygonItem>
+#include <QtGui/QImageReader>
 
 #include "EmMpmGui.h"
 #include "UserInitArea.h"
@@ -408,7 +409,8 @@ void EMMPMGraphicsView::loadBaseImageFile(const QString &filename)
     return;
   }
   QSize pSize(0, 0);
-  //pSize = m_BaseImage.size();
+  pSize = m_BaseImage.size();
+
   m_OverlayImage = m_BaseImage;
   m_CompositedImage = m_BaseImage;
 
@@ -422,8 +424,12 @@ void EMMPMGraphicsView::loadBaseImageFile(const QString &filename)
   }
   m_BaseImage.setColorTable(colorTable);
 
-  m_BaseImage.convertToFormat(QImage::Format_ARGB32_Premultiplied);
-
+  //m_BaseImage = m_BaseImage.convertToFormat(QImage::Format_ARGB32_Premultiplied);
+  if (m_BaseImage.isNull() == true)
+  {
+    std::cout << "Base Image was NULL for some reason. Returning" << std::endl;
+    return;
+  }
   QGraphicsScene* gScene = scene();
   if (gScene == NULL)
   {
@@ -450,7 +456,9 @@ void EMMPMGraphicsView::loadBaseImageFile(const QString &filename)
     m_ImageGraphicsItem = NULL;
   }
   if (NULL == m_ImageGraphicsItem) {
-    m_ImageGraphicsItem = gScene->addPixmap(QPixmap::fromImage(m_BaseImage));
+    QImageReader reader(filename);
+    QPixmap pixmap = QPixmap::fromImageReader(&reader, 0);
+    m_ImageGraphicsItem = gScene->addPixmap(pixmap);
   }
   m_ImageGraphicsItem->setAcceptDrops(true);
   m_ImageGraphicsItem->setZValue(-1);
