@@ -273,7 +273,7 @@ void EmMpmGui::readSettings(QSettings &prefs)
   double d;
   int userInitAreaCount;
   prefs.beginGroup("Parameters");
-  READ_SETTING(prefs, m_NumClasses, ok, i, 2, Int);
+  
   READ_SETTING(prefs, m_EmIterations, ok, i, 5, Int);
   READ_SETTING(prefs, m_MpmIterations, ok, i, 5, Int);
   READ_STRING_SETTING(prefs, m_Beta, "0.5");
@@ -289,12 +289,13 @@ void EmMpmGui::readSettings(QSettings &prefs)
   READ_SETTING(prefs, curvatureRMax, ok, d, 15.0, Double);
   READ_SETTING(prefs, ccostLoopDelay, ok, i, 1, Int);
   READ_VALUE(prefs, userInitAreaCount, ok, i, 0, Int);
+
   READ_BOOL_SETTING(prefs, muSigmaFeedback, false);
   enableUserDefinedAreas->blockSignals(true);
   READ_BOOL_SETTING(prefs, enableUserDefinedAreas, false);
   enableUserDefinedAreas->blockSignals(false);
   READ_BOOL_SETTING(prefs, manualInit, false);
-  prefs.endGroup();
+  
 
 
   if (manualInit->isChecked() == true)
@@ -311,7 +312,9 @@ void EmMpmGui::readSettings(QSettings &prefs)
       updateManualInitHistograms();
     }
   }
+  READ_SETTING(prefs, m_NumClasses, ok, i, 2, Int);
 
+  prefs.endGroup();
 
 
 
@@ -1747,6 +1750,7 @@ void EmMpmGui::manualInitDataChanged ( const QModelIndex & topLeft, const QModel
 // -----------------------------------------------------------------------------
 void EmMpmGui::updateManualInitHistograms()
 {
+  if (NULL == m_histogram) { return; }
   ManualInitTableModel* model = qobject_cast<ManualInitTableModel*>(manualInitTableView->model());
   if (NULL == model) { return; }
   bool ok = false;
