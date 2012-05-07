@@ -273,7 +273,7 @@ void EmMpmGui::readSettings(QSettings &prefs)
   double d;
   int userInitAreaCount;
   prefs.beginGroup("Parameters");
-  
+
   READ_SETTING(prefs, m_EmIterations, ok, i, 5, Int);
   READ_SETTING(prefs, m_MpmIterations, ok, i, 5, Int);
   READ_STRING_SETTING(prefs, m_Beta, "0.5");
@@ -295,7 +295,7 @@ void EmMpmGui::readSettings(QSettings &prefs)
   READ_BOOL_SETTING(prefs, enableUserDefinedAreas, false);
   enableUserDefinedAreas->blockSignals(false);
   READ_BOOL_SETTING(prefs, manualInit, false);
-  
+
 
 
   if (manualInit->isChecked() == true)
@@ -1731,7 +1731,8 @@ void EmMpmGui::addRemoveManualInitTableRows()
     int count = model->rowCount() + 1;
     int defGray = 255/count * (model->rowCount() );
     int defMu = 255/count * (model->rowCount() );
-    ManualInitData* data = new ManualInitData(count-1, (double)defMu, 20.0, defGray, model);
+    double defGamma = 1.0;
+    ManualInitData* data = new ManualInitData(count-1, (double)defMu, 20.0, defGamma, defGray, model);
     model->insertManualData(data, model->rowCount());
   }
   updateManualInitHistograms();

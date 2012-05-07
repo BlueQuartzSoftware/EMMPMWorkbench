@@ -48,10 +48,10 @@ class UserInitAreaTableModel : public QAbstractTableModel
     enum ColumnIndexes
     {
       Class = 0,
-      GrayValue,
       Mu,
       StdDev,
       Gamma,
+      GrayValue,
       UpperLeft,
       LowerRight,
       ColumnCount

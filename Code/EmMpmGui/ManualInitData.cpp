@@ -33,11 +33,13 @@
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
-ManualInitData::ManualInitData(int label, double mu, double sigma, int grayLevel, QObject* parent) :
+ManualInitData::ManualInitData(int label, double mu, double sigma, double gamma,
+                               int grayLevel, QObject* parent) :
 QObject(parent),
 m_Class(label),
 m_Mu(mu),
 m_Sigma(sigma),
+m_Gamma(gamma),
 m_GrayLevel(grayLevel)
 {
 
@@ -96,6 +98,23 @@ double ManualInitData::getSigma()
 {
   return m_Sigma;
 }
+
+// -----------------------------------------------------------------------------
+//
+// -----------------------------------------------------------------------------
+void ManualInitData::setGamma(double sigma)
+{
+  m_Gamma = sigma;
+}
+
+// -----------------------------------------------------------------------------
+//
+// -----------------------------------------------------------------------------
+double ManualInitData::getGamma()
+{
+  return m_Gamma;
+}
+
 
 // -----------------------------------------------------------------------------
 //

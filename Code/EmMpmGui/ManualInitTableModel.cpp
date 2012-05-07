@@ -71,7 +71,7 @@ Qt::ItemFlags ManualInitTableModel::flags(const QModelIndex &index) const
     theFlags |= Qt::ItemIsEnabled;
 
     int col = index.column();
-    if ( col == GrayValue  || col == Mu || col == StdDev)
+    if (  col == Mu || col == StdDev || col == Gamma || col == GrayValue )
     {
       theFlags = Qt::ItemIsEditable | Qt::ItemIsSelectable | Qt::ItemIsEnabled;
     }
@@ -121,6 +121,8 @@ QVariant ManualInitTableModel::data(const QModelIndex &index, qint32 role) const
         return QVariant(uia->getMu());
       case ManualInitTableModel::StdDev:
         return QVariant(uia->getSigma());
+      case ManualInitTableModel::Gamma:
+        return QVariant(uia->getGamma());
       default:
         break;
     }
@@ -142,6 +144,7 @@ QVariant  ManualInitTableModel::headerData ( int section, Qt::Orientation orient
       case GrayValue: return QVariant(QString("Gray Value"));
       case Mu: return QVariant(QString("Mu"));
       case StdDev: return QVariant(QString("Sigma"));
+      case Gamma: return QVariant(QString("Gamma"));
       default:
         break;
     }
@@ -202,6 +205,9 @@ bool ManualInitTableModel::setData(const QModelIndex & index, const QVariant & v
     case ManualInitTableModel::StdDev:
       m_ManualInitDatas.at(row)->setSigma(value.toDouble(&ok));
       break;
+    case ManualInitTableModel::Gamma:
+      m_ManualInitDatas.at(row)->setGamma(value.toDouble(&ok));
+      break;
     default:
       Q_ASSERT(false);
   }
@@ -218,13 +224,14 @@ bool ManualInitTableModel::insertRows(int row, int count, const QModelIndex& ind
   qint32 binNum = 0;
   double mu = 128.0;
   double sigma = 20.0;
+  double gamma = 1.0;
 
 
   beginInsertRows(QModelIndex(), row, row + count - 1);
   for (int i = 0; i < count; ++i)
   {
     // Create a new ManualInitData object
-    ManualInitData* d = new ManualInitData(m_ManualInitDatas.count(), mu, sigma, 128, this);
+    ManualInitData* d = new ManualInitData(m_ManualInitDatas.count(), mu, sigma, gamma, 128, this);
     m_ManualInitDatas.push_back(d);
     m_RowCount = m_ManualInitDatas.count();
   }
@@ -238,9 +245,9 @@ bool ManualInitTableModel::insertRows(int row, int count, const QModelIndex& ind
 // -----------------------------------------------------------------------------
 bool ManualInitTableModel::insertManualData(ManualInitData* data, int row, const QModelIndex& index)
 {
-  qint32 binNum = 0;
-  double mu = 128.0;
-  double sigma = 20.0;
+//  qint32 binNum = 0;
+//  double mu = 128.0;
+//  double sigma = 20.0;
 
   beginInsertRows(QModelIndex(), row, row );
   for (int i = 0; i < 1; ++i)

@@ -41,7 +41,17 @@ class ManualInitData : public QObject
     Q_OBJECT;
 
 public:
-    ManualInitData(int label, double mu, double sigma, int grayLevel, QObject* parent = 0);
+    /**
+     * @brief
+     * @param label
+     * @param mu
+     * @param sigma
+     * @param gamma
+     * @param grayLevel
+     * @param parent
+     */
+    ManualInitData(int label, double mu, double sigma, double gamma,
+                   int grayLevel, QObject* parent = 0);
     virtual ~ManualInitData();
 
     void readSettings(QSettings &prefs);
@@ -57,6 +67,9 @@ public:
 
     void setSigma(double sigma);
     double getSigma();
+
+    void setGamma(double g);
+    double getGamma();
 
     void setEmMpmGrayLevel(int gray);
     int getEmMpmGrayLevel();
@@ -76,6 +89,7 @@ public:
     int m_Class;
     double m_Mu;
     double m_Sigma;
+    double m_Gamma;
     int m_GrayLevel;
 };
 

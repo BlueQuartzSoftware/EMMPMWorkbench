@@ -50,6 +50,7 @@ class ManualInitTableModel : public QAbstractTableModel
       Class = 0,
       Mu,
       StdDev,
+      Gamma,
       GrayValue,
       ColumnCount
     };

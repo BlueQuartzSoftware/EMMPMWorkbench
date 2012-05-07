@@ -309,8 +309,7 @@ bool UserInitAreaTableModel::removeRows(int row, int count, const QModelIndex& i
 
   // This is basically disabled for now.
   if (true) return false;
-
-
+#if 0
   if (count < 1)
   {
     return true;
@@ -324,6 +323,8 @@ bool UserInitAreaTableModel::removeRows(int row, int count, const QModelIndex& i
   endRemoveRows();
   emit dataChanged(index, index);
   return true;
+#endif
+
 }
 
 // -----------------------------------------------------------------------------
