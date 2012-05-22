@@ -253,7 +253,8 @@ class EmMpmGui :  public QMainWindow, private Ui::EmMpmGui
     void on_outputSuffix_textChanged();
     void on_outputImageType_currentIndexChanged(int index);
 
-
+    // These are for the fileListWidget
+    void deleteFileListItem();
 
     /* Slots to receive events from the ProcessQueueController */
     void queueControllerFinished();

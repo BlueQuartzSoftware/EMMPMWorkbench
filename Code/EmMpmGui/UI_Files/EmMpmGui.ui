@@ -472,7 +472,7 @@
         <item>
          <widget class="QListWidget" name="fileListWidget">
           <property name="editTriggers">
-           <set>QAbstractItemView::DoubleClicked</set>
+           <set>QAbstractItemView::DoubleClicked|QAbstractItemView::EditKeyPressed</set>
           </property>
           <property name="dragEnabled">
            <bool>true</bool>
@@ -485,6 +485,9 @@
           </property>
           <property name="alternatingRowColors">
            <bool>true</bool>
+          </property>
+          <property name="selectionMode">
+           <enum>QAbstractItemView::ExtendedSelection</enum>
           </property>
           <property name="movement">
            <enum>QListView::Free</enum>

@@ -54,6 +54,7 @@
 #include <QtGui/QStringListModel>
 #include <QtGui/QLineEdit>
 #include <QtGui/QDoubleValidator>
+#include <QtGui/QShortcut>
 
 //-- Qwt Includes
 #include <qwt.h>
@@ -618,7 +619,29 @@ void EmMpmGui::setupGui()
   manualInitTableView->setModel(tm);
   connect(tm, SIGNAL(dataChanged(const QModelIndex &, const QModelIndex &)),
           this, SLOT(manualInitDataChanged(const QModelIndex &, const QModelIndex &)));
+
+  // option B (pressing DEL activates the slots only when list widget has focus)
+  QShortcut* shortcut = new QShortcut(QKeySequence(Qt::Key_Delete), fileListWidget);
+  connect(shortcut, SIGNAL(activated()), this, SLOT(deleteFileListItem()));
+
+
+
 }
+
+// -----------------------------------------------------------------------------
+//
+// -----------------------------------------------------------------------------
+void EmMpmGui::deleteFileListItem()
+{
+  QList<QListWidgetItem*>selectedItems = fileListWidget->selectedItems();
+  qint32 count = selectedItems.count();
+  for(qint32 i = 0; i < count; ++i)
+  {
+    QListWidgetItem* item = selectedItems[i];
+    delete item;
+  }
+}
+
 
 // -----------------------------------------------------------------------------
 //
