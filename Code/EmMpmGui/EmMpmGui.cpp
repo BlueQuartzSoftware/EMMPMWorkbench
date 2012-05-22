@@ -621,9 +621,10 @@ void EmMpmGui::setupGui()
           this, SLOT(manualInitDataChanged(const QModelIndex &, const QModelIndex &)));
 
   // option B (pressing DEL activates the slots only when list widget has focus)
-  QShortcut* shortcut = new QShortcut(QKeySequence(Qt::Key_Delete), fileListWidget);
-  connect(shortcut, SIGNAL(activated()), this, SLOT(deleteFileListItem()));
-
+  QShortcut* shortcut_delete = new QShortcut(QKeySequence(Qt::Key_Delete), fileListWidget);
+  connect(shortcut_delete, SIGNAL(activated()), this, SLOT(deleteFileListItem()));
+  QShortcut* shortcut_backspace = new QShortcut(QKeySequence(Qt::Key_Backspace), fileListWidget);
+  connect(shortcut_backspace, SIGNAL(activated()), this, SLOT(deleteFileListItem()));
 
 
 }
