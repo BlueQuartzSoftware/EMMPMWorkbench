@@ -273,6 +273,11 @@ void EmMpmGui::readSettings(QSettings &prefs)
   qint32 i;
   double d;
   int userInitAreaCount;
+
+  READ_STRING_SETTING(prefs, outputPrefix, "Segmented_");
+  READ_STRING_SETTING(prefs, outputSuffix, "");
+
+
   prefs.beginGroup("Parameters");
 
   READ_SETTING(prefs, m_EmIterations, ok, i, 5, Int);
@@ -341,6 +346,8 @@ void EmMpmGui::readSettings(QSettings &prefs)
       m_GraphicsView->addNewInitArea(uia);
     }
   }
+
+
 }
 
 // -----------------------------------------------------------------------------
@@ -348,6 +355,9 @@ void EmMpmGui::readSettings(QSettings &prefs)
 // -----------------------------------------------------------------------------
 void EmMpmGui::writeSettings(QSettings &prefs)
 {
+
+  WRITE_STRING_SETTING(prefs, outputPrefix);
+  WRITE_STRING_SETTING(prefs, outputSuffix);
 
   prefs.beginGroup("Parameters");
   WRITE_SETTING(prefs, m_NumClasses);
@@ -1759,6 +1769,8 @@ void EmMpmGui::addRemoveManualInitTableRows()
     ManualInitData* data = new ManualInitData(count-1, (double)defMu, 20.0, defGamma, defGray, model);
     model->insertManualData(data, model->rowCount());
   }
+  model->sanityCheckClassValues();
+
   updateManualInitHistograms();
 }
 

@@ -86,6 +86,7 @@ class ManualInitTableModel : public QAbstractTableModel
 
     QList<ManualInitData*> getManualInits();
 
+    void sanityCheckClassValues();
 
   public slots:
 

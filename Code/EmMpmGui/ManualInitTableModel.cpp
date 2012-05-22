@@ -261,6 +261,17 @@ bool ManualInitTableModel::insertManualData(ManualInitData* data, int row, const
   return true;
 }
 
+// -----------------------------------------------------------------------------
+//
+// -----------------------------------------------------------------------------
+void ManualInitTableModel::sanityCheckClassValues()
+{
+  for (int i = 0; i < m_ManualInitDatas.count(); ++i)
+  {
+    m_ManualInitDatas[i]->setEmMpmClass(i);
+  }
+  emit dataChanged(QModelIndex(), QModelIndex());
+}
 
 // -----------------------------------------------------------------------------
 //
