@@ -79,12 +79,10 @@ class ProcessQueueTask : public QThread , public Observer
     typedef QList<InputOutputFilePair>     InputOutputFilePairList;
 
     MXA_INSTANCE_PROPERTY(bool, Debug);
-//    MXA_VIRTUAL_INSTANCE_PROPERTY(QString, InputFilePath);
-//    MXA_VIRTUAL_INSTANCE_PROPERTY(QString, OutputFilePath);
-
     MXA_INSTANCE_PROPERTY(InputOutputFilePairList, InputOutputFilePairList)
 
     MXA_INSTANCE_PROPERTY(bool, FeedBackInitialization);
+    MXA_INSTANCE_PROPERTY(bool, SaveHistogram);
 
     /**
      * @brief Converts a QImage to a Gray Scale (8 bit) AIMImage object

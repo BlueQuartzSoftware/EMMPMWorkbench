@@ -30,6 +30,10 @@
 
 #include "ManualInitData.h"
 
+#include <iostream>
+
+#include "QtCore/QStringList"
+
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
@@ -149,6 +153,8 @@ void ManualInitData::writeSettings(QSettings &prefs)
 
   prefs.endGroup();
 }
+#define printvar(var)\
+  std::cout << "m_" << #var << ": " << m_##var << std::endl;
 
 // -----------------------------------------------------------------------------
 //
@@ -160,11 +166,22 @@ void ManualInitData::readSettings(QSettings &prefs)
   QString group("ManualInitData-");
   group.append(QString::number(m_Class));
   prefs.beginGroup(group);
+  QStringList keys = prefs.allKeys();
 
-  m_Class = prefs.value("Class").toInt(&ok);
-  m_Mu = prefs.value("Mu").toDouble(&ok);
-  m_Sigma = prefs.value("Sigma").toDouble(&ok);
-  m_GrayLevel = prefs.value("GrayLevel").toInt(&ok);
+  QVariant v = prefs.value("Class");
+  m_Class = v.toInt(&ok);
+  v = prefs.value("Mu");
+  m_Mu = v.toDouble(&ok);
+  v = prefs.value("Sigma");
+  m_Sigma = v.toDouble(&ok);
+  v = prefs.value("GrayLevel");
+  m_GrayLevel = v.toInt(&ok);
+#if 0
+  printvar(Class);
+  printvar(Mu);
+  printvar(Sigma);
+  printvar(GrayLevel);
+#endif
   prefs.endGroup();
 }
 

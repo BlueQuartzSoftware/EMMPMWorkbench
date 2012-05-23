@@ -44,6 +44,9 @@
 #include <QtCore/QMutexLocker>
 #include <QtGui/QMessageBox>
 
+//-- MXA Includes
+#include "MXA/Utilities/MXAFileInfo.h"
+
 //-- EMMPMLib Includes
 #include "EMMPMLib/Common/EMMPM.h"
 #include "EMMPMLib/Common/InitializationFunctions.h"
@@ -287,7 +290,7 @@ void EMMPMTask::segmentImage(int i)
 
  // std::cout << "Segmenting Image: " << inputFile.toStdString() << std::endl;
   QFileInfo fileInfo(inputFile);
-  emit imageStarted(fileInfo.fileName());
+  emit imageStarted(inputFile);
 
   // Get our input image from the Image IO functions
   QImage image = QImage(m_data->input_file_name);
@@ -424,6 +427,7 @@ void EMMPMTask::segmentImage(int i)
     outQImage.setColor(g, qRgb(m_data->grayTable[g], m_data->grayTable[g], m_data->grayTable[g]) );
   }
 
+  // Save the output image to a file
   QFileInfo fi (QString(m_data->output_file_name));
   QString ext = fi.suffix();
   if (ext.compare(QString("tif"), Qt::CaseInsensitive) == 0
@@ -466,6 +470,47 @@ void EMMPMTask::segmentImage(int i)
     fclose(f);
   }
 
+  // Save the histogram/Gaussian curve data to a file
+  if (getSaveHistogram() == true)
+  {
+    std::string histogramFileName =  MXAFileInfo::parentPath(m_data->output_file_name) + MXAFileInfo::Separator;
+    histogramFileName.append(MXAFileInfo::fileNameWithOutExtension(m_data->output_file_name));
+    histogramFileName.append(".csv");
+    //std::cout << "Writing Histogram File: " << histogramFileName << std::endl;
+    size_t histIdx = 0;
+    int count = m_data->classes;
+    int columns = count + 2;
+    FILE* f = fopen(histogramFileName.c_str(), "wb");
+    double value;
+    char comma[2] = {',', 0};
+
+    // Write the header to the file
+    fprintf(f, "Bins,Histogram");
+    for (int c = 2; c < columns; ++c)
+    {
+      fprintf(f, ",Class %d", (c-2));
+    }
+    fprintf(f, "\n");
+
+    for(size_t bin = 0; bin < 256; ++bin)
+    {
+      fprintf(f, "%ld,%f,", bin, m_ImageHistogram.at(bin));
+      for (unsigned int d = 0; d < m_data->dims; ++d)
+      {
+        for (int c = 0; c < m_data->classes; ++c)
+        {
+          histIdx = (256 * m_data->dims *c) + (256*d) + bin;
+          if (c < columns - 1) { comma[0] = ',';}
+          else { comma[0] = '\n';}
+          value = m_data->histograms[histIdx];
+          fprintf(f, "%f%s", value, comma);
+        }
+      }
+      fprintf(f, "\n");
+    }
+    fflush(f);
+    fclose(f);
+  }
 
 
   //Clean up the Memory as this class will NOT get deleted right away. This will

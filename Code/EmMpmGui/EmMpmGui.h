@@ -35,6 +35,7 @@
 #include <QtCore/QObject>
 #include <QtCore/QString>
 #include <QtCore/QSettings>
+#include <QtCore/QVector>
 #include <QtGui/QCloseEvent>
 #include <QtGui/QMainWindow>
 #include <QtGui/QWidget>
@@ -133,6 +134,9 @@ class EmMpmGui :  public QMainWindow, private Ui::EmMpmGui
 
     void addRemoveManualInitTableRows();
 
+    void estimateMemoryUse(QSize size);
+
+    void calcGaussianCurve(double mu, double sigma, QwtArray<double> &intervals, QwtArray<double> &values);
 
     /**
      * @brief Opens an Image file
@@ -142,15 +146,12 @@ class EmMpmGui :  public QMainWindow, private Ui::EmMpmGui
 
     void openOverlayImage(QString mountImage);
 
-    void estimateMemoryUse(QSize size);
-
-    void calcGaussianCurve(double mu, double sigma, QwtArray<double> &intervals, QwtArray<double> &values);
-
   signals:
     void cancelTask();
     void cancelProcessQueue();
 
   public slots:
+    void setCurrentProcessedImage(QString imageFile);
 
   // Manual hookup slots to get signals from the graphics view
   //  void baseImageFileLoaded(const QString &filename);
@@ -338,6 +339,7 @@ class EmMpmGui :  public QMainWindow, private Ui::EmMpmGui
     QwtPlotGrid*   m_grid;
 
     QwtPlotCurve*           m_histogram;
+    QVector<double>         m_ImageHistogram;
     QList<QwtPlotCurve*>    m_Gaussians;
     QList<QwtPlotCurve*>    m_ManualInitGaussians;
     QwtPlotCurve*           m_CombinedGaussians;
@@ -352,6 +354,7 @@ class EmMpmGui :  public QMainWindow, private Ui::EmMpmGui
 
     LayersDockWidget*  m_LayersPalette;
 
+    QVector<int>     m_StartingMuValues;
 
 
     EmMpmGui(const EmMpmGui&); // Copy Constructor Not Implemented

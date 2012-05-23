@@ -82,6 +82,7 @@
 
 //-- EMMPM Lib Includes
 #include "EMMPMLib/EMMPMLib.h"
+#include "EMMPMLib/Common/EMMPM_Constants.h"
 #include "EMMPMLib/Common/MSVCDefines.h"
 #include "EMMPMLib/Common/InitializationFunctions.h"
 #include "EMMPMLib/tiff/TiffUtilities.h"
@@ -159,6 +160,22 @@ m_OpenDialogLastDirectory("C:\\")
 m_OpenDialogLastDirectory("~/")
 #endif
 {
+  m_StartingMuValues.resize(EMMPM_MAX_CLASSES);
+  m_StartingMuValues[0] = 96;
+  m_StartingMuValues[1] = 208;
+  m_StartingMuValues[2] = 144;
+  m_StartingMuValues[3] = 48;
+  m_StartingMuValues[4] = 176;
+  m_StartingMuValues[5] = 80;
+  m_StartingMuValues[6] = 192;
+  m_StartingMuValues[7] = 112;
+  m_StartingMuValues[8] = 224;
+  m_StartingMuValues[9] = 160;
+  m_StartingMuValues[10] = 32;
+  m_StartingMuValues[11] = 240;
+  m_StartingMuValues[12] = 128;
+  m_StartingMuValues[13] = 16;
+  m_StartingMuValues[14] = 256;
 
   setupUi(this);
   setupGui();
@@ -225,6 +242,7 @@ void EmMpmGui::writeIOSettings(QSettings &prefs)
   WRITE_STRING_SETTING(prefs, outputDirectoryLE);
   WRITE_STRING_SETTING(prefs, outputPrefix);
   WRITE_STRING_SETTING(prefs, outputSuffix);
+  WRITE_BOOL_SETTING(prefs, saveHistogramCheckBox, saveHistogramCheckBox->isChecked())
   prefs.endGroup();
 }
 
@@ -247,6 +265,7 @@ void EmMpmGui::readIOSettings(QSettings &prefs)
   READ_STRING_SETTING(prefs, outputDirectoryLE, "");
   READ_STRING_SETTING(prefs, outputPrefix, "Segmented_");
   READ_STRING_SETTING(prefs, outputSuffix, "");
+  READ_BOOL_SETTING(prefs, saveHistogramCheckBox, false);
 
   processFolder->blockSignals(true);
   READ_BOOL_SETTING(prefs, processFolder, false);
@@ -261,6 +280,7 @@ void EmMpmGui::readIOSettings(QSettings &prefs)
   {
     on_inputImageFilePath_textChanged(inputImageFilePath->text());
   }
+  on_processFolder_stateChanged(processFolder->isChecked());
 }
 
 // -----------------------------------------------------------------------------
@@ -276,6 +296,7 @@ void EmMpmGui::readSettings(QSettings &prefs)
 
   READ_STRING_SETTING(prefs, outputPrefix, "Segmented_");
   READ_STRING_SETTING(prefs, outputSuffix, "");
+  on_outputPrefix_textChanged();
 
 
   prefs.beginGroup("Parameters");
@@ -304,6 +325,8 @@ void EmMpmGui::readSettings(QSettings &prefs)
 
 
 
+  prefs.endGroup();
+
   if (manualInit->isChecked() == true)
   {
     ManualInitTableModel* model = qobject_cast<ManualInitTableModel*>(manualInitTableView->model());
@@ -319,10 +342,6 @@ void EmMpmGui::readSettings(QSettings &prefs)
     }
   }
   READ_SETTING(prefs, m_NumClasses, ok, i, 2, Int);
-
-  prefs.endGroup();
-
-
 
   // We only load the User Init Areas if there is an image loaded
   // and the checkbox was set
@@ -615,7 +634,10 @@ void EmMpmGui::setupGui()
 
   m_ProcessFolderWidgets <<  sourceDirectoryLE << sourceDirectoryBtn << outputDirectoryLE
   << outputDirectoryBtn << outputPrefix << outputSuffix << filterPatternLabel
-  << filterPatternLineEdit << fileListWidget << outputImageTypeLabel << outputImageType;
+  << filterPatternLineEdit << fileListWidget << outputImageTypeLabel << outputImageType
+  << muSigmaFeedback << saveHistogramCheckBox << outputSuffixLabel << outputPrefixLabel
+  << exampleFileNameLabel << outputFilenamePattern << histogramFilenamePattern;
+
 
   QDoubleValidator* betaValidator = new QDoubleValidator(m_Beta);
   QDoubleValidator* minVarValidator = new QDoubleValidator(m_MinVariance);
@@ -998,6 +1020,10 @@ void EmMpmGui::on_processBtn_clicked()
   connect(task, SIGNAL(histogramsAboutToBeUpdated()), this, SLOT(clearProcessHistograms()));
   qRegisterMetaType<QVector<real_t> >("QVector<real_t>");
   connect(task, SIGNAL(updateHistogramAvailable(QVector<real_t>)), this, SLOT(addProcessHistogram(QVector<real_t>)));
+  if (processFolder->isChecked())
+  {
+    connect(task, SIGNAL(imageStarted(QString )), this, SLOT(setCurrentProcessedImage(QString)));
+  }
   this->addProcess(task);
 
 
@@ -1028,6 +1054,9 @@ EMMPMTask* EmMpmGui::newEmMpmTask( ProcessQueueController* queueController)
   EMMPM_Data::Pointer data = task->getEMMPM_Data();
 
   task->setFeedBackInitialization(muSigmaFeedback->isChecked());
+  task->setSaveHistogram(saveHistogramCheckBox->isChecked());
+  task->setImageHistogram(m_ImageHistogram);
+
   data->in_beta = m_Beta->text().toFloat(&ok);
 
   for (int i = 0; i < EMMPM_MAX_CLASSES; i++)
@@ -1172,12 +1201,12 @@ void EmMpmGui::queueControllerFinished()
     setCurrentImageFile (inputImageFilePath->text());
     setCurrentProcessedFile(outputImageFile->text());
     m_GraphicsView->loadOverlayImageFile(outputImageFile->text());
-    m_LayersPalette->getSegmentedImageCheckBox()->setChecked(true);
+//    m_LayersPalette->getSegmentedImageCheckBox()->setChecked(true);
+    m_LayersPalette->on_segmentedImage_stateChanged(true);
   }
   else
   {
     QStringList fileList = generateInputFileList();
-
 
     setCurrentImageFile (sourceDirectoryLE->text() + QDir::separator() + fileList.at(0) );
     m_GraphicsView->blockSignals(true);
@@ -1197,7 +1226,8 @@ void EmMpmGui::queueControllerFinished()
     filepath.append(outputImageType->currentText());
     setCurrentProcessedFile(filepath);
     m_GraphicsView->loadOverlayImageFile(m_CurrentProcessedFile);
-    m_LayersPalette->getSegmentedImageCheckBox()->setChecked(true);
+//    m_LayersPalette->getSegmentedImageCheckBox()->setChecked(true);
+    m_LayersPalette->on_segmentedImage_stateChanged(true);
   //  std::cout << "Setting processed Image file: " << filepath.toStdString() << std::endl;
   }
   setWindowTitle(m_CurrentImageFile);
@@ -1297,13 +1327,13 @@ void EmMpmGui::on_fileListWidget_itemDoubleClicked(QListWidgetItem * item)
   }
 }
 
-
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
 void EmMpmGui::on_outputPrefix_textChanged()
 {
   outputFilenamePattern->setText(outputPrefix->text() + "[ORIGINAL FILE NAME]" + outputSuffix->text() + "." + outputImageType->currentText() );
+  histogramFilenamePattern->setText(outputPrefix->text() + "[ORIGINAL FILE NAME]" + outputSuffix->text() + ".csv" );
 }
 
 // -----------------------------------------------------------------------------
@@ -1312,6 +1342,7 @@ void EmMpmGui::on_outputPrefix_textChanged()
 void EmMpmGui::on_outputSuffix_textChanged()
 {
   outputFilenamePattern->setText(outputPrefix->text() + "[ORIGINAL FILE NAME]" + outputSuffix->text() + "." + outputImageType->currentText() );
+  histogramFilenamePattern->setText(outputPrefix->text() + "[ORIGINAL FILE NAME]" + outputSuffix->text() + ".csv" );
 }
 
 // -----------------------------------------------------------------------------
@@ -1663,6 +1694,21 @@ void EmMpmGui::on_actionExit_triggered()
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
+void EmMpmGui::setCurrentProcessedImage(QString imageFile)
+{
+
+  bool showBaseImage = m_LayersPalette->getOriginalImageCheckBox()->isChecked();
+  bool showSegmentedImage = m_LayersPalette->getSegmentedImageCheckBox()->isChecked();
+  openBaseImageFile(imageFile);
+
+  m_LayersPalette->on_originalImage_stateChanged(showBaseImage);
+  m_LayersPalette->on_segmentedImage_stateChanged(showSegmentedImage);
+}
+
+
+// -----------------------------------------------------------------------------
+//
+// -----------------------------------------------------------------------------
 void EmMpmGui::openBaseImageFile(QString imageFile)
 {
   if ( true == imageFile.isEmpty() ) // User cancelled the operation
@@ -1711,14 +1757,18 @@ void EmMpmGui::openBaseImageFile(QString imageFile)
 
 
   plotImageHistogram();
+  QFileInfo fi(imageFile);
+  m_HistogramPlot->setTitle(fi.fileName());
   // remove the gaussian curves due to the Manual Init values
   clearManualInitCurves();
   // Create a new table model
-  ManualInitTableModel* tm = new ManualInitTableModel(manualInitTableView);
-  manualInitTableView->setModel(tm);
-  connect(tm, SIGNAL(dataChanged(const QModelIndex &, const QModelIndex &)),
-          this, SLOT(manualInitDataChanged(const QModelIndex &, const QModelIndex &)));
-
+  if (manualInitTableView->model() == NULL )
+  {
+    ManualInitTableModel* tm = new ManualInitTableModel(manualInitTableView);
+    manualInitTableView->setModel(tm);
+    connect(tm, SIGNAL(dataChanged(const QModelIndex &, const QModelIndex &)),
+            this, SLOT(manualInitDataChanged(const QModelIndex &, const QModelIndex &)));
+  }
 
   addRemoveManualInitTableRows();
 
@@ -1736,6 +1786,7 @@ void EmMpmGui::addRemoveManualInitTableRows()
   // Check to see if the model and the number of classes match.
   if (m_NumClasses->value() == model->rowCount())
   {
+    updateManualInitHistograms();
     return;
   }
 
@@ -1751,9 +1802,12 @@ void EmMpmGui::addRemoveManualInitTableRows()
     delete curve;
   }
 
+  int mVal = 0;
+  // The number of classes is greater than the number of rows - Add rows
   while(m_NumClasses->value() > model->rowCount())
   {
-    QColor color = QColor(0, 125, 0);
+
+    QColor color = QColor(0, 125, 0); // Green Lines for the starting Gaussians
     color.setAlpha(255);
 
     QwtPlotCurve* curve = new QwtPlotCurve("");
@@ -1763,8 +1817,9 @@ void EmMpmGui::addRemoveManualInitTableRows()
     m_ManualInitGaussians.insert(model->rowCount(), curve);
 
     int count = model->rowCount() + 1;
-    int defGray = 255/count * (model->rowCount() );
-    int defMu = 255/count * (model->rowCount() );
+    mVal = m_StartingMuValues[count-1];
+    int defGray = mVal;
+    int defMu = mVal;
     double defGamma = 1.0;
     ManualInitData* data = new ManualInitData(count-1, (double)defMu, 20.0, defGamma, defGray, model);
     model->insertManualData(data, model->rowCount());
@@ -2249,6 +2304,7 @@ void EmMpmGui::plotImageHistogram()
     m_histogram->attach(m_HistogramPlot);
   }
   m_histogram->setData(intervals, values);
+  m_ImageHistogram = values;
 
   m_AxisSettingsDialog->setXAxisMax(256.0);
   m_AxisSettingsDialog->setXAxisMin(0.0);
@@ -2662,7 +2718,6 @@ void EmMpmGui::on_manualInit_stateChanged(int state)
   if (manualInit->isChecked() == true)
   {
     enableUserDefinedAreas->setChecked(!manualInit->isChecked());
-
   }
   updateManualInitHistograms();
 }
