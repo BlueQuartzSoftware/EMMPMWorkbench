@@ -1699,6 +1699,7 @@ void EmMpmGui::setCurrentProcessedImage(QString imageFile)
 
   bool showBaseImage = m_LayersPalette->getOriginalImageCheckBox()->isChecked();
   bool showSegmentedImage = m_LayersPalette->getSegmentedImageCheckBox()->isChecked();
+
   openBaseImageFile(imageFile);
 
   m_LayersPalette->on_originalImage_stateChanged(showBaseImage);
@@ -1745,7 +1746,7 @@ void EmMpmGui::openBaseImageFile(QString imageFile)
   ImageOpenDialog d(this);
 
   d.show();
-  d.raise();
+  //d.raise();
   d.activateWindow();
   d.setModal(false);
 
