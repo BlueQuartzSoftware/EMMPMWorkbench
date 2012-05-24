@@ -1084,12 +1084,12 @@ EMMPMTask* EmMpmGui::newEmMpmTask( ProcessQueueController* queueController)
     {
       QModelIndex muIndex = model->index(i, ManualInitTableModel::Mu);
       double mu = model->data(muIndex).toDouble(&ok);
-      QModelIndex sigIndex = model->index(i, ManualInitTableModel::StdDev);
-      double sig = model->data(sigIndex).toDouble(&ok);
+      QModelIndex varianceIndex = model->index(i, ManualInitTableModel::Variance);
+      double variance = model->data(varianceIndex).toDouble(&ok);
       QModelIndex gvIndex = model->index(i, ManualInitTableModel::GrayValue);
       int gv = model->data(gvIndex).toInt(&ok);
       data->m[i] = mu;
-      data->v[i] = sig;
+      data->v[i] = variance;
       data->grayTable[i] = gv;
     }
 
@@ -1851,7 +1851,7 @@ void EmMpmGui::updateManualInitHistograms()
   {
     QModelIndex muIndex = model->index(i, ManualInitTableModel::Mu);
     double mu = model->data(muIndex).toDouble(&ok);
-    QModelIndex sigIndex = model->index(i, ManualInitTableModel::StdDev);
+    QModelIndex sigIndex = model->index(i, ManualInitTableModel::Variance);
     double sig = model->data(sigIndex).toDouble(&ok);
     QwtArray<double> intervals;
     QwtArray<double> values;

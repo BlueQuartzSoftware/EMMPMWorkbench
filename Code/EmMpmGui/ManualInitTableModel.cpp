@@ -71,7 +71,7 @@ Qt::ItemFlags ManualInitTableModel::flags(const QModelIndex &index) const
     theFlags |= Qt::ItemIsEnabled;
 
     int col = index.column();
-    if (  col == Mu || col == StdDev || col == Gamma || col == GrayValue )
+    if (  col == Mu || col == Variance || col == Gamma || col == GrayValue )
     {
       theFlags = Qt::ItemIsEditable | Qt::ItemIsSelectable | Qt::ItemIsEnabled;
     }
@@ -119,7 +119,7 @@ QVariant ManualInitTableModel::data(const QModelIndex &index, qint32 role) const
         return QVariant(uia->getEmMpmGrayLevel());
       case ManualInitTableModel::Mu:
         return QVariant(uia->getMu());
-      case ManualInitTableModel::StdDev:
+      case ManualInitTableModel::Variance:
         return QVariant(uia->getSigma());
       case ManualInitTableModel::Gamma:
         return QVariant(uia->getGamma());
@@ -143,7 +143,7 @@ QVariant  ManualInitTableModel::headerData ( int section, Qt::Orientation orient
       case Class: return QVariant(QString("Class"));
       case GrayValue: return QVariant(QString("Gray Value"));
       case Mu: return QVariant(QString("Mu"));
-      case StdDev: return QVariant(QString("Sigma"));
+      case Variance: return QVariant(QString("Variance"));
       case Gamma: return QVariant(QString("Gamma"));
       default:
         break;
@@ -202,7 +202,7 @@ bool ManualInitTableModel::setData(const QModelIndex & index, const QVariant & v
     case ManualInitTableModel::Mu:
       m_ManualInitDatas.at(row)->setMu(value.toDouble(&ok));
       break;
-    case ManualInitTableModel::StdDev:
+    case ManualInitTableModel::Variance:
       m_ManualInitDatas.at(row)->setSigma(value.toDouble(&ok));
       break;
     case ManualInitTableModel::Gamma:

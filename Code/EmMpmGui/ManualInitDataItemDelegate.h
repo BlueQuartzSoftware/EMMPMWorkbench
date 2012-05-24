@@ -86,7 +86,7 @@ class ManualInitDataItemDelegate : public QStyledItemDelegate
       qint32 col = index.column();
       switch(col)
       {
-        case ManualInitTableModel::StdDev:
+        case ManualInitTableModel::Variance:
           sigma = new QLineEdit(parent);
           sigma->setFrame(false);
           classValidator = new QDoubleValidator(sigma);
@@ -117,7 +117,7 @@ class ManualInitDataItemDelegate : public QStyledItemDelegate
     void setEditorData(QWidget *editor, const QModelIndex &index) const
     {
       qint32 col = index.column();
-      if (col == ManualInitTableModel::StdDev ||
+      if (col == ManualInitTableModel::Variance ||
           col == ManualInitTableModel::GrayValue ||
           col == ManualInitTableModel::Mu )
       {
@@ -142,7 +142,7 @@ class ManualInitDataItemDelegate : public QStyledItemDelegate
         int v = lineEdit->text().toInt(&ok);
         model->setData(index, v);
       }
-      else if (col == ManualInitTableModel::Mu || col == ManualInitTableModel::StdDev)
+      else if (col == ManualInitTableModel::Mu || col == ManualInitTableModel::Variance)
       {
         QLineEdit* lineEdit = qobject_cast<QLineEdit* > (editor);
         Q_ASSERT(lineEdit);

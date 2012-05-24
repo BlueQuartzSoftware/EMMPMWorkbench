@@ -464,6 +464,7 @@ void EMMPMTask::segmentImage(int i)
     // Remember the Sigma is the Square Root of the variance
     for(int i = 0; i < m_data->classes; ++i)
     {
+      // note we are taking the Squart Root of the variance to get the standard deviation (sigma)
       fprintf(f, "%d,%f,%f\n", i,  m_data->m[i] , sqrtf(m_data->v[i]) );
     }
 
