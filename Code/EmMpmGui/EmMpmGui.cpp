@@ -153,13 +153,9 @@ m_CombinedGaussians(NULL),
 m_ShowCombinedGaussians(false),
 m_OutputExistsCheck(false),
 m_QueueController(NULL),
-m_LayersPalette(NULL),
-#if defined(Q_WS_WIN)
-m_OpenDialogLastDirectory("C:\\")
-#else
-m_OpenDialogLastDirectory("~/")
-#endif
+m_LayersPalette(NULL)
 {
+  m_OpenDialogLastDirectory = QDir::homePath();
   m_StartingMuValues.resize(EMMPM_MAX_CLASSES);
   m_StartingMuValues[0] = 96;
   m_StartingMuValues[1] = 208;

@@ -51,13 +51,9 @@ QFrame(parent),
 m_ProxyModel(NULL),
 m_OutputExistsCheck(false),
 m_QueueController(NULL),
-m_QueueDialog(NULL),
-#if defined(Q_WS_WIN)
-m_OpenDialogLastDirectory("C:\\")
-#else
-m_OpenDialogLastDirectory("~/")
-#endif
+m_QueueDialog(NULL)
 {
+  m_OpenDialogLastDirectory = QDir::homePath();
   m_QueueDialog = new ProcessQueueDialog(this);
   m_QueueDialog->setVisible(false);
 }
