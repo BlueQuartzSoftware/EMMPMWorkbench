@@ -306,6 +306,7 @@ void EmMpmGui::readSettings(QSettings &prefs)
 
   READ_BOOL_SETTING(prefs, useGradientPenalty, false);
   READ_SETTING(prefs, gradientBetaE, ok, d, 1.0, Double);
+  if(useGradientPenalty->isChecked()) {gradientBetaE->setEnabled(true);betaELabel->setEnabled(true);}
 
   READ_BOOL_SETTING(prefs, useCurvaturePenalty, false);
   READ_SETTING(prefs, curvatureBetaC, ok, d, 1.0, Double);
@@ -1119,6 +1120,20 @@ EMMPMTask* EmMpmGui::newEmMpmTask( ProcessQueueController* queueController)
   data->beta_c = (useCurvaturePenalty->isChecked()) ? curvatureBetaC->value() : 0.0;
   data->r_max = (useCurvaturePenalty->isChecked()) ? curvatureRMax->value() : 0.0;
   data->ccostLoopDelay = (useCurvaturePenalty->isChecked()) ? ccostLoopDelay->value() : m_MpmIterations->value() + 1;
+
+  // Make sure the Coupling Beta Pointer is initialized
+  if (NULL == data->couplingBeta)
+  {
+    unsigned int cSize = data->classes + 1;
+    size_t couplingElements = cSize * cSize;
+    data->couplingBeta = static_cast<real_t*>(malloc(sizeof(real_t) * couplingElements));
+    ::memset(data->couplingBeta, 0, sizeof(real_t) * couplingElements);
+  }
+  // Transfer from the user interface the Class Coupling entries
+
+  // Update the Beta (Coupling) Matrix
+  data->calculateBetaMatrix();
+
 
   return task;
 }
