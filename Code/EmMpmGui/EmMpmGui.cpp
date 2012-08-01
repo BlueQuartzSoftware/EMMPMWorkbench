@@ -124,6 +124,16 @@
 #define WRITE_SETTING(prefs, var)\
   prefs.setValue(#var, this->var->value());
 
+#define WRITE_COMBO_SETTING(prefs, var)\
+  prefs.setValue(#var, this->var->currentIndex());
+
+#define READ_COMBO_SETTING(prefs, var, emptyValue)\
+  { QString s = prefs.value(#var).toString();\
+  if (s.isEmpty() == false) {\
+    bool ok = false; int bb = prefs.value(#var).toInt(&ok);\
+  var->setCurrentIndex(bb); } else { var->setCurrentIndex(emptyValue); } }
+
+
 #define READ_BOOL_SETTING(prefs, var, emptyValue)\
   { QString s = prefs.value(#var).toString();\
   if (s.isEmpty() == false) {\
@@ -294,6 +304,16 @@ void EmMpmGui::readSettings(QSettings &prefs)
   READ_STRING_SETTING(prefs, outputSuffix, "");
   on_outputPrefix_textChanged();
 
+  READ_BOOL_SETTING(prefs, processFolder, false);
+  READ_STRING_SETTING(prefs, sourceDirectoryLE, "");
+  READ_STRING_SETTING(prefs, outputDirectoryLE, "");
+  READ_BOOL_SETTING(prefs, muSigmaFeedback, false);
+  READ_STRING_SETTING(prefs, outputPrefix, "");
+  READ_STRING_SETTING(prefs, outputSuffix, "");
+  READ_BOOL_SETTING(prefs, saveHistogramCheckBox, false);
+  READ_STRING_SETTING(prefs, filterPatternLineEdit, "");
+  READ_COMBO_SETTING(prefs, outputImageType, 0);
+
 
   prefs.beginGroup("Parameters");
 
@@ -320,9 +340,7 @@ void EmMpmGui::readSettings(QSettings &prefs)
   enableUserDefinedAreas->blockSignals(false);
   READ_BOOL_SETTING(prefs, manualInit, false);
 
-
-
-  prefs.endGroup();
+  prefs.endGroup();  // End the Parameters Group
 
   if (manualInit->isChecked() == true)
   {
@@ -372,8 +390,20 @@ void EmMpmGui::readSettings(QSettings &prefs)
 void EmMpmGui::writeSettings(QSettings &prefs)
 {
 
+  prefs.setValue("Version", QString::fromStdString(EmMpm_Gui::Version::Complete()));
+  WRITE_STRING_SETTING(prefs, inputImageFilePath);
+  WRITE_STRING_SETTING(prefs, outputImageFile);
+
+
+  WRITE_CHECKBOX_SETTING(prefs, processFolder);
+  WRITE_STRING_SETTING(prefs, sourceDirectoryLE);
+  WRITE_STRING_SETTING(prefs, outputDirectoryLE);
+  WRITE_CHECKBOX_SETTING(prefs, muSigmaFeedback);
   WRITE_STRING_SETTING(prefs, outputPrefix);
   WRITE_STRING_SETTING(prefs, outputSuffix);
+  WRITE_CHECKBOX_SETTING(prefs, saveHistogramCheckBox);
+  WRITE_STRING_SETTING(prefs, filterPatternLineEdit);
+  WRITE_COMBO_SETTING(prefs, outputImageType);
 
   prefs.beginGroup("Parameters");
   WRITE_SETTING(prefs, m_NumClasses);
@@ -396,8 +426,6 @@ void EmMpmGui::writeSettings(QSettings &prefs)
   WRITE_VALUE(prefs, userInitAreaCount);
 
   WRITE_CHECKBOX_SETTING(prefs, manualInit);
-
-
   prefs.endGroup();
 
   if (manualInit->isChecked() == true)
@@ -1836,7 +1864,7 @@ void EmMpmGui::addRemoveManualInitTableRows()
     mVal = m_StartingMuValues[count-1];
     int defGray = mVal;
     int defMu = mVal;
-    double defGamma = 1.0;
+    double defGamma = 0.0;
     ManualInitData* data = new ManualInitData(count-1, (double)defMu, 20.0, defGamma, defGray, model);
     model->insertManualData(data, model->rowCount());
   }

@@ -224,7 +224,7 @@ bool ManualInitTableModel::insertRows(int row, int count, const QModelIndex& ind
   qint32 binNum = 0;
   double mu = 128.0;
   double sigma = 20.0;
-  double gamma = 1.0;
+  double gamma = 0.0;
 
 
   beginInsertRows(QModelIndex(), row, row + count - 1);

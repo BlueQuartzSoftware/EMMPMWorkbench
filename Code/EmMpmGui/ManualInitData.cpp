@@ -149,6 +149,7 @@ void ManualInitData::writeSettings(QSettings &prefs)
   prefs.setValue("Class", m_Class);
   prefs.setValue("Mu", m_Mu);
   prefs.setValue("Sigma", m_Sigma);
+  prefs.setValue("Gamma", m_Gamma);
   prefs.setValue("GrayLevel", m_GrayLevel);
 
   prefs.endGroup();
@@ -174,6 +175,8 @@ void ManualInitData::readSettings(QSettings &prefs)
   m_Mu = v.toDouble(&ok);
   v = prefs.value("Sigma");
   m_Sigma = v.toDouble(&ok);
+  v = prefs.value("Gamma");
+  m_Gamma = v.toDouble(&ok);
   v = prefs.value("GrayLevel");
   m_GrayLevel = v.toInt(&ok);
 #if 0
