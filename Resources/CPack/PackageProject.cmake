@@ -36,7 +36,6 @@ endif()
 # Get a shorter version number:
 set(EMMPMGui_VERSION_SHORT "${EMMPMGui_VER_MAJOR}.${EMMPMGui_VER_MINOR}")
 
-
 SET(CPACK_PACKAGE_DESCRIPTION_SUMMARY "GUI Application that runs the EM/MPM image segmentation algorithms through a GUI interface.")
 SET(CPACK_PACKAGE_VENDOR "BlueQuartz Software, Michael A. Jackson")
 SET(CPACK_PACKAGE_DESCRIPTION_FILE "${PROJECT_BINARY_DIR}/ReadMe.txt")
@@ -75,6 +74,15 @@ else()
   set(CPACK_PACKAGE_FILE_NAME "EmMpmGui-${EMMPMGui_VERSION_SHORT}-${CMAKE_SYSTEM_NAME}")
   set (UPLOAD_FILE_NAME ${CPACK_PACKAGE_FILE_NAME}.tar.gz)
 endif()
+
+set (EMMPMGUI_WEBSITE_SERVER "www.bluequartz.net")
+set (EMMPMGUI_WEBSITE_SERVER_PATH "/var/www/www.bluequartz.net/binaries/to81/.")
+set (EMMPMGUI_WEBSITE_SCP_USERNAME "mjackson") 
+#-- Create a bash script file that will upload the latest version to the web server
+configure_file(${PROJECT_RESOURCES_DIR}/upload.sh.in 
+               ${PROJECT_BINARY_DIR}/upload.sh)
+               
+               
 # Create an NSID based installer for Windows Systems
 IF(WIN32 AND NOT UNIX)
   # There is a bug in NSIS that does not handle full unix paths properly. Make
