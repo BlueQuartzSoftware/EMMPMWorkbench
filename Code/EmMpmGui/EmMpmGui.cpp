@@ -1083,10 +1083,14 @@ EMMPMTask* EmMpmGui::newEmMpmTask( ProcessQueueController* queueController)
       double mu = model->data(muIndex).toDouble(&ok);
       QModelIndex varianceIndex = model->index(i, ManualInitTableModel::Variance);
       double variance = model->data(varianceIndex).toDouble(&ok);
+      QModelIndex gammaIndex = model->index(i, ManualInitTableModel::Gamma);
+      double gamma = model->data(gammaIndex).toDouble(&ok);
       QModelIndex gvIndex = model->index(i, ManualInitTableModel::GrayValue);
       int gv = model->data(gvIndex).toInt(&ok);
+
       data->m[i] = mu;
       data->v[i] = variance;
+      data->w_gamma[i] = gamma;
       data->grayTable[i] = gv;
     }
 
