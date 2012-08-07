@@ -76,7 +76,7 @@
 #include "QtSupport/QFileCompleter.h"
 #include "QtSupport/ImageGraphicsDelegate.h"
 #include "QtSupport/ProcessQueueController.h"
-#include "QtSupport/ProcessQueueDialog.h"
+
 
 #include "MXA/Common/MXAMemory.h"
 
@@ -683,7 +683,10 @@ void EmMpmGui::setupGui()
   QShortcut* shortcut_backspace = new QShortcut(QKeySequence(Qt::Key_Backspace), fileListWidget);
   connect(shortcut_backspace, SIGNAL(activated()), this, SLOT(deleteFileListItem()));
 
+  // Hid the progress bar
+  progBar->hide();
 
+  manualInitGroupBox->setChecked(false);
 }
 
 // -----------------------------------------------------------------------------
@@ -956,7 +959,6 @@ void EmMpmGui::on_processBtn_clicked()
   }
 
 
-  m_QueueDialog->clearTable();
   if (getQueueController() != NULL)
   {
     getQueueController()->deleteLater();
@@ -1049,8 +1051,11 @@ void EmMpmGui::on_processBtn_clicked()
   {
     connect(task, SIGNAL(imageStarted(QString )), this, SLOT(setCurrentProcessedImage(QString)));
   }
-  this->addProcess(task);
 
+  connect(task, SIGNAL(updateProgress(int)), progBar, SLOT(setValue(int)));
+ // connect(task, SIGNAL(finished(QObject*)), this, SLOT(taskFinished(QObject*)));
+  connect(task, SIGNAL(imageStarted(QString)), progBar, SLOT(setText(QString)));
+//  m_TasksMap[task] = progBar;
 
   // When the event loop of the controller starts it will signal the ProcessQueue to run
   connect(queueController, SIGNAL(started()), queueController, SLOT(processTask()));
@@ -1173,29 +1178,13 @@ EMMPMTask* EmMpmGui::newEmMpmTask( ProcessQueueController* queueController)
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
-void EmMpmGui::on_cancelBtn_clicked()
-{
-  std::cout << "on_cancelBtn_clicked" << std::endl;
-}
-
-
-// -----------------------------------------------------------------------------
-//
-// -----------------------------------------------------------------------------
-void EmMpmGui::addProcess(EMMPMTask* task)
-{
-  m_QueueDialog->addProcess(task);
-}
-
-// -----------------------------------------------------------------------------
-//
-// -----------------------------------------------------------------------------
 void EmMpmGui::processingStarted()
 {
 //  std::cout << "EmMpmGui::processingStarted()" << std::endl;
   processBtn->setText("Cancel");
   processBtn->setVisible(false);
   this->statusBar()->showMessage("Processing Images...");
+  progBar->show();
 }
 
 
@@ -1209,7 +1198,9 @@ void EmMpmGui::processingFinished()
   processBtn->setText("Segment");
   processBtn->setVisible(true);
   cancelBtn->setVisible(false);
-//  this->statusBar()->showMessage("Processing Complete");
+  progBar->setText("");
+  progBar->setValue(0);
+  progBar->hide();
 }
 
 // -----------------------------------------------------------------------------
@@ -2805,3 +2796,4 @@ void EmMpmGui::on_actionLayers_Palette_triggered()
 {
   m_LayersPalette->show();
 }
+

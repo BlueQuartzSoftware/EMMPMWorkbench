@@ -1,7 +1,9 @@
  <!DOCTYPE RCC>
  <RCC version="1.0">
  <qresource>
-
+   <file>DisclosableGroupBoxHeader.png</file>
+   <file>bullet_triangle_grey.png</file>
+   <file>bullet_triangle_grey_down.png</file>
     <file>zoomIn.png</file>
     <file>zoomOut.png</file>
     <file>fitToWindow.png</file>

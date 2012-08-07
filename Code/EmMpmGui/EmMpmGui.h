@@ -79,11 +79,10 @@ class LayersDockWidget;
  * @date Apr 3, 2011
  * @version 1.0
  */
-class EmMpmGui :  public QMainWindow, private Ui::EmMpmGui
+class EmMpmGui : public QMainWindow, private Ui::EmMpmGui
 {
 
     Q_OBJECT;
-
 
   public:
     EmMpmGui(QWidget *parent = 0);
@@ -114,11 +113,9 @@ class EmMpmGui :  public QMainWindow, private Ui::EmMpmGui
 
     MXA_INSTANCE_PROPERTY(QString, CurrentImageFile)
     MXA_INSTANCE_PROPERTY(QString, CurrentProcessedFile)
- //   MXA_INSTANCE_PROPERTY(QSortFilterProxyModel*, ProxyModel)
 
     MXA_INSTANCE_PROPERTY(bool, OutputExistsCheck)
     MXA_INSTANCE_PROPERTY(ProcessQueueController*, QueueController)
-  //  MXA_INSTANCE_PROPERTY(ProcessQueueDialog*, QueueDialog)
     MXA_INSTANCE_PROPERTY(QString, OpenDialogLastDirectory)
     MXA_INSTANCE_PROPERTY(InputOutputFilePairList, InputOutputFilePairList)
 
@@ -199,7 +196,6 @@ class EmMpmGui :  public QMainWindow, private Ui::EmMpmGui
 
     /* slots for the buttons in the GUI */
     void on_processBtn_clicked();
-    void on_cancelBtn_clicked();
 
     void on_useGradientPenalty_clicked();
     void on_useCurvaturePenalty_clicked();
@@ -266,12 +262,10 @@ class EmMpmGui :  public QMainWindow, private Ui::EmMpmGui
     void processingMessage(QString str);
 
 
-
   protected:
 
     EMMPMTask* newEmMpmTask(ProcessQueueController* queueController);
 
-    void addProcess(EMMPMTask* name);
     /**
     * @brief Implements the CloseEvent to Quit the application and write settings
     * to the preference file
@@ -319,15 +313,11 @@ class EmMpmGui :  public QMainWindow, private Ui::EmMpmGui
 
     qint32 initImageViews();
 
-
-
     QStringList generateInputFileList();
 
     void setImageWidgetsEnabled(bool b);
-    void setProcessFolderWidgetsEnabled(bool b);
 
-//    void saveLayout();
-//    void loadLayout();
+    void setProcessFolderWidgetsEnabled(bool b);
 
   private:
     QVector<UserInitArea*>*      m_UserInitAreaVector;
@@ -346,7 +336,6 @@ class EmMpmGui :  public QMainWindow, private Ui::EmMpmGui
     bool                    m_ShowCombinedGaussians;
     QList<QwtPlotCurve*>    m_ProcessGaussians;
     AxisSettingsDialog*     m_AxisSettingsDialog;
-    QMap<QObject*, QWidget*> m_TasksMap;
 
     QList<QWidget*> m_WidgetList;
     QList<QWidget*> m_ImageWidgets;
@@ -355,6 +344,7 @@ class EmMpmGui :  public QMainWindow, private Ui::EmMpmGui
     LayersDockWidget*  m_LayersPalette;
 
     QVector<int>     m_StartingMuValues;
+  //  QMap<QObject*, QWidget*> m_TasksMap;
 
 
     EmMpmGui(const EmMpmGui&); // Copy Constructor Not Implemented
