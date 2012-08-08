@@ -1939,13 +1939,11 @@ void EmMpmGui::updateManualInitHistograms()
 
     QModelIndex colorIndex = model->index(i, ManualInitTableModel::Color);
     QColor c = QColor(model->data(colorIndex).toString());
-    c.setAlpha(255);
+    //c.setAlpha(0);
 
-    colorTable[i] = c.rgba();
-    quint32 r = c.red() * 0.299;
-    quint32 g = c.green() * 0.587;
-    quint32 b = c.blue() * 0.144;
-    grayTable[i] = qRgb(r, g, b);
+    colorTable[i] = c.rgb();
+    qint32 gray = qGray(c.rgb());
+    grayTable[i] = qRgb(gray, gray, gray);
 
     curve->setData(intervals, values);
     curve->setPen(QPen(c, 2, Qt::SolidLine));
