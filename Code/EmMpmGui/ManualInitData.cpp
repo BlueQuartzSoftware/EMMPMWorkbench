@@ -38,13 +38,13 @@
 //
 // -----------------------------------------------------------------------------
 ManualInitData::ManualInitData(int label, double mu, double sigma, double gamma,
-                               int grayLevel, QObject* parent) :
+                               QString color, QObject* parent) :
 QObject(parent),
 m_Class(label),
 m_Mu(mu),
 m_Sigma(sigma),
 m_Gamma(gamma),
-m_GrayLevel(grayLevel)
+m_Color(color)
 {
 
 }
@@ -123,17 +123,17 @@ double ManualInitData::getGamma()
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
-void ManualInitData::setEmMpmGrayLevel(int gray)
+void ManualInitData::setEmMpmColor(QString color)
 {
-  m_GrayLevel = gray;
+  m_Color = color;
 }
 
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
-int ManualInitData::getEmMpmGrayLevel()
+QString ManualInitData::getEmMpmColor()
 {
-  return m_GrayLevel;
+  return m_Color;
 }
 
 // -----------------------------------------------------------------------------
@@ -150,7 +150,7 @@ void ManualInitData::writeSettings(QSettings &prefs)
   prefs.setValue("Mu", m_Mu);
   prefs.setValue("Sigma", m_Sigma);
   prefs.setValue("Gamma", m_Gamma);
-  prefs.setValue("GrayLevel", m_GrayLevel);
+  prefs.setValue("Color", m_Color);
 
   prefs.endGroup();
 }
@@ -177,8 +177,8 @@ void ManualInitData::readSettings(QSettings &prefs)
   m_Sigma = v.toDouble(&ok);
   v = prefs.value("Gamma");
   m_Gamma = v.toDouble(&ok);
-  v = prefs.value("GrayLevel");
-  m_GrayLevel = v.toInt(&ok);
+  v = prefs.value("Color");
+  m_Color = v.toString();
 #if 0
   printvar(Class);
   printvar(Mu);

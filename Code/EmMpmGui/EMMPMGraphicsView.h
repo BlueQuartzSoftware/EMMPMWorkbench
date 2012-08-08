@@ -116,8 +116,7 @@ class EMMPMGraphicsView : public QGraphicsView
     void addNewInitArea(UserInitArea* uia);
     void createNewUserInitArea(const QPolygonF &polygon);
 
-    void updateColorTables();
- //   void setCustomColorTable(QVector<QRgb> colorTable);
+    void updateColorTables(QVector<QRgb> grayTable, QVector<QRgb> colorTable);
     void useCustomColorTable(bool b);
     void useCustomGrayScaleTable(bool b);
 

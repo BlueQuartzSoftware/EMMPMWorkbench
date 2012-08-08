@@ -202,7 +202,7 @@ class EmMpmGui : public QMainWindow, private Ui::EmMpmGui
     void on_m_NumClasses_valueChanged(int i);
 
     void on_enableUserDefinedAreas_stateChanged(int state);
-    void on_manualInit_stateChanged(int state);
+    void on_enableManualInit_stateChanged(int state);
 
     void z10_triggered();
     void z25_triggered();

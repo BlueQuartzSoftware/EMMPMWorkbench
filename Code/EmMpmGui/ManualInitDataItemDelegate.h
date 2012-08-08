@@ -33,6 +33,8 @@
 #include <iostream>
 
 #include <QtCore/QModelIndex>
+#include <QtGui/QToolButton>
+#include <QtGui/QColorDialog>
 #include <QtGui/QComboBox>
 #include <QtGui/QPainter>
 #include <QtGui/QStyleOptionViewItemV4>
@@ -41,8 +43,13 @@
 #include <QtGui/QDoubleValidator>
 #include <QtGui/QStyledItemDelegate>
 
+#include "QtSupport/ColorComboPicker.h"
 
 #include "ManualInitTableModel.h"
+
+namespace Detail {
+ const static int Alpha = 155;
+}
 
 /**
  * @class ManualInitDataItemDelegate ManualInitDataItemDelegate.h AIM/StatsGenerator/ManualInitDataItemDelegate.h
@@ -74,37 +81,41 @@ class ManualInitDataItemDelegate : public QStyledItemDelegate
     // -----------------------------------------------------------------------------
     QWidget* createEditor(QWidget *parent, const QStyleOptionViewItem &option, const QModelIndex &index) const
     {
-      QLineEdit* sigma = NULL;
-      QDoubleValidator* classValidator = NULL;
-
-      QLineEdit* grayValue = NULL;
-      QIntValidator* grayValueValidator = NULL;
-
-      QLineEdit* mu = NULL;
-      QDoubleValidator* muValidator = NULL;
+      QLineEdit* editor = NULL;
+      QDoubleValidator* dValidator = NULL;
+      QIntValidator* iValidator = NULL;
+      QComboBox* colorCombo = NULL;
 
       qint32 col = index.column();
       switch(col)
       {
-        case ManualInitTableModel::Variance:
-          sigma = new QLineEdit(parent);
-          sigma->setFrame(false);
-          classValidator = new QDoubleValidator(sigma);
-          sigma->setValidator(classValidator);
-          return sigma;
-        case ManualInitTableModel::GrayValue:
-          grayValue = new QLineEdit(parent);
-          grayValue->setFrame(false);
-          grayValueValidator = new QIntValidator(grayValue);
-          grayValueValidator->setRange(0, 255);
-          grayValue->setValidator(grayValueValidator);
-          return grayValue;
         case ManualInitTableModel::Mu:
-           mu = new QLineEdit(parent);
-           mu->setFrame(false);
-           muValidator = new QDoubleValidator(mu);
-           mu->setValidator(muValidator);
-           return mu;
+          editor = new QLineEdit(parent);
+          editor->setFrame(false);
+          dValidator = new QDoubleValidator(editor);
+          dValidator->setDecimals(6);
+          editor->setValidator(dValidator);
+          return editor;
+
+        case ManualInitTableModel::Variance:
+          editor = new QLineEdit(parent);
+          editor->setFrame(false);
+          dValidator = new QDoubleValidator(editor);
+          dValidator->setDecimals(6);
+          editor->setValidator(dValidator);
+          return editor;
+        case ManualInitTableModel::Gamma:
+          editor = new QLineEdit(parent);
+          editor->setFrame(false);
+          dValidator = new QDoubleValidator(editor);
+          dValidator->setDecimals(6);
+          editor->setValidator(dValidator);
+          return editor;
+
+        case ManualInitTableModel::Color:
+          colorCombo = new ColorComboPicker(parent);
+          colorCombo->setAutoFillBackground(true);
+          return colorCombo;
         default:
           break;
       }
@@ -116,14 +127,22 @@ class ManualInitDataItemDelegate : public QStyledItemDelegate
     // -----------------------------------------------------------------------------
     void setEditorData(QWidget *editor, const QModelIndex &index) const
     {
+      bool ok = false;
       qint32 col = index.column();
-      if (col == ManualInitTableModel::Variance ||
-          col == ManualInitTableModel::GrayValue ||
-          col == ManualInitTableModel::Mu )
+      if (col == ManualInitTableModel::Mu ||
+          col == ManualInitTableModel::Variance ||
+          col == ManualInitTableModel::Gamma )
       {
         QLineEdit* lineEdit = qobject_cast<QLineEdit* > (editor);
         Q_ASSERT(lineEdit);
         lineEdit->setText(index.model()->data(index).toString());
+      }
+      else if (col == ManualInitTableModel::Color)
+      {
+        QString state = index.model()->data(index).toString();
+        ColorComboPicker* comboBox = qobject_cast<ColorComboPicker* > (editor);
+        Q_ASSERT(comboBox);
+        comboBox->setCurrentIndex(comboBox->findText(state));
       }
       else QStyledItemDelegate::setEditorData(editor, index);
     }
@@ -134,21 +153,21 @@ class ManualInitDataItemDelegate : public QStyledItemDelegate
     void setModelData(QWidget *editor, QAbstractItemModel *model, const QModelIndex &index) const
     {
       qint32 col = index.column();
-      if (col == ManualInitTableModel::GrayValue )
-      {
-        QLineEdit* lineEdit = qobject_cast<QLineEdit* > (editor);
-        Q_ASSERT(lineEdit);
-        bool ok = false;
-        int v = lineEdit->text().toInt(&ok);
-        model->setData(index, v);
-      }
-      else if (col == ManualInitTableModel::Mu || col == ManualInitTableModel::Variance)
+      if (col == ManualInitTableModel::Mu ||
+          col == ManualInitTableModel::Variance ||
+          col == ManualInitTableModel::Gamma)
       {
         QLineEdit* lineEdit = qobject_cast<QLineEdit* > (editor);
         Q_ASSERT(lineEdit);
         bool ok = false;
         double v = lineEdit->text().toDouble(&ok);
         model->setData(index, v);
+      }
+      else if (col == ManualInitTableModel::Color )
+      {
+        ColorComboPicker *comboBox = qobject_cast<ColorComboPicker* > (editor);
+        Q_ASSERT(comboBox);
+        model->setData(index, comboBox->currentText());
       }
       else QStyledItemDelegate::setModelData(editor, model, index);
     }

@@ -33,7 +33,7 @@
 
 #include <QtCore/QObject>
 #include <QtCore/QSettings>
-
+#include <QtGui/QColor>
 
 
 class ManualInitData : public QObject
@@ -51,7 +51,7 @@ public:
      * @param parent
      */
     ManualInitData(int label, double mu, double sigma, double gamma,
-                   int grayLevel, QObject* parent = 0);
+                   QString color, QObject* parent = 0);
     virtual ~ManualInitData();
 
     void readSettings(QSettings &prefs);
@@ -71,9 +71,8 @@ public:
     void setGamma(double g);
     double getGamma();
 
-    void setEmMpmGrayLevel(int gray);
-    int getEmMpmGrayLevel();
-
+    void setEmMpmColor(QString color);
+    QString getEmMpmColor();
 
  signals:
 
@@ -90,7 +89,7 @@ public:
     double m_Mu;
     double m_Sigma;
     double m_Gamma;
-    int m_GrayLevel;
+    QString m_Color;
 };
 
 

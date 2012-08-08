@@ -338,11 +338,11 @@ void EmMpmGui::readSettings(QSettings &prefs)
   enableUserDefinedAreas->blockSignals(true);
   READ_BOOL_SETTING(prefs, enableUserDefinedAreas, false);
   enableUserDefinedAreas->blockSignals(false);
-  READ_BOOL_SETTING(prefs, manualInit, false);
+  READ_BOOL_SETTING(prefs, enableManualInit, false);
 
   prefs.endGroup();  // End the Parameters Group
 
-  if (manualInit->isChecked() == true)
+  if (enableManualInit->isChecked() == true)
   {
     ManualInitTableModel* model = qobject_cast<ManualInitTableModel*>(manualInitTableView->model());
     if (NULL != model)
@@ -425,10 +425,10 @@ void EmMpmGui::writeSettings(QSettings &prefs)
   int userInitAreaCount = this->m_UserInitAreaVector->size();
   WRITE_VALUE(prefs, userInitAreaCount);
 
-  WRITE_CHECKBOX_SETTING(prefs, manualInit);
+  WRITE_CHECKBOX_SETTING(prefs, enableManualInit);
   prefs.endGroup();
 
-  if (manualInit->isChecked() == true)
+  if (enableManualInit->isChecked() == true)
   {
     ManualInitTableModel* model = qobject_cast<ManualInitTableModel*>(manualInitTableView->model());
     if (NULL != model)
@@ -674,6 +674,10 @@ void EmMpmGui::setupGui()
 
   ManualInitTableModel* tm = new ManualInitTableModel(manualInitTableView);
   manualInitTableView->setModel(tm);
+  QAbstractItemDelegate* aid = tm->getItemDelegate();
+
+  manualInitTableView->setItemDelegate(aid);
+
   connect(tm, SIGNAL(dataChanged(const QModelIndex &, const QModelIndex &)),
           this, SLOT(manualInitDataChanged(const QModelIndex &, const QModelIndex &)));
 
@@ -686,7 +690,7 @@ void EmMpmGui::setupGui()
   // Hid the progress bar
   progBar->hide();
 
-  manualInitGroupBox->setChecked(false);
+ // manualInitGroupBox->setChecked(false);
 }
 
 // -----------------------------------------------------------------------------
@@ -974,7 +978,15 @@ void EmMpmGui::on_processBtn_clicked()
   m_LayersPalette->getSegmentedImageCheckBox()->setChecked(true);
  // m_LayersPalette->getSegmentedImageCheckBox()->blockSignals(false);
   m_LayersPalette->getCompositeTypeComboBox()->setEnabled(true);
-  m_LayersPalette->getUseColorTable()->setEnabled(enableUserDefinedAreas->isChecked());
+
+  if (enableUserDefinedAreas->isChecked() || enableManualInit->isChecked())
+  {
+    m_LayersPalette->getUseColorTable()->setEnabled(true);
+  }
+  else
+  {
+    m_LayersPalette->getUseColorTable()->setEnabled(false);
+  }
   //m_GraphicsView->setImageDisplayType(EmMpm_Constants::CompositedImage);
 
   EMMPMTask* task = newEmMpmTask(queueController);
@@ -1099,7 +1111,7 @@ EMMPMTask* EmMpmGui::newEmMpmTask( ProcessQueueController* queueController)
   data->simulatedAnnealing = (useSimulatedAnnealing->isChecked()) ? 1 : 0;
   data->dims = 1; // FORCING A GRAY SCALE IMAGE TO BE USED
 
-  if (manualInit->isChecked() == true)
+  if (enableManualInit->isChecked() == true)
   {
     data->initType = EMMPM_ManualInit;
     // Allocate memory to hold the values - The EMMPM Task will free the memory
@@ -1110,6 +1122,9 @@ EMMPMTask* EmMpmGui::newEmMpmTask( ProcessQueueController* queueController)
     if (NULL == model) { return NULL; }
     bool ok = false;
     int rows = model->rowCount();
+    int gv = 0;
+
+
     for(int i = 0; i < rows; ++i)
     {
       QModelIndex muIndex = model->index(i, ManualInitTableModel::Mu);
@@ -1118,13 +1133,21 @@ EMMPMTask* EmMpmGui::newEmMpmTask( ProcessQueueController* queueController)
       double variance = model->data(varianceIndex).toDouble(&ok);
       QModelIndex gammaIndex = model->index(i, ManualInitTableModel::Gamma);
       double gamma = model->data(gammaIndex).toDouble(&ok);
-      QModelIndex gvIndex = model->index(i, ManualInitTableModel::GrayValue);
-      int gv = model->data(gvIndex).toInt(&ok);
 
       data->m[i] = mu;
       data->v[i] = variance;
       data->w_gamma[i] = gamma;
-      data->grayTable[i] = gv;
+
+      //Take the current color and convert it to a grayscale value and use that
+      // value in the gray table
+      QModelIndex colorIndex = model->index(i, ManualInitTableModel::Color);
+      QColor color(model->data(colorIndex).toString());
+
+      float R = color.red() * 0.299;
+      float G = color.green() * 0.587;
+      float B = color.blue() * 0.144;
+      data->grayTable[i] = static_cast<unsigned int>(R + G + B);
+
     }
 
   }
@@ -1842,8 +1865,21 @@ void EmMpmGui::addRemoveManualInitTableRows()
   while(m_NumClasses->value() > model->rowCount())
   {
 
-    QColor color = QColor(0, 125, 0); // Green Lines for the starting Gaussians
+    int count = model->rowCount() + 1;
+    mVal = m_StartingMuValues[count-1];
+    int defGray = mVal;
+    int defMu = mVal;
+    double defGamma = 0.0;
+
+    if (defGray > QColor::colorNames().size())
+    {
+      defGray = 10;
+    }
+    QColor color(QColor::colorNames().at(defGray));
     color.setAlpha(255);
+
+    ManualInitData* data = new ManualInitData(count-1, (double)defMu, 20.0, defGamma, QColor::colorNames().at(defGray), model);
+    model->insertManualData(data, model->rowCount());
 
     QwtPlotCurve* curve = new QwtPlotCurve("");
     curve->setPen(QPen(color, 2));
@@ -1851,13 +1887,6 @@ void EmMpmGui::addRemoveManualInitTableRows()
     curve->attach(m_HistogramPlot);
     m_ManualInitGaussians.insert(model->rowCount(), curve);
 
-    int count = model->rowCount() + 1;
-    mVal = m_StartingMuValues[count-1];
-    int defGray = mVal;
-    int defMu = mVal;
-    double defGamma = 0.0;
-    ManualInitData* data = new ManualInitData(count-1, (double)defMu, 20.0, defGamma, defGray, model);
-    model->insertManualData(data, model->rowCount());
   }
   model->sanityCheckClassValues();
 
@@ -1882,6 +1911,9 @@ void EmMpmGui::updateManualInitHistograms()
   if (NULL == model) { return; }
   bool ok = false;
   int rows = model->rowCount();
+  QVector<QRgb> colorTable(rows);
+  QVector<QRgb> grayTable(rows);
+
   for(int i = 0; i < rows; ++i)
   {
     QModelIndex muIndex = model->index(i, ManualInitTableModel::Mu);
@@ -1905,12 +1937,20 @@ void EmMpmGui::updateManualInitHistograms()
       m_ManualInitGaussians.insert(i, curve);
     }
 
-    curve->setData(intervals, values);
-    QColor c = QColor(0, 125, 0);
+    QModelIndex colorIndex = model->index(i, ManualInitTableModel::Color);
+    QColor c = QColor(model->data(colorIndex).toString());
     c.setAlpha(255);
+
+    colorTable[i] = c.rgba();
+    quint32 r = c.red() * 0.299;
+    quint32 g = c.green() * 0.587;
+    quint32 b = c.blue() * 0.144;
+    grayTable[i] = qRgb(r, g, b);
+
+    curve->setData(intervals, values);
     curve->setPen(QPen(c, 2, Qt::SolidLine));
 
-    if (manualInit->isChecked() == true)
+    if (enableManualInit->isChecked() == true)
     {
       curve->attach(m_HistogramPlot);
     }
@@ -1919,6 +1959,8 @@ void EmMpmGui::updateManualInitHistograms()
       curve->detach();
     }
   }
+  m_GraphicsView->updateColorTables(grayTable, colorTable);
+  m_GraphicsView->updateDisplay();
 
   //Update the combine Gaussian Curve
   plotCombinedGaussian();
@@ -2105,6 +2147,10 @@ void EmMpmGui::clearProcessHistograms()
     m_Gaussians.removeAt(r);
     delete curve;
   }
+
+  // Remove the Manual Init Gaussians
+  clearManualInitCurves();
+
   // This is an internal variable to keep track of the class number
   m_CurrentHistogramClass = 0;
   if (NULL != m_CombinedGaussians) {
@@ -2158,15 +2204,30 @@ void EmMpmGui::addProcessHistogram(QVector<real_t> data)
   for (int i = 0; i < numValues; ++i)
   {
     intervals[i] = (double)i;
-    if (data[i] > max) { max = data[i]; }
+    if(data[i] > max)
+    {
+      max = data[i];
+    }
     dValues[i] = data[i];
   }
 
   QPen pen(Qt::red, 1.5, Qt::SolidLine);
 
-  if (m_UserInitAreaVector->size() > 0)
+  if(enableUserDefinedAreas->isChecked() == true && m_UserInitAreaVector->size() > 0)
   {
     QColor c = m_UserInitAreaVector->at(m_CurrentHistogramClass)->getColor();
+    pen.setColor(c);
+  }
+  else if(enableManualInit->isChecked() == true)
+  {
+    ManualInitTableModel* model = qobject_cast<ManualInitTableModel*>(manualInitTableView->model());
+    if(NULL == model)
+    {
+      return;
+    }
+    QModelIndex colorIndex = model->index(m_CurrentHistogramClass, ManualInitTableModel::Color);
+    QColor c = QColor(model->data(colorIndex).toString());
+    c.setAlpha(255);
     pen.setColor(c);
   }
 
@@ -2175,7 +2236,14 @@ void EmMpmGui::addProcessHistogram(QVector<real_t> data)
   curve->setRenderHint(QwtPlotItem::RenderAntialiased);
   curve->setPen(pen);
   curve->attach(m_HistogramPlot);
-  m_Gaussians.append(curve);
+  if(enableUserDefinedAreas->isChecked() == true)
+  {
+    m_Gaussians.append(curve);
+  }
+  else if(enableManualInit->isChecked() == true)
+  {
+    m_ManualInitGaussians.append(curve);
+  }
 
   curve->setData(intervals, dValues);
 
@@ -2183,9 +2251,13 @@ void EmMpmGui::addProcessHistogram(QVector<real_t> data)
   ++m_CurrentHistogramClass;
 
   // Only update the combined Gaussian when all the individual Gaussian's are in place
-  if (m_UserInitAreaVector->size() == m_CurrentHistogramClass)
+  if(m_UserInitAreaVector->size() == m_CurrentHistogramClass)
   {
-      plotCombinedGaussian();
+    plotCombinedGaussian();
+  }
+  else if(m_ManualInitGaussians.size() == m_CurrentHistogramClass)
+  {
+    plotCombinedGaussian();
   }
   m_HistogramPlot->replot();
 }
@@ -2741,18 +2813,21 @@ void EmMpmGui::on_enableUserDefinedAreas_stateChanged(int state)
   }
   m_HistogramPlot->replot();
   if(enableUserDefinedAreas->isChecked() == true) {
-    manualInit->setChecked(!enableUserDefinedAreas->isChecked());
+    enableManualInit->setChecked(!enableUserDefinedAreas->isChecked());
   }
 }
 
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
-void EmMpmGui::on_manualInit_stateChanged(int state)
+void EmMpmGui::on_enableManualInit_stateChanged(int state)
 {
-  if (manualInit->isChecked() == true)
+  m_LayersPalette->getUseColorTable()->setEnabled(enableManualInit->isChecked());
+  m_LayersPalette->getUseColorTable()->setChecked(enableManualInit->isChecked());
+
+  if (enableManualInit->isChecked() == true)
   {
-    enableUserDefinedAreas->setChecked(!manualInit->isChecked());
+    enableUserDefinedAreas->setChecked(!enableManualInit->isChecked());
   }
   updateManualInitHistograms();
 }

@@ -176,7 +176,24 @@ void EMMPMGraphicsView::setZoomIndex(int index)
 // -----------------------------------------------------------------------------
 void EMMPMGraphicsView::userInitAreaUpdated(UserInitArea* uia)
 {
-  updateColorTables();
+
+
+  qint32 size = m_UserInitAreaVector->size();
+  QVector<QRgb> colorTable(size);
+  QVector<QRgb> grayTable(size);
+  UserInitArea* u = NULL;
+  for(qint32 i = 0; i < size; ++i)
+  {
+    u = m_UserInitAreaVector->at(i);
+    if (NULL != u)
+    {
+      int index = u->getEmMpmClass(); // Get the class value which will be the index values that are written to the indexed image
+      colorTable[index] = u->getColor().rgb();
+      grayTable[index] = qRgb(u->getEmMpmGrayLevel(), u->getEmMpmGrayLevel(), u->getEmMpmGrayLevel());
+    }
+  }
+
+  updateColorTables(grayTable, colorTable);
   updateDisplay();
 }
 
@@ -702,14 +719,32 @@ void EMMPMGraphicsView::addNewInitArea(UserInitArea* userInitArea)
   connect (userInitArea, SIGNAL (fireUserInitAreaUpdated(UserInitArea*)),
            this, SLOT(userInitAreaUpdated(UserInitArea*)), Qt::QueuedConnection);
 
-  updateColorTables();
+
+
+    qint32 size = m_UserInitAreaVector->size();
+    QVector<QRgb> colorTable(size);
+    QVector<QRgb> grayTable(size);
+    UserInitArea* u = NULL;
+    for(qint32 i = 0; i < size; ++i)
+    {
+      u = m_UserInitAreaVector->at(i);
+      if (NULL != u)
+      {
+        int index = u->getEmMpmClass(); // Get the class value which will be the index values that are written to the indexed image
+        colorTable[index] = u->getColor().rgb();
+        grayTable[index] = qRgb(u->getEmMpmGrayLevel(), u->getEmMpmGrayLevel(), u->getEmMpmGrayLevel());
+      }
+    }
+
+    updateColorTables(grayTable, colorTable);
+
   emit fireUserInitAreaAdded(userInitArea);
 }
 
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
-void EMMPMGraphicsView::updateColorTables()
+void EMMPMGraphicsView::updateColorTables(QVector<QRgb> grayTable, QVector<QRgb> colorTable)
 {
   // Write Gray Scale values for each entry from 0 to 255 to initialize the table
   // to something. Also initialize the Gray Scale table to the same thing
@@ -719,17 +754,17 @@ void EMMPMGraphicsView::updateColorTables()
     m_CustomGrayScaleTable[i] = qRgb(i, i, i);
   }
 
-  qint32 size = m_UserInitAreaVector->size();
-  UserInitArea* u = NULL;
-  for(qint32 i = 0; i < size; ++i)
+  qint32 size = grayTable.size();
+  for(qint32 index = 0; index < size; ++index)
   {
-    u = m_UserInitAreaVector->at(i);
-    if (NULL != u) {
-      int index = u->getEmMpmClass(); // Get the class value which will be the index values that are written to the indexed image
-      m_CustomColorTable[index] = u->getColor().rgb();
-      m_CustomGrayScaleTable[index] = qRgb(u->getEmMpmGrayLevel(), u->getEmMpmGrayLevel(), u->getEmMpmGrayLevel());
-    }
+      m_CustomGrayScaleTable[index] = grayTable[index];
   }
+  size = colorTable.size();
+  for(qint32 index = 0; index < size; ++index)
+  {
+      m_CustomColorTable[index] = colorTable[index];
+  }
+
 }
 
 

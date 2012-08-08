@@ -71,7 +71,7 @@ Qt::ItemFlags ManualInitTableModel::flags(const QModelIndex &index) const
     theFlags |= Qt::ItemIsEnabled;
 
     int col = index.column();
-    if (  col == Mu || col == Variance || col == Gamma || col == GrayValue )
+    if (  col == Mu || col == Variance || col == Gamma || col == Color )
     {
       theFlags = Qt::ItemIsEditable | Qt::ItemIsSelectable | Qt::ItemIsEnabled;
     }
@@ -93,7 +93,28 @@ QVariant ManualInitTableModel::data(const QModelIndex &index, qint32 role) const
 
   if (role == Qt::SizeHintRole)
   {
+    QStyleOptionComboBox comboBox;
 
+    switch(index.column())
+    {
+
+      case Color:
+      {
+        comboBox.currentText = QString("Dark Blue     ");
+        const QString header = headerData(Color, Qt::Horizontal, Qt::DisplayRole).toString();
+        if (header.length() > comboBox.currentText.length())
+        {
+          comboBox.currentText = header;
+        }
+        break;
+      }
+      default:
+        Q_ASSERT(false);
+    }
+    QFontMetrics fontMetrics(data(index, Qt::FontRole) .value<QFont > ());
+    comboBox.fontMetrics = fontMetrics;
+    QSize size(fontMetrics.width(comboBox.currentText), fontMetrics.height());
+    return qApp->style()->sizeFromContents(QStyle::CT_ComboBox, &comboBox, size);
 
   }
   else if (role == Qt::TextAlignmentRole) {
@@ -101,28 +122,28 @@ QVariant ManualInitTableModel::data(const QModelIndex &index, qint32 role) const
   }
   else if (role == Qt::DisplayRole || role == Qt::EditRole)
   {
-    ManualInitData* uia = m_ManualInitDatas.at(index.row());
-    if (NULL == uia)
+    ManualInitData* manualInitData = m_ManualInitDatas.at(index.row());
+    if(NULL == manualInitData)
     {
       return QVariant();
     }
 
     QString s;
-  //  unsigned int x, y;
+    //  unsigned int x, y;
 
     int col = index.column();
     switch(col)
     {
       case ManualInitTableModel::Class:
-        return QVariant(uia->getEmMpmClass());
-      case ManualInitTableModel::GrayValue:
-        return QVariant(uia->getEmMpmGrayLevel());
+        return QVariant(manualInitData->getEmMpmClass());
       case ManualInitTableModel::Mu:
-        return QVariant(uia->getMu());
+        return QVariant(manualInitData->getMu());
       case ManualInitTableModel::Variance:
-        return QVariant(uia->getSigma());
+        return QVariant(manualInitData->getSigma());
       case ManualInitTableModel::Gamma:
-        return QVariant(uia->getGamma());
+        return QVariant(manualInitData->getGamma());
+      case ManualInitTableModel::Color:
+        return QVariant(manualInitData->getEmMpmColor());
       default:
         break;
     }
@@ -141,10 +162,10 @@ QVariant  ManualInitTableModel::headerData ( int section, Qt::Orientation orient
     switch(section)
     {
       case Class: return QVariant(QString("Class"));
-      case GrayValue: return QVariant(QString("Gray Value"));
       case Mu: return QVariant(QString("Mu"));
       case Variance: return QVariant(QString("Variance"));
       case Gamma: return QVariant(QString("Gamma"));
+      case Color: return QVariant(QString("Color"));
       default:
         break;
     }
@@ -196,9 +217,6 @@ bool ManualInitTableModel::setData(const QModelIndex & index, const QVariant & v
     case ManualInitTableModel::Class:
       m_ManualInitDatas.at(row)->setEmMpmClass(value.toInt(&ok));
       break;
-    case ManualInitTableModel::GrayValue:
-      m_ManualInitDatas.at(row)->setEmMpmGrayLevel(value.toInt(&ok));
-      break;
     case ManualInitTableModel::Mu:
       m_ManualInitDatas.at(row)->setMu(value.toDouble(&ok));
       break;
@@ -208,6 +226,9 @@ bool ManualInitTableModel::setData(const QModelIndex & index, const QVariant & v
     case ManualInitTableModel::Gamma:
       m_ManualInitDatas.at(row)->setGamma(value.toDouble(&ok));
       break;
+    case ManualInitTableModel::Color:
+        m_ManualInitDatas.at(row)->setEmMpmColor(value.toString());
+        break;
     default:
       Q_ASSERT(false);
   }
@@ -231,7 +252,7 @@ bool ManualInitTableModel::insertRows(int row, int count, const QModelIndex& ind
   for (int i = 0; i < count; ++i)
   {
     // Create a new ManualInitData object
-    ManualInitData* d = new ManualInitData(m_ManualInitDatas.count(), mu, sigma, gamma, 128, this);
+    ManualInitData* d = new ManualInitData(m_ManualInitDatas.count(), mu, sigma, gamma,  QColor::colorNames().at(10), this);
     m_ManualInitDatas.push_back(d);
     m_RowCount = m_ManualInitDatas.count();
   }
