@@ -62,15 +62,7 @@
 QDisclosableGroupBox::QDisclosableGroupBox(QWidget* parent) :
 QGroupBox(parent)
 {
-
-
-//  m_DeleteRect.setX(PADDING + BORDER);
-//  m_DeleteRect.setY(PADDING + BORDER);
-//  m_DeleteRect.setWidth(IMAGE_WIDTH);
-//  m_DeleteRect.setHeight(IMAGE_HEIGHT);
-
   connect(this, SIGNAL(toggled(bool)), this, SLOT(disclose(bool)));
-//  updateWidgetStyle();
 }
 
 // -----------------------------------------------------------------------------
@@ -79,8 +71,6 @@ QGroupBox(parent)
 QDisclosableGroupBox::~QDisclosableGroupBox()
 {
 }
-
-
 
 // -----------------------------------------------------------------------------
 //
@@ -94,44 +84,7 @@ void QDisclosableGroupBox::changeStyle()
 // -----------------------------------------------------------------------------
 void QDisclosableGroupBox::updateWidgetStyle()
 {
-  QString style;
-
-  style.append("QGroupBox{\n");
-
-  style.append("background-color: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #FFFFFF, stop: 1 #DCDCDC);");
-  style.append("background-image: url(:/DisclosableGroupBoxHeader.png);");
-  style.append("background-position: top ;\n background-repeat: repeat-x;");
-
-//  style.append("border-radius: 10px;");
-  style.append("padding: 30 0 0 0px;");
-#if defined(Q_WS_WIN)
-  style.append("font: 85 italic 10pt \"Arial\";");
-#elif defined(Q_WS_MAC)
-  style.append("font: 85 italic 12pt \"Arial\";");
-#else
-  style.append("font: 85 italic 9pt \"Arial\";");
-#endif
-  style.append("font-weight: bold;");
-  style.append("}\n");
-  style.append(" QGroupBox::title {");
-  style.append("    subcontrol-origin: padding;");
-  style.append("    subcontrol-position: top left;");
-  style.append("    padding: 5 5px;");
-  style.append("    background-color: rgba(255, 255, 255, 0);");
-  style.append(" }\n");
-  style.append("QGroupBox::indicator {");
-  style.append("    width: 17px;");
-  style.append("    height: 17px;");
-  style.append("}\n");
-  style.append("\nQGroupBox::indicator:unchecked { image: url(:/bullet_triangle_grey.png);}");
-  style.append("\nQGroupBox::indicator:unchecked:pressed { image: url(:/bullet_triangle_grey.png);}");
-  style.append("\nQGroupBox::indicator:checked { image: url(:/bullet_triangle_grey_down.png);}");
-  style.append("\nQGroupBox::indicator:checked:pressed { image: url(:/bullet_triangle_grey_down.png);}");
-
-  setStyleSheet(style);
-  //std::cout << style.toStdString() << std::endl;
 }
-
 
 // -----------------------------------------------------------------------------
 //
@@ -139,7 +92,6 @@ void QDisclosableGroupBox::updateWidgetStyle()
 void QDisclosableGroupBox::setupGui()
 {
   setCheckable(true);
- // updateWidgetStyle();
 }
 
 // -----------------------------------------------------------------------------
@@ -147,15 +99,6 @@ void QDisclosableGroupBox::setupGui()
 // -----------------------------------------------------------------------------
 void QDisclosableGroupBox::disclose(bool on)
 {
-
-  // Remove the current Layout
-//    QLayout* l = layout();
-//    if(NULL != l)
-//    {
-//      qDeleteAll(l->children());
-//      delete l;
-//    }
-//    QGridLayout* gridLayout = new QGridLayout(this);
   QObjectList objs = children();
   foreach(QObject* obj, objs)
   {
@@ -166,6 +109,5 @@ void QDisclosableGroupBox::disclose(bool on)
       else w->hide();
     }
   }
-
 }
 

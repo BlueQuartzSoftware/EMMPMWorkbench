@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>251</width>
-    <height>271</height>
+    <height>298</height>
    </rect>
   </property>
   <property name="floating">
@@ -44,19 +44,31 @@
       </property>
      </widget>
     </item>
-    <item row="6" column="1">
-     <widget class="QSpinBox" name="opacitySpinner">
-      <property name="enabled">
-       <bool>false</bool>
+    <item row="9" column="0" colspan="2">
+     <widget class="Line" name="line_3">
+      <property name="orientation">
+       <enum>Qt::Horizontal</enum>
       </property>
-      <property name="toolTip">
-       <string>Adjust the opacity of the segmented image. 0 makes the segmented image opaque. 100 makes the segmented image transparent </string>
+     </widget>
+    </item>
+    <item row="0" column="0">
+     <widget class="QLabel" name="label_2">
+      <property name="text">
+       <string>Image Display</string>
       </property>
-      <property name="maximum">
-       <number>100</number>
+     </widget>
+    </item>
+    <item row="7" column="0" colspan="2">
+     <widget class="Line" name="line_2">
+      <property name="orientation">
+       <enum>Qt::Horizontal</enum>
       </property>
-      <property name="value">
-       <number>40</number>
+     </widget>
+    </item>
+    <item row="4" column="0" colspan="2">
+     <widget class="Line" name="line">
+      <property name="orientation">
+       <enum>Qt::Horizontal</enum>
       </property>
      </widget>
     </item>
@@ -70,20 +82,6 @@
       </property>
       <property name="statusTip">
        <string>Select the type of compositing of the original and segmented images</string>
-      </property>
-     </widget>
-    </item>
-    <item row="4" column="0" colspan="2">
-     <widget class="Line" name="line">
-      <property name="orientation">
-       <enum>Qt::Horizontal</enum>
-      </property>
-     </widget>
-    </item>
-    <item row="7" column="0" colspan="2">
-     <widget class="Line" name="line_2">
-      <property name="orientation">
-       <enum>Qt::Horizontal</enum>
       </property>
      </widget>
     </item>
@@ -106,10 +104,29 @@
       </property>
      </widget>
     </item>
-    <item row="0" column="0">
-     <widget class="QLabel" name="label_2">
+    <item row="10" column="0" colspan="2">
+     <widget class="QCheckBox" name="useColorTable">
+      <property name="enabled">
+       <bool>false</bool>
+      </property>
       <property name="text">
-       <string>Image Display</string>
+       <string>Display Segmentation with Colors</string>
+      </property>
+     </widget>
+    </item>
+    <item row="6" column="1">
+     <widget class="QSpinBox" name="opacitySpinner">
+      <property name="enabled">
+       <bool>false</bool>
+      </property>
+      <property name="toolTip">
+       <string>Adjust the opacity of the segmented image. 0 makes the segmented image opaque. 100 makes the segmented image transparent </string>
+      </property>
+      <property name="maximum">
+       <number>100</number>
+      </property>
+      <property name="value">
+       <number>40</number>
       </property>
      </widget>
     </item>
@@ -129,22 +146,18 @@
       </property>
      </widget>
     </item>
-    <item row="9" column="0" colspan="2">
-     <widget class="Line" name="line_3">
+    <item row="11" column="0">
+     <spacer name="verticalSpacer">
       <property name="orientation">
-       <enum>Qt::Horizontal</enum>
+       <enum>Qt::Vertical</enum>
       </property>
-     </widget>
-    </item>
-    <item row="10" column="0" colspan="2">
-     <widget class="QCheckBox" name="useColorTable">
-      <property name="enabled">
-       <bool>false</bool>
+      <property name="sizeHint" stdset="0">
+       <size>
+        <width>20</width>
+        <height>40</height>
+       </size>
       </property>
-      <property name="text">
-       <string>Display Segmentation with Colors</string>
-      </property>
-     </widget>
+     </spacer>
     </item>
    </layout>
   </widget>

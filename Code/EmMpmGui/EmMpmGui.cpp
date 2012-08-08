@@ -1190,7 +1190,21 @@ EMMPMTask* EmMpmGui::newEmMpmTask( ProcessQueueController* queueController)
     ::memset(data->couplingBeta, 0, sizeof(real_t) * couplingElements);
   }
   // Transfer from the user interface the Class Coupling entries
-
+  int rc = m_ClassCouplingTableWidget->rowCount();
+  std::vector<CoupleType> coupleEntries;
+  ok = false;
+  for(int i = 0; i < rc; ++i)
+  {
+    CoupleType couple;
+    couple.label_1 = m_ClassCouplingTableWidget->item(i, 0)->text().toInt(&ok);
+    if (ok == false) { continue; } // If the conversion didn't work then move to the next one
+    couple.label_2 = m_ClassCouplingTableWidget->item(i, 1)->text().toInt(&ok);
+    if (ok == false) { continue; } // If the conversion didn't work then move to the next one
+    couple.beta = m_ClassCouplingTableWidget->item(i, 2)->text().toDouble(&ok);
+    if (ok == false) { continue; } // If the conversion didn't work then move to the next one
+    coupleEntries.push_back(couple);
+  }
+  data->coupleEntries = coupleEntries;
   // Update the Beta (Coupling) Matrix
   data->calculateBetaMatrix();
 
@@ -2868,5 +2882,61 @@ void EmMpmGui::on_actionParameters_triggered()
 void EmMpmGui::on_actionLayers_Palette_triggered()
 {
   m_LayersPalette->show();
+}
+
+
+// -----------------------------------------------------------------------------
+//
+// -----------------------------------------------------------------------------
+void EmMpmGui::on_addClassCoupling_clicked()
+{
+  if(m_ClassA->text().isEmpty() == false
+      && m_ClassB->text().isEmpty() == false
+      && m_CouplingBeta->text().isEmpty() == false)
+  {
+    int a = m_ClassA->text().toInt();
+    if(a >= m_NumClasses->value())
+    {
+      return;
+    }
+    int b = m_ClassB->text().toInt();
+    if(b >= m_NumClasses->value())
+    {
+      return;
+    }
+    if(a == b)
+    {
+      return;
+    }
+    int rc = m_ClassCouplingTableWidget->rowCount();
+    m_ClassCouplingTableWidget->insertRow(rc);
+
+    QTableWidgetItem* classA_WI = new QTableWidgetItem(m_ClassA->text());
+    classA_WI->setTextAlignment(Qt::AlignCenter);
+
+    QTableWidgetItem* classB_WI = new QTableWidgetItem(m_ClassB->text());
+    classB_WI->setTextAlignment(Qt::AlignCenter);
+
+    QTableWidgetItem* beta_WI = new QTableWidgetItem(m_CouplingBeta->text());
+    beta_WI->setTextAlignment(Qt::AlignCenter);
+
+    m_ClassCouplingTableWidget->setItem(rc, 0, classA_WI);
+    m_ClassCouplingTableWidget->setItem(rc, 1, classB_WI);
+    m_ClassCouplingTableWidget->setItem(rc, 2, beta_WI);
+  }
+}
+
+// -----------------------------------------------------------------------------
+//
+// -----------------------------------------------------------------------------
+void EmMpmGui::on_removeClassCoupling_clicked()
+{
+  QModelIndexList indices = m_ClassCouplingTableWidget->selectionModel()->selection().indexes();
+  int count = indices.count();
+  for(int i = count - 1; i >= 0; --i)
+  {
+    QModelIndex index = indices.at(i);
+    m_ClassCouplingTableWidget->removeRow(index.row());
+  }
 }
 

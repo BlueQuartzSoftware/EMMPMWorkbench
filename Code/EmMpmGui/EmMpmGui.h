@@ -204,6 +204,10 @@ class EmMpmGui : public QMainWindow, private Ui::EmMpmGui
     void on_enableUserDefinedAreas_stateChanged(int state);
     void on_enableManualInit_stateChanged(int state);
 
+    void on_addClassCoupling_clicked();
+    void on_removeClassCoupling_clicked();
+
+
     void z10_triggered();
     void z25_triggered();
     void z50_triggered();
