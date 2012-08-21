@@ -2256,6 +2256,10 @@ void EmMpmGui::addProcessHistogram(QVector<real_t> data)
   {
     m_ManualInitGaussians.append(curve);
   }
+  else
+  {
+    m_Gaussians.append(curve);
+  }
 
   curve->setData(intervals, dValues);
 
