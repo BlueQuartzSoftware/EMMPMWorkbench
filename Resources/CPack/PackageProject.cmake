@@ -58,7 +58,7 @@ IF (APPLE)
     set(CPACK_PACKAGE_FILE_NAME "EmMpmGui-${EMMPMGui_VERSION_SHORT}-OSX")
     # This ASSUMES we are creating a tar.gz package. If you change that below to
     # anything else then you need to update this.
-    set (UPLOAD_FILE_NAME ${CPACK_PACKAGE_FILE_NAME}.tar.gz)
+    set(UPLOAD_FILE_NAME ${CPACK_PACKAGE_FILE_NAME}.tar.gz)
 elseif(WIN32)
     if ( "${CMAKE_SIZEOF_VOID_P}" EQUAL "8" )
         set(CPACK_PACKAGE_FILE_NAME "EmMpmGui-${EMMPMGui_VERSION_SHORT}-Win64")
@@ -72,7 +72,7 @@ elseif(WIN32)
     endif()
 else()
   set(CPACK_PACKAGE_FILE_NAME "EmMpmGui-${EMMPMGui_VERSION_SHORT}-${CMAKE_SYSTEM_NAME}")
-  set (UPLOAD_FILE_NAME ${CPACK_PACKAGE_FILE_NAME}.tar.gz)
+  set(UPLOAD_FILE_NAME ${CPACK_PACKAGE_FILE_NAME}.tar.gz)
 endif()
 
 set (EMMPMGUI_WEBSITE_SERVER "www.bluequartz.net")
@@ -113,7 +113,12 @@ ELSE(WIN32 AND NOT UNIX)
 ENDIF(WIN32 AND NOT UNIX)
 
 SET(CPACK_SOURCE_GENERATOR "ZIP")
-SET(CPACK_SOURCE_PACKAGE_FILE_NAME "EM/MPM Gui-${EMMPMGui_VERSION_SHORT}-Source")
+SET(CPACK_SOURCE_PACKAGE_FILE_NAME "EmMpmGui-${EMMPMGui_VERSION_SHORT}-Source")
+#-- Create a bash script file that will upload the latest version to the web server
+set (UPLOAD_FILE_NAME ${CPACK_SOURCE_PACKAGE_FILE_NAME}.zip) 
+configure_file(${PROJECT_RESOURCES_DIR}/upload.sh.in 
+               ${PROJECT_BINARY_DIR}/src_upload.sh)
+               
 SET(CPACK_SOURCE_TOPLEVEL_TAG "Source")
 SET(CPACK_IGNORE_FILES "/i386/;/x64/;/VS2008/;/zRel/;/Build/;/\\\\.git/;\\\\.*project")
 SET(CPACK_SOURCE_IGNORE_FILES "/i386/;/x64/;/VS2008/;/zRel/;/Build/;/\\\\.git/;\\\\.*project")
