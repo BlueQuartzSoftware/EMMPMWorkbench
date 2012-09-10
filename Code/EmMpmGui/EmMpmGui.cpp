@@ -82,11 +82,11 @@
 
 //-- EMMPM Lib Includes
 #include "EMMPMLib/EMMPMLib.h"
-#include "EMMPMLib/Common/EMMPM_Constants.h"
 #include "EMMPMLib/Common/MSVCDefines.h"
-#include "EMMPMLib/Common/InitializationFunctions.h"
+#include "EMMPMLib/Core/EMMPM_Constants.h"
+#include "EMMPMLib/Core/InitializationFunctions.h"
+#include "EMMPMLib/Core/EMMPM.h"
 #include "EMMPMLib/tiff/TiffUtilities.h"
-#include "EMMPMLib/Common/EMMPM.h"
 
 //-- EMMPM Gui Includes
 #include "EMMPMGuiVersion.h"
@@ -759,8 +759,8 @@ void EmMpmGui::copyIntializationValues(EMMPM_Data::Pointer inputs)
   for (int r = 0; r < size; ++r)
   {
     uia = m_UserInitAreaVector->at(r);
-    inputs->m[r] = uia->getMu();
-    inputs->v[r] = uia->getSigma() * uia->getSigma();
+    inputs->mean[r] = uia->getMu();
+    inputs->variance[r] = uia->getSigma() * uia->getSigma();
  //   std::cout << "Initializing with Mu:" << inputs->m[r] << "  Sigma: " << inputs->v[r] << std::endl;
   }
 }
@@ -818,15 +818,15 @@ void EMMPMUpdateStats(EMMPM_Data::Pointer data)
     {
       //    snprintf(msgbuff, 256, "%d\t%.3f\t%.3f", l, data->m[l], data->v[l]);
       //    EMMPM_ShowProgress(msgbuff, data->progress);
-      std::cout << l << "\t" << data->m[l] << "\t" << data->v[l] << "\t" << std::endl;
+      std::cout << l << "\t" << data->mean[l] << "\t" << data->variance[l] << "\t" << std::endl;
     }
 
     double hist[EMMPM_MAX_CLASSES][256];
     // Generate a gaussian curve for each class based off the mu and sigma for that class
     for (int c = 0; c < data->classes; ++c)
     {
-      double mu = data->m[c];
-      double sig = data->v[c];
+      double mu = data->mean[c];
+      double sig = data->variance[c];
       double twoSigSqrd = sig * sig * 2.0f;
       double constant = 1.0 / (sig * sqrt(2.0 * M_PI));
       for (size_t x = 0; x < 256; ++x)
@@ -1115,8 +1115,8 @@ EMMPMTask* EmMpmGui::newEmMpmTask( ProcessQueueController* queueController)
   {
     data->initType = EMMPM_ManualInit;
     // Allocate memory to hold the values - The EMMPM Task will free the memory
-    data->m = (real_t*)malloc(data->classes * data->dims * sizeof(real_t));
-    data->v = (real_t*)malloc(data->classes * data->dims * sizeof(real_t));
+    data->mean = (real_t*)malloc(data->classes * data->dims * sizeof(real_t));
+    data->variance = (real_t*)malloc(data->classes * data->dims * sizeof(real_t));
 
     ManualInitTableModel* model = qobject_cast<ManualInitTableModel*>(manualInitTableView->model());
     if (NULL == model) { return NULL; }
@@ -1134,8 +1134,8 @@ EMMPMTask* EmMpmGui::newEmMpmTask( ProcessQueueController* queueController)
       QModelIndex gammaIndex = model->index(i, ManualInitTableModel::Gamma);
       double gamma = model->data(gammaIndex).toDouble(&ok);
 
-      data->m[i] = mu;
-      data->v[i] = variance;
+      data->mean[i] = mu;
+      data->variance[i] = variance;
       data->w_gamma[i] = gamma;
 
       //Take the current color and convert it to a grayscale value and use that
@@ -1155,8 +1155,8 @@ EMMPMTask* EmMpmGui::newEmMpmTask( ProcessQueueController* queueController)
   {
     data->initType = EMMPM_ManualInit;
     // Allocate memory to hold the values - The EMMPM Task will free the memory
-    data->m = (real_t*)malloc(data->classes * data->dims * sizeof(real_t));
-    data->v = (real_t*)malloc(data->classes * data->dims * sizeof(real_t));
+    data->mean = (real_t*)malloc(data->classes * data->dims * sizeof(real_t));
+    data->variance = (real_t*)malloc(data->classes * data->dims * sizeof(real_t));
     copyGrayValues(data);
     copyInitCoords(data);
     copyIntializationValues(data);

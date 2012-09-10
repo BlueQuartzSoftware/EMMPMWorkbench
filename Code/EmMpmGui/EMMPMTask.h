@@ -53,8 +53,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 //-- EMMPM Lib Includes
 #include "EMMPMLib/EMMPMLib.h"
-#include "EMMPMLib/Common/EMMPM_Data.h"
-#include "EMMPMLib/Common/EMMPM.h"
+#include "EMMPMLib/Core/EMMPM.h"
+#include "EMMPMLib/Core/EMMPM_Data.h"
 #include "EMMPMLib/Common/StatsDelegate.h"
 
 

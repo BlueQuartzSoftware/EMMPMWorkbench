@@ -42,7 +42,7 @@
 #include <QtGui/QGraphicsScene>
 
 
-#include "EMMPMLib/Common/EMMPM_Data.h"
+#include "EMMPMLib/Core/EMMPM_Data.h"
 
 //-- UIC generated Header
 #include <ui_EmMpmGui.h>

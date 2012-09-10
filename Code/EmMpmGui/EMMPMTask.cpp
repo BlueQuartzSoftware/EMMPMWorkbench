@@ -48,8 +48,8 @@
 #include "MXA/Utilities/MXAFileInfo.h"
 
 //-- EMMPMLib Includes
-#include "EMMPMLib/Common/EMMPM.h"
-#include "EMMPMLib/Common/InitializationFunctions.h"
+#include "EMMPMLib/Core/EMMPM.h"
+#include "EMMPMLib/Core/InitializationFunctions.h"
 #include "EMMPMLib/tiff/TiffUtilities.h"
 
 #include "AIM/Common/AIMArray.hpp"
@@ -465,7 +465,7 @@ void EMMPMTask::segmentImage(int i)
     for(int i = 0; i < m_data->classes; ++i)
     {
       // note we are taking the Squart Root of the variance to get the standard deviation (sigma)
-      fprintf(f, "%d,%f,%f\n", i,  m_data->m[i] , sqrtf(m_data->v[i]) );
+      fprintf(f, "%d,%f,%f\n", i,  m_data->mean[i] , sqrtf(m_data->variance[i]) );
     }
 
     fclose(f);

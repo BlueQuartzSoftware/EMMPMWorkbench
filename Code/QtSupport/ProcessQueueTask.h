@@ -1,3 +1,4 @@
+
 /* ============================================================================
  * Copyright (c) 2010, Michael A. Jackson (BlueQuartz Software)
  * All rights reserved.
@@ -44,8 +45,9 @@
 #include "AIM/Common/AIMImage.h"
 
 #include "EMMPMLib/EMMPMLib.h"
-#include "EMMPMLib/Common/EMMPM_Data.h"
 #include "EMMPMLib/Common/Observer.h"
+#include "EMMPMLib/Core/EMMPM_Data.h"
+
 
 
 /**
