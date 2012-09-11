@@ -902,7 +902,7 @@ font-size: 12px;
      <x>0</x>
      <y>0</y>
      <width>1129</width>
-     <height>21</height>
+     <height>22</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -986,8 +986,8 @@ font-size: 12px;
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>326</width>
-          <height>792</height>
+          <width>370</width>
+          <height>860</height>
          </rect>
         </property>
         <layout class="QVBoxLayout" name="verticalLayout_4">
@@ -1007,7 +1007,7 @@ font-size: 12px;
           <number>5</number>
          </property>
          <item>
-          <widget class="QDisclosableGroupBox" name="groupBox">
+          <widget class="QDisclosableGroupBox" name="parameters_groupbox">
            <property name="sizePolicy">
             <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
              <horstretch>0</horstretch>
@@ -1019,15 +1019,6 @@ font-size: 12px;
              <width>225</width>
              <height>0</height>
             </size>
-           </property>
-           <property name="font">
-            <font>
-             <family>10 12pt Arial</family>
-             <pointsize>8</pointsize>
-             <weight>75</weight>
-             <italic>false</italic>
-             <bold>true</bold>
-            </font>
            </property>
            <property name="styleSheet">
             <string notr="true">QGroupBox
@@ -1441,14 +1432,6 @@ font-size: 10px;
              <horstretch>0</horstretch>
              <verstretch>0</verstretch>
             </sizepolicy>
-           </property>
-           <property name="font">
-            <font>
-             <family>10 12pt Arial</family>
-             <weight>75</weight>
-             <italic>false</italic>
-             <bold>true</bold>
-            </font>
            </property>
            <property name="styleSheet">
             <string notr="true">QGroupBox
