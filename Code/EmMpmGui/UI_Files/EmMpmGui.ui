@@ -25,6 +25,17 @@
   <property name="windowTitle">
    <string>EM/MPM</string>
   </property>
+  <property name="styleSheet">
+   <string notr="true"> QMainWindow::separator {
+ /*    background: lightgray; */
+     width: 2px; /* when vertical */
+     height: 2px; /* when horizontal */
+ }
+
+ QMainWindow::separator:hover {
+     background: black;
+ }</string>
+  </property>
   <property name="dockNestingEnabled">
    <bool>true</bool>
   </property>
@@ -891,7 +902,7 @@ font-size: 12px;
      <x>0</x>
      <y>0</y>
      <width>1129</width>
-     <height>22</height>
+     <height>21</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -974,9 +985,9 @@ font-size: 12px;
         <property name="geometry">
          <rect>
           <x>0</x>
-          <y>-222</y>
-          <width>283</width>
-          <height>872</height>
+          <y>0</y>
+          <width>326</width>
+          <height>792</height>
          </rect>
         </property>
         <layout class="QVBoxLayout" name="verticalLayout_4">
@@ -1011,22 +1022,22 @@ font-size: 12px;
            </property>
            <property name="font">
             <font>
-             <family>Arial</family>
-             <pointsize>12</pointsize>
+             <family>10 12pt Arial</family>
+             <pointsize>8</pointsize>
              <weight>75</weight>
-             <italic>true</italic>
+             <italic>false</italic>
              <bold>true</bold>
             </font>
            </property>
            <property name="styleSheet">
             <string notr="true">QGroupBox
 {
-background-color: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #FFFFFF, stop: 1 #E6E6E6);
+/*background-color: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #FFFFFF, stop: 1 #DCDCDC); */
 background-image: url(:/DisclosableGroupBoxHeader.png);
 background-position: top ;
 background-repeat: repeat-x;
-padding: 17 0 0 0px;
-font: 85 italic 12pt &quot;Arial&quot;;
+padding: 30 0 0 0px;
+font: 85% italic 12pt &quot;Arial&quot;;
 font-weight: bold;
 border: 0px solid gray;
 margin: 0px;
@@ -1078,16 +1089,16 @@ image: url(:/bullet_triangle_grey_down.png);
              <number>6</number>
             </property>
             <property name="leftMargin">
-             <number>4</number>
+             <number>3</number>
             </property>
             <property name="topMargin">
-             <number>17</number>
+             <number>0</number>
             </property>
             <property name="rightMargin">
-             <number>4</number>
+             <number>3</number>
             </property>
             <property name="bottomMargin">
-             <number>5</number>
+             <number>6</number>
             </property>
             <item row="0" column="0">
              <widget class="QLabel" name="label_12">
@@ -1431,15 +1442,23 @@ font-size: 10px;
              <verstretch>0</verstretch>
             </sizepolicy>
            </property>
+           <property name="font">
+            <font>
+             <family>10 12pt Arial</family>
+             <weight>75</weight>
+             <italic>false</italic>
+             <bold>true</bold>
+            </font>
+           </property>
            <property name="styleSheet">
             <string notr="true">QGroupBox
 {
-background-color: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #FFFFFF, stop: 1 #E6E6E6);
+/*background-color: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #FFFFFF, stop: 1 #DCDCDC); */
 background-image: url(:/DisclosableGroupBoxHeader.png);
 background-position: top ;
 background-repeat: repeat-x;
-padding: 17 0 0 0px;
-font: 85 italic 12pt &quot;Arial&quot;;
+padding: 30 0 0 0px;
+font: 85% italic 12pt &quot;Arial&quot;;
 font-weight: bold;
 border: 0px solid gray;
 margin: 0px;
@@ -1479,16 +1498,16 @@ image: url(:/bullet_triangle_grey_down.png);
            </property>
            <layout class="QGridLayout" name="gridLayout_9">
             <property name="leftMargin">
-             <number>0</number>
+             <number>3</number>
             </property>
             <property name="topMargin">
-             <number>17</number>
-            </property>
-            <property name="rightMargin">
              <number>0</number>
             </property>
+            <property name="rightMargin">
+             <number>3</number>
+            </property>
             <property name="bottomMargin">
-             <number>5</number>
+             <number>6</number>
             </property>
             <property name="spacing">
              <number>6</number>
@@ -1572,12 +1591,12 @@ font-size: 10px;
            <property name="styleSheet">
             <string notr="true">QGroupBox
 {
-background-color: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #FFFFFF, stop: 1 #E6E6E6);
+/*background-color: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #FFFFFF, stop: 1 #DCDCDC); */
 background-image: url(:/DisclosableGroupBoxHeader.png);
 background-position: top ;
 background-repeat: repeat-x;
-padding: 17 0 0 0px;
-font: 85 italic 12pt &quot;Arial&quot;;
+padding: 30 0 0 0px;
+font: 85% italic 12pt &quot;Arial&quot;;
 font-weight: bold;
 border: 0px solid gray;
 margin: 0px;
@@ -1617,16 +1636,16 @@ image: url(:/bullet_triangle_grey_down.png);
            </property>
            <layout class="QGridLayout" name="gridLayout_8">
             <property name="leftMargin">
-             <number>4</number>
+             <number>3</number>
             </property>
             <property name="topMargin">
-             <number>17</number>
+             <number>0</number>
             </property>
             <property name="rightMargin">
-             <number>4</number>
+             <number>3</number>
             </property>
             <property name="bottomMargin">
-             <number>5</number>
+             <number>6</number>
             </property>
             <property name="spacing">
              <number>6</number>
@@ -1801,12 +1820,12 @@ font-size: 10px;
            <property name="styleSheet">
             <string notr="true">QGroupBox
 {
-background-color: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #FFFFFF, stop: 1 #E6E6E6);
+/*background-color: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #FFFFFF, stop: 1 #DCDCDC); */
 background-image: url(:/DisclosableGroupBoxHeader.png);
 background-position: top ;
 background-repeat: repeat-x;
-padding: 17 0 0 0px;
-font: 85 italic 12pt &quot;Arial&quot;;
+padding: 30 0 0 0px;
+font: 85% italic 12pt &quot;Arial&quot;;
 font-weight: bold;
 border: 0px solid gray;
 margin: 0px;
@@ -1849,16 +1868,16 @@ image: url(:/bullet_triangle_grey_down.png);
            </property>
            <layout class="QVBoxLayout" name="verticalLayout_2">
             <property name="leftMargin">
-             <number>4</number>
+             <number>3</number>
             </property>
             <property name="topMargin">
-             <number>17</number>
+             <number>0</number>
             </property>
             <property name="rightMargin">
-             <number>4</number>
+             <number>3</number>
             </property>
             <property name="bottomMargin">
-             <number>5</number>
+             <number>6</number>
             </property>
             <item>
              <layout class="QHBoxLayout" name="horizontalLayout_10">
@@ -2404,6 +2423,9 @@ font-size: 10px;
      <verstretch>0</verstretch>
     </sizepolicy>
    </property>
+   <property name="styleSheet">
+    <string notr="true"/>
+   </property>
    <property name="floating">
     <bool>false</bool>
    </property>
@@ -2856,14 +2878,20 @@ font-size: 10px;
  </widget>
  <customwidgets>
   <customwidget>
+   <class>QwtPlot</class>
+   <extends>QFrame</extends>
+   <header>qwt_plot.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
    <class>QFSDropLineEdit</class>
    <extends>QLineEdit</extends>
    <header location="global">QFSDropLineEdit.h</header>
   </customwidget>
   <customwidget>
-   <class>QwtPlot</class>
-   <extends>QFrame</extends>
-   <header>qwt_plot.h</header>
+   <class>QDisclosableGroupBox</class>
+   <extends>QGroupBox</extends>
+   <header location="global">QDisclosableGroupBox.h</header>
    <container>1</container>
   </customwidget>
   <customwidget>
@@ -2876,12 +2904,6 @@ font-size: 10px;
    <class>UserInitAreaWidget</class>
    <extends>QWidget</extends>
    <header location="global">UserInitAreaWidget.h</header>
-   <container>1</container>
-  </customwidget>
-  <customwidget>
-   <class>QDisclosableGroupBox</class>
-   <extends>QGroupBox</extends>
-   <header location="global">QDisclosableGroupBox.h</header>
    <container>1</container>
   </customwidget>
   <customwidget>
