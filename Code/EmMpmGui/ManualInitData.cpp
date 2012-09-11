@@ -154,6 +154,7 @@ void ManualInitData::writeSettings(QSettings &prefs)
 
   prefs.endGroup();
 }
+
 #define printvar(var)\
   std::cout << "m_" << #var << ": " << m_##var << std::endl;
 

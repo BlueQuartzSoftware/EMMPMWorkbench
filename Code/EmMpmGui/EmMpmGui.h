@@ -169,6 +169,10 @@ class EmMpmGui : public QMainWindow, private Ui::EmMpmGui
      void plotCombinedGaussian();
      void plotImageHistogram();
 
+  // MSE Value update/Plots
+     void updateMSEValue(qreal value);
+     void refreshMSEPlot();
+
   protected slots:
   //Manual Hookup Menu Actions
   // File Menu
@@ -191,6 +195,9 @@ class EmMpmGui : public QMainWindow, private Ui::EmMpmGui
     void on_clearTempHistograms_clicked();
     void on_saveCurves_clicked();
 
+    void on_m_msePlotXMin_valueChanged(int value);
+    void on_m_msePlotXMax_valueChanged(int value);
+    void on_saveMSEDataBtn_clicked();
 
     void on_fileListWidget_itemDoubleClicked(QListWidgetItem * item);
 
@@ -207,6 +214,7 @@ class EmMpmGui : public QMainWindow, private Ui::EmMpmGui
     void on_addClassCoupling_clicked();
     void on_removeClassCoupling_clicked();
 
+    void on_useStoppingCriteria_clicked();
 
     void z10_triggered();
     void z25_triggered();
@@ -348,8 +356,12 @@ class EmMpmGui : public QMainWindow, private Ui::EmMpmGui
     LayersDockWidget*  m_LayersPalette;
 
     QVector<int>     m_StartingMuValues;
-  //  QMap<QObject*, QWidget*> m_TasksMap;
 
+    QVector<qreal>   m_MSEValues;
+    QwtPlotCurve*    m_MSEPlotCurve;
+    QwtPlotPicker*   m_MSEpicker;
+
+    QString m_GaussianCurveColors[16];
 
     EmMpmGui(const EmMpmGui&); // Copy Constructor Not Implemented
     void operator=(const EmMpmGui&); // Operator '=' Not Implemented

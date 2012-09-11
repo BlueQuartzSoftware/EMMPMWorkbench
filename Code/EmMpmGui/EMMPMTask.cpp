@@ -98,7 +98,7 @@ void EMMPMTask::reportProgress(EMMPM_Data::Pointer data)
     for (unsigned int y = 0; y < data->rows; ++y)
     {
       front = image.scanLine(y);
-      int bytesPerLine = image.bytesPerLine();
+     // int bytesPerLine = image.bytesPerLine();
       for (unsigned int x = 0; x < data->columns; ++x)
       {
         front[x] = data->xt[data->columns*y + x];
@@ -126,7 +126,12 @@ void EMMPMTask::reportProgress(EMMPM_Data::Pointer data)
         emit mySelf->updateHistogramAvailable(values);
       }
     }
+  }
 
+  // Send the latest value of the MSE to the GUI for plotting or saving.
+  if (data->inside_mpm_loop == 0 && data->currentEMLoop > 0)
+  {
+      emit mySelf->mseValueUpdated(data->currentMSE);
   }
 
 #if 0
@@ -460,6 +465,11 @@ void EMMPMTask::segmentImage(int i)
     fprintf(f, "InputFile:%s\n", m_data->input_file_name);
     fprintf(f, "SegmentedFile:%s\n" , m_data->output_file_name);
     fprintf(f, "NumClasses:%d\n", m_data->classes);
+    fprintf(f, "Proposed EM Loops:%d\n", m_data->emIterations);
+    fprintf(f, "EM Loops Completed:%d\n", m_data->currentEMLoop);
+    fprintf(f, "Final MSE:%f\n", m_data->currentMSE);
+    fprintf(f, "Stopping Threshold:%f\n", m_data->stoppingThreshold);
+    fprintf(f, "Use Stopping Criteria:%d\n", (int)(m_data->useStoppingThreshold));
     fprintf(f, "Class,Mu,Sigma\n");
     // Remember the Sigma is the Square Root of the variance
     for(int i = 0; i < m_data->classes; ++i)

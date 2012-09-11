@@ -91,9 +91,10 @@ class EMMPMTask : public ProcessQueueTask, public StatsDelegate
     virtual void run();
 
     void segmentImage(int i);
-    MXA_INSTANCE_PROPERTY(QVector<double>, ImageHistogram);
 
-    MXA_INSTANCE_STRING_PROPERTY(OutputStatsFile);
+    MXA_INSTANCE_PROPERTY(QVector<double>, ImageHistogram)
+
+    MXA_INSTANCE_STRING_PROPERTY(OutputStatsFile)
 
   public slots:
 

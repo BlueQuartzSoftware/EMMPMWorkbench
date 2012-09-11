@@ -69,6 +69,8 @@
 #include <qwt_plot_panner.h>
 #include <qwt_plot_curve.h>
 #include <qwt_plot_marker.h>
+#include <qwt_curve_fitter.h>
+#include <qwt_symbol.h>
 
 // Our Project wide includes
 #include "QtSupport/ApplicationAboutBoxDialog.h"
@@ -163,7 +165,8 @@ m_CombinedGaussians(NULL),
 m_ShowCombinedGaussians(false),
 m_OutputExistsCheck(false),
 m_QueueController(NULL),
-m_LayersPalette(NULL)
+m_LayersPalette(NULL),
+m_MSEPlotCurve(NULL)
 {
   m_OpenDialogLastDirectory = QDir::homePath();
   m_StartingMuValues.resize(EMMPM_MAX_CLASSES);
@@ -182,6 +185,25 @@ m_LayersPalette(NULL)
   m_StartingMuValues[12] = 128;
   m_StartingMuValues[13] = 16;
   m_StartingMuValues[14] = 256;
+
+  int index = 0;
+  m_GaussianCurveColors[index++] = QString("midnightblue");
+  m_GaussianCurveColors[index++] = QString("blueviolet");
+  m_GaussianCurveColors[index++] = QString("darkred");
+  m_GaussianCurveColors[index++] = QString("orangered");
+  m_GaussianCurveColors[index++] = QString("purple");
+  m_GaussianCurveColors[index++] = QString("darkgreen");
+  m_GaussianCurveColors[index++] = QString("darkblue");
+  m_GaussianCurveColors[index++] = QString("fuchsia");
+  m_GaussianCurveColors[index++] = QString("darkslategray");
+  m_GaussianCurveColors[index++] = QString("mediumturquoise");
+  m_GaussianCurveColors[index++] = QString("cadetblue");
+  m_GaussianCurveColors[index++] = QString("chartreuse");
+  m_GaussianCurveColors[index++] = QString("chocolate");
+  m_GaussianCurveColors[index++] = QString("darkslateblue");
+  m_GaussianCurveColors[index++] = QString("royalblue");
+  m_GaussianCurveColors[index++] = QString("coral");
+
 
   setupUi(this);
   setupGui();
@@ -340,6 +362,11 @@ void EmMpmGui::readSettings(QSettings &prefs)
   enableUserDefinedAreas->blockSignals(false);
   READ_BOOL_SETTING(prefs, enableManualInit, false);
 
+  READ_SETTING(prefs, m_NumClasses, ok, i, 2, Int);
+
+  READ_BOOL_SETTING(prefs, useStoppingCriteria, false);
+  READ_STRING_SETTING(prefs, m_StoppingThreshold, "");
+
   prefs.endGroup();  // End the Parameters Group
 
   if (enableManualInit->isChecked() == true)
@@ -356,7 +383,7 @@ void EmMpmGui::readSettings(QSettings &prefs)
       updateManualInitHistograms();
     }
   }
-  READ_SETTING(prefs, m_NumClasses, ok, i, 2, Int);
+
 
   // We only load the User Init Areas if there is an image loaded
   // and the checkbox was set
@@ -426,6 +453,10 @@ void EmMpmGui::writeSettings(QSettings &prefs)
   WRITE_VALUE(prefs, userInitAreaCount);
 
   WRITE_CHECKBOX_SETTING(prefs, enableManualInit);
+
+  WRITE_CHECKBOX_SETTING(prefs, useStoppingCriteria);
+  WRITE_STRING_SETTING(prefs, m_StoppingThreshold);
+
   prefs.endGroup();
 
   if (enableManualInit->isChecked() == true)
@@ -650,8 +681,9 @@ void EmMpmGui::setupGui()
   m_WidgetList << enableUserDefinedAreas << useSimulatedAnnealing;
   m_WidgetList << useCurvaturePenalty << useGradientPenalty;
   m_WidgetList << curvatureBetaC << curvatureRMax << ccostLoopDelay;
-  m_WidgetList << gradientPenaltyLabel << gradientBetaE;
+  m_WidgetList << gradientBetaE;
   m_WidgetList << axisSettingsBtn << clearTempHistograms << saveCurves;
+  m_WidgetList << m_StoppingThreshold << m_StoppingThresholdLabel << useStoppingCriteria;
   setWidgetListEnabled(false);
 
   m_ImageWidgets << zoomIn << zoomOut << fitToWindow << layersPalette;
@@ -666,11 +698,22 @@ void EmMpmGui::setupGui()
 
   QDoubleValidator* betaValidator = new QDoubleValidator(m_Beta);
   QDoubleValidator* minVarValidator = new QDoubleValidator(m_MinVariance);
+  QDoubleValidator* stoppingThresholdValidator = new QDoubleValidator(m_StoppingThreshold);
+  stoppingThresholdValidator->setRange(0.0, 1000000, 5);
+  m_StoppingThreshold->setValidator(stoppingThresholdValidator);
 
   m_picker = new QwtPlotPicker(QwtPlot::xBottom, QwtPlot::yLeft, QwtPicker::PointSelection, QwtPlotPicker::CrossRubberBand, QwtPicker::AlwaysOn, m_HistogramPlot->canvas());
   m_picker->setRubberBandPen(QColor(QColor(0, 125, 0)));
   m_picker->setRubberBand(QwtPicker::CrossRubberBand);
   m_picker->setTrackerPen(QColor(Qt::blue));
+
+
+  // Add a Plot Picker for the MSE Plots
+  m_MSEpicker = new QwtPlotPicker(QwtPlot::xBottom, QwtPlot::yLeft, QwtPicker::PointSelection, QwtPlotPicker::CrossRubberBand, QwtPicker::AlwaysOn, m_MSEPlot->canvas());
+  m_MSEpicker->setRubberBandPen(QColor(QColor(0, 125, 0)));
+  m_MSEpicker->setRubberBand(QwtPicker::CrossRubberBand);
+  m_MSEpicker->setTrackerPen(QColor(Qt::blue));
+
 
   ManualInitTableModel* tm = new ManualInitTableModel(manualInitTableView);
   manualInitTableView->setModel(tm);
@@ -1049,6 +1092,15 @@ void EmMpmGui::on_processBtn_clicked()
   }
 
 
+  // Clear out the MSE Vector
+  m_MSEValues.clear();
+  m_msePlotXMax->setMaximum(0);
+  m_msePlotXMax->setValue(0);
+
+  m_msePlotXMin->setMaximum(0);
+  m_msePlotXMin->setValue(0);
+
+
   task->setInputOutputFilePairList(filepairs);
   setInputOutputFilePairList(filepairs);
 
@@ -1063,6 +1115,9 @@ void EmMpmGui::on_processBtn_clicked()
   {
     connect(task, SIGNAL(imageStarted(QString )), this, SLOT(setCurrentProcessedImage(QString)));
   }
+
+  connect(task, SIGNAL(mseValueUpdated(qreal)), this, SLOT(updateMSEValue(qreal)));
+
 
   connect(task, SIGNAL(updateProgress(int)), progBar, SLOT(setValue(int)));
  // connect(task, SIGNAL(finished(QObject*)), this, SLOT(taskFinished(QObject*)));
@@ -1209,6 +1264,13 @@ EMMPMTask* EmMpmGui::newEmMpmTask( ProcessQueueController* queueController)
   data->calculateBetaMatrix();
 
 
+  /* Transfer the Stopping Criteria Values */
+  ok = false;
+  data->useStoppingThreshold = useStoppingCriteria->isChecked();
+  data->stoppingThreshold = m_StoppingThreshold->text().toFloat(&ok); // The validator should have made sure we are a valid floating point value
+
+
+
   return task;
 }
 
@@ -1319,6 +1381,14 @@ void EmMpmGui::queueControllerFinished()
 
   /* Gradient Penalty widgets  */
   gradientBetaE->setEnabled(useGradientPenalty->isChecked());
+
+  /* Stopping Criteria widgets */
+  m_StoppingThreshold->setEnabled(useStoppingCriteria->isChecked());
+  m_StoppingThresholdLabel->setEnabled(useStoppingCriteria->isChecked());
+
+  /* Update MSE Plot with better title */
+  m_MSEPlot->setTitle("MSE Plot");
+
 
   // Make sure the image manipulating widgets are enabled
   setImageWidgetsEnabled(true);
@@ -1572,6 +1642,10 @@ void EmMpmGui::setWidgetListEnabled(bool b)
 
     /* Gradient Penalty widgets  */
     gradientBetaE->setEnabled(useGradientPenalty->isChecked());
+
+    /* Stopping Criteria widgets */
+    m_StoppingThreshold->setEnabled(useStoppingCriteria->isChecked());
+    m_StoppingThresholdLabel->setEnabled(useStoppingCriteria->isChecked());
   }
 
 }
@@ -1875,27 +1949,23 @@ void EmMpmGui::addRemoveManualInitTableRows()
   }
 
   int mVal = 0;
+
+
   // The number of classes is greater than the number of rows - Add rows
   while(m_NumClasses->value() > model->rowCount())
   {
-
     int count = model->rowCount() + 1;
     mVal = m_StartingMuValues[count-1];
-    int defGray = mVal;
+  //  int defGray = mVal;
     int defMu = mVal;
     double defGamma = 0.0;
 
-    if (defGray > QColor::colorNames().size())
-    {
-      defGray = 10;
-    }
-    QColor color(QColor::colorNames().at(defGray));
-    color.setAlpha(255);
-
-    ManualInitData* data = new ManualInitData(count-1, (double)defMu, 20.0, defGamma, QColor::colorNames().at(defGray), model);
+    ManualInitData* data = new ManualInitData(count-1, (double)defMu, 20.0, defGamma, m_GaussianCurveColors[count - 1], model);
     model->insertManualData(data, model->rowCount());
 
     QwtPlotCurve* curve = new QwtPlotCurve("");
+    QColor color = m_GaussianCurveColors[count - 1];
+    color.setAlpha(255);
     curve->setPen(QPen(color, 2));
     curve->setRenderHint(QwtPlotItem::RenderAntialiased);
     curve->attach(m_HistogramPlot);
@@ -2465,13 +2535,21 @@ void EmMpmGui::plotCombinedGaussian()
     values[i] = 0.0;
   }
 
-
+  QList <QwtPlotCurve*> curves;
+  if(enableManualInit->isChecked() == true)
+  {
+     curves = m_ManualInitGaussians;
+  }
+  else
+  {
+      curves = m_Gaussians;
+  }
   QwtPlotCurve* curve = NULL;
-  int count = m_Gaussians.size();
+  int count = curves.size();
   if (count < 2) { return; } // only one Gaussian is the same as the user init Gaussian and is meaningless
   for (int c = 0; c < count; ++c)
   {
-    curve = m_Gaussians[c];
+    curve = curves[c];
     QwtArrayData* data = static_cast<QwtArrayData*>(&(curve->data()));
     for (int i = 0; i < numValues; ++i)
     {
@@ -2479,6 +2557,172 @@ void EmMpmGui::plotCombinedGaussian()
     }
   }
   m_CombinedGaussians->setData(intervals, values);
+}
+
+// -----------------------------------------------------------------------------
+//
+// -----------------------------------------------------------------------------
+void EmMpmGui::on_saveMSEDataBtn_clicked()
+{
+    QString outputFile = getOpenDialogLastDirectory() + QDir::separator() + "MSEData.csv";
+    outputFile = QFileDialog::getSaveFileName(this, tr("Save MSE Data As ..."), outputFile, tr("CSV (*.csv)"));
+    if (outputFile.isNull())
+    {
+        return;
+    }
+
+    // Update the last directory the user visited
+    QFileInfo fi(outputFile);
+    setOpenDialogLastDirectory(fi.absolutePath());
+
+    QwtPlotCurve* curve = NULL;
+    int count = m_MSEValues.size();
+
+    // We now have a table of data, lets write it to a file
+    FILE* f = fopen(outputFile.toAscii().data(), "wb");
+    if (NULL == f)
+    {
+        QMessageBox::critical(this, tr("MSE Value Save Error"), tr("The selected output file could not be opened for writing."), QMessageBox::Ok);
+        return;
+    }
+    double d;
+    char comma[2] = {',', 0};
+
+    // Write the header to the file
+    fprintf(f, "EMLoop,MSEValue\n");
+
+    // write the data to the file
+    for (int i = 0; i < count; ++i)
+    {
+        fprintf(f, "%d,%f\n", i, m_MSEValues[i]);
+    }
+
+    fclose(f);
+}
+
+// -----------------------------------------------------------------------------
+//
+// -----------------------------------------------------------------------------
+void EmMpmGui::on_useStoppingCriteria_clicked()
+{
+    m_StoppingThreshold->setEnabled(useStoppingCriteria->isChecked());
+    m_StoppingThresholdLabel->setEnabled(useStoppingCriteria->isChecked());
+}
+
+// -----------------------------------------------------------------------------
+//
+// -----------------------------------------------------------------------------
+void EmMpmGui::on_m_msePlotXMax_valueChanged(int value)
+{
+    if (m_msePlotXMin->value() < m_msePlotXMax->value() ) {
+        refreshMSEPlot();
+    }
+}
+
+// -----------------------------------------------------------------------------
+//
+// -----------------------------------------------------------------------------
+void EmMpmGui::on_m_msePlotXMin_valueChanged(int value)
+{
+    if (m_msePlotXMin->value() < m_msePlotXMax->value() ) {
+        refreshMSEPlot();
+    }
+}
+
+// -----------------------------------------------------------------------------
+//
+// -----------------------------------------------------------------------------
+void EmMpmGui::updateMSEValue(qreal value)
+{
+  //  std::cout << "MSE: " << value << std::endl;
+    QString str("Current MSE Value: ");
+    str = str.append(QString::number(value));
+    m_MSEPlot->setTitle(str);
+    m_MSEValues.push_back(value);
+
+
+    if (m_MSEPlotCurve == NULL)
+    {
+        m_MSEPlotCurve = new QwtPlotCurve("Combined Gaussians");
+        m_MSEPlotCurve->setPen(QPen(Qt::black, 1.0, Qt::SolidLine));
+        m_MSEPlotCurve->setRenderHint(QwtPlotItem::RenderAntialiased);
+
+        m_MSEPlot->setCanvasBackground(QColor(Qt::white));
+        m_MSEPlotCurve->setTitle("MSE (Mean & Variance)");
+
+        QwtPlotGrid *grid = new QwtPlotGrid;
+     //   grid->enableXMin(true);
+      //  grid->enableYMin(true);
+        grid->setMajPen(QPen(Qt::lightGray, 0, Qt::SolidLine));
+      //  grid->setMinPen(QPen(Qt::lightGray, 0 , Qt::DotLine));
+        grid->attach(m_MSEPlot);
+
+#if 0
+        QwtSplineCurveFitter* curveFitter = new QwtSplineCurveFitter();
+        curveFitter->setSplineSize(300);
+        m_MSEPlotCurve->setCurveAttribute(QwtPlotCurve::Inverted, true);
+        m_MSEPlotCurve->setCurveFitter(curveFitter);
+#endif
+
+        QwtSymbol sym;
+        sym.setStyle(QwtSymbol::XCross);
+        sym.setPen(QPen(Qt::red,2));
+        sym.setSize(4);
+        m_MSEPlotCurve->setSymbol(sym);
+
+        m_MSEPlotCurve->attach(m_MSEPlot);
+    }
+
+    const int numValues = m_MSEValues.size();
+    QwtArray<double> intervals(numValues);
+    QwtArray<double> values(numValues);
+    for (int i = 0; i < numValues; ++i)
+    {
+      intervals[i] = (double)i;
+      values[i] = m_MSEValues[i];
+    }
+
+    m_MSEPlotCurve->setData(intervals, values);
+
+#if 0
+    refreshMSEPlot();
+#endif
+
+    m_msePlotXMax->setMaximum(m_MSEValues.size()-1);
+    m_msePlotXMax->setValue(m_MSEValues.size()-1);
+
+    m_msePlotXMin->setMaximum(m_MSEValues.size());
+}
+
+// -----------------------------------------------------------------------------
+//
+// -----------------------------------------------------------------------------
+void EmMpmGui::refreshMSEPlot()
+{
+    int xmin = m_msePlotXMin->value();
+    int xmax = m_msePlotXMax->value();
+
+    if (xmax >= m_MSEValues.size())
+    {
+        return;
+    }
+
+    qreal max = 0.0;
+
+    for (int i = xmin; i < xmax; ++i)
+    {
+        if (m_MSEValues[i] > max)
+        {
+            max = m_MSEValues[i];
+        }
+    }
+
+
+
+    m_MSEPlot->setAxisScale(QwtPlot::xBottom, xmin, xmax);
+    m_MSEPlot->setAxisScale(QwtPlot::yLeft, 0, max * 1.10);
+
+    m_MSEPlot->replot();
 }
 
 // -----------------------------------------------------------------------------

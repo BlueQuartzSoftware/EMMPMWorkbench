@@ -169,6 +169,7 @@ class ProcessQueueTask : public QThread , public Observer
       void histogramsAboutToBeUpdated();
       void updateHistogramAvailable(QVector<real_t> values);
       void imageStarted(QString s);
+      void mseValueUpdated(qreal value);
 
     public slots:
 
