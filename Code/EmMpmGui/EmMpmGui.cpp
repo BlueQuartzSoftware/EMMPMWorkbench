@@ -811,7 +811,7 @@ void EmMpmGui::copyIntializationValues(EMMPM_Data::Pointer inputs)
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
-void EmMpmGui::copyGammaValues(EMMPM_Data::Pointer inputs)
+void EmMpmGui::copyUserInitAreaGammaValues(EMMPM_Data::Pointer inputs)
 {
   int size = m_UserInitAreaVector->count();
   UserInitArea* uia = NULL;
@@ -819,8 +819,31 @@ void EmMpmGui::copyGammaValues(EMMPM_Data::Pointer inputs)
   {
     uia = m_UserInitAreaVector->at(r);
     inputs->w_gamma[r] = uia->getGamma();
- //   std::cout << "Initializing with Gamma:" << inputs->w_gamma[r] << std::endl;
   }
+}
+
+// -----------------------------------------------------------------------------
+//
+// -----------------------------------------------------------------------------
+int EmMpmGui::copyGammaValues(EMMPM_Data::Pointer inputs)
+{
+    bool ok = false;
+    float value = 0.0f;
+    int size = gammaTableWidget->rowCount();
+    for (int r = 0; r < size; ++r)
+    {
+        value = gammaTableWidget->item(r, 1)->text().toFloat(&ok);
+        if (ok == false) {
+            inputs->w_gamma[r] = 0.0f;
+            QMessageBox::critical(this, tr("Gamma Value Error"), tr("One of the Gamma values was not convertable to a number."), QMessageBox::Ok);
+            return -1;
+        }
+        else
+        {
+            inputs->w_gamma[r] = value;
+        }
+    }
+    return 0;
 }
 
 // -----------------------------------------------------------------------------
@@ -1033,6 +1056,10 @@ void EmMpmGui::on_processBtn_clicked()
   //m_GraphicsView->setImageDisplayType(EmMpm_Constants::CompositedImage);
 
   EMMPMTask* task = newEmMpmTask(queueController);
+  if (NULL == task)
+  {
+      return;
+  }
   queueController->addTask(static_cast<QThread*> (task));
 
   if (this->processFolder->isChecked() == false)
@@ -1156,6 +1183,12 @@ EMMPMTask* EmMpmGui::newEmMpmTask( ProcessQueueController* queueController)
 
   data->in_beta = m_Beta->text().toFloat(&ok);
 
+  if (copyGammaValues(data) < 0)
+  {
+      delete task;
+      return NULL;
+  }
+
   for (int i = 0; i < EMMPM_MAX_CLASSES; i++)
   {
     data->w_gamma[i] = 0.0;
@@ -1186,12 +1219,9 @@ EMMPMTask* EmMpmGui::newEmMpmTask( ProcessQueueController* queueController)
       double mu = model->data(muIndex).toDouble(&ok);
       QModelIndex sigmaIndex = model->index(i, ManualInitTableModel::Sigma);
       double sigma = model->data(sigmaIndex).toDouble(&ok);
-      QModelIndex gammaIndex = model->index(i, ManualInitTableModel::Gamma);
-      double gamma = model->data(gammaIndex).toDouble(&ok);
 
       data->mean[i] = mu;
       data->variance[i] = sigma * sigma; // Variance is sigma squared (sig^2)
-      data->w_gamma[i] = gamma;
 
       //Take the current color and convert it to a grayscale value and use that
       // value in the gray table
@@ -1215,7 +1245,7 @@ EMMPMTask* EmMpmGui::newEmMpmTask( ProcessQueueController* queueController)
     copyGrayValues(data);
     copyInitCoords(data);
     copyIntializationValues(data);
-    copyGammaValues(data);
+    copyUserInitAreaGammaValues(data);
     copyMinVarianceValues(data);
   }
   else
@@ -1925,6 +1955,35 @@ void EmMpmGui::openBaseImageFile(QString imageFile)
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
+void EmMpmGui::addRemoveGammaTableRows()
+{
+    if (gammaTableWidget->rowCount() == m_NumClasses->value())
+    {
+        return;
+    }
+
+   while (m_NumClasses->value() < gammaTableWidget->rowCount())
+   {
+       gammaTableWidget->removeRow(gammaTableWidget->rowCount() - 1);
+   }
+
+   int mVal = 0;
+   // The number of classes is greater than the number of rows - Add rows
+   while(m_NumClasses->value() > gammaTableWidget->rowCount())
+   {
+        int count = gammaTableWidget->rowCount();
+        gammaTableWidget->insertRow(gammaTableWidget->rowCount());
+
+        QTableWidgetItem* col0 = new QTableWidgetItem(QString::number(count));
+        QTableWidgetItem* col1 = new QTableWidgetItem(QString("0.0"));
+        gammaTableWidget->setItem(count, 0, col0);
+        gammaTableWidget->setItem(count, 1, col1);
+   }
+}
+
+// -----------------------------------------------------------------------------
+//
+// -----------------------------------------------------------------------------
 void EmMpmGui::addRemoveManualInitTableRows()
 {
   ManualInitTableModel* model = qobject_cast<ManualInitTableModel*>(manualInitTableView->model());
@@ -1936,14 +1995,11 @@ void EmMpmGui::addRemoveManualInitTableRows()
     return;
   }
 
- // std::cout << "m_Gaussians.size(): " << m_Gaussians.count() << std::endl;
-  // The number of classes is less than the model, remove rows
   while (m_NumClasses->value() < model->rowCount())
   {
     model->removeRows(model->rowCount()-1, 1);
     QwtPlotCurve* curve = m_ManualInitGaussians[0];
     m_ManualInitGaussians.removeAll(curve);
-
     curve->detach();
     delete curve;
   }
@@ -2172,6 +2228,7 @@ void EmMpmGui::on_m_NumClasses_valueChanged(int i)
 
   estimateMemoryUse(size);
   addRemoveManualInitTableRows();
+  addRemoveGammaTableRows();
 }
 
 // -----------------------------------------------------------------------------
@@ -3044,6 +3101,7 @@ void EmMpmGui::on_enableUserDefinedAreas_stateChanged(int state)
 {
   m_NumClasses->setEnabled( !enableUserDefinedAreas->isChecked() );
   m_MinVariance->setEnabled( !enableUserDefinedAreas->isChecked() );
+  gammaTableWidget->setEnabled( !enableUserDefinedAreas->isChecked() );
   m_LayersPalette->getUseColorTable()->setEnabled(enableUserDefinedAreas->isChecked());
   m_LayersPalette->getUseColorTable()->setChecked(enableUserDefinedAreas->isChecked());
 

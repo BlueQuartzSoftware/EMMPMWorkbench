@@ -986,8 +986,8 @@ font-size: 12px;
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>345</width>
-          <height>861</height>
+          <width>283</width>
+          <height>886</height>
          </rect>
         </property>
         <layout class="QVBoxLayout" name="verticalLayout_4">
@@ -1071,16 +1071,7 @@ image: url(:/bullet_triangle_grey_down.png);
            <property name="checkable">
             <bool>true</bool>
            </property>
-           <layout class="QFormLayout" name="formLayout_2">
-            <property name="fieldGrowthPolicy">
-             <enum>QFormLayout::FieldsStayAtSizeHint</enum>
-            </property>
-            <property name="horizontalSpacing">
-             <number>4</number>
-            </property>
-            <property name="verticalSpacing">
-             <number>6</number>
-            </property>
+           <layout class="QGridLayout" name="gridLayout_15">
             <property name="leftMargin">
              <number>3</number>
             </property>
@@ -1093,45 +1084,14 @@ image: url(:/bullet_triangle_grey_down.png);
             <property name="bottomMargin">
              <number>6</number>
             </property>
-            <item row="0" column="0">
-             <widget class="QLabel" name="label_12">
-              <property name="sizePolicy">
-               <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-                <horstretch>0</horstretch>
-                <verstretch>0</verstretch>
-               </sizepolicy>
-              </property>
-              <property name="minimumSize">
-               <size>
-                <width>0</width>
-                <height>0</height>
-               </size>
-              </property>
-              <property name="toolTip">
-               <string>The number of EM/MPM classes to segment into</string>
-              </property>
-              <property name="statusTip">
-               <string>The number of EM/MPM classes to segment into</string>
-              </property>
-              <property name="styleSheet">
-               <string notr="true">QLabel {
-font-weight: bold;
-font-size: 10px;
-}</string>
-              </property>
-              <property name="text">
-               <string>Classes:</string>
-              </property>
-              <property name="scaledContents">
-               <bool>false</bool>
-              </property>
-              <property name="alignment">
-               <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
-              </property>
-             </widget>
-            </item>
-            <item row="0" column="1">
-             <widget class="QSpinBox" name="m_NumClasses">
+            <property name="horizontalSpacing">
+             <number>4</number>
+            </property>
+            <property name="verticalSpacing">
+             <number>6</number>
+            </property>
+            <item row="3" column="1">
+             <widget class="QLineEdit" name="m_Beta">
               <property name="sizePolicy">
                <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
                 <horstretch>0</horstretch>
@@ -1151,19 +1111,13 @@ font-size: 10px;
                </size>
               </property>
               <property name="toolTip">
-               <string>The number of EM/MPM classes to segment into</string>
+               <string>The value of Beta for the EM/MPM Algorithm</string>
               </property>
               <property name="statusTip">
-               <string>The number of EM/MPM classes to segment into</string>
+               <string>The value of Beta for the EM/MPM Algorithm</string>
               </property>
-              <property name="minimum">
-               <number>2</number>
-              </property>
-              <property name="maximum">
-               <number>15</number>
-              </property>
-              <property name="value">
-               <number>2</number>
+              <property name="text">
+               <string>0.5</string>
               </property>
              </widget>
             </item>
@@ -1238,7 +1192,78 @@ font-size: 10px;
               </property>
              </widget>
             </item>
-            <item row="2" column="0">
+            <item row="3" column="0">
+             <widget class="QLabel" name="label_8">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="minimumSize">
+               <size>
+                <width>0</width>
+                <height>0</height>
+               </size>
+              </property>
+              <property name="toolTip">
+               <string>The value of Beta for the EM/MPM Algorithm</string>
+              </property>
+              <property name="statusTip">
+               <string>The value of Beta for the EM/MPM Algorithm</string>
+              </property>
+              <property name="styleSheet">
+               <string notr="true">QLabel {
+font-weight: bold;
+font-size: 10px;
+}</string>
+              </property>
+              <property name="text">
+               <string>Beta</string>
+              </property>
+              <property name="alignment">
+               <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="1">
+             <widget class="QSpinBox" name="m_NumClasses">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="minimumSize">
+               <size>
+                <width>60</width>
+                <height>0</height>
+               </size>
+              </property>
+              <property name="maximumSize">
+               <size>
+                <width>60</width>
+                <height>16777215</height>
+               </size>
+              </property>
+              <property name="toolTip">
+               <string>The number of EM/MPM classes to segment into</string>
+              </property>
+              <property name="statusTip">
+               <string>The number of EM/MPM classes to segment into</string>
+              </property>
+              <property name="minimum">
+               <number>2</number>
+              </property>
+              <property name="maximum">
+               <number>15</number>
+              </property>
+              <property name="value">
+               <number>2</number>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="2">
              <widget class="QLabel" name="label_10">
               <property name="sizePolicy">
                <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
@@ -1272,7 +1297,44 @@ font-size: 10px;
               </property>
              </widget>
             </item>
-            <item row="2" column="1">
+            <item row="0" column="0">
+             <widget class="QLabel" name="label_12">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="minimumSize">
+               <size>
+                <width>0</width>
+                <height>0</height>
+               </size>
+              </property>
+              <property name="toolTip">
+               <string>The number of EM/MPM classes to segment into</string>
+              </property>
+              <property name="statusTip">
+               <string>The number of EM/MPM classes to segment into</string>
+              </property>
+              <property name="styleSheet">
+               <string notr="true">QLabel {
+font-weight: bold;
+font-size: 10px;
+}</string>
+              </property>
+              <property name="text">
+               <string>Classes:</string>
+              </property>
+              <property name="scaledContents">
+               <bool>false</bool>
+              </property>
+              <property name="alignment">
+               <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="3">
              <widget class="QSpinBox" name="m_MpmIterations">
               <property name="sizePolicy">
                <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
@@ -1309,72 +1371,7 @@ font-size: 10px;
               </property>
              </widget>
             </item>
-            <item row="3" column="0">
-             <widget class="QLabel" name="label_8">
-              <property name="sizePolicy">
-               <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-                <horstretch>0</horstretch>
-                <verstretch>0</verstretch>
-               </sizepolicy>
-              </property>
-              <property name="minimumSize">
-               <size>
-                <width>0</width>
-                <height>0</height>
-               </size>
-              </property>
-              <property name="toolTip">
-               <string>The value of Beta for the EM/MPM Algorithm</string>
-              </property>
-              <property name="statusTip">
-               <string>The value of Beta for the EM/MPM Algorithm</string>
-              </property>
-              <property name="styleSheet">
-               <string notr="true">QLabel {
-font-weight: bold;
-font-size: 10px;
-}</string>
-              </property>
-              <property name="text">
-               <string>Beta</string>
-              </property>
-              <property name="alignment">
-               <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-              </property>
-             </widget>
-            </item>
-            <item row="3" column="1">
-             <widget class="QLineEdit" name="m_Beta">
-              <property name="sizePolicy">
-               <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
-                <horstretch>0</horstretch>
-                <verstretch>0</verstretch>
-               </sizepolicy>
-              </property>
-              <property name="minimumSize">
-               <size>
-                <width>60</width>
-                <height>0</height>
-               </size>
-              </property>
-              <property name="maximumSize">
-               <size>
-                <width>60</width>
-                <height>16777215</height>
-               </size>
-              </property>
-              <property name="toolTip">
-               <string>The value of Beta for the EM/MPM Algorithm</string>
-              </property>
-              <property name="statusTip">
-               <string>The value of Beta for the EM/MPM Algorithm</string>
-              </property>
-              <property name="text">
-               <string>0.5</string>
-              </property>
-             </widget>
-            </item>
-            <item row="4" column="0">
+            <item row="3" column="2">
              <widget class="QLabel" name="label_9">
               <property name="toolTip">
                <string>The minimum variance that any class can use during the EM/MPM algorithm</string>
@@ -1391,9 +1388,12 @@ font-size: 10px;
               <property name="text">
                <string>Min. Variance:</string>
               </property>
+              <property name="alignment">
+               <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+              </property>
              </widget>
             </item>
-            <item row="4" column="1">
+            <item row="3" column="3">
              <widget class="QLineEdit" name="m_MinVariance">
               <property name="sizePolicy">
                <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
@@ -1422,6 +1422,26 @@ font-size: 10px;
               <property name="text">
                <string>20</string>
               </property>
+             </widget>
+            </item>
+            <item row="4" column="0" colspan="4">
+             <widget class="QTableWidget" name="gammaTableWidget">
+              <property name="alternatingRowColors">
+               <bool>true</bool>
+              </property>
+              <property name="columnCount">
+               <number>2</number>
+              </property>
+              <column>
+               <property name="text">
+                <string>Class</string>
+               </property>
+              </column>
+              <column>
+               <property name="text">
+                <string>Gamma</string>
+               </property>
+              </column>
              </widget>
             </item>
            </layout>
@@ -2917,7 +2937,6 @@ font-size: 10px;
  <tabstops>
   <tabstop>m_NumClasses</tabstop>
   <tabstop>m_EmIterations</tabstop>
-  <tabstop>m_MpmIterations</tabstop>
   <tabstop>m_Beta</tabstop>
   <tabstop>inputImageFilePath</tabstop>
   <tabstop>inputImageFilePathBtn</tabstop>

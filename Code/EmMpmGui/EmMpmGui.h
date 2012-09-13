@@ -124,12 +124,15 @@ class EmMpmGui : public QMainWindow, private Ui::EmMpmGui
     void copyGrayValues( EMMPM_Data::Pointer inputs);
     void copyInitCoords( EMMPM_Data::Pointer inputs);
     void copyIntializationValues(EMMPM_Data::Pointer inputs);
-    void copyGammaValues(EMMPM_Data::Pointer inputs);
+    void copyUserInitAreaGammaValues(EMMPM_Data::Pointer inputs);
+    int copyGammaValues(EMMPM_Data::Pointer inputs);
+
     void copyMinVarianceValues(EMMPM_Data::Pointer inputs);
 
     void updateHistogramAxis();
 
     void addRemoveManualInitTableRows();
+    void addRemoveGammaTableRows();
 
     void estimateMemoryUse(QSize size);
 
