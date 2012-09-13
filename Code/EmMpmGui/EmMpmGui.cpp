@@ -3210,8 +3210,10 @@ void EmMpmGui::on_addClassCoupling_clicked()
     {
       return;
     }
-    if(a == b)
+
+    if(a >= b)
     {
+      QMessageBox::critical(this, tr("Class Coupling Error"), tr("Class B must be a larger value than Class A. Input (1,2) instead of (2,1)"), QMessageBox::Ok);
       return;
     }
     int rc = m_ClassCouplingTableWidget->rowCount();
