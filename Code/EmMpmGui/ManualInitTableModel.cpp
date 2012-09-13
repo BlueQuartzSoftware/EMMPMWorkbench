@@ -71,7 +71,7 @@ Qt::ItemFlags ManualInitTableModel::flags(const QModelIndex &index) const
     theFlags |= Qt::ItemIsEnabled;
 
     int col = index.column();
-    if (  col == Mu || col == Sigma || col == Gamma || col == Color )
+    if (  col == Mu || col == Sigma || col == Color )
     {
       theFlags = Qt::ItemIsEditable | Qt::ItemIsSelectable | Qt::ItemIsEnabled;
     }
@@ -140,8 +140,6 @@ QVariant ManualInitTableModel::data(const QModelIndex &index, qint32 role) const
         return QVariant(manualInitData->getMu());
       case ManualInitTableModel::Sigma:
         return QVariant(manualInitData->getSigma());
-      case ManualInitTableModel::Gamma:
-        return QVariant(manualInitData->getGamma());
       case ManualInitTableModel::Color:
         return QVariant(manualInitData->getEmMpmColor());
       default:
@@ -164,7 +162,6 @@ QVariant  ManualInitTableModel::headerData ( int section, Qt::Orientation orient
       case Class: return QVariant(QString("Class"));
       case Mu: return QVariant(QString("Mu"));
       case Sigma: return QVariant(QString("Sigma"));
-      case Gamma: return QVariant(QString("Gamma"));
       case Color: return QVariant(QString("Color"));
       default:
         break;
@@ -222,9 +219,6 @@ bool ManualInitTableModel::setData(const QModelIndex & index, const QVariant & v
       break;
     case ManualInitTableModel::Sigma:
       m_ManualInitDatas.at(row)->setSigma(value.toDouble(&ok));
-      break;
-    case ManualInitTableModel::Gamma:
-      m_ManualInitDatas.at(row)->setGamma(value.toDouble(&ok));
       break;
     case ManualInitTableModel::Color:
         m_ManualInitDatas.at(row)->setEmMpmColor(value.toString());

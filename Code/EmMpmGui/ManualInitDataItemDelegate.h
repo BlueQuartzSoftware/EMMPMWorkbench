@@ -104,13 +104,6 @@ class ManualInitDataItemDelegate : public QStyledItemDelegate
           dValidator->setDecimals(6);
           editor->setValidator(dValidator);
           return editor;
-        case ManualInitTableModel::Gamma:
-          editor = new QLineEdit(parent);
-          editor->setFrame(false);
-          dValidator = new QDoubleValidator(editor);
-          dValidator->setDecimals(6);
-          editor->setValidator(dValidator);
-          return editor;
 
         case ManualInitTableModel::Color:
           colorCombo = new ColorComboPicker(parent);
@@ -130,8 +123,7 @@ class ManualInitDataItemDelegate : public QStyledItemDelegate
       bool ok = false;
       qint32 col = index.column();
       if (col == ManualInitTableModel::Mu ||
-          col == ManualInitTableModel::Sigma ||
-          col == ManualInitTableModel::Gamma )
+          col == ManualInitTableModel::Sigma)
       {
         QLineEdit* lineEdit = qobject_cast<QLineEdit* > (editor);
         Q_ASSERT(lineEdit);
@@ -154,8 +146,7 @@ class ManualInitDataItemDelegate : public QStyledItemDelegate
     {
       qint32 col = index.column();
       if (col == ManualInitTableModel::Mu ||
-          col == ManualInitTableModel::Sigma ||
-          col == ManualInitTableModel::Gamma)
+          col == ManualInitTableModel::Sigma)
       {
         QLineEdit* lineEdit = qobject_cast<QLineEdit* > (editor);
         Q_ASSERT(lineEdit);
