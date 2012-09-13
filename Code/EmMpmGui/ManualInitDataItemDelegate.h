@@ -97,7 +97,7 @@ class ManualInitDataItemDelegate : public QStyledItemDelegate
           editor->setValidator(dValidator);
           return editor;
 
-        case ManualInitTableModel::Variance:
+        case ManualInitTableModel::Sigma:
           editor = new QLineEdit(parent);
           editor->setFrame(false);
           dValidator = new QDoubleValidator(editor);
@@ -130,7 +130,7 @@ class ManualInitDataItemDelegate : public QStyledItemDelegate
       bool ok = false;
       qint32 col = index.column();
       if (col == ManualInitTableModel::Mu ||
-          col == ManualInitTableModel::Variance ||
+          col == ManualInitTableModel::Sigma ||
           col == ManualInitTableModel::Gamma )
       {
         QLineEdit* lineEdit = qobject_cast<QLineEdit* > (editor);
@@ -154,7 +154,7 @@ class ManualInitDataItemDelegate : public QStyledItemDelegate
     {
       qint32 col = index.column();
       if (col == ManualInitTableModel::Mu ||
-          col == ManualInitTableModel::Variance ||
+          col == ManualInitTableModel::Sigma ||
           col == ManualInitTableModel::Gamma)
       {
         QLineEdit* lineEdit = qobject_cast<QLineEdit* > (editor);

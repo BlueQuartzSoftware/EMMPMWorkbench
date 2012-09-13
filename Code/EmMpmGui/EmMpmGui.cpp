@@ -1044,7 +1044,7 @@ void EmMpmGui::on_processBtn_clicked()
     QFileInfo fi(outputFile);
     QString statsFile = fi.path();
     statsFile.append(QDir::separator());
-    statsFile.append(fi.fileName());
+    statsFile.append(fi.baseName());
     statsFile.append("_Stats.txt");
     task->setOutputStatsFile(statsFile.toStdString());
 
@@ -1184,13 +1184,13 @@ EMMPMTask* EmMpmGui::newEmMpmTask( ProcessQueueController* queueController)
     {
       QModelIndex muIndex = model->index(i, ManualInitTableModel::Mu);
       double mu = model->data(muIndex).toDouble(&ok);
-      QModelIndex varianceIndex = model->index(i, ManualInitTableModel::Variance);
-      double variance = model->data(varianceIndex).toDouble(&ok);
+      QModelIndex sigmaIndex = model->index(i, ManualInitTableModel::Sigma);
+      double sigma = model->data(sigmaIndex).toDouble(&ok);
       QModelIndex gammaIndex = model->index(i, ManualInitTableModel::Gamma);
       double gamma = model->data(gammaIndex).toDouble(&ok);
 
       data->mean[i] = mu;
-      data->variance[i] = variance;
+      data->variance[i] = sigma * sigma; // Variance is sigma squared (sig^2)
       data->w_gamma[i] = gamma;
 
       //Take the current color and convert it to a grayscale value and use that
@@ -2002,7 +2002,7 @@ void EmMpmGui::updateManualInitHistograms()
   {
     QModelIndex muIndex = model->index(i, ManualInitTableModel::Mu);
     double mu = model->data(muIndex).toDouble(&ok);
-    QModelIndex sigIndex = model->index(i, ManualInitTableModel::Variance);
+    QModelIndex sigIndex = model->index(i, ManualInitTableModel::Sigma);
     double sig = model->data(sigIndex).toDouble(&ok);
     QwtArray<double> intervals;
     QwtArray<double> values;

@@ -944,7 +944,7 @@ font-size: 12px;
    <property name="minimumSize">
     <size>
      <width>300</width>
-     <height>136</height>
+     <height>138</height>
     </size>
    </property>
    <property name="floating">
@@ -965,7 +965,7 @@ font-size: 12px;
    <widget class="QWidget" name="dockWidgetContents">
     <layout class="QVBoxLayout" name="verticalLayout_6">
      <property name="spacing">
-      <number>0</number>
+      <number>2</number>
      </property>
      <property name="margin">
       <number>0</number>
@@ -986,8 +986,8 @@ font-size: 12px;
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>370</width>
-          <height>860</height>
+          <width>345</width>
+          <height>861</height>
          </rect>
         </property>
         <layout class="QVBoxLayout" name="verticalLayout_4">
@@ -1032,6 +1032,7 @@ font: 85% italic 12pt &quot;Arial&quot;;
 font-weight: bold;
 border: 0px solid gray;
 margin: 0px;
+color: white;
 }
  
 QGroupBox::title
@@ -1041,6 +1042,7 @@ subcontrol-position: top left;
 padding: 5 5px;    
 background-color: rgba(255, 255, 255, 0);
 }
+
 QGroupBox::indicator {    
 width: 17px;    
 height: 17px;
@@ -1445,6 +1447,7 @@ font: 85% italic 12pt &quot;Arial&quot;;
 font-weight: bold;
 border: 0px solid gray;
 margin: 0px;
+color: white;
 }
  
 QGroupBox::title
@@ -1454,6 +1457,7 @@ subcontrol-position: top left;
 padding: 5 5px;    
 background-color: rgba(255, 255, 255, 0);
 }
+
 QGroupBox::indicator {    
 width: 17px;    
 height: 17px;
@@ -1492,8 +1496,11 @@ image: url(:/bullet_triangle_grey_down.png);
             <property name="bottomMargin">
              <number>6</number>
             </property>
-            <property name="spacing">
+            <property name="horizontalSpacing">
              <number>6</number>
+            </property>
+            <property name="verticalSpacing">
+             <number>2</number>
             </property>
             <item row="1" column="0">
              <layout class="QHBoxLayout" name="horizontalLayout_2">
@@ -1583,6 +1590,7 @@ font: 85% italic 12pt &quot;Arial&quot;;
 font-weight: bold;
 border: 0px solid gray;
 margin: 0px;
+color: white;
 }
  
 QGroupBox::title
@@ -1812,6 +1820,7 @@ font: 85% italic 12pt &quot;Arial&quot;;
 font-weight: bold;
 border: 0px solid gray;
 margin: 0px;
+color: white;
 }
  
 QGroupBox::title
@@ -2338,6 +2347,19 @@ font-size: 10px;
            </property>
           </spacer>
          </item>
+         <item>
+          <spacer name="verticalSpacer_2">
+           <property name="orientation">
+            <enum>Qt::Vertical</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>20</width>
+             <height>40</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
         </layout>
        </widget>
       </widget>
@@ -2405,9 +2427,6 @@ font-size: 10px;
      <horstretch>0</horstretch>
      <verstretch>0</verstretch>
     </sizepolicy>
-   </property>
-   <property name="styleSheet">
-    <string notr="true"/>
    </property>
    <property name="floating">
     <bool>false</bool>

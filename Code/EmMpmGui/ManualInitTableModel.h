@@ -49,7 +49,7 @@ class ManualInitTableModel : public QAbstractTableModel
     {
       Class = 0,
       Mu,
-      Variance,
+      Sigma,
       Gamma,
       Color,
       ColumnCount
