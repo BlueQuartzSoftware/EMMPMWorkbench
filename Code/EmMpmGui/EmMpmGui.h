@@ -192,6 +192,7 @@ class EmMpmGui : public QMainWindow, private Ui::EmMpmGui
     void on_actionHistogram_triggered();
     void on_actionUser_Initialization_triggered();
     void on_actionLayers_Palette_triggered();
+    void on_actionMSE_Plot_triggered();
 
  // Histogram Related Slots - Auto Hookup
     void on_axisSettingsBtn_clicked();

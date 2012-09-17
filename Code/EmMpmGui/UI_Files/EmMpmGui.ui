@@ -40,7 +40,7 @@
    <bool>true</bool>
   </property>
   <property name="dockOptions">
-   <set>QMainWindow::AllowNestedDocks|QMainWindow::AllowTabbedDocks|QMainWindow::AnimatedDocks|QMainWindow::VerticalTabs</set>
+   <set>QMainWindow::AllowNestedDocks|QMainWindow::AllowTabbedDocks|QMainWindow::VerticalTabs</set>
   </property>
   <property name="unifiedTitleAndToolBarOnMac">
    <bool>true</bool>
@@ -935,6 +935,7 @@ font-size: 12px;
     <addaction name="actionHistogram"/>
     <addaction name="actionUser_Initialization"/>
     <addaction name="actionLayers_Palette"/>
+    <addaction name="actionMSE_Plot"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuWindow"/>
@@ -986,7 +987,7 @@ font-size: 12px;
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>283</width>
+          <width>368</width>
           <height>886</height>
          </rect>
         </property>
@@ -2672,7 +2673,7 @@ font-size: 10px;
     </layout>
    </widget>
   </widget>
-  <widget class="QDockWidget" name="MSEDockWidget">
+  <widget class="QDockWidget" name="m_MSEDockWidget">
    <property name="windowTitle">
     <string>Mean Square Error</string>
    </property>
@@ -2895,6 +2896,11 @@ font-size: 10px;
   <action name="actionLoad_Config_File">
    <property name="text">
     <string>Load Configuration</string>
+   </property>
+  </action>
+  <action name="actionMSE_Plot">
+   <property name="text">
+    <string>MSE Plot</string>
    </property>
   </action>
  </widget>

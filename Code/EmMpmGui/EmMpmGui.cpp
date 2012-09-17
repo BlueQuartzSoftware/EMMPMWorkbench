@@ -1283,8 +1283,7 @@ EMMPMTask* EmMpmGui::newEmMpmTask( ProcessQueueController* queueController)
     coupleEntries.push_back(couple);
   }
   data->coupleEntries = coupleEntries;
-  // Update the Beta (Coupling) Matrix
-  data->calculateBetaMatrix();
+  // The beta matrix will be filled each time through the EM Loop so we do not need to calculate it here.
 
 
   /* Transfer the Stopping Criteria Values */
@@ -1859,6 +1858,9 @@ void EmMpmGui::openBaseImageFile(QString imageFile)
     return;
   }
 
+  QFileInfo fi(imageFile);
+  m_OpenDialogLastDirectory = fi.absolutePath();
+
   inputImageFilePath->blockSignals(true);
   inputImageFilePath->setText(imageFile);
   inputImageFilePath->blockSignals(false);
@@ -1900,7 +1902,6 @@ void EmMpmGui::openBaseImageFile(QString imageFile)
 
 
   plotImageHistogram();
-  QFileInfo fi(imageFile);
   m_HistogramPlot->setTitle(fi.fileName());
   // remove the gaussian curves due to the Manual Init values
   clearManualInitCurves();
@@ -3157,6 +3158,13 @@ void EmMpmGui::on_actionLayers_Palette_triggered()
   m_LayersPalette->show();
 }
 
+// -----------------------------------------------------------------------------
+//
+// -----------------------------------------------------------------------------
+void EmMpmGui::on_actionMSE_Plot_triggered()
+{
+    m_MSEDockWidget->show();
+}
 
 // -----------------------------------------------------------------------------
 //

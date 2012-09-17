@@ -110,6 +110,7 @@ SET( EmMpmGui_SRCS
   ${EmMpmGui_SOURCE_DIR}/LayersDockWidget.cpp
   ${EmMpmGui_SOURCE_DIR}/EMMPMTask.cpp
   ${EmMpmGui_SOURCE_DIR}/ImageOpenDialog.cpp
+  #${EmMpmGui_SOURCE_DIR}/PerClassTableModel.cpp
   ${PROJECT_CODE_DIR}/AIM/Common/AIMImage.cpp
 )
 
@@ -130,6 +131,8 @@ SET( EmMpmGui_MOC_HDRS
   ${EmMpmGui_SOURCE_DIR}/UserInitAreaItemDelegate.h
   ${EmMpmGui_SOURCE_DIR}/ImageOpenDialog.h
   ${EmMpmGui_SOURCE_DIR}/EMMPMTask.h
+#  ${EmMpmGui_SOURCE_DIR}/PerClassTableModel.h
+#  ${EmMpmGui_SOURCE_DIR}/PerClassItemDelegate.h
 )
 cmp_IDE_SOURCE_PROPERTIES(EmMpmGui "${EmMpmGui_MOC_HDRS}" "${EmMpmGui_SRCS}" "0")
 
