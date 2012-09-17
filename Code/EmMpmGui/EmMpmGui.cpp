@@ -300,15 +300,8 @@ void EmMpmGui::readIOSettings(QSettings &prefs)
   processFolder->blockSignals(false);
   prefs.endGroup();
 
-  if (processFolder->isChecked() == true)
-  {
-    on_sourceDirectoryLE_textChanged(sourceDirectoryLE->text());
-  }
-  else
-  {
-    on_inputImageFilePath_textChanged(inputImageFilePath->text());
-  }
   on_processFolder_stateChanged(processFolder->isChecked());
+
 }
 
 // -----------------------------------------------------------------------------
@@ -1429,56 +1422,30 @@ void EmMpmGui::queueControllerFinished()
 // -----------------------------------------------------------------------------
 void EmMpmGui::on_processFolder_stateChanged(int state)
 {
-  bool enabled = true;
-  if (state == Qt::Unchecked)
-  {
-    enabled = false;
-  }
 
-  // Enable/Disable widgets
-  setProcessFolderWidgetsEnabled(enabled);
-  inputImageFilePath->setEnabled(!enabled);
-  inputImageFilePathBtn->setEnabled(!enabled);
-  outputImageFile->setEnabled(!enabled);
-  outputImageButton->setEnabled(!enabled);
-
-
-  // We are NOT processing a file so load what ever image is in the InputImageFilePath Line Edit
-  if (false == enabled)
-  {
-    on_inputImageFilePath_textChanged(inputImageFilePath->text());
-    return;
-  }
-  else
- {
-    populateFileTable(sourceDirectoryLE, fileListWidget);
-    if (fileListWidget->count() > 0) {
-      QListWidgetItem* item = fileListWidget->item(0);
-      on_fileListWidget_itemDoubleClicked(item);
-    }
-  }
-
-#if 0
-  if (inputImageFilePath->text().isEmpty() == false)
-  {
-    QFileInfo fileinfo(inputImageFilePath->text());
-    if (true == fileinfo.exists())
+    bool checked = true;
+    if (state == Qt::Unchecked)
     {
-      setWidgetListEnabled(true);
-      setImageWidgetsEnabled(true);
+        checked = false;
     }
-  }
-  else
-  {
-    setWidgetListEnabled(false);
-    setImageWidgetsEnabled(false);
-  }
-  setProcessFolderWidgetsEnabled(enabled);
-  inputImageFilePath->setEnabled(!enabled);
-  inputImageFilePathBtn->setEnabled(!enabled);
-  outputImageFile->setEnabled(!enabled);
-  outputImageButton->setEnabled(!enabled);
-#endif
+
+    // Enable/Disable widgets
+    setProcessFolderWidgetsEnabled(checked);
+    inputImageFilePath->setEnabled(!checked);
+    inputImageFilePathBtn->setEnabled(!checked);
+    outputImageFile->setEnabled(!checked);
+    outputImageButton->setEnabled(!checked);
+
+    // If we are checked then load the first image (assuming it exists) in the image viewer
+    if (checked == true)
+    {
+        on_sourceDirectoryLE_textChanged(QString(""));
+    }
+    else // We load up what ever file is in the input image file path line edit
+    {
+        on_inputImageFilePath_textChanged(inputImageFilePath->text());
+        return;
+    }
 }
 
 

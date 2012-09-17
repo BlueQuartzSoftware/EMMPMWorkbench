@@ -250,7 +250,7 @@ class EmMpmGui : public QMainWindow, private Ui::EmMpmGui
     void on_inputImageFilePathBtn_clicked();
     void on_outputImageButton_clicked();
 
-    void on_processFolder_stateChanged(int state  );
+    void on_processFolder_stateChanged(int checked  );
     void on_sourceDirectoryBtn_clicked();
     void on_outputDirectoryBtn_clicked();
 
