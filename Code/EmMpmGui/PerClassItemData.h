@@ -28,60 +28,64 @@
  * USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 
-#ifndef USERINITAREAWIDGET_H_
-#define USERINITAREAWIDGET_H_
+#ifndef _PER_CLASS_ITEM_DATA_H
+#define _PER_CLASS_ITEM_DATA_H
 
-#include <QtCore/QList>
-#include <QtGui/QWidget>
+#include <QtCore/QObject>
+#include <QtCore/QSettings>
 #include <QtGui/QColor>
 
 
-//-- UIC generated Header
-#include <ui_UserInitAreaWidget.h>
-
-class UserInitArea;
-
-namespace UIA
+class PerClassItemData : public QObject
 {
-  const static int Alpha = 155;
-}
+    Q_OBJECT;
 
-
-/**
- * @class UserInitAreaWidget UserInitAreaWidget.h Code/EmMpmGui/UserInitAreaWidget.h
- * @brief
- * @author Michael A. Jackson for BlueQuartz Software
- * @date Oct 5, 2010
- * @version 1.0
- */
-class UserInitAreaWidget  : public QWidget, public Ui::UserInitAreaWidget
-{
-  Q_OBJECT;
-
-  public:
-    UserInitAreaWidget(QWidget *parent = 0);
-    virtual ~UserInitAreaWidget();
-
-    void setUserInitArea(UserInitArea* uia);
-    UserInitArea* getUserInitArea();
-
-  protected slots:
-    void on_m_MinVariance_valueChanged(double v);
-    void on_m_LineWidth_valueChanged(double v);
-
+public:
     /**
-     * @brief Enables or Disables all the widgets in a list
-     * @param b
+     * @brief
+     * @param label
+     * @param gamma
+     * @param grayLevel
+     * @param color
+     * @param parent
      */
-    void setWidgetListEnabled(bool b);
+    PerClassItemData(int label, double gamma, int grayLevel,
+                   QString color, QObject* parent = 0);
+    virtual ~PerClassItemData();
+
+    void readSettings(QSettings &prefs);
+    void writeSettings(QSettings &prefs);
+
+ public slots:
+
+    void setLabel(int eClass);
+    int getLabel();
+
+    void setGamma(double g);
+    double getGamma();
+
+    void setGrayLevel(int gv);
+    int getGrayLevel();
+
+    void setColor(QString color);
+    QString getColor();
+
+ signals:
+
+  void firePerClassItemDataUpdated(PerClassItemData*);
+  void firePerClassItemDataAboutToDelete(PerClassItemData*);
+  void firePerClassItemDataDeleted(PerClassItemData*);
+  void firePerClassItemDataSelected(PerClassItemData*);
+
+  protected:
 
 
   private:
-    UserInitArea* m_uia;
-    QList<QWidget*> m_WidgetList;
-
-    UserInitAreaWidget(const UserInitAreaWidget&); // Copy Constructor Not Implemented
-    void operator=(const UserInitAreaWidget&); // Operator '=' Not Implemented
+    int m_Label;
+    double m_Gamma;
+    int m_GrayLevel;
+    QString m_Color;
 };
 
-#endif /* USERINITAREAWIDGET_H_ */
+
+#endif // _PER_CLASS_ITEM_DATA_H

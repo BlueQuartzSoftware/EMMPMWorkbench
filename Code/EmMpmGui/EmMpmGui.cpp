@@ -102,6 +102,9 @@
 #include "ManualInitTableModel.h"
 
 
+#include "PerClassTableModel.h"
+
+
 
 #define READ_STRING_SETTING(prefs, var, emptyValue)\
   var->setText( prefs.value(#var).toString() );\
@@ -707,7 +710,7 @@ void EmMpmGui::setupGui()
   m_MSEpicker->setRubberBand(QwtPicker::CrossRubberBand);
   m_MSEpicker->setTrackerPen(QColor(Qt::blue));
 
-
+  /* Setup the Manual Initialization Table View with a Model and hook up some signals/slots */
   ManualInitTableModel* tm = new ManualInitTableModel(manualInitTableView);
   manualInitTableView->setModel(tm);
   QAbstractItemDelegate* aid = tm->getItemDelegate();
@@ -716,6 +719,17 @@ void EmMpmGui::setupGui()
 
   connect(tm, SIGNAL(dataChanged(const QModelIndex &, const QModelIndex &)),
           this, SLOT(manualInitDataChanged(const QModelIndex &, const QModelIndex &)));
+
+
+  /* Setup the PerClass Parameters Table */
+  PerClassTableModel* pctm = new PerClassTableModel(perClassTableView);
+  perClassTableView->setModel(pctm);
+  QAbstractItemDelegate* pcid = pctm->getItemDelegate();
+  perClassTableView->setItemDelegate(pcid);
+  connect(pctm, SIGNAL(dataChanged(const QModelIndex &, const QModelIndex &)),
+          this, SLOT(perClassItemDataChanged(const QModelIndex &, const QModelIndex &)));
+
+
 
   // option B (pressing DEL activates the slots only when list widget has focus)
   QShortcut* shortcut_delete = new QShortcut(QKeySequence(Qt::Key_Delete), fileListWidget);
@@ -820,21 +834,15 @@ void EmMpmGui::copyUserInitAreaGammaValues(EMMPM_Data::Pointer inputs)
 // -----------------------------------------------------------------------------
 int EmMpmGui::copyGammaValues(EMMPM_Data::Pointer inputs)
 {
-    bool ok = false;
-    float value = 0.0f;
-    int size = gammaTableWidget->rowCount();
+
+    PerClassTableModel* model = qobject_cast<PerClassTableModel*>(perClassTableView->model());
+
+    QList<PerClassItemData*> items = model->getItemDatas();
+
+    int size = items.count();
     for (int r = 0; r < size; ++r)
     {
-        value = gammaTableWidget->item(r, 1)->text().toFloat(&ok);
-        if (ok == false) {
-            inputs->w_gamma[r] = 0.0f;
-            QMessageBox::critical(this, tr("Gamma Value Error"), tr("One of the Gamma values was not convertable to a number."), QMessageBox::Ok);
-            return -1;
-        }
-        else
-        {
-            inputs->w_gamma[r] = value;
-        }
+        inputs->w_gamma[r] = items.at(r)->getGamma();
     }
     return 0;
 }
@@ -1925,27 +1933,29 @@ void EmMpmGui::openBaseImageFile(QString imageFile)
 // -----------------------------------------------------------------------------
 void EmMpmGui::addRemoveGammaTableRows()
 {
-    if (gammaTableWidget->rowCount() == m_NumClasses->value())
+
+    PerClassTableModel* model = qobject_cast<PerClassTableModel*>(perClassTableView->model());
+    if (NULL == model) { return; }
+
+    if (model->rowCount() == m_NumClasses->value())
     {
         return;
     }
 
-   while (m_NumClasses->value() < gammaTableWidget->rowCount())
+   while (m_NumClasses->value() < model->rowCount())
    {
-       gammaTableWidget->removeRow(gammaTableWidget->rowCount() - 1);
+
+       model->removeRow(model->rowCount() - 1);
    }
 
    int mVal = 0;
    // The number of classes is greater than the number of rows - Add rows
-   while(m_NumClasses->value() > gammaTableWidget->rowCount())
+   while(m_NumClasses->value() > perClassTableView->model()->rowCount())
    {
-        int count = gammaTableWidget->rowCount();
-        gammaTableWidget->insertRow(gammaTableWidget->rowCount());
+        int count = perClassTableView->model()->rowCount();
 
-        QTableWidgetItem* col0 = new QTableWidgetItem(QString::number(count));
-        QTableWidgetItem* col1 = new QTableWidgetItem(QString("0.0"));
-        gammaTableWidget->setItem(count, 0, col0);
-        gammaTableWidget->setItem(count, 1, col1);
+        PerClassItemData* data = new PerClassItemData(count-1, 0.0, 0, m_GaussianCurveColors[count - 1], model);
+        model->insertItemData(data, model->rowCount());
    }
 }
 
@@ -2007,6 +2017,14 @@ void EmMpmGui::addRemoveManualInitTableRows()
 void EmMpmGui::manualInitDataChanged ( const QModelIndex & topLeft, const QModelIndex & bottomRight )
 {
   updateManualInitHistograms();
+}
+
+// -----------------------------------------------------------------------------
+//
+// -----------------------------------------------------------------------------
+void EmMpmGui::perClassItemDataChanged ( const QModelIndex & topLeft, const QModelIndex & bottomRight )
+{
+  // updateManualInitHistograms();
 }
 
 // -----------------------------------------------------------------------------
@@ -3069,7 +3087,7 @@ void EmMpmGui::on_enableUserDefinedAreas_stateChanged(int state)
 {
   m_NumClasses->setEnabled( !enableUserDefinedAreas->isChecked() );
   m_MinVariance->setEnabled( !enableUserDefinedAreas->isChecked() );
-  gammaTableWidget->setEnabled( !enableUserDefinedAreas->isChecked() );
+  perClassTableView->setEnabled( !enableUserDefinedAreas->isChecked() );
   m_LayersPalette->getUseColorTable()->setEnabled(enableUserDefinedAreas->isChecked());
   m_LayersPalette->getUseColorTable()->setChecked(enableUserDefinedAreas->isChecked());
 

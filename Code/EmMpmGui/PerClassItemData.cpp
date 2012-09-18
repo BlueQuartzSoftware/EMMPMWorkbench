@@ -1,5 +1,5 @@
 /* ============================================================================
- * Copyright (c) 2010, Michael A. Jackson (BlueQuartz Software)
+ * Copyright (c) 2011, Michael A. Jackson (BlueQuartz Software)
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without modification,
@@ -28,127 +28,147 @@
  * USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 
-#include "UserInitAreaWidget.h"
-#include "UserInitArea.h"
-#include <QtGui/QColorDialog>
+#include "PerClassItemData.h"
+
 #include <iostream>
 
+#include "QtCore/QStringList"
+
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
-UserInitAreaWidget::UserInitAreaWidget(QWidget *parent) :
-QWidget(parent),
-m_uia(NULL)
+PerClassItemData::PerClassItemData(int label, double gamma, int grayLevel,
+                                   QString color, QObject* parent) :
+QObject(parent),
+m_Label(label),
+m_Gamma(gamma),
+m_GrayLevel(grayLevel),
+m_Color(color)
 {
-  setupUi(this);
-  m_WidgetList <<  m_Class << m_LowerRight << m_Mu;
-  m_WidgetList << m_Sigma << m_UpperLeft;
-  setWidgetListEnabled(false);
+
 }
 
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
-UserInitAreaWidget::~UserInitAreaWidget()
+PerClassItemData::~PerClassItemData()
 {
 }
 
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
-void UserInitAreaWidget::setWidgetListEnabled(bool b)
+void PerClassItemData::setLabel(int eClass)
 {
-//  foreach (QWidget* w, m_WidgetList)
-//  {
-//    w->setEnabled(b);
-//  }
+  m_Label = eClass;
+}
 
-  QObjectList objects = this->children();
-  foreach(QObject* o, objects)
-  {
-    QWidget* w = qobject_cast<QWidget*>(o);
-    if (w) {
-      w->setEnabled(b);
-    }
-  }
-
+// -----------------------------------------------------------------------------
+//
+// -----------------------------------------------------------------------------
+int PerClassItemData::getLabel()
+{
+  return m_Label;
 }
 
 
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
-void UserInitAreaWidget::on_m_MinVariance_valueChanged(double v)
+void PerClassItemData::setGamma(double sigma)
 {
-  if (m_uia != NULL)
-  {
-    m_uia->setMinVariance(m_MinVariance->value());
-  }
+  m_Gamma = sigma;
 }
 
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
-void UserInitAreaWidget::on_m_LineWidth_valueChanged(double v)
+double PerClassItemData::getGamma()
 {
-  if (m_uia != NULL)
-  {
-    m_uia->setLineWidth(m_LineWidth->value());
-  }
+  return m_Gamma;
 }
 
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
-void UserInitAreaWidget::setUserInitArea(UserInitArea* uia)
+void PerClassItemData::setGrayLevel(int gray)
 {
-  this->m_uia = uia;
-  if (uia == NULL)
-  {
-    setWidgetListEnabled(false);
+  m_GrayLevel = gray;
+}
 
-    m_Class->setText(QString("0"));
-
-    m_Mu->setText(0);
-    m_Sigma->setText(0);
-    m_UpperLeft->setText("-1, -1");
-    m_LowerRight->setText("-1, -1");
-    m_LineWidth->setValue(1);
-    m_MinVariance->setValue(20.0);
-    return;
-  }
-  setWidgetListEnabled(true);
-
-  m_Class->setText(QString::number(uia->getEmMpmClass()));
+// -----------------------------------------------------------------------------
+//
+// -----------------------------------------------------------------------------
+int PerClassItemData::getGrayLevel()
+{
+  return m_GrayLevel;
+}
 
 
+// -----------------------------------------------------------------------------
+//
+// -----------------------------------------------------------------------------
+void PerClassItemData::setColor(QString color)
+{
+  m_Color = color;
+}
+
+// -----------------------------------------------------------------------------
+//
+// -----------------------------------------------------------------------------
+QString PerClassItemData::getColor()
+{
+  return m_Color;
+}
+
+// -----------------------------------------------------------------------------
+//
+// -----------------------------------------------------------------------------
+void PerClassItemData::writeSettings(QSettings &prefs)
+{
+  QString group("PerClassItemData-");
+  group.append(QString::number(m_Label));
+
+  prefs.beginGroup(group);
+
+  prefs.setValue("Label", m_Label);
+  prefs.setValue("Gamma", m_Gamma);
+  prefs.setValue("GrayLevel", m_GrayLevel);
+  prefs.setValue("Color", m_Color);
+
+  prefs.endGroup();
+}
+
+#define printvar(var)\
+  std::cout << "m_" << #var << ": " << m_##var << std::endl;
+
+// -----------------------------------------------------------------------------
+//
+// -----------------------------------------------------------------------------
+void PerClassItemData::readSettings(QSettings &prefs)
+{
   bool ok = false;
-  m_Mu->setText(QString::number(uia->getMu()));
-  m_Sigma->setText(QString::number(uia->getSigma()));
 
-  m_MinVariance->blockSignals(true);
-  m_MinVariance->setValue(uia->getMinVariance());
-  m_MinVariance->blockSignals(false);
+  QString group("PerClassItemData-");
+  group.append(QString::number(m_Label));
+  prefs.beginGroup(group);
+  QStringList keys = prefs.allKeys();
 
-  m_LineWidth->setValue(uia->getLineWidth());
+  QVariant v = prefs.value("Label");
+  m_Label = v.toInt(&ok);
 
-  unsigned int x, y;
-  uia->getUpperLeft(x, y);
-  QString s = QString::number(x).append(", ").append(QString::number(y));
-  m_UpperLeft->setText(s);
-
-  uia->getLowerRight(x, y);
-  s = QString::number(x).append(", ").append(QString::number(y));
-  m_LowerRight->setText(s);
-
+  v = prefs.value("Gamma");
+  m_Gamma = v.toDouble(&ok);
+  v = prefs.value("GrayLevel");
+  m_GrayLevel = v.toInt(&ok);
+  v = prefs.value("Color");
+  m_Color = v.toString();
+#if 0
+  printvar(Class);
+  printvar(Mu);
+  printvar(Sigma);
+  printvar(GrayLevel);
+#endif
+  prefs.endGroup();
 }
-
-// -----------------------------------------------------------------------------
-//
-// -----------------------------------------------------------------------------
-UserInitArea* UserInitAreaWidget::getUserInitArea()
-{
-  return m_uia;
-}
-
 

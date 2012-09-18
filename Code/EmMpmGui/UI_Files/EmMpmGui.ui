@@ -1091,6 +1091,43 @@ image: url(:/bullet_triangle_grey_down.png);
             <property name="verticalSpacing">
              <number>6</number>
             </property>
+            <item row="1" column="1">
+             <widget class="QSpinBox" name="m_EmIterations">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="minimumSize">
+               <size>
+                <width>60</width>
+                <height>0</height>
+               </size>
+              </property>
+              <property name="maximumSize">
+               <size>
+                <width>60</width>
+                <height>16777215</height>
+               </size>
+              </property>
+              <property name="toolTip">
+               <string>The number of EM Loops to use when segmenting</string>
+              </property>
+              <property name="statusTip">
+               <string>The number of EM Loops to use when segmenting</string>
+              </property>
+              <property name="minimum">
+               <number>0</number>
+              </property>
+              <property name="maximum">
+               <number>32000</number>
+              </property>
+              <property name="value">
+               <number>5</number>
+              </property>
+             </widget>
+            </item>
             <item row="3" column="1">
              <widget class="QLineEdit" name="m_Beta">
               <property name="sizePolicy">
@@ -1153,43 +1190,6 @@ font-size: 10px;
               </property>
               <property name="alignment">
                <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-              </property>
-             </widget>
-            </item>
-            <item row="1" column="1">
-             <widget class="QSpinBox" name="m_EmIterations">
-              <property name="sizePolicy">
-               <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
-                <horstretch>0</horstretch>
-                <verstretch>0</verstretch>
-               </sizepolicy>
-              </property>
-              <property name="minimumSize">
-               <size>
-                <width>60</width>
-                <height>0</height>
-               </size>
-              </property>
-              <property name="maximumSize">
-               <size>
-                <width>60</width>
-                <height>16777215</height>
-               </size>
-              </property>
-              <property name="toolTip">
-               <string>The number of EM Loops to use when segmenting</string>
-              </property>
-              <property name="statusTip">
-               <string>The number of EM Loops to use when segmenting</string>
-              </property>
-              <property name="minimum">
-               <number>0</number>
-              </property>
-              <property name="maximum">
-               <number>32000</number>
-              </property>
-              <property name="value">
-               <number>5</number>
               </property>
              </widget>
             </item>
@@ -1426,23 +1426,13 @@ font-size: 10px;
              </widget>
             </item>
             <item row="4" column="0" colspan="4">
-             <widget class="QTableWidget" name="gammaTableWidget">
+             <widget class="QTableView" name="perClassTableView">
               <property name="alternatingRowColors">
                <bool>true</bool>
               </property>
-              <property name="columnCount">
-               <number>2</number>
-              </property>
-              <column>
-               <property name="text">
-                <string>Class</string>
-               </property>
-              </column>
-              <column>
-               <property name="text">
-                <string>Gamma</string>
-               </property>
-              </column>
+              <attribute name="verticalHeaderVisible">
+               <bool>false</bool>
+              </attribute>
              </widget>
             </item>
            </layout>
@@ -2906,6 +2896,12 @@ font-size: 10px;
  </widget>
  <customwidgets>
   <customwidget>
+   <class>UserInitAreaWidget</class>
+   <extends>QWidget</extends>
+   <header location="global">UserInitAreaWidget.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
    <class>QwtPlot</class>
    <extends>QFrame</extends>
    <header>qwt_plot.h</header>
@@ -2926,12 +2922,6 @@ font-size: 10px;
    <class>EMMPMGraphicsView</class>
    <extends>QWidget</extends>
    <header location="global">EMMPMGraphicsView.h</header>
-   <container>1</container>
-  </customwidget>
-  <customwidget>
-   <class>UserInitAreaWidget</class>
-   <extends>QWidget</extends>
-   <header location="global">UserInitAreaWidget.h</header>
    <container>1</container>
   </customwidget>
   <customwidget>

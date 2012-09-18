@@ -49,7 +49,6 @@
 
 
 class UserInitArea;
-class UserInitAreaTableModel;
 class QwtPlotZoomer;
 class QwtPlotPicker;
 class QwtPlotPanner;
@@ -164,7 +163,7 @@ class EmMpmGui : public QMainWindow, private Ui::EmMpmGui
 
     void updateManualInitHistograms();
     void manualInitDataChanged ( const QModelIndex & topLeft, const QModelIndex & bottomRight );
-
+    void perClassItemDataChanged ( const QModelIndex & topLeft, const QModelIndex & bottomRight );
   // Histogram/Gaussian Plot related Manual Hookup
      void clearProcessHistograms();
      void clearManualInitCurves();
