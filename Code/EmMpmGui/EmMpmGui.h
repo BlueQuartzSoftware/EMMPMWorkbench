@@ -123,7 +123,6 @@ class EmMpmGui : public QMainWindow, private Ui::EmMpmGui
     void copyGrayValues( EMMPM_Data::Pointer inputs);
     void copyInitCoords( EMMPM_Data::Pointer inputs);
     void copyIntializationValues(EMMPM_Data::Pointer inputs);
-    void copyUserInitAreaGammaValues(EMMPM_Data::Pointer inputs);
     int copyGammaValues(EMMPM_Data::Pointer inputs);
 
     void copyMinVarianceValues(EMMPM_Data::Pointer inputs);
@@ -131,7 +130,7 @@ class EmMpmGui : public QMainWindow, private Ui::EmMpmGui
     void updateHistogramAxis();
 
     void addRemoveManualInitTableRows();
-    void addRemoveGammaTableRows();
+    void addRemovePerClassTableRows();
 
     void estimateMemoryUse(QSize size);
 
@@ -161,15 +160,18 @@ class EmMpmGui : public QMainWindow, private Ui::EmMpmGui
     void userInitAreaSelected(UserInitArea* uia);
     void userInitAreaLostFocus();
 
-    void updateManualInitHistograms();
+  //  void updateManualInitHistograms();
     void manualInitDataChanged ( const QModelIndex & topLeft, const QModelIndex & bottomRight );
     void perClassItemDataChanged ( const QModelIndex & topLeft, const QModelIndex & bottomRight );
-  // Histogram/Gaussian Plot related Manual Hookup
-     void clearProcessHistograms();
-     void clearManualInitCurves();
-     void addProcessHistogram(QVector<real_t> data);
+
+    // Histogram/Gaussian Plot related Manual Hookup
+     void clearGaussianCurves();
+ //    void clearManualInitCurves();
+     void addGaussianCurve(QVector<real_t> data);
      void plotCombinedGaussian();
      void plotImageHistogram();
+     void updateGaussianCurves();
+     void generateGaussianData(int rows);
 
   // MSE Value update/Plots
      void updateMSEValue(qreal value);
@@ -212,6 +214,9 @@ class EmMpmGui : public QMainWindow, private Ui::EmMpmGui
     void on_m_NumClasses_valueChanged(int i);
 
     void on_enableUserDefinedAreas_stateChanged(int state);
+    void on_showUserDefinedAreas_stateChanged(int state);
+
+
     void on_enableManualInit_stateChanged(int state);
 
     void on_addClassCoupling_clicked();
@@ -344,12 +349,10 @@ class EmMpmGui : public QMainWindow, private Ui::EmMpmGui
     QwtPlotGrid*   m_grid;
 
     QwtPlotCurve*           m_histogram;
-    QVector<double>         m_ImageHistogram;
-    QList<QwtPlotCurve*>    m_Gaussians;
-    QList<QwtPlotCurve*>    m_ManualInitGaussians;
-    QwtPlotCurve*           m_CombinedGaussians;
+    QVector<double>         m_ImageHistogramData;
+    QList<QwtPlotCurve*>    m_GaussianCurves;
+    QwtPlotCurve*           m_CombinedGaussianCurve;
     bool                    m_ShowCombinedGaussians;
-    QList<QwtPlotCurve*>    m_ProcessGaussians;
     AxisSettingsDialog*     m_AxisSettingsDialog;
 
     QList<QWidget*> m_WidgetList;
@@ -363,6 +366,10 @@ class EmMpmGui : public QMainWindow, private Ui::EmMpmGui
     QVector<qreal>   m_MSEValues;
     QwtPlotCurve*    m_MSEPlotCurve;
     QwtPlotPicker*   m_MSEpicker;
+
+    double          m_MeanOfImage;
+    double          m_SigmaOfImage;
+    bool            m_ImageStatsReady;
 
     QString m_GaussianCurveColors[16];
 

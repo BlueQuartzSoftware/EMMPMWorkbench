@@ -71,7 +71,7 @@ Qt::ItemFlags ManualInitTableModel::flags(const QModelIndex &index) const
     theFlags |= Qt::ItemIsEnabled;
 
     int col = index.column();
-    if (  col == Mu || col == Sigma || col == Color )
+    if (  col == Mu || col == Sigma)
     {
       theFlags = Qt::ItemIsEditable | Qt::ItemIsSelectable | Qt::ItemIsEnabled;
     }
@@ -94,23 +94,6 @@ QVariant ManualInitTableModel::data(const QModelIndex &index, qint32 role) const
   if (role == Qt::SizeHintRole)
   {
     QStyleOptionComboBox comboBox;
-
-    switch(index.column())
-    {
-
-      case Color:
-      {
-        comboBox.currentText = QString("Dark Blue     ");
-        const QString header = headerData(Color, Qt::Horizontal, Qt::DisplayRole).toString();
-        if (header.length() > comboBox.currentText.length())
-        {
-          comboBox.currentText = header;
-        }
-        break;
-      }
-      default:
-        Q_ASSERT(false);
-    }
     QFontMetrics fontMetrics(data(index, Qt::FontRole) .value<QFont > ());
     comboBox.fontMetrics = fontMetrics;
     QSize size(fontMetrics.width(comboBox.currentText), fontMetrics.height());
@@ -140,8 +123,6 @@ QVariant ManualInitTableModel::data(const QModelIndex &index, qint32 role) const
         return QVariant(manualInitData->getMu());
       case ManualInitTableModel::Sigma:
         return QVariant(manualInitData->getSigma());
-      case ManualInitTableModel::Color:
-        return QVariant(manualInitData->getEmMpmColor());
       default:
         break;
     }
@@ -162,7 +143,6 @@ QVariant  ManualInitTableModel::headerData ( int section, Qt::Orientation orient
       case Class: return QVariant(QString("Class"));
       case Mu: return QVariant(QString("Mu"));
       case Sigma: return QVariant(QString("Sigma"));
-      case Color: return QVariant(QString("Color"));
       default:
         break;
     }
@@ -220,9 +200,6 @@ bool ManualInitTableModel::setData(const QModelIndex & index, const QVariant & v
     case ManualInitTableModel::Sigma:
       m_ManualInitDatas.at(row)->setSigma(value.toDouble(&ok));
       break;
-    case ManualInitTableModel::Color:
-        m_ManualInitDatas.at(row)->setEmMpmColor(value.toString());
-        break;
     default:
       Q_ASSERT(false);
   }
@@ -246,7 +223,7 @@ bool ManualInitTableModel::insertRows(int row, int count, const QModelIndex& ind
   for (int i = 0; i < count; ++i)
   {
     // Create a new ManualInitData object
-    ManualInitData* d = new ManualInitData(m_ManualInitDatas.count(), mu, sigma, gamma,  QColor::colorNames().at(10), this);
+    ManualInitData* d = new ManualInitData(m_ManualInitDatas.count(), mu, sigma, this);
     m_ManualInitDatas.push_back(d);
     m_RowCount = m_ManualInitDatas.count();
   }

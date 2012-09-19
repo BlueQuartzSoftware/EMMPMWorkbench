@@ -57,12 +57,10 @@ QGraphicsPolygonItem(polygon, parent)
   m_isResizing = false;
   m_CurrentResizeHandle = UserInitArea::NO_CTRL_POINT;
   ctrlPointSize = 7.0f;
-  m_GrayLevel = 0 + (255/16 * userIndex);
 
   m_Class = userIndex;
   m_Mu = 1.0;
   m_Sigma = 0.1;
-  m_Gamma = 0.0;
   m_MinVariance = 20.0;
   m_LineWidth = 1.0;
   m_Visible = true;
@@ -99,8 +97,6 @@ UserInitArea* UserInitArea::NewUserInitArea(QSettings &prefs, int index, QGraphi
 {
   bool ok = false;
   int m_Class = index;
-  int m_GrayLevel = 0;
-  double m_Gamma = 0.0;
   double m_MinVariance = 20.0;
   double m_LineWidth = 1.0;
   QColor color;
@@ -112,8 +108,6 @@ UserInitArea* UserInitArea::NewUserInitArea(QSettings &prefs, int index, QGraphi
   prefs.beginGroup(group);
 
   m_Class = prefs.value("Class").toInt(&ok);
-  m_GrayLevel = prefs.value("GrayLevel").toInt(&ok);
-  m_Gamma = prefs.value("Gamma").toDouble(&ok);
   m_MinVariance = prefs.value("MinVariance").toDouble(&ok);
 
   x = prefs.value("X").toInt(&ok);
@@ -132,8 +126,6 @@ UserInitArea* UserInitArea::NewUserInitArea(QSettings &prefs, int index, QGraphi
   prefs.endGroup();
 
   UserInitArea* uia = new UserInitArea(m_Class, rect, parent);
-  uia->setEmMpmGrayLevel(m_GrayLevel);
-  uia->setGamma(m_Gamma);
   uia->setMinVariance(m_MinVariance);
   uia->setLineWidth(m_LineWidth);
   uia->setColor(c);
@@ -159,8 +151,6 @@ void UserInitArea::writeSettings(QSettings &prefs)
 
   prefs.beginGroup(group);
   prefs.setValue("Class", m_Class);
-  prefs.setValue("GrayLevel", m_GrayLevel);
-  prefs.setValue("Gamma", m_Gamma);
   prefs.setValue("MinVariance", m_MinVariance);
 
   unsigned int x, y;
@@ -245,22 +235,6 @@ void UserInitArea::setSigma(double sigma)
 double UserInitArea::getSigma()
 {
   return m_Sigma;
-}
-
-// -----------------------------------------------------------------------------
-//
-// -----------------------------------------------------------------------------
-void UserInitArea::setGamma(double g)
-{
-  m_Gamma = g;
-}
-
-// -----------------------------------------------------------------------------
-//
-// -----------------------------------------------------------------------------
-double UserInitArea::getGamma()
-{
-  return m_Gamma;
 }
 
 // -----------------------------------------------------------------------------

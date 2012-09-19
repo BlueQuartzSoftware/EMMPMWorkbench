@@ -109,7 +109,7 @@ void EMMPMTask::reportProgress(EMMPM_Data::Pointer data)
     // Now overwrite the beginning of the color table with the gray scale values for each class
     for (int g = 0; g < data->classes; ++g)
     {
-      image.setColor(g, qRgb(data->grayTable[g], data->grayTable[g], data->grayTable[g]) );
+      image.setColor(g, data->grayTable[g] );
     }
     emit mySelf->updateImageAvailable(image);
 
@@ -429,12 +429,16 @@ void EMMPMTask::segmentImage(int i)
   // Now overwrite the beginning of the color table with the gray scale values for each class
   for (int g = 0; g < m_data->classes; ++g)
   {
-    outQImage.setColor(g, qRgb(m_data->grayTable[g], m_data->grayTable[g], m_data->grayTable[g]) );
+      outQImage.setColor(g, m_data->grayTable[g]);
   }
 
   // Save the output image to a file
   QFileInfo fi (QString(m_data->output_file_name));
   QString ext = fi.suffix();
+
+  bool success = outQImage.save(m_data->output_file_name);
+
+#if 0
   if (ext.compare(QString("tif"), Qt::CaseInsensitive) == 0
       || ext.compare(QString("tiff"), Qt::CaseInsensitive) == 0)
   {
@@ -457,7 +461,7 @@ void EMMPMTask::segmentImage(int i)
        UPDATE_PROGRESS(QString("EM/MPM Error Writing Output Image"), 95);
      }
   }
-
+#endif
 
   if (m_OutputStatsFile.empty() == false)
   {

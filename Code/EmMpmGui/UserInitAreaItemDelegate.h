@@ -77,12 +77,6 @@ class UserInitAreaItemDelegate : public QStyledItemDelegate
       QLineEdit* classValue;
       QIntValidator* classValidator;
 
-      QLineEdit* grayValue;
-      QIntValidator* grayValueValidator;
-
-      QLineEdit* gamma;
-      QDoubleValidator* gammaValidator;
-
       QLineEdit* mu;
       QDoubleValidator* muValidator;
 
@@ -95,18 +89,6 @@ class UserInitAreaItemDelegate : public QStyledItemDelegate
           classValidator = new QIntValidator(classValue);
           classValue->setValidator(classValidator);
           return classValue;
-        case UserInitAreaTableModel::GrayValue:
-          grayValue = new QLineEdit(parent);
-          grayValue->setFrame(false);
-          grayValueValidator = new QIntValidator(grayValue);
-          grayValue->setValidator(grayValueValidator);
-          return grayValue;
-        case UserInitAreaTableModel::Gamma:
-          gamma = new QLineEdit(parent);
-          gamma->setFrame(false);
-          gammaValidator = new QDoubleValidator(gamma);
-          gamma->setValidator(gammaValidator);
-          return gamma;
         case UserInitAreaTableModel::Mu:
            mu = new QLineEdit(parent);
            mu->setFrame(false);
@@ -126,8 +108,6 @@ class UserInitAreaItemDelegate : public QStyledItemDelegate
     {
       qint32 col = index.column();
       if (col == UserInitAreaTableModel::Class ||
-          col == UserInitAreaTableModel::GrayValue ||
-          col == UserInitAreaTableModel::Gamma ||
           col == UserInitAreaTableModel::Mu)
       {
         QLineEdit* lineEdit = qobject_cast<QLineEdit* > (editor);
@@ -143,21 +123,12 @@ class UserInitAreaItemDelegate : public QStyledItemDelegate
     void setModelData(QWidget *editor, QAbstractItemModel *model, const QModelIndex &index) const
     {
       qint32 col = index.column();
-      if (col == UserInitAreaTableModel::Class ||
-          col == UserInitAreaTableModel::GrayValue )
+      if (col == UserInitAreaTableModel::Class)
       {
         QLineEdit* lineEdit = qobject_cast<QLineEdit* > (editor);
         Q_ASSERT(lineEdit);
         bool ok = false;
         int v = lineEdit->text().toInt(&ok);
-        model->setData(index, v);
-      }
-      else if (col == UserInitAreaTableModel::Gamma)
-      {
-        QLineEdit* lineEdit = qobject_cast<QLineEdit* > (editor);
-        Q_ASSERT(lineEdit);
-        bool ok = false;
-        double v = lineEdit->text().toDouble(&ok);
         model->setData(index, v);
       }
       else if (col == UserInitAreaTableModel::Mu)
@@ -172,9 +143,9 @@ class UserInitAreaItemDelegate : public QStyledItemDelegate
     }
 
   private:
-    QModelIndex m_Index;
-    QWidget* m_Widget;
-    QAbstractItemModel* m_Model;
+//    QModelIndex m_Index;
+//    QWidget* m_Widget;
+//    QAbstractItemModel* m_Model;
 
 };
 

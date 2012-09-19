@@ -104,11 +104,6 @@ class ManualInitDataItemDelegate : public QStyledItemDelegate
           dValidator->setDecimals(6);
           editor->setValidator(dValidator);
           return editor;
-
-        case ManualInitTableModel::Color:
-          colorCombo = new ColorComboPicker(parent);
-          colorCombo->setAutoFillBackground(true);
-          return colorCombo;
         default:
           break;
       }
@@ -129,13 +124,7 @@ class ManualInitDataItemDelegate : public QStyledItemDelegate
         Q_ASSERT(lineEdit);
         lineEdit->setText(index.model()->data(index).toString());
       }
-      else if (col == ManualInitTableModel::Color)
-      {
-        QString state = index.model()->data(index).toString();
-        ColorComboPicker* comboBox = qobject_cast<ColorComboPicker* > (editor);
-        Q_ASSERT(comboBox);
-        comboBox->setCurrentIndex(comboBox->findText(state));
-      }
+
       else QStyledItemDelegate::setEditorData(editor, index);
     }
 
@@ -154,19 +143,14 @@ class ManualInitDataItemDelegate : public QStyledItemDelegate
         double v = lineEdit->text().toDouble(&ok);
         model->setData(index, v);
       }
-      else if (col == ManualInitTableModel::Color )
-      {
-        ColorComboPicker *comboBox = qobject_cast<ColorComboPicker* > (editor);
-        Q_ASSERT(comboBox);
-        model->setData(index, comboBox->currentText());
-      }
+
       else QStyledItemDelegate::setModelData(editor, model, index);
     }
 
   private:
-    QModelIndex m_Index;
-    QWidget* m_Widget;
-    QAbstractItemModel* m_Model;
+//    QModelIndex m_Index;
+//    QWidget* m_Widget;
+//    QAbstractItemModel* m_Model;
 
 };
 

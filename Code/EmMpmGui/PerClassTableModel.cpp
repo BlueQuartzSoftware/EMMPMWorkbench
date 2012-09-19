@@ -108,8 +108,7 @@ QVariant PerClassTableModel::data(const QModelIndex &index, qint32 role) const
         }
         break;
       }
-      default:
-        Q_ASSERT(false);
+
     }
     QFontMetrics fontMetrics(data(index, Qt::FontRole) .value<QFont > ());
     comboBox.fontMetrics = fontMetrics;
@@ -235,23 +234,23 @@ bool PerClassTableModel::setData(const QModelIndex & index, const QVariant & val
 // -----------------------------------------------------------------------------
 bool PerClassTableModel::insertRows(int row, int count, const QModelIndex& index)
 {
-  // This is basically disabled at this point
-  qint32 binNum = 0;
-  double gamma = 0.0;
+    // This is basically disabled at this point
+    qint32 binNum = 0;
+    double gamma = 0.0;
     int grayLevel = 0;
 
 
-  beginInsertRows(QModelIndex(), row, row + count - 1);
-  for (int i = 0; i < count; ++i)
-  {
-    // Create a new PerClassItemData object
-    PerClassItemData* d = new PerClassItemData(m_ItemDatas.count(), gamma, grayLevel, QColor::colorNames().at(10), this);
-    m_ItemDatas.push_back(d);
-    m_RowCount = m_ItemDatas.count();
-  }
-  endInsertRows();
-  emit dataChanged(index, index);
-  return true;
+    beginInsertRows(QModelIndex(), row, row + count - 1);
+    for (int i = 0; i < count; ++i)
+    {
+        // Create a new PerClassItemData object
+        PerClassItemData* d = new PerClassItemData(m_ItemDatas.count(), gamma, grayLevel, QColor::colorNames().at(10), this);
+        m_ItemDatas.push_back(d);
+        m_RowCount = m_ItemDatas.count();
+    }
+    endInsertRows();
+    emit dataChanged(index, index);
+    return true;
 }
 
 // -----------------------------------------------------------------------------
@@ -259,10 +258,6 @@ bool PerClassTableModel::insertRows(int row, int count, const QModelIndex& index
 // -----------------------------------------------------------------------------
 bool PerClassTableModel::insertItemData(PerClassItemData* data, int row, const QModelIndex& index)
 {
-//  qint32 binNum = 0;
-//  double mu = 128.0;
-//  double sigma = 20.0;
-
   beginInsertRows(QModelIndex(), row, row );
   for (int i = 0; i < 1; ++i)
   {

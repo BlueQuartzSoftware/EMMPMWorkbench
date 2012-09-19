@@ -52,7 +52,7 @@ class LayersDockWidget : public QDockWidget , private Ui::LayersDockWidget
     QSlider*   getOpacitySlider();
     QSpinBox*  getOpacitySpinBox();
     QComboBox* getCompositeTypeComboBox();
-    QCheckBox* getUseColorTable();
+ //   QCheckBox* getUseColorTable();
 
   public slots:
     void on_segmentedImage_stateChanged(int state);

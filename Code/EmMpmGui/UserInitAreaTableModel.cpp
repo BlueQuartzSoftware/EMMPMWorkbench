@@ -70,7 +70,7 @@ Qt::ItemFlags UserInitAreaTableModel::flags(const QModelIndex &index) const
     theFlags |= Qt::ItemIsEnabled;
 
     int col = index.column();
-    if (col == Class || col == GrayValue || col == Gamma || col == Mu)
+    if (col == Class || col == Mu)
     {
       theFlags = Qt::ItemIsEditable | Qt::ItemIsSelectable | Qt::ItemIsEnabled;
     }
@@ -158,8 +158,6 @@ QVariant UserInitAreaTableModel::data(const QModelIndex &index, qint32 role) con
     {
       case UserInitAreaTableModel::Class:
         return QVariant(uia->getEmMpmClass());
-      case UserInitAreaTableModel::GrayValue:
-        return QVariant(uia->getEmMpmGrayLevel());
       case UserInitAreaTableModel::UpperLeft:
         uia->getUpperLeft(x, y);
         s = QString::number(x);
@@ -178,8 +176,6 @@ QVariant UserInitAreaTableModel::data(const QModelIndex &index, qint32 role) con
         return QVariant(uia->getMu());
       case UserInitAreaTableModel::StdDev:
         return QVariant(uia->getSigma());
-      case UserInitAreaTableModel::Gamma:
-        return QVariant(uia->getGamma());
       default:
         break;
     }
@@ -198,12 +194,10 @@ QVariant  UserInitAreaTableModel::headerData ( int section, Qt::Orientation orie
     switch(section)
     {
       case Class: return QVariant(QString("Class"));
-      case GrayValue: return QVariant(QString("Gray Value"));
       case UpperLeft: return QVariant(QString("Upper Left"));
       case LowerRight: return QVariant(QString("Lower Right"));
       case Mu: return QVariant(QString("Mean"));
       case StdDev: return QVariant(QString("Standard Dev"));
-      case Gamma: return QVariant(QString("Gamma"));
       default:
         break;
     }
@@ -255,9 +249,6 @@ bool UserInitAreaTableModel::setData(const QModelIndex & index, const QVariant &
     case UserInitAreaTableModel::Class:
       m_UserInitAreas.at(row)->setEmMpmClass(value.toInt(&ok));
       break;
-    case UserInitAreaTableModel::GrayValue:
-      m_UserInitAreas.at(row)->setEmMpmGrayLevel(value.toInt(&ok));
-      break;
     case UserInitAreaTableModel::UpperLeft:
       break;
     case UserInitAreaTableModel::LowerRight:
@@ -266,9 +257,6 @@ bool UserInitAreaTableModel::setData(const QModelIndex & index, const QVariant &
       m_UserInitAreas.at(row)->setMu(value.toDouble(&ok));
       break;
     case UserInitAreaTableModel::StdDev:
-      break;
-    case UserInitAreaTableModel::Gamma:
-      m_UserInitAreas.at(row)->setGamma(value.toDouble(&ok));
       break;
     default:
       Q_ASSERT(false);

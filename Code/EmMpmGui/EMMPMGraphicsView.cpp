@@ -54,8 +54,7 @@ EMMPMGraphicsView::EMMPMGraphicsView(QWidget *parent)
 : QGraphicsView(parent),
   m_ImageGraphicsItem(NULL),
   m_UserInitAreaVector(NULL),
-  m_UseColorTable(false),
-  m_UseGrayScaleTable(false)
+  m_UseColorTable(false)
 {
   setAcceptDrops(true);
   setDragMode(RubberBandDrag);
@@ -77,12 +76,12 @@ EMMPMGraphicsView::EMMPMGraphicsView(QWidget *parent)
   m_composition_mode = QPainter::CompositionMode_SourceOver;
   m_OverlayTransparency = 1.0f; // Fully opaque
 
-  m_CustomGrayScaleTable.resize(256);
+ // m_CustomGrayScaleTable.resize(256);
   m_CustomColorTable.resize(256);
   for (quint32 i = 0; i < 256; ++i)
   {
     m_CustomColorTable[i] = qRgb(i, i, i);
-    m_CustomGrayScaleTable[i] = qRgb(i,i,i);
+  //  m_CustomGrayScaleTable[i] = qRgb(i,i,i);
   }
 
 }
@@ -101,31 +100,8 @@ void EMMPMGraphicsView::setOverlayTransparency(float f)
 void EMMPMGraphicsView::useCustomColorTable(bool b)
 {
   m_UseColorTable = b;
-  if (m_UseColorTable == true)
-  {
-    m_UseGrayScaleTable = false;
-  }
-}
 
-// -----------------------------------------------------------------------------
-//
-// -----------------------------------------------------------------------------
-void EMMPMGraphicsView::useCustomGrayScaleTable(bool b)
-{
-  m_UseGrayScaleTable = b;
-  if (m_UseGrayScaleTable == true)
-  {
-    m_UseColorTable = false;
-  }
 }
-
-// -----------------------------------------------------------------------------
-//
-// -----------------------------------------------------------------------------
-//void EMMPMGraphicsView::setCustomColorTable(QVector<QRgb> colorTable)
-//{
-//  m_CustomColorTable = colorTable;
-//}
 
 // -----------------------------------------------------------------------------
 //
@@ -180,7 +156,6 @@ void EMMPMGraphicsView::userInitAreaUpdated(UserInitArea* uia)
 
   qint32 size = m_UserInitAreaVector->size();
   QVector<QRgb> colorTable(size);
-  QVector<QRgb> grayTable(size);
   UserInitArea* u = NULL;
   for(qint32 i = 0; i < size; ++i)
   {
@@ -189,11 +164,11 @@ void EMMPMGraphicsView::userInitAreaUpdated(UserInitArea* uia)
     {
       int index = u->getEmMpmClass(); // Get the class value which will be the index values that are written to the indexed image
       colorTable[index] = u->getColor().rgb();
-      grayTable[index] = qRgb(u->getEmMpmGrayLevel(), u->getEmMpmGrayLevel(), u->getEmMpmGrayLevel());
+    //  grayTable[index] = qRgb(u->getEmMpmGrayLevel(), u->getEmMpmGrayLevel(), u->getEmMpmGrayLevel());
     }
   }
 
-  updateColorTables(grayTable, colorTable);
+  updateColorTables( colorTable);
   updateDisplay();
 }
 
@@ -338,10 +313,10 @@ void EMMPMGraphicsView::updateDisplay()
     {
       m_OverlayImage.setColorTable(m_CustomColorTable);
     }
-    else if (m_UseGrayScaleTable == true)
-    {
-      m_OverlayImage.setColorTable(m_CustomGrayScaleTable);
-    }
+//    else if (m_UseGrayScaleTable == true)
+//    {
+//      m_OverlayImage.setColorTable(m_CustomGrayScaleTable);
+//    }
     else
     {
       m_OverlayImage.setColorTable(m_OriginalColorTable);
@@ -723,7 +698,7 @@ void EMMPMGraphicsView::addNewInitArea(UserInitArea* userInitArea)
 
     qint32 size = m_UserInitAreaVector->size();
     QVector<QRgb> colorTable(size);
-    QVector<QRgb> grayTable(size);
+  //  QVector<QRgb> grayTable(size);
     UserInitArea* u = NULL;
     for(qint32 i = 0; i < size; ++i)
     {
@@ -732,11 +707,11 @@ void EMMPMGraphicsView::addNewInitArea(UserInitArea* userInitArea)
       {
         int index = u->getEmMpmClass(); // Get the class value which will be the index values that are written to the indexed image
         colorTable[index] = u->getColor().rgb();
-        grayTable[index] = qRgb(u->getEmMpmGrayLevel(), u->getEmMpmGrayLevel(), u->getEmMpmGrayLevel());
+    //    grayTable[index] = qRgb(u->getEmMpmGrayLevel(), u->getEmMpmGrayLevel(), u->getEmMpmGrayLevel());
       }
     }
 
-    updateColorTables(grayTable, colorTable);
+    updateColorTables(colorTable);
 
   emit fireUserInitAreaAdded(userInitArea);
 }
@@ -744,22 +719,22 @@ void EMMPMGraphicsView::addNewInitArea(UserInitArea* userInitArea)
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
-void EMMPMGraphicsView::updateColorTables(QVector<QRgb> grayTable, QVector<QRgb> colorTable)
+void EMMPMGraphicsView::updateColorTables( QVector<QRgb> colorTable)
 {
   // Write Gray Scale values for each entry from 0 to 255 to initialize the table
   // to something. Also initialize the Gray Scale table to the same thing
   for (quint32 i = 0; i < 256; ++i)
   {
     m_CustomColorTable[i] = qRgb(i, i, i);
-    m_CustomGrayScaleTable[i] = qRgb(i, i, i);
+  //  m_CustomGrayScaleTable[i] = qRgb(i, i, i);
   }
 
-  qint32 size = grayTable.size();
-  for(qint32 index = 0; index < size; ++index)
-  {
-      m_CustomGrayScaleTable[index] = grayTable[index];
-  }
-  size = colorTable.size();
+//  qint32 size = grayTable.size();
+//  for(qint32 index = 0; index < size; ++index)
+//  {
+//      m_CustomGrayScaleTable[index] = grayTable[index];
+//  }
+  qint32 size = colorTable.size();
   for(qint32 index = 0; index < size; ++index)
   {
       m_CustomColorTable[index] = colorTable[index];

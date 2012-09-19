@@ -50,8 +50,7 @@ public:
      * @param grayLevel
      * @param parent
      */
-    ManualInitData(int label, double mu, double sigma, double gamma,
-                   QString color, QObject* parent = 0);
+    ManualInitData(int label, double mu, double sigma, QObject* parent = 0);
     virtual ~ManualInitData();
 
     void readSettings(QSettings &prefs);
@@ -68,11 +67,6 @@ public:
     void setSigma(double sigma);
     double getSigma();
 
-    void setGamma(double g);
-    double getGamma();
-
-    void setEmMpmColor(QString color);
-    QString getEmMpmColor();
 
  signals:
 
@@ -88,8 +82,7 @@ public:
     int m_Class;
     double m_Mu;
     double m_Sigma;
-    double m_Gamma;
-    QString m_Color;
+
 };
 
 

@@ -96,7 +96,10 @@ class PerClassItemDelegate : public QStyledItemDelegate
           dValidator->setDecimals(6);
           editor->setValidator(dValidator);
           return editor;
-
+      case PerClassTableModel::Color:
+        colorCombo = new ColorComboPicker(parent);
+        colorCombo->setAutoFillBackground(true);
+        return colorCombo;
       case PerClassTableModel::Gray:
         editor = new QLineEdit(parent);
         editor->setFrame(false);
@@ -104,10 +107,7 @@ class PerClassItemDelegate : public QStyledItemDelegate
         editor->setValidator(iValidator);
         return editor;
 
-        case PerClassTableModel::Color:
-          colorCombo = new ColorComboPicker(parent);
-          colorCombo->setAutoFillBackground(true);
-          return colorCombo;
+
         default:
           break;
       }
@@ -170,9 +170,9 @@ class PerClassItemDelegate : public QStyledItemDelegate
     }
 
   private:
-    QModelIndex m_Index;
-    QWidget* m_Widget;
-    QAbstractItemModel* m_Model;
+//    QModelIndex m_Index;
+//    QWidget* m_Widget;
+//    QAbstractItemModel* m_Model;
 
 };
 

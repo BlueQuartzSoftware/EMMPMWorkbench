@@ -37,16 +37,12 @@
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
-ManualInitData::ManualInitData(int label, double mu, double sigma, double gamma,
-                               QString color, QObject* parent) :
+ManualInitData::ManualInitData(int label, double mu, double sigma, QObject* parent) :
 QObject(parent),
 m_Class(label),
 m_Mu(mu),
-m_Sigma(sigma),
-m_Gamma(gamma),
-m_Color(color)
+m_Sigma(sigma)
 {
-
 }
 
 // -----------------------------------------------------------------------------
@@ -106,39 +102,6 @@ double ManualInitData::getSigma()
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
-void ManualInitData::setGamma(double sigma)
-{
-  m_Gamma = sigma;
-}
-
-// -----------------------------------------------------------------------------
-//
-// -----------------------------------------------------------------------------
-double ManualInitData::getGamma()
-{
-  return m_Gamma;
-}
-
-
-// -----------------------------------------------------------------------------
-//
-// -----------------------------------------------------------------------------
-void ManualInitData::setEmMpmColor(QString color)
-{
-  m_Color = color;
-}
-
-// -----------------------------------------------------------------------------
-//
-// -----------------------------------------------------------------------------
-QString ManualInitData::getEmMpmColor()
-{
-  return m_Color;
-}
-
-// -----------------------------------------------------------------------------
-//
-// -----------------------------------------------------------------------------
 void ManualInitData::writeSettings(QSettings &prefs)
 {
   QString group("ManualInitData-");
@@ -149,8 +112,6 @@ void ManualInitData::writeSettings(QSettings &prefs)
   prefs.setValue("Class", m_Class);
   prefs.setValue("Mu", m_Mu);
   prefs.setValue("Sigma", m_Sigma);
-  prefs.setValue("Gamma", m_Gamma);
-  prefs.setValue("Color", m_Color);
 
   prefs.endGroup();
 }
@@ -176,10 +137,7 @@ void ManualInitData::readSettings(QSettings &prefs)
   m_Mu = v.toDouble(&ok);
   v = prefs.value("Sigma");
   m_Sigma = v.toDouble(&ok);
-  v = prefs.value("Gamma");
-  m_Gamma = v.toDouble(&ok);
-  v = prefs.value("Color");
-  m_Color = v.toString();
+
 #if 0
   printvar(Class);
   printvar(Mu);

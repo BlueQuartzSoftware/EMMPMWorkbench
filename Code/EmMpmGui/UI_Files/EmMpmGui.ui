@@ -986,7 +986,7 @@ font-size: 12px;
         <property name="geometry">
          <rect>
           <x>0</x>
-          <y>0</y>
+          <y>-238</y>
           <width>368</width>
           <height>886</height>
          </rect>
@@ -1427,8 +1427,20 @@ font-size: 10px;
             </item>
             <item row="4" column="0" colspan="4">
              <widget class="QTableView" name="perClassTableView">
+              <property name="autoScroll">
+               <bool>false</bool>
+              </property>
+              <property name="editTriggers">
+               <set>QAbstractItemView::AllEditTriggers</set>
+              </property>
               <property name="alternatingRowColors">
                <bool>true</bool>
+              </property>
+              <property name="verticalScrollMode">
+               <enum>QAbstractItemView::ScrollPerPixel</enum>
+              </property>
+              <property name="horizontalScrollMode">
+               <enum>QAbstractItemView::ScrollPerPixel</enum>
               </property>
               <attribute name="verticalHeaderVisible">
                <bool>false</bool>
@@ -1523,15 +1535,8 @@ image: url(:/bullet_triangle_grey_down.png);
               </property>
               <item>
                <widget class="QCheckBox" name="enableManualInit">
-                <property name="text">
-                 <string/>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QLabel" name="label_20">
                 <property name="styleSheet">
-                 <string notr="true">QLabel {
+                 <string notr="true">QCheckBox {
 font-weight: bold;
 font-size: 10px;
 }</string>
@@ -2256,6 +2261,22 @@ font-size: 10px;
                </widget>
               </item>
               <item>
+               <widget class="QCheckBox" name="showUserDefinedAreas">
+                <property name="styleSheet">
+                 <string notr="true">QCheckBox {
+font-weight: bold;
+font-size: 10px;
+}</string>
+                </property>
+                <property name="text">
+                 <string>Show Regions</string>
+                </property>
+                <property name="checked">
+                 <bool>true</bool>
+                </property>
+               </widget>
+              </item>
+              <item>
                <widget class="QToolButton" name="addUserInitArea">
                 <property name="enabled">
                  <bool>false</bool>
@@ -2434,7 +2455,7 @@ font-size: 10px;
   </widget>
   <widget class="QDockWidget" name="UserInitAreaDockWidget">
    <property name="sizePolicy">
-    <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+    <sizepolicy hsizetype="Preferred" vsizetype="Maximum">
      <horstretch>0</horstretch>
      <verstretch>0</verstretch>
     </sizepolicy>
