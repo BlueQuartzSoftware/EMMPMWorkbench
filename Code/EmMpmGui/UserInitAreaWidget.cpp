@@ -74,18 +74,6 @@ void UserInitAreaWidget::setWidgetListEnabled(bool b)
 
 }
 
-
-// -----------------------------------------------------------------------------
-//
-// -----------------------------------------------------------------------------
-void UserInitAreaWidget::on_m_MinVariance_valueChanged(double v)
-{
-  if (m_uia != NULL)
-  {
-    m_uia->setMinVariance(m_MinVariance->value());
-  }
-}
-
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
@@ -114,21 +102,16 @@ void UserInitAreaWidget::setUserInitArea(UserInitArea* uia)
     m_UpperLeft->setText("-1, -1");
     m_LowerRight->setText("-1, -1");
     m_LineWidth->setValue(1);
-    m_MinVariance->setValue(20.0);
+
     return;
   }
   setWidgetListEnabled(true);
 
   m_Class->setText(QString::number(uia->getEmMpmClass()));
 
-
   bool ok = false;
   m_Mu->setText(QString::number(uia->getMu()));
   m_Sigma->setText(QString::number(uia->getSigma()));
-
-  m_MinVariance->blockSignals(true);
-  m_MinVariance->setValue(uia->getMinVariance());
-  m_MinVariance->blockSignals(false);
 
   m_LineWidth->setValue(uia->getLineWidth());
 

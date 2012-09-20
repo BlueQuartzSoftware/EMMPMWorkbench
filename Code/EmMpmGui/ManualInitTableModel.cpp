@@ -141,8 +141,8 @@ QVariant  ManualInitTableModel::headerData ( int section, Qt::Orientation orient
     switch(section)
     {
       case Class: return QVariant(QString("Class"));
-      case Mu: return QVariant(QString("Mu"));
-      case Sigma: return QVariant(QString("Sigma"));
+      case Mu: return QVariant(QString("Mean"));
+      case Sigma: return QVariant(QString("Std. Dev."));
       default:
         break;
     }

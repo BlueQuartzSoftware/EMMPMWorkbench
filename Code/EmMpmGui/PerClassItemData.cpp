@@ -37,13 +37,14 @@
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
-PerClassItemData::PerClassItemData(int label, double gamma, int grayLevel,
-                                   QString color, QObject* parent) :
+PerClassItemData::PerClassItemData(int label, double gamma, double minStdDev,
+                                   QString color, int finalLabel, QObject* parent) :
 QObject(parent),
 m_Label(label),
 m_Gamma(gamma),
-m_GrayLevel(grayLevel),
-m_Color(color)
+m_MinStdDev(minStdDev),
+m_Color(color),
+m_FinalLabel(finalLabel)
 {
 
 }
@@ -71,7 +72,6 @@ int PerClassItemData::getLabel()
   return m_Label;
 }
 
-
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
@@ -91,17 +91,33 @@ double PerClassItemData::getGamma()
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
-void PerClassItemData::setGrayLevel(int gray)
+void PerClassItemData::setMinStdDev(double m)
 {
-  m_GrayLevel = gray;
+  m_MinStdDev = m;
 }
 
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
-int PerClassItemData::getGrayLevel()
+double PerClassItemData::getMinStdDev()
 {
-  return m_GrayLevel;
+  return m_MinStdDev;
+}
+
+// -----------------------------------------------------------------------------
+//
+// -----------------------------------------------------------------------------
+void PerClassItemData::setFinalLabel(int gray)
+{
+  m_FinalLabel = gray;
+}
+
+// -----------------------------------------------------------------------------
+//
+// -----------------------------------------------------------------------------
+int PerClassItemData::getFinalLabel()
+{
+  return m_FinalLabel;
 }
 
 
@@ -131,11 +147,11 @@ void PerClassItemData::writeSettings(QSettings &prefs)
 
   prefs.beginGroup(group);
 
-  prefs.setValue("Label", m_Label);
-  prefs.setValue("Gamma", m_Gamma);
-  prefs.setValue("GrayLevel", m_GrayLevel);
+  prefs.setValue("Class", m_Label);
+  prefs.setValue("Chem_Pntl", m_Gamma);
+  prefs.setValue("Min_Std_Dev", m_MinStdDev);
   prefs.setValue("Color", m_Color);
-
+  prefs.setValue("Final_Class", m_FinalLabel);
   prefs.endGroup();
 }
 
@@ -154,15 +170,18 @@ void PerClassItemData::readSettings(QSettings &prefs)
   prefs.beginGroup(group);
   QStringList keys = prefs.allKeys();
 
-  QVariant v = prefs.value("Label");
+  QVariant v = prefs.value("Class");
   m_Label = v.toInt(&ok);
 
-  v = prefs.value("Gamma");
+  v = prefs.value("Chem_Pntl");
   m_Gamma = v.toDouble(&ok);
-  v = prefs.value("GrayLevel");
-  m_GrayLevel = v.toInt(&ok);
+  v = prefs.value("Min_Std_Dev");
+  m_MinStdDev = v.toDouble(&ok);
   v = prefs.value("Color");
   m_Color = v.toString();
+  v = prefs.value("Final_Class");
+  m_FinalLabel = v.toInt(&ok);
+
 #if 0
   printvar(Class);
   printvar(Mu);

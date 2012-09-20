@@ -49,8 +49,8 @@ public:
      * @param color
      * @param parent
      */
-    PerClassItemData(int label, double gamma, int grayLevel,
-                   QString color, QObject* parent = 0);
+    PerClassItemData(int label, double gamma, double minStdDev,
+                   QString color, int finalLabel, QObject* parent = 0);
     virtual ~PerClassItemData();
 
     void readSettings(QSettings &prefs);
@@ -64,8 +64,11 @@ public:
     void setGamma(double g);
     double getGamma();
 
-    void setGrayLevel(int gv);
-    int getGrayLevel();
+    void setMinStdDev(double m);
+    double getMinStdDev();
+
+    void setFinalLabel(int gv);
+    int getFinalLabel();
 
     void setColor(QString color);
     QString getColor();
@@ -83,8 +86,10 @@ public:
   private:
     int m_Label;
     double m_Gamma;
-    int m_GrayLevel;
+    double m_MinStdDev;
     QString m_Color;
+    int m_FinalLabel;
+
 };
 
 

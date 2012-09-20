@@ -66,7 +66,6 @@ class UserInitAreaWidget  : public QWidget, public Ui::UserInitAreaWidget
     UserInitArea* getUserInitArea();
 
   protected slots:
-    void on_m_MinVariance_valueChanged(double v);
     void on_m_LineWidth_valueChanged(double v);
 
     /**

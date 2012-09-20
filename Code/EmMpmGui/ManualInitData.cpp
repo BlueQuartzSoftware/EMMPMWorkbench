@@ -110,8 +110,8 @@ void ManualInitData::writeSettings(QSettings &prefs)
   prefs.beginGroup(group);
 
   prefs.setValue("Class", m_Class);
-  prefs.setValue("Mu", m_Mu);
-  prefs.setValue("Sigma", m_Sigma);
+  prefs.setValue("Mean", m_Mu);
+  prefs.setValue("Std_Dev", m_Sigma);
 
   prefs.endGroup();
 }
@@ -129,13 +129,13 @@ void ManualInitData::readSettings(QSettings &prefs)
   QString group("ManualInitData-");
   group.append(QString::number(m_Class));
   prefs.beginGroup(group);
-  QStringList keys = prefs.allKeys();
+  //QStringList keys = prefs.allKeys();
 
   QVariant v = prefs.value("Class");
   m_Class = v.toInt(&ok);
-  v = prefs.value("Mu");
+  v = prefs.value("Mean");
   m_Mu = v.toDouble(&ok);
-  v = prefs.value("Sigma");
+  v = prefs.value("Std_Dev");
   m_Sigma = v.toDouble(&ok);
 
 #if 0

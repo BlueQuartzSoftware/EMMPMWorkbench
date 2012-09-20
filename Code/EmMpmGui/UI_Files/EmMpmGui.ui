@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1129</width>
-    <height>753</height>
+    <width>1160</width>
+    <height>816</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -643,7 +643,7 @@ font-size: 12px;
            <item>
             <layout class="QHBoxLayout" name="horizontalLayout_5">
              <property name="spacing">
-              <number>4</number>
+              <number>5</number>
              </property>
              <item>
               <widget class="QToolButton" name="zoomButton">
@@ -807,6 +807,50 @@ font-size: 12px;
                <property name="orientation">
                 <enum>Qt::Horizontal</enum>
                </property>
+               <property name="sizeHint" stdset="0">
+                <size>
+                 <width>40</width>
+                 <height>20</height>
+                </size>
+               </property>
+              </spacer>
+             </item>
+             <item>
+              <widget class="QSlider" name="opacitySlider">
+               <property name="enabled">
+                <bool>false</bool>
+               </property>
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="minimumSize">
+                <size>
+                 <width>65</width>
+                 <height>0</height>
+                </size>
+               </property>
+               <property name="toolTip">
+                <string>Adjust the opacity of the segmented image. 0 makes the segmented image opaque. 100 makes the segmented image transparent </string>
+               </property>
+               <property name="maximum">
+                <number>100</number>
+               </property>
+               <property name="value">
+                <number>40</number>
+               </property>
+               <property name="orientation">
+                <enum>Qt::Horizontal</enum>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <spacer name="horizontalSpacer_2">
+               <property name="orientation">
+                <enum>Qt::Horizontal</enum>
+               </property>
                <property name="sizeType">
                 <enum>QSizePolicy::Fixed</enum>
                </property>
@@ -819,58 +863,55 @@ font-size: 12px;
               </spacer>
              </item>
              <item>
-              <widget class="QPushButton" name="layersPalette">
-               <property name="sizePolicy">
-                <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-                 <horstretch>0</horstretch>
-                 <verstretch>0</verstretch>
-                </sizepolicy>
-               </property>
-               <property name="minimumSize">
-                <size>
-                 <width>24</width>
-                 <height>24</height>
-                </size>
-               </property>
-               <property name="maximumSize">
-                <size>
-                 <width>24</width>
-                 <height>24</height>
-                </size>
-               </property>
+              <widget class="QComboBox" name="imageDisplaySelection">
                <property name="toolTip">
-                <string>Show the layers pallette</string>
+                <string>Select which image to show</string>
                </property>
-               <property name="text">
-                <string/>
-               </property>
-               <property name="icon">
-                <iconset resource="../../../Resources/icons/images/Icons.qrc">
-                 <normaloff>:/logic_and.png</normaloff>:/logic_and.png</iconset>
-               </property>
-               <property name="iconSize">
-                <size>
-                 <width>24</width>
-                 <height>24</height>
-                </size>
-               </property>
-               <property name="flat">
-                <bool>true</bool>
-               </property>
+               <item>
+                <property name="text">
+                 <string>Original Image</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>Segmented Image</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>Both</string>
+                </property>
+               </item>
               </widget>
              </item>
              <item>
-              <spacer name="horizontalSpacer_2">
+              <spacer name="horizontalSpacer_12">
                <property name="orientation">
                 <enum>Qt::Horizontal</enum>
                </property>
+               <property name="sizeType">
+                <enum>QSizePolicy::Fixed</enum>
+               </property>
                <property name="sizeHint" stdset="0">
                 <size>
-                 <width>40</width>
+                 <width>12</width>
                  <height>20</height>
                 </size>
                </property>
               </spacer>
+             </item>
+             <item>
+              <widget class="QComboBox" name="compositeModeCB">
+               <property name="enabled">
+                <bool>false</bool>
+               </property>
+               <property name="toolTip">
+                <string>Select the type of compositing of the original and segmented images</string>
+               </property>
+               <property name="statusTip">
+                <string/>
+               </property>
+              </widget>
              </item>
             </layout>
            </item>
@@ -901,7 +942,7 @@ font-size: 12px;
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1129</width>
+     <width>1160</width>
      <height>22</height>
     </rect>
    </property>
@@ -934,7 +975,6 @@ font-size: 12px;
     <addaction name="actionParameters"/>
     <addaction name="actionHistogram"/>
     <addaction name="actionUser_Initialization"/>
-    <addaction name="actionLayers_Palette"/>
     <addaction name="actionMSE_Plot"/>
    </widget>
    <addaction name="menuFile"/>
@@ -986,9 +1026,9 @@ font-size: 12px;
         <property name="geometry">
          <rect>
           <x>0</x>
-          <y>-238</y>
-          <width>368</width>
-          <height>886</height>
+          <y>0</y>
+          <width>283</width>
+          <height>858</height>
          </rect>
         </property>
         <layout class="QVBoxLayout" name="verticalLayout_4">
@@ -1010,7 +1050,7 @@ font-size: 12px;
          <item>
           <widget class="QDisclosableGroupBox" name="parameters_groupbox">
            <property name="sizePolicy">
-            <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+            <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
              <horstretch>0</horstretch>
              <verstretch>0</verstretch>
             </sizepolicy>
@@ -1128,37 +1168,6 @@ image: url(:/bullet_triangle_grey_down.png);
               </property>
              </widget>
             </item>
-            <item row="3" column="1">
-             <widget class="QLineEdit" name="m_Beta">
-              <property name="sizePolicy">
-               <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
-                <horstretch>0</horstretch>
-                <verstretch>0</verstretch>
-               </sizepolicy>
-              </property>
-              <property name="minimumSize">
-               <size>
-                <width>60</width>
-                <height>0</height>
-               </size>
-              </property>
-              <property name="maximumSize">
-               <size>
-                <width>60</width>
-                <height>16777215</height>
-               </size>
-              </property>
-              <property name="toolTip">
-               <string>The value of Beta for the EM/MPM Algorithm</string>
-              </property>
-              <property name="statusTip">
-               <string>The value of Beta for the EM/MPM Algorithm</string>
-              </property>
-              <property name="text">
-               <string>0.5</string>
-              </property>
-             </widget>
-            </item>
             <item row="1" column="0">
              <widget class="QLabel" name="label_11">
               <property name="sizePolicy">
@@ -1186,41 +1195,7 @@ font-size: 10px;
 }</string>
               </property>
               <property name="text">
-               <string>EM Loops:</string>
-              </property>
-              <property name="alignment">
-               <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-              </property>
-             </widget>
-            </item>
-            <item row="3" column="0">
-             <widget class="QLabel" name="label_8">
-              <property name="sizePolicy">
-               <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-                <horstretch>0</horstretch>
-                <verstretch>0</verstretch>
-               </sizepolicy>
-              </property>
-              <property name="minimumSize">
-               <size>
-                <width>0</width>
-                <height>0</height>
-               </size>
-              </property>
-              <property name="toolTip">
-               <string>The value of Beta for the EM/MPM Algorithm</string>
-              </property>
-              <property name="statusTip">
-               <string>The value of Beta for the EM/MPM Algorithm</string>
-              </property>
-              <property name="styleSheet">
-               <string notr="true">QLabel {
-font-weight: bold;
-font-size: 10px;
-}</string>
-              </property>
-              <property name="text">
-               <string>Beta</string>
+               <string>Histogram Loops:</string>
               </property>
               <property name="alignment">
                <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -1291,7 +1266,7 @@ font-size: 10px;
 }</string>
               </property>
               <property name="text">
-               <string>MPM Loops:</string>
+               <string>Segmentation Loops:</string>
               </property>
               <property name="alignment">
                <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -1372,59 +1347,6 @@ font-size: 10px;
               </property>
              </widget>
             </item>
-            <item row="3" column="2">
-             <widget class="QLabel" name="label_9">
-              <property name="toolTip">
-               <string>The minimum variance that any class can use during the EM/MPM algorithm</string>
-              </property>
-              <property name="statusTip">
-               <string>The minimum variance that any class can use during the EM/MPM algorithm</string>
-              </property>
-              <property name="styleSheet">
-               <string notr="true">QLabel {
-font-weight: bold;
-font-size: 10px;
-}</string>
-              </property>
-              <property name="text">
-               <string>Min. Variance:</string>
-              </property>
-              <property name="alignment">
-               <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-              </property>
-             </widget>
-            </item>
-            <item row="3" column="3">
-             <widget class="QLineEdit" name="m_MinVariance">
-              <property name="sizePolicy">
-               <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
-                <horstretch>0</horstretch>
-                <verstretch>0</verstretch>
-               </sizepolicy>
-              </property>
-              <property name="minimumSize">
-               <size>
-                <width>60</width>
-                <height>0</height>
-               </size>
-              </property>
-              <property name="maximumSize">
-               <size>
-                <width>60</width>
-                <height>16777215</height>
-               </size>
-              </property>
-              <property name="toolTip">
-               <string>The minimum variance that any class can use during the EM/MPM algorithm</string>
-              </property>
-              <property name="statusTip">
-               <string>The minimum variance that any class can use during the EM/MPM algorithm</string>
-              </property>
-              <property name="text">
-               <string>20</string>
-              </property>
-             </widget>
-            </item>
             <item row="4" column="0" colspan="4">
              <widget class="QTableView" name="perClassTableView">
               <property name="autoScroll">
@@ -1445,6 +1367,71 @@ font-size: 10px;
               <attribute name="verticalHeaderVisible">
                <bool>false</bool>
               </attribute>
+             </widget>
+            </item>
+            <item row="0" column="2">
+             <widget class="QLabel" name="label_8">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="minimumSize">
+               <size>
+                <width>0</width>
+                <height>0</height>
+               </size>
+              </property>
+              <property name="toolTip">
+               <string>The value of Beta for the EM/MPM Algorithm</string>
+              </property>
+              <property name="statusTip">
+               <string>The value of Beta for the EM/MPM Algorithm</string>
+              </property>
+              <property name="styleSheet">
+               <string notr="true">QLabel {
+font-weight: bold;
+font-size: 10px;
+}</string>
+              </property>
+              <property name="text">
+               <string>Exchange Energy:</string>
+              </property>
+              <property name="alignment">
+               <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="3">
+             <widget class="QLineEdit" name="m_Beta">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="minimumSize">
+               <size>
+                <width>60</width>
+                <height>0</height>
+               </size>
+              </property>
+              <property name="maximumSize">
+               <size>
+                <width>60</width>
+                <height>16777215</height>
+               </size>
+              </property>
+              <property name="toolTip">
+               <string>The value of Beta for the EM/MPM Algorithm</string>
+              </property>
+              <property name="statusTip">
+               <string>The value of Beta for the EM/MPM Algorithm</string>
+              </property>
+              <property name="text">
+               <string>0.5</string>
+              </property>
              </widget>
             </item>
            </layout>
@@ -1701,7 +1688,7 @@ font-size: 10px;
 }</string>
               </property>
               <property name="text">
-               <string>Beta:</string>
+               <string>Exchange Energy:</string>
               </property>
              </widget>
             </item>
@@ -1740,7 +1727,7 @@ font-size: 10px;
               </column>
               <column>
                <property name="text">
-                <string>Beta</string>
+                <string>Exchange Energy</string>
                </property>
               </column>
              </widget>
@@ -2195,7 +2182,7 @@ font-size: 10px;
 }</string>
                 </property>
                 <property name="text">
-                 <string>Use Stopping Criteria</string>
+                 <string>Use Histogram Stopping Criterion</string>
                 </property>
                </widget>
               </item>
@@ -2954,7 +2941,6 @@ font-size: 10px;
  <tabstops>
   <tabstop>m_NumClasses</tabstop>
   <tabstop>m_EmIterations</tabstop>
-  <tabstop>m_Beta</tabstop>
   <tabstop>inputImageFilePath</tabstop>
   <tabstop>inputImageFilePathBtn</tabstop>
   <tabstop>outputImageFile</tabstop>

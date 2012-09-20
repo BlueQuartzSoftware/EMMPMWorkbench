@@ -61,7 +61,6 @@ QGraphicsPolygonItem(polygon, parent)
   m_Class = userIndex;
   m_Mu = 1.0;
   m_Sigma = 0.1;
-  m_MinVariance = 20.0;
   m_LineWidth = 1.0;
   m_Visible = true;
 
@@ -97,7 +96,7 @@ UserInitArea* UserInitArea::NewUserInitArea(QSettings &prefs, int index, QGraphi
 {
   bool ok = false;
   int m_Class = index;
-  double m_MinVariance = 20.0;
+  double m_MinStdDev = 20.0;
   double m_LineWidth = 1.0;
   QColor color;
   int r, g, b;
@@ -108,7 +107,7 @@ UserInitArea* UserInitArea::NewUserInitArea(QSettings &prefs, int index, QGraphi
   prefs.beginGroup(group);
 
   m_Class = prefs.value("Class").toInt(&ok);
-  m_MinVariance = prefs.value("MinVariance").toDouble(&ok);
+  m_MinStdDev = prefs.value("MinVariance").toDouble(&ok);
 
   x = prefs.value("X").toInt(&ok);
   y = prefs.value("Y").toInt(&ok);
@@ -126,7 +125,6 @@ UserInitArea* UserInitArea::NewUserInitArea(QSettings &prefs, int index, QGraphi
   prefs.endGroup();
 
   UserInitArea* uia = new UserInitArea(m_Class, rect, parent);
-  uia->setMinVariance(m_MinVariance);
   uia->setLineWidth(m_LineWidth);
   uia->setColor(c);
 
@@ -151,7 +149,6 @@ void UserInitArea::writeSettings(QSettings &prefs)
 
   prefs.beginGroup(group);
   prefs.setValue("Class", m_Class);
-  prefs.setValue("MinVariance", m_MinVariance);
 
   unsigned int x, y;
   unsigned int width, height;
@@ -235,22 +232,6 @@ void UserInitArea::setSigma(double sigma)
 double UserInitArea::getSigma()
 {
   return m_Sigma;
-}
-
-// -----------------------------------------------------------------------------
-//
-// -----------------------------------------------------------------------------
-void UserInitArea::setMinVariance(double g)
-{
-  m_MinVariance = g;
-}
-
-// -----------------------------------------------------------------------------
-//
-// -----------------------------------------------------------------------------
-double UserInitArea::getMinVariance()
-{
-  return m_MinVariance;
 }
 
 // -----------------------------------------------------------------------------

@@ -84,9 +84,6 @@ public:
     void setSigma(double sigma);
     double getSigma();
 
-    void setMinVariance(double v);
-    double getMinVariance();
-
     void setLineWidth(qreal w);
     qreal getLineWidth();
 
@@ -131,7 +128,6 @@ private:
     int m_LowerRight[2];
     double m_Mu;
     double m_Sigma;
-    double m_MinVariance;
     qreal m_LineWidth;
     bool m_Visible;
 };

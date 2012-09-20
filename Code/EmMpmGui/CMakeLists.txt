@@ -107,7 +107,7 @@ SET( EmMpmGui_SRCS
   ${EmMpmGui_SOURCE_DIR}/ManualInitTableModel.cpp
   ${EmMpmGui_SOURCE_DIR}/ManualInitData.cpp
   ${EmMpmGui_SOURCE_DIR}/AxisSettingsDialog.cpp
-  ${EmMpmGui_SOURCE_DIR}/LayersDockWidget.cpp
+#  ${EmMpmGui_SOURCE_DIR}/LayersDockWidget.cpp
   ${EmMpmGui_SOURCE_DIR}/EMMPMTask.cpp
   ${EmMpmGui_SOURCE_DIR}/ImageOpenDialog.cpp
   ${EmMpmGui_SOURCE_DIR}/PerClassTableModel.cpp
@@ -128,7 +128,7 @@ SET( EmMpmGui_MOC_HDRS
   ${EmMpmGui_SOURCE_DIR}/ManualInitData.h
   ${EmMpmGui_SOURCE_DIR}/ManualInitDataItemDelegate.h
   ${EmMpmGui_SOURCE_DIR}/AxisSettingsDialog.h
-  ${EmMpmGui_SOURCE_DIR}/LayersDockWidget.h
+#  ${EmMpmGui_SOURCE_DIR}/LayersDockWidget.h
   ${EmMpmGui_SOURCE_DIR}/UserInitAreaItemDelegate.h
   ${EmMpmGui_SOURCE_DIR}/ImageOpenDialog.h
   ${EmMpmGui_SOURCE_DIR}/EMMPMTask.h

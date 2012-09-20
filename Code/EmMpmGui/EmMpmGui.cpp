@@ -168,7 +168,6 @@ m_CombinedGaussianCurve(NULL),
 m_ShowCombinedGaussians(false),
 m_OutputExistsCheck(false),
 m_QueueController(NULL),
-m_LayersPalette(NULL),
 m_MSEPlotCurve(NULL),
 m_MeanOfImage(0.0),
 m_SigmaOfImage(0.0),
@@ -341,7 +340,6 @@ void EmMpmGui::readSettings(QSettings &prefs)
   READ_SETTING(prefs, m_EmIterations, ok, i, 5, Int);
   READ_SETTING(prefs, m_MpmIterations, ok, i, 5, Int);
   READ_STRING_SETTING(prefs, m_Beta, "0.5");
-  READ_STRING_SETTING(prefs, m_MinVariance, "20");
 
   READ_BOOL_SETTING(prefs, useSimulatedAnnealing, false);
 
@@ -382,6 +380,19 @@ void EmMpmGui::readSettings(QSettings &prefs)
         uia->readSettings(prefs);
       }
     }
+  }
+
+  {
+      PerClassTableModel* model = qobject_cast<PerClassTableModel*>(perClassTableView->model());
+      if (NULL != model)
+      {
+          QList<PerClassItemData*> datas = model->getItemDatas();
+          for (int i = 0; i < datas.count(); ++i)
+          {
+              PerClassItemData* item = datas.at(i);
+              item->readSettings(prefs);
+          }
+      }
   }
 
 
@@ -439,7 +450,6 @@ void EmMpmGui::writeSettings(QSettings &prefs)
   WRITE_SETTING(prefs, m_EmIterations);
   WRITE_SETTING(prefs, m_MpmIterations);
   WRITE_STRING_SETTING(prefs, m_Beta);
-  WRITE_STRING_SETTING(prefs, m_MinVariance);
 
   WRITE_CHECKBOX_SETTING(prefs, useSimulatedAnnealing);
   WRITE_CHECKBOX_SETTING(prefs, useGradientPenalty);
@@ -475,14 +485,27 @@ void EmMpmGui::writeSettings(QSettings &prefs)
       }
     }
   }
-
-
-  for (int i = 0; i < this->m_UserInitAreaVector->size(); ++i)
   {
-    UserInitArea* uia = m_UserInitAreaVector->at(i);
-    uia->writeSettings(prefs);
+    PerClassTableModel* model = qobject_cast<PerClassTableModel*>(perClassTableView->model());
+    if (NULL != model)
+    {
+      QList<PerClassItemData*> datas = model->getItemDatas();
+      for (int i = 0; i < datas.count(); ++i)
+      {
+        PerClassItemData* uia = datas.at(i);
+        uia->writeSettings(prefs);
+      }
+    }
   }
 
+  if (enableUserDefinedAreas->isChecked() == true)
+  {
+      for (int i = 0; i < this->m_UserInitAreaVector->size(); ++i)
+      {
+          UserInitArea* uia = m_UserInitAreaVector->at(i);
+          uia->writeSettings(prefs);
+      }
+  }
 }
 
 // -----------------------------------------------------------------------------
@@ -622,17 +645,6 @@ void EmMpmGui::setupGui()
   m_GraphicsView->setEmMpmGui(this);
   m_GraphicsView->setUserInitAreas(m_UserInitAreaVector);
 
-  if (m_LayersPalette == NULL)
-  {
-    m_LayersPalette = new LayersDockWidget(this);
-    m_LayersPalette->setGraphicsView(m_GraphicsView);
-    m_LayersPalette->setVisible(false);
-    m_LayersPalette->setFeatures(QDockWidget::AllDockWidgetFeatures);
-    m_LayersPalette->setAllowedAreas(Qt::AllDockWidgetAreas);
- //   m_LayersPalette->getUseColorTable()->setEnabled(enableUserDefinedAreas->isChecked());
-  }
-
-
   connect (m_GraphicsView, SIGNAL(fireOverlayImageFileLoaded(const QString &)),
            this, SLOT(overlayImageFileLoaded(const QString &)), Qt::QueuedConnection);
 
@@ -680,8 +692,8 @@ void EmMpmGui::setupGui()
 //  m_grid->attach(m_HistogramPlot);
 
   // setup the Widget List
-  m_WidgetList << m_NumClasses << m_EmIterations << m_MpmIterations << m_Beta << m_MinVariance;
-  m_WidgetList << enableUserDefinedAreas << useSimulatedAnnealing;
+  m_WidgetList << m_NumClasses << m_EmIterations << m_MpmIterations << m_Beta;
+  m_WidgetList << enableUserDefinedAreas << showUserDefinedAreas << useSimulatedAnnealing;
   m_WidgetList << useCurvaturePenalty << useGradientPenalty;
   m_WidgetList << curvatureBetaC << curvatureRMax << ccostLoopDelay;
   m_WidgetList << gradientBetaE;
@@ -689,7 +701,7 @@ void EmMpmGui::setupGui()
   m_WidgetList << m_StoppingThreshold << m_StoppingThresholdLabel << useStoppingCriteria;
   setWidgetListEnabled(false);
 
-  m_ImageWidgets << zoomIn << zoomOut << fitToWindow << layersPalette;
+  m_ImageWidgets << zoomIn << zoomOut << fitToWindow;
   setImageWidgetsEnabled(false);
 
   m_ProcessFolderWidgets <<  sourceDirectoryLE << sourceDirectoryBtn << outputDirectoryLE
@@ -699,8 +711,7 @@ void EmMpmGui::setupGui()
   << exampleFileNameLabel << outputFilenamePattern << histogramFilenamePattern;
 
 
-  QDoubleValidator* betaValidator = new QDoubleValidator(m_Beta);
-  QDoubleValidator* minVarValidator = new QDoubleValidator(m_MinVariance);
+ // QDoubleValidator* betaValidator = new QDoubleValidator(m_Beta);
   QDoubleValidator* stoppingThresholdValidator = new QDoubleValidator(m_StoppingThreshold);
   stoppingThresholdValidator->setRange(0.0, 1000000, 5);
   m_StoppingThreshold->setValidator(stoppingThresholdValidator);
@@ -724,6 +735,11 @@ void EmMpmGui::setupGui()
   manualInitTableView->setItemDelegate(aid);
   connect(tm, SIGNAL(dataChanged(const QModelIndex &, const QModelIndex &)),
           this, SLOT(manualInitDataChanged(const QModelIndex &, const QModelIndex &)));
+  for(int c = 0; c < tm->columnCount(); ++c)
+  {
+   //   manualInitTableView->horizontalHeader()->setResizeMode(c, QHeaderView::ResizeToContents);
+      manualInitTableView->horizontalHeader()->resizeSection(c, 100);
+  }
 
 
   /* Setup the PerClass Parameters Table */
@@ -733,7 +749,11 @@ void EmMpmGui::setupGui()
   perClassTableView->setItemDelegate(pcid);
   connect(pctm, SIGNAL(dataChanged(const QModelIndex &, const QModelIndex &)),
           this, SLOT(perClassItemDataChanged(const QModelIndex &, const QModelIndex &)));
-
+  for(int c = 0; c < pctm->columnCount(); ++c)
+  {
+      perClassTableView->horizontalHeader()->setResizeMode(c, QHeaderView::ResizeToContents);
+   //   perClassTableView->horizontalHeader()->resizeSection(c, 100);
+  }
 
 
   // option B (pressing DEL activates the slots only when list widget has focus)
@@ -745,7 +765,15 @@ void EmMpmGui::setupGui()
   // Hid the progress bar
   progBar->hide();
 
- // manualInitGroupBox->setChecked(false);
+  compositeModeCB->blockSignals(true);
+  compositeModeCB->insertItem(0, "Exclusion", QVariant(EmMpm_Constants::Exclusion));
+  compositeModeCB->insertItem(1, "Difference", QVariant(EmMpm_Constants::Difference));
+  compositeModeCB->insertItem(2, "Alpha Blend", QVariant(EmMpm_Constants::Alpha_Blend));
+  compositeModeCB->setCurrentIndex(2); // Default to an Alpha Blend;
+
+  compositeModeCB->blockSignals(false);
+
+
 }
 
 // -----------------------------------------------------------------------------
@@ -760,16 +788,6 @@ void EmMpmGui::deleteFileListItem()
     QListWidgetItem* item = selectedItems[i];
     delete item;
   }
-}
-
-
-// -----------------------------------------------------------------------------
-//
-// -----------------------------------------------------------------------------
-void EmMpmGui::on_layersPalette_clicked()
-{
-  //m_LayersPalette->setFloating(true);
-  m_LayersPalette->setVisible(true);
 }
 
 // -----------------------------------------------------------------------------
@@ -790,7 +808,7 @@ void EmMpmGui::copyGrayValues( EMMPM_Data::Pointer inputs)
 //        float G = color.green() * 0.587;
 //        float B = color.blue() * 0.144;
 
-        inputs->grayTable[i] = static_cast<unsigned int>(color.rgba());
+        inputs->colorTable[i] = static_cast<unsigned int>(color.rgba());
     }
 }
 
@@ -832,7 +850,7 @@ void EmMpmGui::copyIntializationValues(EMMPM_Data::Pointer inputs)
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
-int EmMpmGui::copyGammaValues(EMMPM_Data::Pointer inputs)
+int EmMpmGui::copyGammaMinStdDevValues(EMMPM_Data::Pointer inputs)
 {
     PerClassTableModel* model = qobject_cast<PerClassTableModel*>(perClassTableView->model());
     QList<PerClassItemData*> items = model->getItemDatas();
@@ -840,23 +858,9 @@ int EmMpmGui::copyGammaValues(EMMPM_Data::Pointer inputs)
     for (int r = 0; r < size; ++r)
     {
         inputs->w_gamma[r] = items.at(r)->getGamma();
+        inputs->min_variance[r] = items.at(r)->getMinStdDev() * items.at(r)->getMinStdDev();
     }
     return 0;
-}
-
-// -----------------------------------------------------------------------------
-//
-// -----------------------------------------------------------------------------
-void EmMpmGui::copyMinVarianceValues(EMMPM_Data::Pointer inputs)
-{
-  int size = m_UserInitAreaVector->count();
-  UserInitArea* uia = NULL;
-  for (int r = 0; r < size; ++r)
-  {
-    uia = m_UserInitAreaVector->at(r);
-    inputs->min_variance[r] = uia->getMinVariance();
-    //   std::cout << "Initializing with Gamma:" << inputs->w_gamma[r] << std::endl;
-  }
 }
 
 // -----------------------------------------------------------------------------
@@ -1033,19 +1037,8 @@ void EmMpmGui::on_processBtn_clicked()
   }
   ProcessQueueController* queueController = new ProcessQueueController(this);
   setQueueController(queueController);
- // bool ok;
 
   InputOutputFilePairList filepairs;
-
- // m_LayersPalette->getSegmentedImageCheckBox()->blockSignals(true);
-  m_LayersPalette->getSegmentedImageCheckBox()->setEnabled(true);
-  m_LayersPalette->getSegmentedImageCheckBox()->setChecked(true);
- // m_LayersPalette->getSegmentedImageCheckBox()->blockSignals(false);
-  m_LayersPalette->getCompositeTypeComboBox()->setEnabled(true);
-
-//  m_LayersPalette->getUseColorTable()->setEnabled(true);
-
-  //m_GraphicsView->setImageDisplayType(EmMpm_Constants::CompositedImage);
 
   EMMPMTask* task = newEmMpmTask(queueController);
   if (NULL == task)
@@ -1126,7 +1119,8 @@ void EmMpmGui::on_processBtn_clicked()
   connect(cancelBtn, SIGNAL(clicked()), task, SLOT(cancel()));
 
   connect(task, SIGNAL(progressMessage(QString )), this, SLOT(processingMessage(QString )), Qt::QueuedConnection);
-  connect(task, SIGNAL(updateImageAvailable(QImage)), m_GraphicsView, SLOT(setOverlayImage(QImage)));
+//  connect(task, SIGNAL(updateImageAvailable(QImage)), m_GraphicsView, SLOT(setOverlayImage(QImage)));
+  connect(task, SIGNAL(updateImageAvailable(QImage)), this, SLOT(segmentedImageAvailable(QImage)));
   connect(task, SIGNAL(histogramsAboutToBeUpdated()), this, SLOT(clearGaussianCurves()));
   qRegisterMetaType<QVector<real_t> >("QVector<real_t>");
   connect(task, SIGNAL(updateHistogramAvailable(QVector<real_t>)), this, SLOT(addGaussianCurve(QVector<real_t>)));
@@ -1136,12 +1130,8 @@ void EmMpmGui::on_processBtn_clicked()
   }
 
   connect(task, SIGNAL(mseValueUpdated(qreal)), this, SLOT(updateMSEValue(qreal)));
-
-
   connect(task, SIGNAL(updateProgress(int)), progBar, SLOT(setValue(int)));
- // connect(task, SIGNAL(finished(QObject*)), this, SLOT(taskFinished(QObject*)));
   connect(task, SIGNAL(imageStarted(QString)), progBar, SLOT(setText(QString)));
-//  m_TasksMap[task] = progBar;
 
   // When the event loop of the controller starts it will signal the ProcessQueue to run
   connect(queueController, SIGNAL(started()), queueController, SLOT(processTask()));
@@ -1175,7 +1165,7 @@ EMMPMTask* EmMpmGui::newEmMpmTask( ProcessQueueController* queueController)
 
   data->in_beta = m_Beta->text().toFloat(&ok);
 
-  if (copyGammaValues(data) < 0)
+  if (copyGammaMinStdDevValues(data) < 0)
   {
       delete task;
       return NULL;
@@ -1224,23 +1214,15 @@ EMMPMTask* EmMpmGui::newEmMpmTask( ProcessQueueController* queueController)
     data->mean = (real_t*)malloc(data->classes * data->dims * sizeof(real_t));
     data->variance = (real_t*)malloc(data->classes * data->dims * sizeof(real_t));
     copyInitCoords(data);
+    // This copies the mean and StdDev
     copyIntializationValues(data);
-
-    copyMinVarianceValues(data);
   }
   else
   {
     data->initType = EMMPM_Basic;
-    int n = data->classes - 1;
-    for (int value = 0; value < data->classes; ++value)
-    {
-     // data->grayTable[value] = value * 255 / n;
-      data->min_variance[value] = m_MinVariance->text().toFloat(&ok);
-    }
   }
 
   copyGrayValues(data);
-  copyGammaValues(data);
 
   data->useCurvaturePenalty = (useCurvaturePenalty->isChecked()) ? 1 : 0;
   data->useGradientPenalty = (useGradientPenalty->isChecked()) ? 1 : 0;
@@ -1346,8 +1328,7 @@ void EmMpmGui::queueControllerFinished()
     setCurrentImageFile (inputImageFilePath->text());
     setCurrentProcessedFile(outputImageFile->text());
     m_GraphicsView->loadOverlayImageFile(outputImageFile->text());
-//    m_LayersPalette->getSegmentedImageCheckBox()->setChecked(true);
-    m_LayersPalette->on_segmentedImage_stateChanged(true);
+    imageDisplaySelection->setCurrentIndex(2);
   }
   else
   {
@@ -1371,16 +1352,13 @@ void EmMpmGui::queueControllerFinished()
     filepath.append(outputImageType->currentText());
     setCurrentProcessedFile(filepath);
     m_GraphicsView->loadOverlayImageFile(m_CurrentProcessedFile);
-//    m_LayersPalette->getSegmentedImageCheckBox()->setChecked(true);
-    m_LayersPalette->on_segmentedImage_stateChanged(true);
-  //  std::cout << "Setting processed Image file: " << filepath.toStdString() << std::endl;
+    imageDisplaySelection->setCurrentIndex(2);
   }
   setWindowTitle(m_CurrentImageFile);
   setWidgetListEnabled(true);
   if (m_UserInitAreaVector->size() != 0)
   {
     m_NumClasses->setEnabled(false);
-    m_MinVariance->setEnabled(false);
   }
 
   getQueueController()->deleteLater();
@@ -1776,8 +1754,7 @@ void EmMpmGui::on_actionOpenOverlayImage_triggered()
 void EmMpmGui::on_actionSaveCanvas_triggered()
 {
   QImage image = m_GraphicsView->getOverlayImage();
-  if (m_LayersPalette->getOriginalImageCheckBox()->isChecked()
-       && m_LayersPalette->getSegmentedImageCheckBox()->isChecked())
+  if (imageDisplaySelection->currentIndex() == 2)
   {
     image = m_GraphicsView->getCompositedImage();
   }
@@ -1828,13 +1805,13 @@ void EmMpmGui::on_actionExit_triggered()
 void EmMpmGui::setCurrentProcessedImage(QString imageFile)
 {
 
-  bool showBaseImage = m_LayersPalette->getOriginalImageCheckBox()->isChecked();
-  bool showSegmentedImage = m_LayersPalette->getSegmentedImageCheckBox()->isChecked();
+//  bool showBaseImage = m_LayersPalette->getOriginalImageCheckBox()->isChecked();
+//  bool showSegmentedImage = m_LayersPalette->getSegmentedImageCheckBox()->isChecked();
 
   openBaseImageFile(imageFile);
 
-  m_LayersPalette->on_originalImage_stateChanged(showBaseImage);
-  m_LayersPalette->on_segmentedImage_stateChanged(showSegmentedImage);
+//  m_LayersPalette->on_originalImage_stateChanged(showBaseImage);
+//  m_LayersPalette->on_segmentedImage_stateChanged(showSegmentedImage);
 }
 
 
@@ -1858,8 +1835,10 @@ void EmMpmGui::openBaseImageFile(QString imageFile)
   setWindowTitle(imageFile);
   this->setWindowFilePath(imageFile);
 
-  m_LayersPalette->getOriginalImageCheckBox()->setChecked(true);
-  m_LayersPalette->getSegmentedImageCheckBox()->setChecked(false);
+  imageDisplaySelection->setEnabled(false);
+  imageDisplaySelection->setCurrentIndex(0);
+//  m_LayersPalette->getOriginalImageCheckBox()->setChecked(true);
+//  m_LayersPalette->getSegmentedImageCheckBox()->setChecked(false);
 
   // Tell the RecentFileList to update itself then broadcast those changes.
   QRecentFileList::instance()->addFile(imageFile);
@@ -1950,7 +1929,7 @@ void EmMpmGui::addRemovePerClassTableRows()
     {
         int count = perClassTableView->model()->rowCount();
         QString colorName = m_GaussianCurveColors[count];
-        PerClassItemData* data = new PerClassItemData(count, 0.0, 0, colorName, model);
+        PerClassItemData* data = new PerClassItemData(count, 0.0, 4.5, colorName, 0, model);
         model->insertItemData(data, model->rowCount());
         if (m_GaussianCurves.size() < model->rowCount() )
         {
@@ -2173,8 +2152,9 @@ void EmMpmGui::updateGaussianCurves()
         if (i < count)
         {
             UserInitArea* uia = m_UserInitAreaVector->at(i);
-            c.setAlpha(128);
-            uia->setColor(c);
+            QColor uicColor = c;
+            uicColor.setAlpha(128);
+            uia->setColor(uicColor);
         }
     }
   }
@@ -2328,14 +2308,16 @@ void EmMpmGui::openOverlayImage(QString processedImage)
   }
   m_GraphicsView->loadOverlayImageFile(processedImage);
 
-  if (m_LayersPalette != NULL)
+  //if (m_LayersPalette != NULL)
   {
-    m_LayersPalette->getOriginalImageCheckBox()->setChecked(true);
-    m_LayersPalette->getSegmentedImageCheckBox()->setChecked(true);
-    m_LayersPalette->getCompositeTypeComboBox()->setCurrentIndex(EmMpm_Constants::Alpha_Blend);
-    m_LayersPalette->getOpacitySlider()->setEnabled(true);
-    m_LayersPalette->getOpacitySpinBox()->setEnabled(true);
-    m_LayersPalette->getCompositeTypeComboBox()->setEnabled(true);
+  //  m_LayersPalette->getOriginalImageCheckBox()->setChecked(true);
+   // m_LayersPalette->getSegmentedImageCheckBox()->setChecked(true);
+    imageDisplaySelection->setEnabled(true);
+    imageDisplaySelection->setCurrentIndex(2);
+    compositeModeCB->setCurrentIndex(EmMpm_Constants::Alpha_Blend);
+    opacitySlider->setEnabled(true);
+   // m_LayersPalette->getOpacitySpinBox()->setEnabled(true);
+    compositeModeCB->setEnabled(true);
   }
 
   setWidgetListEnabled(true);
@@ -2353,6 +2335,18 @@ void EmMpmGui::overlayImageFileLoaded(const QString &filename)
   outputImageFile->blockSignals(true);
   outputImageFile->setText(filename);
   outputImageFile->blockSignals(false);
+}
+
+// -----------------------------------------------------------------------------
+//
+// -----------------------------------------------------------------------------
+void EmMpmGui::segmentedImageAvailable(QImage image)
+{
+    imageDisplaySelection->setEnabled(true);
+    if (m_GraphicsView)
+    {
+        m_GraphicsView->setOverlayImage(image);
+    }
 }
 
 // -----------------------------------------------------------------------------
@@ -2390,7 +2384,6 @@ void EmMpmGui::addGaussianCurve(QVector<real_t> data)
   //std::cout << "EmMpmGui::setProcessHistograms..... " << std::endl;
   QwtPlotCurve* curve = NULL;
   const int numValues = data.size();
-  double max = 0;
   // Generate the Histogram Bins (X Axis)
   QwtArray<double> intervals(numValues);
   QwtArray<double> dValues(numValues);
@@ -2398,10 +2391,6 @@ void EmMpmGui::addGaussianCurve(QVector<real_t> data)
   for (int i = 0; i < numValues; ++i)
   {
     intervals[i] = (double)i;
-    if(data[i] > max)
-    {
-      max = data[i];
-    }
     dValues[i] = data[i];
   }
 
@@ -2410,7 +2399,9 @@ void EmMpmGui::addGaussianCurve(QVector<real_t> data)
   if(enableUserDefinedAreas->isChecked() == true && m_UserInitAreaVector->size() > 0)
   {
     QColor c = m_UserInitAreaVector->at(m_CurrentHistogramClass)->getColor();
+    c.setAlpha(255);
     pen.setColor(c);
+
   }
   else
   {
@@ -2421,7 +2412,6 @@ void EmMpmGui::addGaussianCurve(QVector<real_t> data)
     }
     QModelIndex colorIndex = model->index(m_CurrentHistogramClass, PerClassTableModel::Color);
     QColor c = QColor(model->data(colorIndex).toString());
-    c.setAlpha(255);
     pen.setColor(c);
   }
 
@@ -2532,11 +2522,6 @@ void EmMpmGui::userInitAreaUpdated(UserInitArea* uia)
   int row = m_UserInitAreaVector->indexOf(uia, 0);
   QwtPlotCurve* curve = m_GaussianCurves[row];
   curve->setData(intervals, values);
-
- // QColor c = uia->getColor();
- // c.setAlpha(255);
- // curve->setPen(QPen(c, uia->getLineWidth(), Qt::SolidLine));
-
 
   m_UserInitAreaWidget->setUserInitArea(uia);
 
@@ -2703,6 +2688,23 @@ void EmMpmGui::on_useStoppingCriteria_clicked()
 {
     m_StoppingThreshold->setEnabled(useStoppingCriteria->isChecked());
     m_StoppingThresholdLabel->setEnabled(useStoppingCriteria->isChecked());
+
+    // These are mutually exclusive
+    if (useSimulatedAnnealing->isChecked()) {
+            useSimulatedAnnealing->setChecked(!useStoppingCriteria->isChecked());
+    }
+}
+
+// -----------------------------------------------------------------------------
+//
+// -----------------------------------------------------------------------------
+void EmMpmGui::on_useSimulatedAnnealing_clicked()
+{
+
+    // These are mutually exclusive
+    if (useStoppingCriteria->isChecked()) {
+        useStoppingCriteria->setChecked(!useSimulatedAnnealing->isChecked());
+    }
 }
 
 // -----------------------------------------------------------------------------
@@ -2851,7 +2853,6 @@ void EmMpmGui::deleteUserInitArea(UserInitArea* uia)
   if (m_UserInitAreaVector->size() == 0)
   {
     m_NumClasses->setEnabled(true);
-    m_MinVariance->setEnabled(true);
   }
 }
 
@@ -2876,7 +2877,6 @@ void EmMpmGui::userInitAreaAdded(UserInitArea* uia)
   if (m_UserInitAreaVector->size() != 0)
   {
     m_NumClasses->setEnabled(false);
-    m_MinVariance->setEnabled(false);
   }
 
   // This model should have been properly updated at this point along with the list of
@@ -3174,14 +3174,16 @@ void EmMpmGui::on_showUserDefinedAreas_stateChanged(int state)
 void EmMpmGui::on_enableUserDefinedAreas_stateChanged(int state)
 {
     m_NumClasses->setEnabled( !enableUserDefinedAreas->isChecked() );
-    m_MinVariance->setEnabled( !enableUserDefinedAreas->isChecked() );
-    perClassTableView->setEnabled( !enableUserDefinedAreas->isChecked() );
     showUserDefinedAreas->setEnabled( enableUserDefinedAreas->isChecked() );
+    if (enableUserDefinedAreas->isChecked() == false)
+    {
+        showUserDefinedAreas->setChecked(false);
+    }
 
     int size = m_UserInitAreaVector->count();
     UserInitArea* uia = NULL;
-    int s = m_GaussianCurves.size();
-    int u = m_UserInitAreaVector->size();
+//    int s = m_GaussianCurves.size();
+//    int u = m_UserInitAreaVector->size();
 
     // If we are enabling the User Init Areas, then make sure we can see them
     if(enableUserDefinedAreas->isChecked())
@@ -3258,14 +3260,6 @@ void EmMpmGui::on_actionParameters_triggered()
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
-void EmMpmGui::on_actionLayers_Palette_triggered()
-{
-  m_LayersPalette->show();
-}
-
-// -----------------------------------------------------------------------------
-//
-// -----------------------------------------------------------------------------
 void EmMpmGui::on_actionMSE_Plot_triggered()
 {
     m_MSEDockWidget->show();
@@ -3328,3 +3322,96 @@ void EmMpmGui::on_removeClassCoupling_clicked()
   }
 }
 
+// -----------------------------------------------------------------------------
+//
+// -----------------------------------------------------------------------------
+void EmMpmGui::on_imageDisplaySelection_currentIndexChanged(int index)
+{
+    updateDisplayState();
+}
+
+// -----------------------------------------------------------------------------
+//
+// -----------------------------------------------------------------------------
+void EmMpmGui::on_opacitySlider_valueChanged(int value)
+{
+    float f = (float)value/100.0;
+    m_GraphicsView->setOverlayTransparency(f);
+    m_GraphicsView->updateDisplay();
+}
+
+// -----------------------------------------------------------------------------
+//
+// -----------------------------------------------------------------------------
+void EmMpmGui::on_compositeModeCB_currentIndexChanged()
+{
+    //  std::cout << "on_compositeModeCB_indexChanged" << std::endl;
+      bool ok = false;
+      EmMpm_Constants::CompositeType cType = static_cast<EmMpm_Constants::CompositeType>(compositeModeCB->itemData(compositeModeCB->currentIndex()).toInt(&ok));
+      m_GraphicsView->setImageDisplayType(EmMpm_Constants::CompositedImage);
+      m_GraphicsView->setCompositeMode(cType);
+      if (cType == EmMpm_Constants::Alpha_Blend)
+      {
+        opacitySlider->setEnabled(true);
+      }
+      else
+      {
+        opacitySlider->setEnabled(false);
+      }
+      m_GraphicsView->updateDisplay();
+}
+
+// -----------------------------------------------------------------------------
+//
+// -----------------------------------------------------------------------------
+void EmMpmGui::updateDisplayState()
+{
+    float f = (float)opacitySlider->value()/100.0;
+    m_GraphicsView->setOverlayTransparency(f);
+
+//    if (useColorTable->isEnabled() && useColorTable->isChecked())
+//    {
+//      m_GraphicsView->useCustomColorTable(true);
+//    }
+//    else
+//    {
+//      m_GraphicsView->useCustomColorTable(false);
+//    }
+
+    bool ok = false;
+    // Display only the original image only
+    if (imageDisplaySelection->currentIndex() == 0)
+    {
+      m_GraphicsView->setImageDisplayType(EmMpm_Constants::OriginalImage);
+      opacitySlider->setEnabled(false);
+      compositeModeCB->setEnabled(false);
+    }
+    else if ( imageDisplaySelection->currentIndex() == 1)
+    {
+      m_GraphicsView->setImageDisplayType(EmMpm_Constants::SegmentedImage);
+      opacitySlider->setEnabled(false);
+      compositeModeCB->setEnabled(false);
+    }
+    else if (imageDisplaySelection->currentIndex() == 2)
+    {
+      m_GraphicsView->setImageDisplayType(EmMpm_Constants::CompositedImage);
+      EmMpm_Constants::CompositeType cType = static_cast<EmMpm_Constants::CompositeType>(compositeModeCB->itemData(compositeModeCB->currentIndex()).toInt(&ok));
+      m_GraphicsView->setCompositeMode(cType);
+      compositeModeCB->setEnabled(true);
+      if (cType == EmMpm_Constants::Alpha_Blend)
+      {
+        opacitySlider->setEnabled(true);
+      }
+      else
+      {
+        opacitySlider->setEnabled(false);
+      }
+    }
+    else
+    {
+      m_GraphicsView->setImageDisplayType(EmMpm_Constants::UnknownDisplayType);
+      opacitySlider->setEnabled(false);
+      compositeModeCB->setEnabled(false);
+    }
+    m_GraphicsView->updateDisplay();
+}

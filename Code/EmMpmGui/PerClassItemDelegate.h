@@ -48,7 +48,7 @@
 #include "PerClassTableModel.h"
 
 namespace Detail {
- const static int Alpha = 155;
+    const static int Alpha = 155;
 }
 
 /**
@@ -81,37 +81,44 @@ class PerClassItemDelegate : public QStyledItemDelegate
     // -----------------------------------------------------------------------------
     QWidget* createEditor(QWidget *parent, const QStyleOptionViewItem &option, const QModelIndex &index) const
     {
-      QLineEdit* editor = NULL;
-      QDoubleValidator* dValidator = NULL;
-      QIntValidator* iValidator = NULL;
-      QComboBox* colorCombo = NULL;
+        QLineEdit* editor = NULL;
+        QDoubleValidator* dValidator = NULL;
+        QIntValidator* iValidator = NULL;
+        QComboBox* colorCombo = NULL;
 
-      qint32 col = index.column();
-      switch(col)
-      {
+        qint32 col = index.column();
+        switch(col)
+        {
         case PerClassTableModel::Gamma:
-          editor = new QLineEdit(parent);
-          editor->setFrame(false);
-          dValidator = new QDoubleValidator(editor);
-          dValidator->setDecimals(6);
-          editor->setValidator(dValidator);
-          return editor;
-      case PerClassTableModel::Color:
-        colorCombo = new ColorComboPicker(parent);
-        colorCombo->setAutoFillBackground(true);
-        return colorCombo;
-      case PerClassTableModel::Gray:
-        editor = new QLineEdit(parent);
-        editor->setFrame(false);
-        iValidator = new QIntValidator(editor);
-        editor->setValidator(iValidator);
-        return editor;
+            editor = new QLineEdit(parent);
+            editor->setFrame(false);
+            dValidator = new QDoubleValidator(editor);
+            dValidator->setDecimals(6);
+            editor->setValidator(dValidator);
+            return editor;
+        case PerClassTableModel::MinStdDev:
+            editor = new QLineEdit(parent);
+            editor->setFrame(false);
+            dValidator = new QDoubleValidator(editor);
+            dValidator->setDecimals(6);
+            editor->setValidator(dValidator);
+            return editor;
+        case PerClassTableModel::Color:
+            colorCombo = new ColorComboPicker(parent);
+            colorCombo->setAutoFillBackground(true);
+            return colorCombo;
+        case PerClassTableModel::Gray:
+            editor = new QLineEdit(parent);
+            editor->setFrame(false);
+            iValidator = new QIntValidator(editor);
+            editor->setValidator(iValidator);
+            return editor;
 
 
         default:
-          break;
-      }
-      return QStyledItemDelegate::createEditor(parent, option, index);
+            break;
+        }
+        return QStyledItemDelegate::createEditor(parent, option, index);
     }
 
     // -----------------------------------------------------------------------------
@@ -122,7 +129,8 @@ class PerClassItemDelegate : public QStyledItemDelegate
       bool ok = false;
       qint32 col = index.column();
       if (col == PerClassTableModel::Gamma ||
-          col == PerClassTableModel::Gray)
+          col == PerClassTableModel::Gray ||
+          col == PerClassTableModel::MinStdDev)
       {
         QLineEdit* lineEdit = qobject_cast<QLineEdit* > (editor);
         Q_ASSERT(lineEdit);
@@ -145,6 +153,14 @@ class PerClassItemDelegate : public QStyledItemDelegate
     {
       qint32 col = index.column();
       if (col == PerClassTableModel::Gamma)
+      {
+        QLineEdit* lineEdit = qobject_cast<QLineEdit* > (editor);
+        Q_ASSERT(lineEdit);
+        bool ok = false;
+        double v = lineEdit->text().toDouble(&ok);
+        model->setData(index, v);
+      }
+      else if (col == PerClassTableModel::MinStdDev)
       {
         QLineEdit* lineEdit = qobject_cast<QLineEdit* > (editor);
         Q_ASSERT(lineEdit);

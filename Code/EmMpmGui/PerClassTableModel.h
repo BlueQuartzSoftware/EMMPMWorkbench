@@ -50,6 +50,7 @@ class PerClassTableModel : public QAbstractTableModel
       Label = 0,
       Gamma,
       Color,
+      MinStdDev,
       Gray,
       ColumnCount
     };
