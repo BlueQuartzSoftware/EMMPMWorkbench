@@ -153,7 +153,7 @@ class PerClassItemDelegate : public QStyledItemDelegate
             dValidator->setDecimals(6);
             editor->setValidator(dValidator);
             return editor;
-        case PerClassTableModel::Gray:
+        case PerClassTableModel::MergeLabel:
             editor = new QLineEdit(parent);
             editor->setFrame(false);
             iValidator = new QIntValidator(editor);
@@ -174,7 +174,7 @@ class PerClassItemDelegate : public QStyledItemDelegate
       qint32 col = index.column();
 
       if (col == PerClassTableModel::Gamma ||
-          col == PerClassTableModel::Gray ||
+          col == PerClassTableModel::MergeLabel ||
           col == PerClassTableModel::MinStdDev)
       {
         QLineEdit* lineEdit = qobject_cast<QLineEdit* > (editor);
@@ -208,13 +208,17 @@ class PerClassItemDelegate : public QStyledItemDelegate
         double v = lineEdit->text().toDouble(&ok);
         model->setData(index, v);
       }
-      else if (col == PerClassTableModel::Gray)
+      else if (col == PerClassTableModel::MergeLabel)
       {
           QLineEdit* lineEdit = qobject_cast<QLineEdit* > (editor);
           Q_ASSERT(lineEdit);
           bool ok = false;
           int v = lineEdit->text().toInt(&ok);
           model->setData(index, v);
+      }
+      else if (col == PerClassTableModel::Color)
+      {
+         // Do nothing because the data has already been committed.
       }
       else QStyledItemDelegate::setModelData(editor, model, index);
     }

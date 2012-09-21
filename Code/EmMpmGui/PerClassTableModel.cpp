@@ -71,7 +71,7 @@ Qt::ItemFlags PerClassTableModel::flags(const QModelIndex &index) const
     theFlags |= Qt::ItemIsEnabled;
 
     int col = index.column();
-    if (  col == Gamma || col == MinStdDev|| col == Gray || col == Color )
+    if (  col == Gamma || col == MinStdDev|| col == MergeLabel || col == Color )
     {
       theFlags = Qt::ItemIsEditable | Qt::ItemIsSelectable | Qt::ItemIsEnabled;
     }
@@ -139,7 +139,7 @@ QVariant PerClassTableModel::data(const QModelIndex &index, qint32 role) const
         return QVariant(itemData->getGamma());
       case PerClassTableModel::MinStdDev:
         return QVariant(itemData->getMinStdDev());
-      case PerClassTableModel::Gray:
+      case PerClassTableModel::MergeLabel:
         return QVariant(itemData->getFinalLabel());
       case PerClassTableModel::Color:
         return QVariant(itemData->getColor());
@@ -164,7 +164,7 @@ QVariant  PerClassTableModel::headerData ( int section, Qt::Orientation orientat
       case Gamma: return QVariant(QString("-Chem. Pntl"));
       case MinStdDev: return QVariant(QString("Min Std Dev"));
       case Color: return QVariant(QString("Color"));
-      case Gray: return QVariant(QString("Final Class"));
+      case MergeLabel: return QVariant(QString("Final Class"));
       default:
         break;
     }
@@ -225,7 +225,7 @@ bool PerClassTableModel::setData(const QModelIndex & index, const QVariant & val
     case PerClassTableModel::Color:
         m_ItemDatas.at(row)->setColor(value.toString());
         break;
-    case PerClassTableModel::Gray:
+    case PerClassTableModel::MergeLabel:
         m_ItemDatas.at(row)->setFinalLabel(value.toInt(&ok));
         break;
 
@@ -245,14 +245,14 @@ bool PerClassTableModel::insertRows(int row, int count, const QModelIndex& index
  //   qint32 binNum = 0;
     double gamma = 0.0;
     double minStdDev = 4.5;
-    int grayLevel = 0;
+    int MergeLabelLevel = 0;
 
 
     beginInsertRows(QModelIndex(), row, row + count - 1);
     for (int i = 0; i < count; ++i)
     {
         // Create a new PerClassItemData object
-        PerClassItemData* d = new PerClassItemData(m_ItemDatas.count(), gamma, minStdDev, QColor::colorNames().at(10), grayLevel, this);
+        PerClassItemData* d = new PerClassItemData(m_ItemDatas.count(), gamma, minStdDev, QColor::colorNames().at(10), MergeLabelLevel, this);
         m_ItemDatas.push_back(d);
         m_RowCount = m_ItemDatas.count();
     }

@@ -191,27 +191,8 @@ m_ImageStatsReady(false)
   m_StartingMuValues[13] = 16;
   m_StartingMuValues[14] = 256;
 
-  int index = 0;
-  /* Color Names are taken from the W3C SVG Spec
-   * http://www.december.com/html/spec/colorsvghex.html
-   */
-  m_GaussianCurveColors[index++] = QString("#191970"); // midnightblue
-  m_GaussianCurveColors[index++] = QString("#8A2BE2"); // blueviolet
-  m_GaussianCurveColors[index++] = QString("#8B0000"); // darkred
-  m_GaussianCurveColors[index++] = QString("#FF4500"); // orangered
-  m_GaussianCurveColors[index++] = QString("#800080"); // purple
-  m_GaussianCurveColors[index++] = QString("#006400"); // darkgreen
-  m_GaussianCurveColors[index++] = QString("#00008B"); // darkblue
-  m_GaussianCurveColors[index++] = QString("#FF00FF"); // fuchsia
-  m_GaussianCurveColors[index++] = QString("#2F4F4F"); // darkslategray
-  m_GaussianCurveColors[index++] = QString("#48D1CC"); // mediumturquoise
-  m_GaussianCurveColors[index++] = QString("#5F9EA0"); // cadetblue
-  m_GaussianCurveColors[index++] = QString("#7FFF00"); // chartreuse
-  m_GaussianCurveColors[index++] = QString("#D2691E"); // chocolate
-  m_GaussianCurveColors[index++] = QString("#483D8B"); // darkslateblue
-  m_GaussianCurveColors[index++] = QString("#4169E1"); // royalblue
-  m_GaussianCurveColors[index++] = QString("#FF7F50"); // coral
 
+  initializeColorTable();
 
   setupUi(this);
   setupGui();
@@ -1482,6 +1463,7 @@ void EmMpmGui::on_sourceDirectoryBtn_clicked()
   if (!getOpenDialogLastDirectory().isNull())
   {
     this->sourceDirectoryLE->setText(getOpenDialogLastDirectory() );
+    verifyPathExists(sourceDirectoryLE->text(), sourceDirectoryLE);
     populateFileTable(sourceDirectoryLE, fileListWidget);
     if (fileListWidget->count() > 0) {
       QListWidgetItem* item = fileListWidget->item(0);
@@ -1816,16 +1798,8 @@ void EmMpmGui::on_actionExit_triggered()
 // -----------------------------------------------------------------------------
 void EmMpmGui::setCurrentProcessedImage(QString imageFile)
 {
-
-//  bool showBaseImage = m_LayersPalette->getOriginalImageCheckBox()->isChecked();
-//  bool showSegmentedImage = m_LayersPalette->getSegmentedImageCheckBox()->isChecked();
-
   openBaseImageFile(imageFile);
-
-//  m_LayersPalette->on_originalImage_stateChanged(showBaseImage);
-//  m_LayersPalette->on_segmentedImage_stateChanged(showSegmentedImage);
 }
-
 
 // -----------------------------------------------------------------------------
 //
@@ -1939,7 +1913,7 @@ void EmMpmGui::addRemovePerClassTableRows()
     {
         int count = perClassTableView->model()->rowCount();
         QString colorName = m_GaussianCurveColors[count];
-        PerClassItemData* data = new PerClassItemData(count, 0.0, 4.5, colorName, 0, model);
+        PerClassItemData* data = new PerClassItemData(count, 0.0, 4.5, colorName, count, model);
         model->insertItemData(data, model->rowCount());
         if (m_GaussianCurves.size() < model->rowCount() )
         {
@@ -2305,6 +2279,88 @@ void EmMpmGui::on_m_NumClasses_valueChanged(int i)
   addRemovePerClassTableRows();
   addRemoveManualInitTableRows();
   updateGaussianCurves();
+}
+
+// -----------------------------------------------------------------------------
+//
+// -----------------------------------------------------------------------------
+void EmMpmGui::on_colorTablePresets_currentIndexChanged(int i)
+{
+  if (colorTablePresets->currentIndex() == 0)
+  {
+    initializeColorTable();
+  }
+  else if (colorTablePresets->currentIndex() == 1)
+  {
+    initializeGrayScaleTable();
+  }
+
+  PerClassTableModel* colorModel = qobject_cast<PerClassTableModel*>(perClassTableView->model());
+  if (NULL == colorModel) { return; }
+  int rows = colorModel->rowCount();
+
+  for(int i = 0; i < rows; ++i)
+  {
+    QModelIndex colorIndex = perClassTableView->model()->index(i, PerClassTableModel::Color);
+    QColor c = QColor(m_GaussianCurveColors[i]);
+    colorModel->setData(colorIndex, c.name()); // That will cause the 'dataChanged()' signal to be emitted
+  }
+  m_GraphicsView->useCustomColorTable(true);
+  updateGaussianCurves();
+}
+
+// -----------------------------------------------------------------------------
+//
+// -----------------------------------------------------------------------------
+void EmMpmGui::initializeColorTable()
+{
+  int index = 0;
+  /* Color Names are taken from the W3C SVG Spec
+   * http://www.december.com/html/spec/colorsvghex.html
+   */
+  m_GaussianCurveColors[index++] = QString("#191970"); // midnightblue
+  m_GaussianCurveColors[index++] = QString("#8A2BE2"); // blueviolet
+  m_GaussianCurveColors[index++] = QString("#8B0000"); // darkred
+  m_GaussianCurveColors[index++] = QString("#FF4500"); // orangered
+  m_GaussianCurveColors[index++] = QString("#800080"); // purple
+  m_GaussianCurveColors[index++] = QString("#006400"); // darkgreen
+  m_GaussianCurveColors[index++] = QString("#00008B"); // darkblue
+  m_GaussianCurveColors[index++] = QString("#FF00FF"); // fuchsia
+  m_GaussianCurveColors[index++] = QString("#2F4F4F"); // darkslategray
+  m_GaussianCurveColors[index++] = QString("#48D1CC"); // mediumturquoise
+  m_GaussianCurveColors[index++] = QString("#5F9EA0"); // cadetblue
+  m_GaussianCurveColors[index++] = QString("#7FFF00"); // chartreuse
+  m_GaussianCurveColors[index++] = QString("#D2691E"); // chocolate
+  m_GaussianCurveColors[index++] = QString("#483D8B"); // darkslateblue
+  m_GaussianCurveColors[index++] = QString("#4169E1"); // royalblue
+  m_GaussianCurveColors[index++] = QString("#FF7F50"); // coral
+}
+
+// -----------------------------------------------------------------------------
+//
+// -----------------------------------------------------------------------------
+void EmMpmGui::initializeGrayScaleTable()
+{
+  int index = 0;
+  /* Color Names are taken from the W3C SVG Spec
+   * http://www.december.com/html/spec/colorsvghex.html
+   */
+  m_GaussianCurveColors[index++] = QString("#000000");
+  m_GaussianCurveColors[index++] = QString("#FFFFFF"); //
+  m_GaussianCurveColors[index++] = QString("#222222"); //
+  m_GaussianCurveColors[index++] = QString("#EEEEEE"); //
+  m_GaussianCurveColors[index++] = QString("#444444"); //
+  m_GaussianCurveColors[index++] = QString("#DDDDDD"); //
+  m_GaussianCurveColors[index++] = QString("#666666"); //
+  m_GaussianCurveColors[index++] = QString("#CCCCCC"); //
+  m_GaussianCurveColors[index++] = QString("#888888"); //
+  m_GaussianCurveColors[index++] = QString("#BBBBBB"); //
+  m_GaussianCurveColors[index++] = QString("#111111"); //
+  m_GaussianCurveColors[index++] = QString("#AAAAAA"); //
+  m_GaussianCurveColors[index++] = QString("#333333"); //
+  m_GaussianCurveColors[index++] = QString("#555555"); //
+  m_GaussianCurveColors[index++] = QString("#777777"); //
+  m_GaussianCurveColors[index++] = QString("#999999"); //
 }
 
 // -----------------------------------------------------------------------------

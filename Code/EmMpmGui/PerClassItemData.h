@@ -43,10 +43,6 @@ class PerClassItemData : public QObject
 public:
     /**
      * @brief
-     * @param label
-     * @param gamma
-     * @param grayLevel
-     * @param color
      * @param parent
      */
     PerClassItemData(int label, double gamma, double minStdDev,

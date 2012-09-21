@@ -198,6 +198,7 @@ class EmMpmGui : public QMainWindow, private Ui::EmMpmGui
     void on_clearTempHistograms_clicked();
     void on_saveCurves_clicked();
 
+// MSE Plot Slots
     void on_m_msePlotXMin_valueChanged(int value);
     void on_m_msePlotXMax_valueChanged(int value);
     void on_saveMSEDataBtn_clicked();
@@ -207,9 +208,11 @@ class EmMpmGui : public QMainWindow, private Ui::EmMpmGui
     /* slots for the buttons in the GUI */
     void on_processBtn_clicked();
 
+    void on_m_NumClasses_valueChanged(int i);
+    void on_colorTablePresets_currentIndexChanged(int i);
+
     void on_useGradientPenalty_clicked();
     void on_useCurvaturePenalty_clicked();
-    void on_m_NumClasses_valueChanged(int i);
 
     void on_enableUserDefinedAreas_stateChanged(int state);
     void on_showUserDefinedAreas_stateChanged(int state);
@@ -341,6 +344,9 @@ class EmMpmGui : public QMainWindow, private Ui::EmMpmGui
     void setImageWidgetsEnabled(bool b);
 
     void setProcessFolderWidgetsEnabled(bool b);
+
+    void initializeColorTable();
+    void initializeGrayScaleTable();
 
   private:
     QVector<UserInitArea*>*      m_UserInitAreaVector;

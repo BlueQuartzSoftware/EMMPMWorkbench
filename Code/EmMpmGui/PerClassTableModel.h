@@ -51,7 +51,7 @@ class PerClassTableModel : public QAbstractTableModel
       Gamma,
       Color,
       MinStdDev,
-      Gray,
+      MergeLabel,
       ColumnCount
     };
 

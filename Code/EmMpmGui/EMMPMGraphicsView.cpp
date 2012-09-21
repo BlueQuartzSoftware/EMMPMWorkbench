@@ -76,12 +76,10 @@ EMMPMGraphicsView::EMMPMGraphicsView(QWidget *parent)
   m_composition_mode = QPainter::CompositionMode_SourceOver;
   m_OverlayTransparency = 1.0f; // Fully opaque
 
- // m_CustomGrayScaleTable.resize(256);
   m_CustomColorTable.resize(256);
   for (quint32 i = 0; i < 256; ++i)
   {
     m_CustomColorTable[i] = qRgb(i, i, i);
-  //  m_CustomGrayScaleTable[i] = qRgb(i,i,i);
   }
 
 }
@@ -313,10 +311,6 @@ void EMMPMGraphicsView::updateDisplay()
     {
       m_OverlayImage.setColorTable(m_CustomColorTable);
     }
-//    else if (m_UseGrayScaleTable == true)
-//    {
-//      m_OverlayImage.setColorTable(m_CustomGrayScaleTable);
-//    }
     else
     {
       m_OverlayImage.setColorTable(m_OriginalColorTable);
@@ -710,14 +704,8 @@ void EMMPMGraphicsView::updateColorTables( QVector<QRgb> colorTable)
   for (quint32 i = 0; i < 256; ++i)
   {
     m_CustomColorTable[i] = qRgb(i, i, i);
-  //  m_CustomGrayScaleTable[i] = qRgb(i, i, i);
   }
 
-//  qint32 size = grayTable.size();
-//  for(qint32 index = 0; index < size; ++index)
-//  {
-//      m_CustomGrayScaleTable[index] = grayTable[index];
-//  }
   qint32 size = colorTable.size();
   for(qint32 index = 0; index < size; ++index)
   {
