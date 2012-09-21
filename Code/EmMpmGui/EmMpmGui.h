@@ -158,7 +158,6 @@ class EmMpmGui : public QMainWindow, private Ui::EmMpmGui
     void userInitAreaSelected(UserInitArea* uia);
     void userInitAreaLostFocus();
 
-  //  void updateManualInitHistograms();
     void manualInitDataChanged ( const QModelIndex & topLeft, const QModelIndex & bottomRight );
     void perClassItemDataChanged ( const QModelIndex & topLeft, const QModelIndex & bottomRight );
 

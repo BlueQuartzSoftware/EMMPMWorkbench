@@ -1023,6 +1023,13 @@ void EmMpmGui::on_processBtn_clicked()
     }
 
     fi = QFileInfo(outputImageFile->text());
+    if (fi.suffix().compare("jpg") == 0 || fi.suffix().compare("jpeg") == 0)
+    {
+        QMessageBox::critical(this, tr("Output Image Format Error"), tr("Due to compression artifacts using the JPEG format please use tif, bmp or png as the output format."), QMessageBox::Ok);
+        return;
+    }
+
+
     QDir outputDir(fi.absolutePath());
     if (outputDir.exists() == false)
     {
