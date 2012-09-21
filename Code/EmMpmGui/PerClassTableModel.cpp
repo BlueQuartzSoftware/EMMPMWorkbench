@@ -164,7 +164,7 @@ QVariant  PerClassTableModel::headerData ( int section, Qt::Orientation orientat
       case Gamma: return QVariant(QString("-Chem. Pntl"));
       case MinStdDev: return QVariant(QString("Min Std Dev"));
       case Color: return QVariant(QString("Color"));
-      case MergeLabel: return QVariant(QString("Final Class"));
+      case MergeLabel: return QVariant(QString("Remap Class"));
       default:
         break;
     }

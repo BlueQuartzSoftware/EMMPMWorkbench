@@ -51,8 +51,8 @@ class PerClassTableModel : public QAbstractTableModel
       Gamma,
       Color,
       MinStdDev,
-      MergeLabel,
-      ColumnCount
+      ColumnCount,
+            MergeLabel
     };
 
     PerClassTableModel(QObject* parent = 0);
