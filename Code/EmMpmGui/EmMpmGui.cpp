@@ -192,22 +192,25 @@ m_ImageStatsReady(false)
   m_StartingMuValues[14] = 256;
 
   int index = 0;
-  m_GaussianCurveColors[index++] = QString("midnightblue");
-  m_GaussianCurveColors[index++] = QString("blueviolet");
-  m_GaussianCurveColors[index++] = QString("darkred");
-  m_GaussianCurveColors[index++] = QString("orangered");
-  m_GaussianCurveColors[index++] = QString("purple");
-  m_GaussianCurveColors[index++] = QString("darkgreen");
-  m_GaussianCurveColors[index++] = QString("darkblue");
-  m_GaussianCurveColors[index++] = QString("fuchsia");
-  m_GaussianCurveColors[index++] = QString("darkslategray");
-  m_GaussianCurveColors[index++] = QString("mediumturquoise");
-  m_GaussianCurveColors[index++] = QString("cadetblue");
-  m_GaussianCurveColors[index++] = QString("chartreuse");
-  m_GaussianCurveColors[index++] = QString("chocolate");
-  m_GaussianCurveColors[index++] = QString("darkslateblue");
-  m_GaussianCurveColors[index++] = QString("royalblue");
-  m_GaussianCurveColors[index++] = QString("coral");
+  /* Color Names are taken from the W3C SVG Spec
+   * http://www.december.com/html/spec/colorsvghex.html
+   */
+  m_GaussianCurveColors[index++] = QString("#191970"); // midnightblue
+  m_GaussianCurveColors[index++] = QString("#8A2BE2"); // blueviolet
+  m_GaussianCurveColors[index++] = QString("#8B0000"); // darkred
+  m_GaussianCurveColors[index++] = QString("#FF4500"); // orangered
+  m_GaussianCurveColors[index++] = QString("#800080"); // purple
+  m_GaussianCurveColors[index++] = QString("#006400"); // darkgreen
+  m_GaussianCurveColors[index++] = QString("#00008B"); // darkblue
+  m_GaussianCurveColors[index++] = QString("#FF00FF"); // fuchsia
+  m_GaussianCurveColors[index++] = QString("#2F4F4F"); // darkslategray
+  m_GaussianCurveColors[index++] = QString("#48D1CC"); // mediumturquoise
+  m_GaussianCurveColors[index++] = QString("#5F9EA0"); // cadetblue
+  m_GaussianCurveColors[index++] = QString("#7FFF00"); // chartreuse
+  m_GaussianCurveColors[index++] = QString("#D2691E"); // chocolate
+  m_GaussianCurveColors[index++] = QString("#483D8B"); // darkslateblue
+  m_GaussianCurveColors[index++] = QString("#4169E1"); // royalblue
+  m_GaussianCurveColors[index++] = QString("#FF7F50"); // coral
 
 
   setupUi(this);
@@ -368,6 +371,19 @@ void EmMpmGui::readSettings(QSettings &prefs)
 
   prefs.endGroup();  // End the Parameters Group
 
+  {
+      PerClassTableModel* model = qobject_cast<PerClassTableModel*>(perClassTableView->model());
+      if (NULL != model)
+      {
+          QList<PerClassItemData*> datas = model->getItemDatas();
+          for (int i = 0; i < datas.count(); ++i)
+          {
+              PerClassItemData* item = datas.at(i);
+              item->readSettings(prefs);
+          }
+      }
+  }
+
   if (enableManualInit->isChecked() == true)
   {
     ManualInitTableModel* model = qobject_cast<ManualInitTableModel*>(manualInitTableView->model());
@@ -380,19 +396,6 @@ void EmMpmGui::readSettings(QSettings &prefs)
         uia->readSettings(prefs);
       }
     }
-  }
-
-  {
-      PerClassTableModel* model = qobject_cast<PerClassTableModel*>(perClassTableView->model());
-      if (NULL != model)
-      {
-          QList<PerClassItemData*> datas = model->getItemDatas();
-          for (int i = 0; i < datas.count(); ++i)
-          {
-              PerClassItemData* item = datas.at(i);
-              item->readSettings(prefs);
-          }
-      }
   }
 
 
@@ -421,6 +424,7 @@ void EmMpmGui::readSettings(QSettings &prefs)
     }
   }
 
+    updateGaussianCurves();
 
 }
 
@@ -747,13 +751,16 @@ void EmMpmGui::setupGui()
   perClassTableView->setModel(pctm);
   QAbstractItemDelegate* pcid = pctm->getItemDelegate();
   perClassTableView->setItemDelegate(pcid);
+//  connect(pcid, SIGNAL(closeEditor(QWidget*)),
+//          this, SLOT(perClassItemEditingComplete(QWidget*)));
   connect(pctm, SIGNAL(dataChanged(const QModelIndex &, const QModelIndex &)),
           this, SLOT(perClassItemDataChanged(const QModelIndex &, const QModelIndex &)));
   for(int c = 0; c < pctm->columnCount(); ++c)
   {
       perClassTableView->horizontalHeader()->setResizeMode(c, QHeaderView::ResizeToContents);
-   //   perClassTableView->horizontalHeader()->resizeSection(c, 100);
   }
+  perClassTableView->horizontalHeader()->setResizeMode(PerClassTableModel::Color, QHeaderView::Fixed);
+  perClassTableView->horizontalHeader()->resizeSection(PerClassTableModel::Color, 60);
 
 
   // option B (pressing DEL activates the slots only when list widget has focus)
@@ -772,8 +779,6 @@ void EmMpmGui::setupGui()
   compositeModeCB->setCurrentIndex(2); // Default to an Alpha Blend;
 
   compositeModeCB->blockSignals(false);
-
-
 }
 
 // -----------------------------------------------------------------------------
@@ -1837,8 +1842,6 @@ void EmMpmGui::openBaseImageFile(QString imageFile)
 
   imageDisplaySelection->setEnabled(false);
   imageDisplaySelection->setCurrentIndex(0);
-//  m_LayersPalette->getOriginalImageCheckBox()->setChecked(true);
-//  m_LayersPalette->getSegmentedImageCheckBox()->setChecked(false);
 
   // Tell the RecentFileList to update itself then broadcast those changes.
   QRecentFileList::instance()->addFile(imageFile);
