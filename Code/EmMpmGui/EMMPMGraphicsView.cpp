@@ -728,28 +728,28 @@ void EMMPMGraphicsView::setCompositeMode(EmMpm_Constants::CompositeType mode)
     case EmMpm_Constants::Alpha_Blend:
       m_composition_mode = QPainter::CompositionMode_SourceOver;
       break;
-#if 0
-    case 2: m_composition_mode = QPainter::CompositionMode_Plus; break;
-    case 3: m_composition_mode = QPainter::CompositionMode_Multiply; break;
-    case 4: m_composition_mode = QPainter::CompositionMode_Screen; break;
-    case 5: m_composition_mode = QPainter::CompositionMode_Darken; break;
-    case 6: m_composition_mode = QPainter::CompositionMode_Lighten; break;
-    case 7: m_composition_mode = QPainter::CompositionMode_ColorDodge; break;
-    case 8: m_composition_mode = QPainter::CompositionMode_ColorBurn; break;
-    case 9: m_composition_mode = QPainter::CompositionMode_HardLight; break;
-    case 10: m_composition_mode = QPainter::CompositionMode_SoftLight; break;
 
-    case 12: m_composition_mode = QPainter::CompositionMode_Destination; break;
-    case 13: m_composition_mode = QPainter::CompositionMode_Source; break;
-    case 14: m_composition_mode = QPainter::CompositionMode_DestinationOver; break;
-    case 15: m_composition_mode = QPainter::CompositionMode_SourceIn; break;
-    case 16: m_composition_mode = QPainter::CompositionMode_DestinationIn; break;
-    case 17: m_composition_mode = QPainter::CompositionMode_DestinationOut; break;
-    case 18: m_composition_mode = QPainter::CompositionMode_SourceAtop; break;
-    case 19: m_composition_mode = QPainter::CompositionMode_DestinationAtop; break;
-    case 20: m_composition_mode = QPainter::CompositionMode_Overlay; break;
-    case 21: m_composition_mode = QPainter::CompositionMode_Clear; break;
-#endif
+    case EmMpm_Constants::Plus: m_composition_mode = QPainter::CompositionMode_Plus; break;
+    case EmMpm_Constants::Multiply: m_composition_mode = QPainter::CompositionMode_Multiply; break;
+    case EmMpm_Constants::Screen: m_composition_mode = QPainter::CompositionMode_Screen; break;
+    case EmMpm_Constants::Darken: m_composition_mode = QPainter::CompositionMode_Darken; break;
+    case EmMpm_Constants::Lighten: m_composition_mode = QPainter::CompositionMode_Lighten; break;
+    case EmMpm_Constants::ColorDodge: m_composition_mode = QPainter::CompositionMode_ColorDodge; break;
+    case EmMpm_Constants::ColorBurn: m_composition_mode = QPainter::CompositionMode_ColorBurn; break;
+    case EmMpm_Constants::HardLight: m_composition_mode = QPainter::CompositionMode_HardLight; break;
+    case EmMpm_Constants::SoftLight: m_composition_mode = QPainter::CompositionMode_SoftLight; break;
+
+    case EmMpm_Constants::Destination: m_composition_mode = QPainter::CompositionMode_Destination; break;
+    case EmMpm_Constants::Source: m_composition_mode = QPainter::CompositionMode_Source; break;
+    case EmMpm_Constants::DestinationOver: m_composition_mode = QPainter::CompositionMode_DestinationOver; break;
+    case EmMpm_Constants::SourceIn: m_composition_mode = QPainter::CompositionMode_SourceIn; break;
+    case EmMpm_Constants::DestinationIn: m_composition_mode = QPainter::CompositionMode_DestinationIn; break;
+    case EmMpm_Constants::DestinationOut: m_composition_mode = QPainter::CompositionMode_DestinationOut; break;
+    case EmMpm_Constants::SourceAtop: m_composition_mode = QPainter::CompositionMode_SourceAtop; break;
+    case EmMpm_Constants::DestinationAtop: m_composition_mode = QPainter::CompositionMode_DestinationAtop; break;
+    case EmMpm_Constants::Overlay: m_composition_mode = QPainter::CompositionMode_Overlay; break;
+    case EmMpm_Constants::Clear: m_composition_mode = QPainter::CompositionMode_Clear; break;
+
   default:
     m_composition_mode = QPainter::CompositionMode_Exclusion; break;
   }
