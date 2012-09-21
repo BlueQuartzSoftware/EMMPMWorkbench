@@ -259,7 +259,10 @@ void EmMpmGui::writeIOSettings(QSettings &prefs)
   WRITE_STRING_SETTING(prefs, outputDirectoryLE);
   WRITE_STRING_SETTING(prefs, outputPrefix);
   WRITE_STRING_SETTING(prefs, outputSuffix);
-  WRITE_BOOL_SETTING(prefs, saveHistogramCheckBox, saveHistogramCheckBox->isChecked())
+  WRITE_CHECKBOX_SETTING(prefs, muSigmaFeedback);
+  WRITE_BOOL_SETTING(prefs, saveHistogramCheckBox, saveHistogramCheckBox->isChecked());
+  WRITE_STRING_SETTING(prefs, filterPatternLineEdit);
+  WRITE_COMBO_SETTING(prefs, outputImageType);
   prefs.endGroup();
 }
 
@@ -283,6 +286,9 @@ void EmMpmGui::readIOSettings(QSettings &prefs)
   READ_STRING_SETTING(prefs, outputPrefix, "Segmented_");
   READ_STRING_SETTING(prefs, outputSuffix, "");
   READ_BOOL_SETTING(prefs, saveHistogramCheckBox, false);
+  READ_BOOL_SETTING(prefs, muSigmaFeedback, false);
+  READ_STRING_SETTING(prefs, filterPatternLineEdit, "");
+  READ_COMBO_SETTING(prefs, outputImageType, 0);
 
   processFolder->blockSignals(true);
   READ_BOOL_SETTING(prefs, processFolder, false);
@@ -303,21 +309,6 @@ void EmMpmGui::readSettings(QSettings &prefs)
   qint32 i;
   double d;
   int userInitAreaCount;
-
-  READ_STRING_SETTING(prefs, outputPrefix, "Segmented_");
-  READ_STRING_SETTING(prefs, outputSuffix, "");
-  on_outputPrefix_textChanged();
-
-  READ_BOOL_SETTING(prefs, processFolder, false);
-  READ_STRING_SETTING(prefs, sourceDirectoryLE, "");
-  READ_STRING_SETTING(prefs, outputDirectoryLE, "");
-  READ_BOOL_SETTING(prefs, muSigmaFeedback, false);
-  READ_STRING_SETTING(prefs, outputPrefix, "");
-  READ_STRING_SETTING(prefs, outputSuffix, "");
-  READ_BOOL_SETTING(prefs, saveHistogramCheckBox, false);
-  READ_STRING_SETTING(prefs, filterPatternLineEdit, "");
-  READ_COMBO_SETTING(prefs, outputImageType, 0);
-
 
   prefs.beginGroup("Parameters");
 
@@ -350,19 +341,21 @@ void EmMpmGui::readSettings(QSettings &prefs)
   READ_BOOL_SETTING(prefs, useStoppingCriteria, false);
   READ_STRING_SETTING(prefs, m_StoppingThreshold, "");
 
+  int classCouplingCount = prefs.value("ClassCouplingCount", 0).toInt(&ok);
+
   prefs.endGroup();  // End the Parameters Group
 
   {
-      PerClassTableModel* model = qobject_cast<PerClassTableModel*>(perClassTableView->model());
-      if (NULL != model)
+    PerClassTableModel* model = qobject_cast<PerClassTableModel*>(perClassTableView->model());
+    if (NULL != model)
+    {
+      QList<PerClassItemData*> datas = model->getItemDatas();
+      for (int i = 0; i < datas.count(); ++i)
       {
-          QList<PerClassItemData*> datas = model->getItemDatas();
-          for (int i = 0; i < datas.count(); ++i)
-          {
-              PerClassItemData* item = datas.at(i);
-              item->readSettings(prefs);
-          }
+        PerClassItemData* item = datas.at(i);
+        item->readSettings(prefs);
       }
+    }
   }
 
   if (enableManualInit->isChecked() == true)
@@ -379,6 +372,17 @@ void EmMpmGui::readSettings(QSettings &prefs)
     }
   }
 
+  for(int i = 0; i < classCouplingCount; ++i)
+  {
+    QString groupName("ClassCoupling-");
+    groupName = groupName.append(QString::number(i));
+    prefs.beginGroup(groupName);
+    m_ClassA->setText(prefs.value("Class_A").toString());
+    m_ClassB->setText(prefs.value("Class_B").toString());
+    m_CouplingBeta->setText(prefs.value("Exchange_Energy").toString());
+    on_addClassCoupling_clicked();
+    prefs.endGroup();
+  }
 
   // We only load the User Init Areas if there is an image loaded
   // and the checkbox was set
@@ -416,19 +420,18 @@ void EmMpmGui::writeSettings(QSettings &prefs)
 {
 
   prefs.setValue("Version", QString::fromStdString(EmMpm_Gui::Version::Complete()));
-  WRITE_STRING_SETTING(prefs, inputImageFilePath);
-  WRITE_STRING_SETTING(prefs, outputImageFile);
+//  WRITE_STRING_SETTING(prefs, outputPrefix);
+//  WRITE_STRING_SETTING(prefs, outputSuffix);
 
+//  WRITE_CHECKBOX_SETTING(prefs, processFolder);
+//  WRITE_STRING_SETTING(prefs, sourceDirectoryLE);
+//  WRITE_STRING_SETTING(prefs, outputDirectoryLE);
+//  WRITE_CHECKBOX_SETTING(prefs, muSigmaFeedback);
 
-  WRITE_CHECKBOX_SETTING(prefs, processFolder);
-  WRITE_STRING_SETTING(prefs, sourceDirectoryLE);
-  WRITE_STRING_SETTING(prefs, outputDirectoryLE);
-  WRITE_CHECKBOX_SETTING(prefs, muSigmaFeedback);
-  WRITE_STRING_SETTING(prefs, outputPrefix);
-  WRITE_STRING_SETTING(prefs, outputSuffix);
-  WRITE_CHECKBOX_SETTING(prefs, saveHistogramCheckBox);
-  WRITE_STRING_SETTING(prefs, filterPatternLineEdit);
-  WRITE_COMBO_SETTING(prefs, outputImageType);
+//  WRITE_CHECKBOX_SETTING(prefs, saveHistogramCheckBox);
+//  WRITE_STRING_SETTING(prefs, filterPatternLineEdit);
+//  WRITE_COMBO_SETTING(prefs, outputImageType);
+
 
   prefs.beginGroup("Parameters");
   WRITE_SETTING(prefs, m_NumClasses);
@@ -454,6 +457,9 @@ void EmMpmGui::writeSettings(QSettings &prefs)
 
   WRITE_CHECKBOX_SETTING(prefs, useStoppingCriteria);
   WRITE_STRING_SETTING(prefs, m_StoppingThreshold);
+
+  prefs.setValue("ClassCouplingCount", m_ClassCouplingTableWidget->rowCount());
+
 
   prefs.endGroup();
 
@@ -485,12 +491,26 @@ void EmMpmGui::writeSettings(QSettings &prefs)
 
   if (enableUserDefinedAreas->isChecked() == true)
   {
-      for (int i = 0; i < this->m_UserInitAreaVector->size(); ++i)
-      {
-          UserInitArea* uia = m_UserInitAreaVector->at(i);
-          uia->writeSettings(prefs);
-      }
+    for (int i = 0; i < this->m_UserInitAreaVector->size(); ++i)
+    {
+      UserInitArea* uia = m_UserInitAreaVector->at(i);
+      uia->writeSettings(prefs);
+    }
   }
+
+  int count = m_ClassCouplingTableWidget->rowCount();
+  for(int row = 0; row < count; ++row)
+  {
+    QString groupName("ClassCoupling-");
+    groupName = groupName.append(QString::number(row));
+    prefs.beginGroup(groupName);
+    prefs.setValue("Class_A", m_ClassCouplingTableWidget->item(row, 0)->text());
+    prefs.setValue("Class_B", m_ClassCouplingTableWidget->item(row, 1)->text());
+    prefs.setValue("Exchange_Energy", m_ClassCouplingTableWidget->item(row, 2)->text());
+    prefs.endGroup();
+  }
+
+
 }
 
 // -----------------------------------------------------------------------------
@@ -540,6 +560,7 @@ void EmMpmGui::on_actionSave_Config_File_triggered()
   QFileInfo fi(file);
   m_OpenDialogLastDirectory = fi.absolutePath();
   QSettings prefs(file, QSettings::IniFormat, this);
+  writeIOSettings(prefs);
   writeSettings(prefs);
 }
 
@@ -555,6 +576,7 @@ void EmMpmGui::on_actionLoad_Config_File_triggered()
   QFileInfo fi(file);
   m_OpenDialogLastDirectory = fi.absolutePath();
   QSettings prefs(file, QSettings::IniFormat, this);
+  readIOSettings(prefs);
   readSettings(prefs);
 }
 
@@ -757,6 +779,26 @@ void EmMpmGui::setupGui()
   compositeModeCB->insertItem(0, "Exclusion", QVariant(EmMpm_Constants::Exclusion));
   compositeModeCB->insertItem(1, "Difference", QVariant(EmMpm_Constants::Difference));
   compositeModeCB->insertItem(2, "Alpha Blend", QVariant(EmMpm_Constants::Alpha_Blend));
+  compositeModeCB->insertItem(3, "Plus", QVariant(EmMpm_Constants::Plus));
+  compositeModeCB->insertItem(4, "Multiply", QVariant(EmMpm_Constants::Multiply));
+  compositeModeCB->insertItem(5, "Screen", QVariant(EmMpm_Constants::Screen));
+  compositeModeCB->insertItem(6, "Darken", QVariant(EmMpm_Constants::Darken));
+  compositeModeCB->insertItem(7, "Lighten", QVariant(EmMpm_Constants::Lighten));
+  compositeModeCB->insertItem(8, "ColorDodge", QVariant(EmMpm_Constants::ColorDodge));
+  compositeModeCB->insertItem(9, "ColorBurn", QVariant(EmMpm_Constants::ColorBurn));
+  compositeModeCB->insertItem(10, "HardLight", QVariant(EmMpm_Constants::HardLight));
+  compositeModeCB->insertItem(11, "SoftLight", QVariant(EmMpm_Constants::SoftLight));
+  compositeModeCB->insertItem(12, "Destination", QVariant(EmMpm_Constants::Destination));
+  compositeModeCB->insertItem(13, "Source", QVariant(EmMpm_Constants::Source));
+  compositeModeCB->insertItem(14, "DestinationOver", QVariant(EmMpm_Constants::DestinationOver));
+  compositeModeCB->insertItem(15, "SourceIn", QVariant(EmMpm_Constants::SourceIn));
+  compositeModeCB->insertItem(16, "DestinationIn", QVariant(EmMpm_Constants::DestinationIn));
+  compositeModeCB->insertItem(17, "DestinationOut", QVariant(EmMpm_Constants::DestinationOut));
+  compositeModeCB->insertItem(18, "SourceAtop", QVariant(EmMpm_Constants::SourceAtop));
+  compositeModeCB->insertItem(19, "DestinationAtop", QVariant(EmMpm_Constants::DestinationAtop));
+  compositeModeCB->insertItem(20, "Overlay", QVariant(EmMpm_Constants::Overlay));
+  compositeModeCB->insertItem(21, "Clear", QVariant(EmMpm_Constants::Clear));
+
   compositeModeCB->setCurrentIndex(2); // Default to an Alpha Blend;
 
   compositeModeCB->blockSignals(false);
@@ -1151,6 +1193,10 @@ EMMPMTask* EmMpmGui::newEmMpmTask( ProcessQueueController* queueController)
   bool ok = false;
   EMMPMTask* task = new EMMPMTask(NULL);
   EMMPM_Data::Pointer data = task->getEMMPM_Data();
+  for (int i = 0; i < EMMPM_MAX_CLASSES; i++)
+  {
+    data->w_gamma[i] = 0.0;
+  }
 
   task->setFeedBackInitialization(muSigmaFeedback->isChecked());
   task->setSaveHistogram(saveHistogramCheckBox->isChecked());
@@ -1164,10 +1210,6 @@ EMMPMTask* EmMpmGui::newEmMpmTask( ProcessQueueController* queueController)
       return NULL;
   }
 
-  for (int i = 0; i < EMMPM_MAX_CLASSES; i++)
-  {
-    data->w_gamma[i] = 0.0;
-  }
   data->mpmIterations = m_MpmIterations->value();
   data->emIterations = m_EmIterations->value();
   data->classes = m_NumClasses->value();
@@ -2058,12 +2100,12 @@ void EmMpmGui::generateGaussianData(int rows)
         for (int row = 0; row < imageSize.height(); row++)
         {
             scanLine = reinterpret_cast<quint8*>(image.scanLine(row));
-            for (size_t c = 0; c < imageSize.width(); ++c) 
+            for (size_t c = 0; c < imageSize.width(); ++c)
             {
               r = scanLine[c*elements + offsets[0]];
               g = scanLine[c*elements + offsets[1]];
               b = scanLine[c*elements + offsets[2]];
-              m_MeanOfImage += qGray(r, g, b);  
+              m_MeanOfImage += qGray(r, g, b);
             }
         }
         m_MeanOfImage /= (imageSize.height() * imageSize.width());
@@ -2073,7 +2115,7 @@ void EmMpmGui::generateGaussianData(int rows)
               r = scanLine[c*elements + offsets[0]];
               g = scanLine[c*elements + offsets[1]];
               b = scanLine[c*elements + offsets[2]];
-              gray= qGray(r, g, b);  
+              gray= qGray(r, g, b);
               m_SigmaOfImage += (gray - m_MeanOfImage) * (gray - m_MeanOfImage);
             }
         }
