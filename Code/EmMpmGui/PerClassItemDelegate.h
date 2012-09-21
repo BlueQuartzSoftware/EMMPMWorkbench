@@ -42,6 +42,7 @@
 #include <QtGui/QIntValidator>
 #include <QtGui/QDoubleValidator>
 #include <QtGui/QStyledItemDelegate>
+#include <QtGui/QPushButton>
 
 #include "QtSupport/ColorComboPicker.h"
 
@@ -66,6 +67,8 @@ class PerClassItemDelegate : public QStyledItemDelegate
     explicit PerClassItemDelegate(QObject *parent = 0) :
       QStyledItemDelegate(parent)
     {
+        m_ColorBtn = new QPushButton("");
+        m_ColorBtn->setText("");
     }
 
     // -----------------------------------------------------------------------------
@@ -73,7 +76,27 @@ class PerClassItemDelegate : public QStyledItemDelegate
     // -----------------------------------------------------------------------------
     void paint(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const
     {
-      QStyledItemDelegate::paint(painter, option, index);
+     qint32 col = index.column();
+     if (col == PerClassTableModel::Color )
+     {
+        QString colorName = index.model()->data(index).toString();
+        if (QColor::isValidColor(colorName) == true)
+        {
+            QString cssColor = "border: 1px solid #101010; background-color: ";
+            cssColor.append(colorName);
+            m_ColorBtn->setStyleSheet(cssColor);
+            m_ColorBtn->setGeometry(option.rect);
+
+            if (option.state == QStyle::State_Selected)
+                         painter->fillRect(option.rect, option.palette.highlight());
+            QPixmap map = QPixmap::grabWidget(m_ColorBtn);
+            painter->drawPixmap(option.rect.x(),option.rect.y(),map);
+        }
+     }
+     else
+     {
+        QStyledItemDelegate::paint(painter, option, index);
+      }
     }
 
     // -----------------------------------------------------------------------------
@@ -84,9 +107,36 @@ class PerClassItemDelegate : public QStyledItemDelegate
         QLineEdit* editor = NULL;
         QDoubleValidator* dValidator = NULL;
         QIntValidator* iValidator = NULL;
-        QComboBox* colorCombo = NULL;
 
         qint32 col = index.column();
+
+        if(col == PerClassTableModel::Color)
+        {
+            QPushButton* colorBtn = new QPushButton(parent);
+            QString colorName = index.model()->data(index).toString();
+            if (QColor::isValidColor(colorName) == true)
+            {
+                QColor color(colorName);
+
+                QColor result = QColorDialog::getColor(color);
+                if(result.isValid())
+                {
+                    QString cssColor = "border: 1px solid #101010; background-color: ";
+                    cssColor.append(result.name());
+                    colorBtn->setStyleSheet(cssColor);
+
+                    QAbstractItemModel* model = const_cast<QAbstractItemModel*>(index.model());
+                    model->setData(index, result.name());
+                }
+            }
+            else
+            {
+                QAbstractItemModel* model = const_cast<QAbstractItemModel*>(index.model());
+                model->setData(index, "#000000");
+            }
+            return colorBtn;
+        }
+
         switch(col)
         {
         case PerClassTableModel::Gamma:
@@ -103,18 +153,12 @@ class PerClassItemDelegate : public QStyledItemDelegate
             dValidator->setDecimals(6);
             editor->setValidator(dValidator);
             return editor;
-        case PerClassTableModel::Color:
-            colorCombo = new ColorComboPicker(parent);
-            colorCombo->setAutoFillBackground(true);
-            return colorCombo;
         case PerClassTableModel::Gray:
             editor = new QLineEdit(parent);
             editor->setFrame(false);
             iValidator = new QIntValidator(editor);
             editor->setValidator(iValidator);
             return editor;
-
-
         default:
             break;
         }
@@ -128,6 +172,7 @@ class PerClassItemDelegate : public QStyledItemDelegate
     {
       bool ok = false;
       qint32 col = index.column();
+
       if (col == PerClassTableModel::Gamma ||
           col == PerClassTableModel::Gray ||
           col == PerClassTableModel::MinStdDev)
@@ -136,15 +181,9 @@ class PerClassItemDelegate : public QStyledItemDelegate
         Q_ASSERT(lineEdit);
         lineEdit->setText(index.model()->data(index).toString());
       }
-      else if (col == PerClassTableModel::Color)
-      {
-        QString state = index.model()->data(index).toString();
-        ColorComboPicker* comboBox = qobject_cast<ColorComboPicker* > (editor);
-        Q_ASSERT(comboBox);
-        comboBox->setCurrentIndex(comboBox->findText(state));
-      }
       else QStyledItemDelegate::setEditorData(editor, index);
     }
+
 
     // -----------------------------------------------------------------------------
     //
@@ -152,6 +191,7 @@ class PerClassItemDelegate : public QStyledItemDelegate
     void setModelData(QWidget *editor, QAbstractItemModel *model, const QModelIndex &index) const
     {
       qint32 col = index.column();
+
       if (col == PerClassTableModel::Gamma)
       {
         QLineEdit* lineEdit = qobject_cast<QLineEdit* > (editor);
@@ -176,19 +216,12 @@ class PerClassItemDelegate : public QStyledItemDelegate
           int v = lineEdit->text().toInt(&ok);
           model->setData(index, v);
       }
-      else if (col == PerClassTableModel::Color )
-      {
-        ColorComboPicker *comboBox = qobject_cast<ColorComboPicker* > (editor);
-        Q_ASSERT(comboBox);
-        model->setData(index, comboBox->currentText());
-      }
       else QStyledItemDelegate::setModelData(editor, model, index);
     }
 
   private:
-//    QModelIndex m_Index;
-//    QWidget* m_Widget;
-//    QAbstractItemModel* m_Model;
+    QPushButton* m_ColorBtn;
+
 
 };
 
