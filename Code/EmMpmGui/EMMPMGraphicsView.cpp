@@ -54,8 +54,7 @@ EMMPMGraphicsView::EMMPMGraphicsView(QWidget *parent)
 : QGraphicsView(parent),
   m_ImageGraphicsItem(NULL),
   m_UserInitAreaVector(NULL),
-  m_UseColorTable(false),
-  m_UseGrayScaleTable(false)
+  m_UseColorTable(false)
 {
   setAcceptDrops(true);
   setDragMode(RubberBandDrag);
@@ -77,12 +76,10 @@ EMMPMGraphicsView::EMMPMGraphicsView(QWidget *parent)
   m_composition_mode = QPainter::CompositionMode_SourceOver;
   m_OverlayTransparency = 1.0f; // Fully opaque
 
-  m_CustomGrayScaleTable.resize(256);
   m_CustomColorTable.resize(256);
   for (quint32 i = 0; i < 256; ++i)
   {
     m_CustomColorTable[i] = qRgb(i, i, i);
-    m_CustomGrayScaleTable[i] = qRgb(i,i,i);
   }
 
 }
@@ -101,31 +98,8 @@ void EMMPMGraphicsView::setOverlayTransparency(float f)
 void EMMPMGraphicsView::useCustomColorTable(bool b)
 {
   m_UseColorTable = b;
-  if (m_UseColorTable == true)
-  {
-    m_UseGrayScaleTable = false;
-  }
-}
 
-// -----------------------------------------------------------------------------
-//
-// -----------------------------------------------------------------------------
-void EMMPMGraphicsView::useCustomGrayScaleTable(bool b)
-{
-  m_UseGrayScaleTable = b;
-  if (m_UseGrayScaleTable == true)
-  {
-    m_UseColorTable = false;
-  }
 }
-
-// -----------------------------------------------------------------------------
-//
-// -----------------------------------------------------------------------------
-//void EMMPMGraphicsView::setCustomColorTable(QVector<QRgb> colorTable)
-//{
-//  m_CustomColorTable = colorTable;
-//}
 
 // -----------------------------------------------------------------------------
 //
@@ -180,7 +154,6 @@ void EMMPMGraphicsView::userInitAreaUpdated(UserInitArea* uia)
 
   qint32 size = m_UserInitAreaVector->size();
   QVector<QRgb> colorTable(size);
-  QVector<QRgb> grayTable(size);
   UserInitArea* u = NULL;
   for(qint32 i = 0; i < size; ++i)
   {
@@ -189,11 +162,11 @@ void EMMPMGraphicsView::userInitAreaUpdated(UserInitArea* uia)
     {
       int index = u->getEmMpmClass(); // Get the class value which will be the index values that are written to the indexed image
       colorTable[index] = u->getColor().rgb();
-      grayTable[index] = qRgb(u->getEmMpmGrayLevel(), u->getEmMpmGrayLevel(), u->getEmMpmGrayLevel());
+    //  grayTable[index] = qRgb(u->getEmMpmGrayLevel(), u->getEmMpmGrayLevel(), u->getEmMpmGrayLevel());
     }
   }
 
-  updateColorTables(grayTable, colorTable);
+  updateColorTables( colorTable);
   updateDisplay();
 }
 
@@ -337,10 +310,6 @@ void EMMPMGraphicsView::updateDisplay()
     if (m_UseColorTable == true)
     {
       m_OverlayImage.setColorTable(m_CustomColorTable);
-    }
-    else if (m_UseGrayScaleTable == true)
-    {
-      m_OverlayImage.setColorTable(m_CustomGrayScaleTable);
     }
     else
     {
@@ -565,26 +534,10 @@ QImage EMMPMGraphicsView::getBaseImage()
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
-//void EMMPMGraphicsView::setBaseImage(QImage image)
-//{
-//  m_BaseImage = image;
-//}
-
-// -----------------------------------------------------------------------------
-//
-// -----------------------------------------------------------------------------
 QImage EMMPMGraphicsView::getOverlayImage()
 {
   return m_OverlayImage;
 }
-
-// -----------------------------------------------------------------------------
-//
-// -----------------------------------------------------------------------------
-//void EMMPMGraphicsView::setOverlayImage(QImage image)
-//{
-//  m_OverlayImage = image;
-//}
 
 // -----------------------------------------------------------------------------
 //
@@ -723,7 +676,7 @@ void EMMPMGraphicsView::addNewInitArea(UserInitArea* userInitArea)
 
     qint32 size = m_UserInitAreaVector->size();
     QVector<QRgb> colorTable(size);
-    QVector<QRgb> grayTable(size);
+  //  QVector<QRgb> grayTable(size);
     UserInitArea* u = NULL;
     for(qint32 i = 0; i < size; ++i)
     {
@@ -732,11 +685,11 @@ void EMMPMGraphicsView::addNewInitArea(UserInitArea* userInitArea)
       {
         int index = u->getEmMpmClass(); // Get the class value which will be the index values that are written to the indexed image
         colorTable[index] = u->getColor().rgb();
-        grayTable[index] = qRgb(u->getEmMpmGrayLevel(), u->getEmMpmGrayLevel(), u->getEmMpmGrayLevel());
+    //    grayTable[index] = qRgb(u->getEmMpmGrayLevel(), u->getEmMpmGrayLevel(), u->getEmMpmGrayLevel());
       }
     }
 
-    updateColorTables(grayTable, colorTable);
+    updateColorTables(colorTable);
 
   emit fireUserInitAreaAdded(userInitArea);
 }
@@ -744,22 +697,16 @@ void EMMPMGraphicsView::addNewInitArea(UserInitArea* userInitArea)
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
-void EMMPMGraphicsView::updateColorTables(QVector<QRgb> grayTable, QVector<QRgb> colorTable)
+void EMMPMGraphicsView::updateColorTables( QVector<QRgb> colorTable)
 {
   // Write Gray Scale values for each entry from 0 to 255 to initialize the table
   // to something. Also initialize the Gray Scale table to the same thing
   for (quint32 i = 0; i < 256; ++i)
   {
     m_CustomColorTable[i] = qRgb(i, i, i);
-    m_CustomGrayScaleTable[i] = qRgb(i, i, i);
   }
 
-  qint32 size = grayTable.size();
-  for(qint32 index = 0; index < size; ++index)
-  {
-      m_CustomGrayScaleTable[index] = grayTable[index];
-  }
-  size = colorTable.size();
+  qint32 size = colorTable.size();
   for(qint32 index = 0; index < size; ++index)
   {
       m_CustomColorTable[index] = colorTable[index];
@@ -781,28 +728,28 @@ void EMMPMGraphicsView::setCompositeMode(EmMpm_Constants::CompositeType mode)
     case EmMpm_Constants::Alpha_Blend:
       m_composition_mode = QPainter::CompositionMode_SourceOver;
       break;
-#if 0
-    case 2: m_composition_mode = QPainter::CompositionMode_Plus; break;
-    case 3: m_composition_mode = QPainter::CompositionMode_Multiply; break;
-    case 4: m_composition_mode = QPainter::CompositionMode_Screen; break;
-    case 5: m_composition_mode = QPainter::CompositionMode_Darken; break;
-    case 6: m_composition_mode = QPainter::CompositionMode_Lighten; break;
-    case 7: m_composition_mode = QPainter::CompositionMode_ColorDodge; break;
-    case 8: m_composition_mode = QPainter::CompositionMode_ColorBurn; break;
-    case 9: m_composition_mode = QPainter::CompositionMode_HardLight; break;
-    case 10: m_composition_mode = QPainter::CompositionMode_SoftLight; break;
 
-    case 12: m_composition_mode = QPainter::CompositionMode_Destination; break;
-    case 13: m_composition_mode = QPainter::CompositionMode_Source; break;
-    case 14: m_composition_mode = QPainter::CompositionMode_DestinationOver; break;
-    case 15: m_composition_mode = QPainter::CompositionMode_SourceIn; break;
-    case 16: m_composition_mode = QPainter::CompositionMode_DestinationIn; break;
-    case 17: m_composition_mode = QPainter::CompositionMode_DestinationOut; break;
-    case 18: m_composition_mode = QPainter::CompositionMode_SourceAtop; break;
-    case 19: m_composition_mode = QPainter::CompositionMode_DestinationAtop; break;
-    case 20: m_composition_mode = QPainter::CompositionMode_Overlay; break;
-    case 21: m_composition_mode = QPainter::CompositionMode_Clear; break;
-#endif
+    case EmMpm_Constants::Plus: m_composition_mode = QPainter::CompositionMode_Plus; break;
+    case EmMpm_Constants::Multiply: m_composition_mode = QPainter::CompositionMode_Multiply; break;
+    case EmMpm_Constants::Screen: m_composition_mode = QPainter::CompositionMode_Screen; break;
+    case EmMpm_Constants::Darken: m_composition_mode = QPainter::CompositionMode_Darken; break;
+    case EmMpm_Constants::Lighten: m_composition_mode = QPainter::CompositionMode_Lighten; break;
+    case EmMpm_Constants::ColorDodge: m_composition_mode = QPainter::CompositionMode_ColorDodge; break;
+    case EmMpm_Constants::ColorBurn: m_composition_mode = QPainter::CompositionMode_ColorBurn; break;
+    case EmMpm_Constants::HardLight: m_composition_mode = QPainter::CompositionMode_HardLight; break;
+    case EmMpm_Constants::SoftLight: m_composition_mode = QPainter::CompositionMode_SoftLight; break;
+
+    case EmMpm_Constants::Destination: m_composition_mode = QPainter::CompositionMode_Destination; break;
+    case EmMpm_Constants::Source: m_composition_mode = QPainter::CompositionMode_Source; break;
+    case EmMpm_Constants::DestinationOver: m_composition_mode = QPainter::CompositionMode_DestinationOver; break;
+    case EmMpm_Constants::SourceIn: m_composition_mode = QPainter::CompositionMode_SourceIn; break;
+    case EmMpm_Constants::DestinationIn: m_composition_mode = QPainter::CompositionMode_DestinationIn; break;
+    case EmMpm_Constants::DestinationOut: m_composition_mode = QPainter::CompositionMode_DestinationOut; break;
+    case EmMpm_Constants::SourceAtop: m_composition_mode = QPainter::CompositionMode_SourceAtop; break;
+    case EmMpm_Constants::DestinationAtop: m_composition_mode = QPainter::CompositionMode_DestinationAtop; break;
+    case EmMpm_Constants::Overlay: m_composition_mode = QPainter::CompositionMode_Overlay; break;
+    case EmMpm_Constants::Clear: m_composition_mode = QPainter::CompositionMode_Clear; break;
+
   default:
     m_composition_mode = QPainter::CompositionMode_Exclusion; break;
   }

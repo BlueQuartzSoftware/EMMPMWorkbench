@@ -75,14 +75,9 @@ void LayersDockWidget::updateDisplayState()
   {
     m_GraphicsView->useCustomColorTable(true);
   }
-  else if (useColorTable->isEnabled() && !useColorTable->isChecked())
-  {
-    m_GraphicsView->useCustomGrayScaleTable(true);
-  }
   else
   {
     m_GraphicsView->useCustomColorTable(false);
-    m_GraphicsView->useCustomGrayScaleTable(false);
   }
 
   bool ok = false;
@@ -223,5 +218,5 @@ QCheckBox* LayersDockWidget::getOriginalImageCheckBox() { return originalImage; 
 QSlider*   LayersDockWidget::getOpacitySlider() { return opacitySlider; }
 QSpinBox*  LayersDockWidget::getOpacitySpinBox() {return opacitySpinner;}
 QComboBox* LayersDockWidget::getCompositeTypeComboBox() { return compositeModeCB; }
-QCheckBox* LayersDockWidget::getUseColorTable() { return useColorTable; }
+//QCheckBox* LayersDockWidget::getUseColorTable() { return useColorTable; }
 

@@ -1,5 +1,5 @@
 /* ============================================================================
- * Copyright (c) 2011, Michael A. Jackson (BlueQuartz Software)
+ * Copyright (c) 2010, Michael A. Jackson (BlueQuartz Software)
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without modification,
@@ -27,51 +27,66 @@
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE
  * USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
-#ifndef LAYERSDOCKWIDGET_H_
-#define LAYERSDOCKWIDGET_H_
 
-#include <QtGui/QDockWidget>
+#ifndef _PER_CLASS_ITEM_DATA_H
+#define _PER_CLASS_ITEM_DATA_H
 
-#include "ui_LayersDockWidget.h"
-#include "EMMPMGraphicsView.h"
+#include <QtCore/QObject>
+#include <QtCore/QSettings>
+#include <QtGui/QColor>
 
 
-
-class LayersDockWidget : public QDockWidget , private Ui::LayersDockWidget
+class PerClassItemData : public QObject
 {
+    Q_OBJECT;
 
-  Q_OBJECT;
-  public:
-    LayersDockWidget(QWidget *parent = 0);
-    virtual ~LayersDockWidget();
+public:
+    /**
+     * @brief
+     * @param parent
+     */
+    PerClassItemData(int label, double gamma, double minStdDev,
+                   QString color, int finalLabel, QObject* parent = 0);
+    virtual ~PerClassItemData();
 
-    void setGraphicsView(EMMPMGraphicsView* view);
+    void readSettings(QSettings &prefs);
+    void writeSettings(QSettings &prefs);
 
-    QCheckBox* getSegmentedImageCheckBox();
-    QCheckBox* getOriginalImageCheckBox();
-    QSlider*   getOpacitySlider();
-    QSpinBox*  getOpacitySpinBox();
-    QComboBox* getCompositeTypeComboBox();
- //   QCheckBox* getUseColorTable();
+ public slots:
 
-  public slots:
-    void on_segmentedImage_stateChanged(int state);
-    void on_originalImage_stateChanged(int state);
-    void on_opacitySlider_valueChanged(int value);
-    void on_opacitySpinner_valueChanged(int value);
-    void on_compositeModeCB_currentIndexChanged();
-    void on_useColorTable_stateChanged(int state);
+    void setLabel(int eClass);
+    int getLabel();
+
+    void setGamma(double g);
+    double getGamma();
+
+    void setMinStdDev(double m);
+    double getMinStdDev();
+
+    void setFinalLabel(int gv);
+    int getFinalLabel();
+
+    void setColor(QString color);
+    QString getColor();
+
+ signals:
+
+  void firePerClassItemDataUpdated(PerClassItemData*);
+  void firePerClassItemDataAboutToDelete(PerClassItemData*);
+  void firePerClassItemDataDeleted(PerClassItemData*);
+  void firePerClassItemDataSelected(PerClassItemData*);
 
   protected:
-    void setupGui();
-    void updateDisplayState();
 
 
   private:
-    EMMPMGraphicsView* m_GraphicsView;
+    int m_Label;
+    double m_Gamma;
+    double m_MinStdDev;
+    QString m_Color;
+    int m_FinalLabel;
 
-    LayersDockWidget(const LayersDockWidget&); // Copy Constructor Not Implemented
-    void operator=(const LayersDockWidget&); // Operator '=' Not Implemented
 };
 
-#endif /* LAYERSDOCKWIDGET_H_ */
+
+#endif // _PER_CLASS_ITEM_DATA_H

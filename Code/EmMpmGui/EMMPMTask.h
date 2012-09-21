@@ -53,8 +53,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 //-- EMMPM Lib Includes
 #include "EMMPMLib/EMMPMLib.h"
-#include "EMMPMLib/Common/EMMPM_Data.h"
-#include "EMMPMLib/Common/EMMPM.h"
+#include "EMMPMLib/Core/EMMPM.h"
+#include "EMMPMLib/Core/EMMPM_Data.h"
 #include "EMMPMLib/Common/StatsDelegate.h"
 
 
@@ -91,9 +91,10 @@ class EMMPMTask : public ProcessQueueTask, public StatsDelegate
     virtual void run();
 
     void segmentImage(int i);
-    MXA_INSTANCE_PROPERTY(QVector<double>, ImageHistogram);
 
-    MXA_INSTANCE_STRING_PROPERTY(OutputStatsFile);
+    MXA_INSTANCE_PROPERTY(QVector<double>, ImageHistogram)
+
+    MXA_INSTANCE_STRING_PROPERTY(OutputStatsFile)
 
   public slots:
 

@@ -56,6 +56,25 @@ enum CompositeType
   Exclusion,
   Difference,
   Alpha_Blend,
+  Plus,
+  Multiply,
+  Screen,
+  Darken,
+  Lighten,
+  ColorDodge,
+  ColorBurn,
+  HardLight,
+  SoftLight,
+  Destination,
+  Source,
+  DestinationOver,
+  SourceIn,
+  DestinationIn,
+  DestinationOut,
+  SourceAtop,
+  DestinationAtop,
+  Overlay,
+  Clear,
   UnknownCompositeType
 };
 
@@ -116,9 +135,9 @@ class EMMPMGraphicsView : public QGraphicsView
     void addNewInitArea(UserInitArea* uia);
     void createNewUserInitArea(const QPolygonF &polygon);
 
-    void updateColorTables(QVector<QRgb> grayTable, QVector<QRgb> colorTable);
+    void updateColorTables(QVector<QRgb> colorTable);
     void useCustomColorTable(bool b);
-    void useCustomGrayScaleTable(bool b);
+//    void useCustomGrayScaleTable(bool b);
 
   public slots:
     void zoomIn();
@@ -171,10 +190,10 @@ class EMMPMGraphicsView : public QGraphicsView
    float          m_OverlayTransparency;
 
    bool           m_UseColorTable;
-   bool           m_UseGrayScaleTable;
+//   bool           m_UseGrayScaleTable;
 
    QVector<QRgb> m_CustomColorTable;
-   QVector<QRgb> m_CustomGrayScaleTable;
+//   QVector<QRgb> m_CustomGrayScaleTable;
    QVector<QRgb> m_OriginalColorTable;
 
    EMMPMGraphicsView(const EMMPMGraphicsView&); // Copy Constructor Not Implemented

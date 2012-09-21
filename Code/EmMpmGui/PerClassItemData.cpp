@@ -28,7 +28,7 @@
  * USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 
-#include "ManualInitData.h"
+#include "PerClassItemData.h"
 
 #include <iostream>
 
@@ -37,82 +37,121 @@
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
-ManualInitData::ManualInitData(int label, double mu, double sigma, QObject* parent) :
+PerClassItemData::PerClassItemData(int label, double gamma, double minStdDev,
+                                   QString color, int finalLabel, QObject* parent) :
 QObject(parent),
-m_Class(label),
-m_Mu(mu),
-m_Sigma(sigma)
+m_Label(label),
+m_Gamma(gamma),
+m_MinStdDev(minStdDev),
+m_Color(color),
+m_FinalLabel(finalLabel)
+{
+
+}
+
+// -----------------------------------------------------------------------------
+//
+// -----------------------------------------------------------------------------
+PerClassItemData::~PerClassItemData()
 {
 }
 
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
-ManualInitData::~ManualInitData()
+void PerClassItemData::setLabel(int eClass)
 {
+  m_Label = eClass;
 }
 
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
-void ManualInitData::setEmMpmClass(int eClass)
+int PerClassItemData::getLabel()
 {
-  m_Class = eClass;
+  return m_Label;
 }
 
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
-int ManualInitData::getEmMpmClass()
+void PerClassItemData::setGamma(double sigma)
 {
-  return m_Class;
+  m_Gamma = sigma;
 }
 
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
-void ManualInitData::setMu(double mu)
+double PerClassItemData::getGamma()
 {
-  m_Mu = mu;
-}
-// -----------------------------------------------------------------------------
-//
-// -----------------------------------------------------------------------------
-double ManualInitData::getMu()
-{
-  return m_Mu;
+  return m_Gamma;
 }
 
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
-void ManualInitData::setSigma(double sigma)
+void PerClassItemData::setMinStdDev(double m)
 {
-  m_Sigma = sigma;
+  m_MinStdDev = m;
 }
 
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
-double ManualInitData::getSigma()
+double PerClassItemData::getMinStdDev()
 {
-  return m_Sigma;
+  return m_MinStdDev;
 }
 
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
-void ManualInitData::writeSettings(QSettings &prefs)
+void PerClassItemData::setFinalLabel(int gray)
 {
-  QString group("ManualInitData-");
-  group.append(QString::number(m_Class));
+  m_FinalLabel = gray;
+}
+
+// -----------------------------------------------------------------------------
+//
+// -----------------------------------------------------------------------------
+int PerClassItemData::getFinalLabel()
+{
+  return m_FinalLabel;
+}
+
+
+// -----------------------------------------------------------------------------
+//
+// -----------------------------------------------------------------------------
+void PerClassItemData::setColor(QString color)
+{
+  m_Color = color;
+}
+
+// -----------------------------------------------------------------------------
+//
+// -----------------------------------------------------------------------------
+QString PerClassItemData::getColor()
+{
+  return m_Color;
+}
+
+// -----------------------------------------------------------------------------
+//
+// -----------------------------------------------------------------------------
+void PerClassItemData::writeSettings(QSettings &prefs)
+{
+  QString group("PerClassItemData-");
+  group.append(QString::number(m_Label));
 
   prefs.beginGroup(group);
 
-  prefs.setValue("Class", m_Class);
-  prefs.setValue("Mean", m_Mu);
-  prefs.setValue("Std_Dev", m_Sigma);
-
+  prefs.setValue("Class", m_Label);
+  prefs.setValue("Chem_Pntl", m_Gamma);
+  prefs.setValue("Min_Std_Dev", m_MinStdDev);
+  prefs.setValue("Color", m_Color);
+  prefs.setValue("Final_Class", m_FinalLabel);
   prefs.endGroup();
 }
 
@@ -122,21 +161,26 @@ void ManualInitData::writeSettings(QSettings &prefs)
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
-void ManualInitData::readSettings(QSettings &prefs)
+void PerClassItemData::readSettings(QSettings &prefs)
 {
   bool ok = false;
 
-  QString group("ManualInitData-");
-  group.append(QString::number(m_Class));
+  QString group("PerClassItemData-");
+  group.append(QString::number(m_Label));
   prefs.beginGroup(group);
-  //QStringList keys = prefs.allKeys();
+  QStringList keys = prefs.allKeys();
 
   QVariant v = prefs.value("Class");
-  m_Class = v.toInt(&ok);
-  v = prefs.value("Mean");
-  m_Mu = v.toDouble(&ok);
-  v = prefs.value("Std_Dev");
-  m_Sigma = v.toDouble(&ok);
+  m_Label = v.toInt(&ok);
+
+  v = prefs.value("Chem_Pntl");
+  m_Gamma = v.toDouble(&ok);
+  v = prefs.value("Min_Std_Dev");
+  m_MinStdDev = v.toDouble(&ok);
+  v = prefs.value("Color");
+  m_Color = v.toString();
+  v = prefs.value("Final_Class");
+  m_FinalLabel = v.toInt(&ok);
 
 #if 0
   printvar(Class);

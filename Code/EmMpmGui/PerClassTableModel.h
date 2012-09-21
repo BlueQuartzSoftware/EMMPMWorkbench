@@ -28,35 +28,35 @@
  * USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 
-#ifndef USERINITAREATABLEMODEL_H_
-#define USERINITAREATABLEMODEL_H_
+#ifndef _PER_CLASS_TABLE_MODEL_
+#define _PER_CLASS_TABLE_MODEL_
 
 #include <QtCore/QVector>
 #include <QtCore/QVariant>
 #include <QtGui/QColor>
 #include <QtCore/QAbstractTableModel>
 
-#include "UserInitArea.h"
+#include "PerClassItemData.h"
 
 class QAbstractItemDelegate;
 
 
-class UserInitAreaTableModel : public QAbstractTableModel
+class PerClassTableModel : public QAbstractTableModel
 {
     Q_OBJECT;
   public:
     enum ColumnIndexes
     {
-      Class = 0,
-      Mu,
-      StdDev,
-      UpperLeft,
-      LowerRight,
+      Label = 0,
+      Gamma,
+      Color,
+      MinStdDev,
+      MergeLabel,
       ColumnCount
     };
 
-    UserInitAreaTableModel(QObject* parent = 0);
-    virtual ~UserInitAreaTableModel();
+    PerClassTableModel(QObject* parent = 0);
+    virtual ~PerClassTableModel();
 
     Qt::ItemFlags flags(const QModelIndex &index) const;
     QVariant  data ( const QModelIndex & index, int role = Qt::DisplayRole ) const;
@@ -65,8 +65,7 @@ class UserInitAreaTableModel : public QAbstractTableModel
     int rowCount ( const QModelIndex & parent = QModelIndex() ) const;
     int  columnCount ( const QModelIndex & parent = QModelIndex() ) const;
 
-    bool setData(const QModelIndex &index, const QVariant &value,
-        int role=Qt::EditRole);
+    bool setData(const QModelIndex &index, const QVariant &value, int role=Qt::EditRole);
 
     /**
      *
@@ -80,18 +79,20 @@ class UserInitAreaTableModel : public QAbstractTableModel
     { return false;}
 
     bool insertRows(int row, int count, const QModelIndex &parent=QModelIndex());
+    bool insertItemData(PerClassItemData* data, int row, const QModelIndex &parent=QModelIndex());
     bool removeRows(int row, int count, const QModelIndex &parent=QModelIndex());
 
     QAbstractItemDelegate* getItemDelegate();
 
+    QList<PerClassItemData*> getItemDatas();
 
-    const QList<UserInitArea*>& getUserInitAreas() { return m_UserInitAreas; }
+    void sanityCheckClassValues();
 
   public slots:
 
-    void addUserInitArea(UserInitArea* uia);
-    void deleteUserInitArea(UserInitArea* uia);
-    void updateUserInitArea(UserInitArea* uia);
+    void addItemData(PerClassItemData* uia);
+    void deleteItemData(PerClassItemData* uia);
+    void updateItemData(PerClassItemData* uia);
 
 
   protected:
@@ -100,12 +101,12 @@ class UserInitAreaTableModel : public QAbstractTableModel
   private:
     int m_ColumnCount;
     int m_RowCount;
-    QList<UserInitArea*> m_UserInitAreas;
+    QList<PerClassItemData*> m_ItemDatas;
 
 
-    UserInitAreaTableModel(const UserInitAreaTableModel&); // Copy Constructor Not Implemented
-    void operator=(const UserInitAreaTableModel&); // Operator '=' Not Implemented
+    PerClassTableModel(const PerClassTableModel&); // Copy Constructor Not Implemented
+    void operator=(const PerClassTableModel&); // Operator '=' Not Implemented
 
 };
 
-#endif /* USERINITAREATABLEMODEL_H_ */
+#endif /* _PER_CLASS_TABLE_MODEL_ */

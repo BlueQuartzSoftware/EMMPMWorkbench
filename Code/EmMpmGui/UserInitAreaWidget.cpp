@@ -41,8 +41,8 @@ QWidget(parent),
 m_uia(NULL)
 {
   setupUi(this);
-  m_WidgetList << m_Gamma << m_Class << m_GrayLevel << m_LowerRight << m_Mu;
-  m_WidgetList << m_Sigma << m_UpperLeft << colorButton;
+  m_WidgetList <<  m_Class << m_LowerRight << m_Mu;
+  m_WidgetList << m_Sigma << m_UpperLeft;
   setWidgetListEnabled(false);
 }
 
@@ -77,49 +77,6 @@ void UserInitAreaWidget::setWidgetListEnabled(bool b)
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
-void UserInitAreaWidget::on_m_Gamma_valueChanged(double v)
-{
-  if (m_uia != NULL)
-  {
-    m_uia->setGamma(m_Gamma->value());
-  }
-}
-
-// -----------------------------------------------------------------------------
-//
-// -----------------------------------------------------------------------------
-void UserInitAreaWidget::on_m_MinVariance_valueChanged(double v)
-{
-  if (m_uia != NULL)
-  {
-    m_uia->setMinVariance(m_MinVariance->value());
-  }
-}
-
-// -----------------------------------------------------------------------------
-//
-// -----------------------------------------------------------------------------
-//void UserInitAreaWidget::on_m_Class_valueChanged(int v)
-//{
-//  if (m_uia != NULL)
-//  {
-//    m_uia->setEmMpmClass(m_Class->value());
-//  }
-//}
-
-// -----------------------------------------------------------------------------
-//
-// -----------------------------------------------------------------------------
-void UserInitAreaWidget::on_m_GrayLevel_valueChanged(int v)
-{
-    if (m_uia != NULL)
-    {
-      m_uia->setEmMpmGrayLevel(m_GrayLevel->value());
-    }
-}
-// -----------------------------------------------------------------------------
-//
-// -----------------------------------------------------------------------------
 void UserInitAreaWidget::on_m_LineWidth_valueChanged(double v)
 {
   if (m_uia != NULL)
@@ -137,43 +94,24 @@ void UserInitAreaWidget::setUserInitArea(UserInitArea* uia)
   if (uia == NULL)
   {
     setWidgetListEnabled(false);
-    m_GrayLevel->setValue(0);
+
     m_Class->setText(QString("0"));
-    bool ok = false;
+
     m_Mu->setText(0);
     m_Sigma->setText(0);
-    m_Gamma->setValue(0);
     m_UpperLeft->setText("-1, -1");
     m_LowerRight->setText("-1, -1");
-    colorButton->setStyleSheet(QString(""));
     m_LineWidth->setValue(1);
-    m_MinVariance->setValue(20.0);
+
     return;
   }
   setWidgetListEnabled(true);
 
   m_Class->setText(QString::number(uia->getEmMpmClass()));
 
-  m_GrayLevel->blockSignals(true);
-  m_GrayLevel->setValue(uia->getEmMpmGrayLevel());
-  m_GrayLevel->blockSignals(false);
-
   bool ok = false;
   m_Mu->setText(QString::number(uia->getMu()));
   m_Sigma->setText(QString::number(uia->getSigma()));
-
-  m_Gamma->blockSignals(true);
-  m_Gamma->setValue(uia->getGamma());
-  m_Gamma->blockSignals(false);
-
-  m_MinVariance->blockSignals(true);
-  m_MinVariance->setValue(uia->getMinVariance());
-  m_MinVariance->blockSignals(false);
-
-  QColor c = m_uia->getColor();
-  QString cssColor = "border: 1px solid #101010; background-color: ";
-  cssColor.append(c.name());
-  colorButton->setStyleSheet(cssColor);
 
   m_LineWidth->setValue(uia->getLineWidth());
 
@@ -196,27 +134,4 @@ UserInitArea* UserInitAreaWidget::getUserInitArea()
   return m_uia;
 }
 
-
-// -----------------------------------------------------------------------------
-//
-// -----------------------------------------------------------------------------
-void UserInitAreaWidget::on_colorButton_clicked()
-{
-  if (NULL != m_uia)
-  {
-    QColorDialog d;
-    d.setCurrentColor(m_uia->getColor());
-    int r = d.exec();
-    if (r > 0)
-    {
-      QColor c = d.selectedColor();
-      c.setAlpha(UIA::Alpha);
-      m_uia->setColor(c);
-
-      QString cssColor = "border: 1px solid #101010; background-color: ";
-      cssColor.append(c.name());
-      colorButton->setStyleSheet(cssColor);
-    }
-  }
-}
 

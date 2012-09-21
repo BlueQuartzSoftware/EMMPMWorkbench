@@ -42,14 +42,13 @@
 #include <QtGui/QGraphicsScene>
 
 
-#include "EMMPMLib/Common/EMMPM_Data.h"
+#include "EMMPMLib/Core/EMMPM_Data.h"
 
 //-- UIC generated Header
 #include <ui_EmMpmGui.h>
 
 
 class UserInitArea;
-class UserInitAreaTableModel;
 class QwtPlotZoomer;
 class QwtPlotPicker;
 class QwtPlotPanner;
@@ -124,12 +123,12 @@ class EmMpmGui : public QMainWindow, private Ui::EmMpmGui
     void copyGrayValues( EMMPM_Data::Pointer inputs);
     void copyInitCoords( EMMPM_Data::Pointer inputs);
     void copyIntializationValues(EMMPM_Data::Pointer inputs);
-    void copyGammaValues(EMMPM_Data::Pointer inputs);
-    void copyMinVarianceValues(EMMPM_Data::Pointer inputs);
+    int copyGammaMinStdDevValues(EMMPM_Data::Pointer inputs);
 
     void updateHistogramAxis();
 
     void addRemoveManualInitTableRows();
+    void addRemovePerClassTableRows();
 
     void estimateMemoryUse(QSize size);
 
@@ -151,23 +150,31 @@ class EmMpmGui : public QMainWindow, private Ui::EmMpmGui
     void setCurrentProcessedImage(QString imageFile);
 
   // Manual hookup slots to get signals from the graphics view
-  //  void baseImageFileLoaded(const QString &filename);
     void overlayImageFileLoaded(const QString &filename);
+
     void userInitAreaAdded(UserInitArea* uia);
     void deleteUserInitArea(UserInitArea* uia);
     void userInitAreaUpdated(UserInitArea* uia);
     void userInitAreaSelected(UserInitArea* uia);
     void userInitAreaLostFocus();
 
-    void updateManualInitHistograms();
     void manualInitDataChanged ( const QModelIndex & topLeft, const QModelIndex & bottomRight );
+    void perClassItemDataChanged ( const QModelIndex & topLeft, const QModelIndex & bottomRight );
 
-  // Histogram/Gaussian Plot related Manual Hookup
-     void clearProcessHistograms();
-     void clearManualInitCurves();
-     void addProcessHistogram(QVector<real_t> data);
+    // Histogram/Gaussian Plot related Manual Hookup
+     void clearGaussianCurves();
+     void addGaussianCurve(QVector<real_t> data);
      void plotCombinedGaussian();
      void plotImageHistogram();
+     void updateGaussianCurves();
+     void generateGaussianData(int rows);
+
+  // MSE Value update/Plots
+     void updateMSEValue(qreal value);
+     void refreshMSEPlot();
+
+  // Intermediate Segmented Image Available from EMMPM Engine
+     void segmentedImageAvailable(QImage image);
 
   protected slots:
   //Manual Hookup Menu Actions
@@ -184,28 +191,44 @@ class EmMpmGui : public QMainWindow, private Ui::EmMpmGui
     void on_actionParameters_triggered();
     void on_actionHistogram_triggered();
     void on_actionUser_Initialization_triggered();
-    void on_actionLayers_Palette_triggered();
+    void on_actionMSE_Plot_triggered();
 
  // Histogram Related Slots - Auto Hookup
     void on_axisSettingsBtn_clicked();
     void on_clearTempHistograms_clicked();
     void on_saveCurves_clicked();
 
+// MSE Plot Slots
+    void on_m_msePlotXMin_valueChanged(int value);
+    void on_m_msePlotXMax_valueChanged(int value);
+    void on_saveMSEDataBtn_clicked();
 
     void on_fileListWidget_itemDoubleClicked(QListWidgetItem * item);
 
     /* slots for the buttons in the GUI */
     void on_processBtn_clicked();
 
+    void on_m_NumClasses_valueChanged(int i);
+    void on_colorTablePresets_currentIndexChanged(int i);
+
     void on_useGradientPenalty_clicked();
     void on_useCurvaturePenalty_clicked();
-    void on_m_NumClasses_valueChanged(int i);
 
     void on_enableUserDefinedAreas_stateChanged(int state);
+    void on_showUserDefinedAreas_stateChanged(int state);
+
     void on_enableManualInit_stateChanged(int state);
 
     void on_addClassCoupling_clicked();
     void on_removeClassCoupling_clicked();
+
+    void on_useStoppingCriteria_clicked();
+    void on_useSimulatedAnnealing_clicked();
+
+    void on_imageDisplaySelection_currentIndexChanged(int index);
+    void on_opacitySlider_valueChanged(int value);
+    void on_compositeModeCB_currentIndexChanged();
+    void updateDisplayState();
 
 
     void z10_triggered();
@@ -218,7 +241,6 @@ class EmMpmGui : public QMainWindow, private Ui::EmMpmGui
     void z400_triggered();
     void z600_triggered();
     void on_fitToWindow_clicked();
-    void on_layersPalette_clicked();
 
     void imageLoadingComplete();
 
@@ -239,7 +261,7 @@ class EmMpmGui : public QMainWindow, private Ui::EmMpmGui
     void on_inputImageFilePathBtn_clicked();
     void on_outputImageButton_clicked();
 
-    void on_processFolder_stateChanged(int state  );
+    void on_processFolder_stateChanged(int checked  );
     void on_sourceDirectoryBtn_clicked();
     void on_outputDirectoryBtn_clicked();
 
@@ -323,6 +345,9 @@ class EmMpmGui : public QMainWindow, private Ui::EmMpmGui
 
     void setProcessFolderWidgetsEnabled(bool b);
 
+    void initializeColorTable();
+    void initializeGrayScaleTable();
+
   private:
     QVector<UserInitArea*>*      m_UserInitAreaVector;
     qint32                       m_CurrentHistogramClass;
@@ -333,23 +358,29 @@ class EmMpmGui : public QMainWindow, private Ui::EmMpmGui
     QwtPlotGrid*   m_grid;
 
     QwtPlotCurve*           m_histogram;
-    QVector<double>         m_ImageHistogram;
-    QList<QwtPlotCurve*>    m_Gaussians;
-    QList<QwtPlotCurve*>    m_ManualInitGaussians;
-    QwtPlotCurve*           m_CombinedGaussians;
+    QVector<double>         m_ImageHistogramData;
+    QList<QwtPlotCurve*>    m_GaussianCurves;
+    QwtPlotCurve*           m_CombinedGaussianCurve;
     bool                    m_ShowCombinedGaussians;
-    QList<QwtPlotCurve*>    m_ProcessGaussians;
     AxisSettingsDialog*     m_AxisSettingsDialog;
 
     QList<QWidget*> m_WidgetList;
     QList<QWidget*> m_ImageWidgets;
     QList<QWidget*> m_ProcessFolderWidgets;
 
-    LayersDockWidget*  m_LayersPalette;
+  //  LayersDockWidget*  m_LayersPalette;
 
     QVector<int>     m_StartingMuValues;
-  //  QMap<QObject*, QWidget*> m_TasksMap;
 
+    QVector<qreal>   m_MSEValues;
+    QwtPlotCurve*    m_MSEPlotCurve;
+    QwtPlotPicker*   m_MSEpicker;
+
+    double          m_MeanOfImage;
+    double          m_SigmaOfImage;
+    bool            m_ImageStatsReady;
+
+    QString m_GaussianCurveColors[16];
 
     EmMpmGui(const EmMpmGui&); // Copy Constructor Not Implemented
     void operator=(const EmMpmGui&); // Operator '=' Not Implemented

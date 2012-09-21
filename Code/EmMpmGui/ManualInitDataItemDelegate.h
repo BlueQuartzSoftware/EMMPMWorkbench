@@ -97,25 +97,13 @@ class ManualInitDataItemDelegate : public QStyledItemDelegate
           editor->setValidator(dValidator);
           return editor;
 
-        case ManualInitTableModel::Variance:
+        case ManualInitTableModel::Sigma:
           editor = new QLineEdit(parent);
           editor->setFrame(false);
           dValidator = new QDoubleValidator(editor);
           dValidator->setDecimals(6);
           editor->setValidator(dValidator);
           return editor;
-        case ManualInitTableModel::Gamma:
-          editor = new QLineEdit(parent);
-          editor->setFrame(false);
-          dValidator = new QDoubleValidator(editor);
-          dValidator->setDecimals(6);
-          editor->setValidator(dValidator);
-          return editor;
-
-        case ManualInitTableModel::Color:
-          colorCombo = new ColorComboPicker(parent);
-          colorCombo->setAutoFillBackground(true);
-          return colorCombo;
         default:
           break;
       }
@@ -130,20 +118,13 @@ class ManualInitDataItemDelegate : public QStyledItemDelegate
       bool ok = false;
       qint32 col = index.column();
       if (col == ManualInitTableModel::Mu ||
-          col == ManualInitTableModel::Variance ||
-          col == ManualInitTableModel::Gamma )
+          col == ManualInitTableModel::Sigma)
       {
         QLineEdit* lineEdit = qobject_cast<QLineEdit* > (editor);
         Q_ASSERT(lineEdit);
         lineEdit->setText(index.model()->data(index).toString());
       }
-      else if (col == ManualInitTableModel::Color)
-      {
-        QString state = index.model()->data(index).toString();
-        ColorComboPicker* comboBox = qobject_cast<ColorComboPicker* > (editor);
-        Q_ASSERT(comboBox);
-        comboBox->setCurrentIndex(comboBox->findText(state));
-      }
+
       else QStyledItemDelegate::setEditorData(editor, index);
     }
 
@@ -154,8 +135,7 @@ class ManualInitDataItemDelegate : public QStyledItemDelegate
     {
       qint32 col = index.column();
       if (col == ManualInitTableModel::Mu ||
-          col == ManualInitTableModel::Variance ||
-          col == ManualInitTableModel::Gamma)
+          col == ManualInitTableModel::Sigma)
       {
         QLineEdit* lineEdit = qobject_cast<QLineEdit* > (editor);
         Q_ASSERT(lineEdit);
@@ -163,19 +143,14 @@ class ManualInitDataItemDelegate : public QStyledItemDelegate
         double v = lineEdit->text().toDouble(&ok);
         model->setData(index, v);
       }
-      else if (col == ManualInitTableModel::Color )
-      {
-        ColorComboPicker *comboBox = qobject_cast<ColorComboPicker* > (editor);
-        Q_ASSERT(comboBox);
-        model->setData(index, comboBox->currentText());
-      }
+
       else QStyledItemDelegate::setModelData(editor, model, index);
     }
 
   private:
-    QModelIndex m_Index;
-    QWidget* m_Widget;
-    QAbstractItemModel* m_Model;
+//    QModelIndex m_Index;
+//    QWidget* m_Widget;
+//    QAbstractItemModel* m_Model;
 
 };
 

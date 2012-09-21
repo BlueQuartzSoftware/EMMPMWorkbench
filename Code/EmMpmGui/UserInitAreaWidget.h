@@ -66,11 +66,6 @@ class UserInitAreaWidget  : public QWidget, public Ui::UserInitAreaWidget
     UserInitArea* getUserInitArea();
 
   protected slots:
-    void on_m_GrayLevel_valueChanged(int v);
- //   void on_m_Class_valueChanged(int v);
-    void on_m_Gamma_valueChanged(double v);
-    void on_m_MinVariance_valueChanged(double v);
-    void on_colorButton_clicked();
     void on_m_LineWidth_valueChanged(double v);
 
     /**

@@ -65,11 +65,6 @@ public:
 
  public slots:
 
-    void setEmMpmGrayLevel(int gray)
-    { m_GrayLevel = gray;}
-    int getEmMpmGrayLevel()
-    { return m_GrayLevel;}
-
     void setEmMpmClass(int eClass)
     { m_Class = eClass;}
     int getEmMpmClass() { return m_Class; }
@@ -88,12 +83,6 @@ public:
 
     void setSigma(double sigma);
     double getSigma();
-
-    void setGamma(double g);
-    double getGamma();
-
-    void setMinVariance(double v);
-    double getMinVariance();
 
     void setLineWidth(qreal w);
     qreal getLineWidth();
@@ -134,15 +123,11 @@ private:
     bool m_isResizing;
     CTRL_POINTS m_CurrentResizeHandle;
     float ctrlPointSize;
-    int m_GrayLevel;
     int m_Class;
     int m_UpperLeft[2];
     int m_LowerRight[2];
- //   QColor m_Color;
     double m_Mu;
     double m_Sigma;
-    double m_Gamma;
-    double m_MinVariance;
     qreal m_LineWidth;
     bool m_Visible;
 };

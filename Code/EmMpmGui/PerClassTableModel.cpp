@@ -29,18 +29,18 @@
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 
 #include <iostream>
-#include "ManualInitTableModel.h"
+#include "PerClassTableModel.h"
 
 #include <QApplication>
 #include <QtGui/QAbstractItemDelegate>
 
-#include "ManualInitData.h"
-#include "ManualInitDataItemDelegate.h"
+#include "PerClassItemData.h"
+#include "PerClassItemDelegate.h"
 
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
-ManualInitTableModel::ManualInitTableModel(QObject* parent) :
+PerClassTableModel::PerClassTableModel(QObject* parent) :
 QAbstractTableModel(parent),
 m_RowCount(0)
 {
@@ -50,7 +50,7 @@ m_RowCount(0)
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
-ManualInitTableModel::~ManualInitTableModel()
+PerClassTableModel::~PerClassTableModel()
 {
 
 }
@@ -58,7 +58,7 @@ ManualInitTableModel::~ManualInitTableModel()
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
-Qt::ItemFlags ManualInitTableModel::flags(const QModelIndex &index) const
+Qt::ItemFlags PerClassTableModel::flags(const QModelIndex &index) const
 {
   //  std::cout << "SGLogNormalTableModel::flags" << std::endl;
   if (!index.isValid())
@@ -71,7 +71,7 @@ Qt::ItemFlags ManualInitTableModel::flags(const QModelIndex &index) const
     theFlags |= Qt::ItemIsEnabled;
 
     int col = index.column();
-    if (  col == Mu || col == Sigma)
+    if (  col == Gamma || col == MinStdDev|| col == MergeLabel || col == Color )
     {
       theFlags = Qt::ItemIsEditable | Qt::ItemIsSelectable | Qt::ItemIsEnabled;
     }
@@ -83,7 +83,7 @@ Qt::ItemFlags ManualInitTableModel::flags(const QModelIndex &index) const
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
-QVariant ManualInitTableModel::data(const QModelIndex &index, qint32 role) const
+QVariant PerClassTableModel::data(const QModelIndex &index, qint32 role) const
 {
 
   if (! index.isValid())
@@ -94,6 +94,22 @@ QVariant ManualInitTableModel::data(const QModelIndex &index, qint32 role) const
   if (role == Qt::SizeHintRole)
   {
     QStyleOptionComboBox comboBox;
+
+    switch(index.column())
+    {
+
+      case Color:
+      {
+        comboBox.currentText = QString("Dark Blue     ");
+        const QString header = headerData(Color, Qt::Horizontal, Qt::DisplayRole).toString();
+        if (header.length() > comboBox.currentText.length())
+        {
+          comboBox.currentText = header;
+        }
+        break;
+      }
+
+    }
     QFontMetrics fontMetrics(data(index, Qt::FontRole) .value<QFont > ());
     comboBox.fontMetrics = fontMetrics;
     QSize size(fontMetrics.width(comboBox.currentText), fontMetrics.height());
@@ -105,8 +121,8 @@ QVariant ManualInitTableModel::data(const QModelIndex &index, qint32 role) const
   }
   else if (role == Qt::DisplayRole || role == Qt::EditRole)
   {
-    ManualInitData* manualInitData = m_ManualInitDatas.at(index.row());
-    if(NULL == manualInitData)
+    PerClassItemData* itemData = m_ItemDatas.at(index.row());
+    if(NULL == itemData)
     {
       return QVariant();
     }
@@ -117,12 +133,16 @@ QVariant ManualInitTableModel::data(const QModelIndex &index, qint32 role) const
     int col = index.column();
     switch(col)
     {
-      case ManualInitTableModel::Class:
-        return QVariant(manualInitData->getEmMpmClass());
-      case ManualInitTableModel::Mu:
-        return QVariant(manualInitData->getMu());
-      case ManualInitTableModel::Sigma:
-        return QVariant(manualInitData->getSigma());
+      case PerClassTableModel::Label:
+        return QVariant(itemData->getLabel());
+      case PerClassTableModel::Gamma:
+        return QVariant(itemData->getGamma());
+      case PerClassTableModel::MinStdDev:
+        return QVariant(itemData->getMinStdDev());
+      case PerClassTableModel::MergeLabel:
+        return QVariant(itemData->getFinalLabel());
+      case PerClassTableModel::Color:
+        return QVariant(itemData->getColor());
       default:
         break;
     }
@@ -134,15 +154,17 @@ QVariant ManualInitTableModel::data(const QModelIndex &index, qint32 role) const
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
-QVariant  ManualInitTableModel::headerData ( int section, Qt::Orientation orientation, int role ) const
+QVariant  PerClassTableModel::headerData ( int section, Qt::Orientation orientation, int role ) const
 {
   if (orientation == Qt::Horizontal && role == Qt::DisplayRole)
   {
     switch(section)
     {
-      case Class: return QVariant(QString("Class"));
-      case Mu: return QVariant(QString("Mean"));
-      case Sigma: return QVariant(QString("Std. Dev."));
+      case Label: return QVariant(QString("Class"));
+      case Gamma: return QVariant(QString("-Chem. Pntl"));
+      case MinStdDev: return QVariant(QString("Min Std Dev"));
+      case Color: return QVariant(QString("Color"));
+      case MergeLabel: return QVariant(QString("Final Class"));
       default:
         break;
     }
@@ -153,15 +175,15 @@ QVariant  ManualInitTableModel::headerData ( int section, Qt::Orientation orient
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
-int ManualInitTableModel::rowCount(const QModelIndex &index) const
+int PerClassTableModel::rowCount(const QModelIndex &index) const
 {
-  return m_ManualInitDatas.count();
+  return m_ItemDatas.count();
 }
 
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
-int ManualInitTableModel::columnCount(const QModelIndex &index) const
+int PerClassTableModel::columnCount(const QModelIndex &index) const
 {
   return index.isValid() ? 0 : m_ColumnCount;
 }
@@ -170,83 +192,86 @@ int ManualInitTableModel::columnCount(const QModelIndex &index) const
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
-bool ManualInitTableModel::setData(const QModelIndex & index, const QVariant & value, int role)
+bool PerClassTableModel::setData(const QModelIndex & index, const QVariant & value, int role)
 {
-  // std::cout << "SGLogNormalTableModel::setData " << value.toString().toStdString() << std::endl;
-  if (!index.isValid()
-      || role != Qt::EditRole
-      || index.row() < 0
-      || index.row() >= m_ManualInitDatas.count()
-      || index.column() < 0
-      || index.column() >= m_ColumnCount)
-  {
-    return false;
-  }
-  bool ok;
-  qint32 row = index.row();
-  qint32 col = index.column();
-  if (row >= rowCount(index))
-  {
-    return false;
-  }
-  switch(col)
-  {
-    case ManualInitTableModel::Class:
-      m_ManualInitDatas.at(row)->setEmMpmClass(value.toInt(&ok));
-      break;
-    case ManualInitTableModel::Mu:
-      m_ManualInitDatas.at(row)->setMu(value.toDouble(&ok));
-      break;
-    case ManualInitTableModel::Sigma:
-      m_ManualInitDatas.at(row)->setSigma(value.toDouble(&ok));
-      break;
+    // std::cout << "SGLogNormalTableModel::setData " << value.toString().toStdString() << std::endl;
+    if (!index.isValid()
+            || role != Qt::EditRole
+            || index.row() < 0
+            || index.row() >= m_ItemDatas.count()
+            || index.column() < 0
+            || index.column() >= m_ColumnCount)
+    {
+        return false;
+    }
+    bool ok;
+    qint32 row = index.row();
+    qint32 col = index.column();
+    if (row >= rowCount(index))
+    {
+        return false;
+    }
+    switch(col)
+    {
+    case PerClassTableModel::Label:
+        m_ItemDatas.at(row)->setLabel(value.toInt(&ok));
+        break;
+    case PerClassTableModel::Gamma:
+        m_ItemDatas.at(row)->setGamma(value.toDouble(&ok));
+        break;
+    case PerClassTableModel::MinStdDev:
+        m_ItemDatas.at(row)->setMinStdDev(value.toDouble(&ok));
+        break;
+    case PerClassTableModel::Color:
+        m_ItemDatas.at(row)->setColor(value.toString());
+        break;
+    case PerClassTableModel::MergeLabel:
+        m_ItemDatas.at(row)->setFinalLabel(value.toInt(&ok));
+        break;
+
     default:
-      Q_ASSERT(false);
-  }
-  emit dataChanged(index, index);
-  return true;
+        Q_ASSERT(false);
+    }
+    emit dataChanged(index, index);
+    return true;
 }
 
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
-bool ManualInitTableModel::insertRows(int row, int count, const QModelIndex& index)
+bool PerClassTableModel::insertRows(int row, int count, const QModelIndex& index)
 {
-  // This is basically disabled at this point
-  qint32 binNum = 0;
-  double mu = 128.0;
-  double sigma = 20.0;
-  double gamma = 0.0;
+    // This is basically disabled at this point
+ //   qint32 binNum = 0;
+    double gamma = 0.0;
+    double minStdDev = 4.5;
+    int MergeLabelLevel = 0;
 
 
-  beginInsertRows(QModelIndex(), row, row + count - 1);
-  for (int i = 0; i < count; ++i)
-  {
-    // Create a new ManualInitData object
-    ManualInitData* d = new ManualInitData(m_ManualInitDatas.count(), mu, sigma, this);
-    m_ManualInitDatas.push_back(d);
-    m_RowCount = m_ManualInitDatas.count();
-  }
-  endInsertRows();
-  emit dataChanged(index, index);
-  return true;
+    beginInsertRows(QModelIndex(), row, row + count - 1);
+    for (int i = 0; i < count; ++i)
+    {
+        // Create a new PerClassItemData object
+        PerClassItemData* d = new PerClassItemData(m_ItemDatas.count(), gamma, minStdDev, QColor::colorNames().at(10), MergeLabelLevel, this);
+        m_ItemDatas.push_back(d);
+        m_RowCount = m_ItemDatas.count();
+    }
+    endInsertRows();
+    emit dataChanged(index, index);
+    return true;
 }
 
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
-bool ManualInitTableModel::insertManualData(ManualInitData* data, int row, const QModelIndex& index)
+bool PerClassTableModel::insertItemData(PerClassItemData* data, int row, const QModelIndex& index)
 {
-//  qint32 binNum = 0;
-//  double mu = 128.0;
-//  double sigma = 20.0;
-
   beginInsertRows(QModelIndex(), row, row );
   for (int i = 0; i < 1; ++i)
   {
-    // Create a new ManualInitData object
-    m_ManualInitDatas.push_back(data);
-    m_RowCount = m_ManualInitDatas.count();
+    // Create a new PerClassItemData object
+    m_ItemDatas.push_back(data);
+    m_RowCount = m_ItemDatas.count();
   }
   endInsertRows();
   emit dataChanged(index, index);
@@ -256,11 +281,11 @@ bool ManualInitTableModel::insertManualData(ManualInitData* data, int row, const
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
-void ManualInitTableModel::sanityCheckClassValues()
+void PerClassTableModel::sanityCheckClassValues()
 {
-  for (int i = 0; i < m_ManualInitDatas.count(); ++i)
+  for (int i = 0; i < m_ItemDatas.count(); ++i)
   {
-    m_ManualInitDatas[i]->setEmMpmClass(i);
+    m_ItemDatas[i]->setLabel(i);
   }
   emit dataChanged(QModelIndex(), QModelIndex());
 }
@@ -268,7 +293,7 @@ void ManualInitTableModel::sanityCheckClassValues()
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
-bool ManualInitTableModel::removeRows(int row, int count, const QModelIndex& index)
+bool PerClassTableModel::removeRows(int row, int count, const QModelIndex& index)
 {
   if (count < 1)
   {
@@ -278,8 +303,8 @@ bool ManualInitTableModel::removeRows(int row, int count, const QModelIndex& ind
   for (int i = 0; i < count; ++i)
   {
     // Remove the UIA Object Pointer
-    m_ManualInitDatas.removeAt(row + i);
-    m_RowCount = m_ManualInitDatas.count();
+    m_ItemDatas.removeAt(row + i);
+    m_RowCount = m_ItemDatas.count();
   }
   endRemoveRows();
   emit dataChanged(index, index);
@@ -289,27 +314,27 @@ bool ManualInitTableModel::removeRows(int row, int count, const QModelIndex& ind
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
-void ManualInitTableModel::addManualInitData(ManualInitData* uia)
+void PerClassTableModel::addItemData(PerClassItemData* uia)
 {
-  m_ManualInitDatas.push_back(uia);
+  m_ItemDatas.push_back(uia);
   emit layoutChanged();
 }
 
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
-void ManualInitTableModel::deleteManualInitData(ManualInitData* uia)
+void PerClassTableModel::deleteItemData(PerClassItemData* uia)
 {
-  m_ManualInitDatas.removeAll(uia);
+  m_ItemDatas.removeAll(uia);
   emit layoutChanged();
 }
 
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
-void ManualInitTableModel::updateManualInitData(ManualInitData* uia)
+void PerClassTableModel::updateItemData(PerClassItemData* uia)
 {
-  int row = m_ManualInitDatas.indexOf(uia, 0);
+  int row = m_ItemDatas.indexOf(uia, 0);
   QModelIndex index0 = createIndex(row, 0);
   QModelIndex index1 = createIndex(row, m_ColumnCount);
   emit dataChanged(index0, index1);
@@ -320,16 +345,16 @@ void ManualInitTableModel::updateManualInitData(ManualInitData* uia)
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
-QAbstractItemDelegate* ManualInitTableModel::getItemDelegate()
+QAbstractItemDelegate* PerClassTableModel::getItemDelegate()
 {
-  return new ManualInitDataItemDelegate;
+  return new PerClassItemDelegate;
 }
 
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
-QList<ManualInitData*> ManualInitTableModel::getManualInits()
+QList<PerClassItemData*> PerClassTableModel::getItemDatas()
 {
-  return m_ManualInitDatas;
+  return m_ItemDatas;
 }
 

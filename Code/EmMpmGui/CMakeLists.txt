@@ -15,30 +15,30 @@ set (CMP_VERSION_SOURCE_FILE_NAME "EMMPMGuiVersion.cpp")
 # In order to increment the version of EMMPMGuiProj simply adjust these variables.
 # we are using a 3 part Version scheme commonly found in software development. The
 # example would be Version 2.1.6543 which translates to Version [major].[minor].[patch].
-# The Major version is set here in the CMake file. We will use Git 
+# The Major version is set here in the CMake file. We will use Git
 # to figure out the "patch" leve of the version by using "git describe" which will
 # calculate how many commits since the last "tag" was applied to the repository.
 # this basically gives us an always incrementing number for the patch level
-# and we can set the Major and Minor versions as we see fit. 
+# and we can set the Major and Minor versions as we see fit.
 set(CMP_VERSION_MAJOR "v2")
 
 # --------------------------------------------------------------------
 # Generate a Header file with Compile Version variables
 # --------------------------------------------------------------------
 if (EXISTS ${EMMPMGuiProj_SOURCE_DIR}/.git)
-cmpVersionStringsFromGit(GENERATED_HEADER_FILE_PATH ${CMP_HEADER_DIR}/${CMP_VERSION_HEADER_FILE_NAME} 
+cmpVersionStringsFromGit(GENERATED_HEADER_FILE_PATH ${CMP_HEADER_DIR}/${CMP_VERSION_HEADER_FILE_NAME}
                          GENERATED_SOURCE_FILE_PATH ${CMP_HEADER_DIR}/${CMP_VERSION_SOURCE_FILE_NAME}
-                         NAMESPACE EmMpm_Gui 
-                         cmpProjectName EMMPMGui 
+                         NAMESPACE EmMpm_Gui
+                         cmpProjectName EMMPMGui
                          WORKING_DIRECTORY ${EMMPMGuiProj_SOURCE_DIR} )
 else()
-   cmpGenerateVersionString(GENERATED_HEADER_FILE_PATH ${CMP_HEADER_DIR}/${CMP_VERSION_HEADER_FILE_NAME} 
+   cmpGenerateVersionString(GENERATED_HEADER_FILE_PATH ${CMP_HEADER_DIR}/${CMP_VERSION_HEADER_FILE_NAME}
                          GENERATED_SOURCE_FILE_PATH ${CMP_HEADER_DIR}/${CMP_VERSION_SOURCE_FILE_NAME}
-                         NAMESPACE EmMpm_Gui 
-                         cmpProjectName EMMPMGui 
-                         WORKING_DIRECTORY ${EMMPMGuiProj_SOURCE_DIR} 
-                         MAJOR 0 MINOR 0 PATCH 0) 
-endif() 
+                         NAMESPACE EmMpm_Gui
+                         cmpProjectName EMMPMGui
+                         WORKING_DIRECTORY ${EMMPMGuiProj_SOURCE_DIR}
+                         MAJOR 0 MINOR 0 PATCH 0)
+endif()
 
 # ------------------------------------------------------------------------------
 #  Qt 4 Section
@@ -93,7 +93,7 @@ include_directories( ${PROJECT_CODE_DIR}/QtSupport )
 
 include_directories( ${EmMpmGui_BINARY_DIR} )
 
- 
+
 # --------------------------------------------------------------------
 # Set up all the source codes
 SET( EmMpmGui_SRCS
@@ -107,13 +107,15 @@ SET( EmMpmGui_SRCS
   ${EmMpmGui_SOURCE_DIR}/ManualInitTableModel.cpp
   ${EmMpmGui_SOURCE_DIR}/ManualInitData.cpp
   ${EmMpmGui_SOURCE_DIR}/AxisSettingsDialog.cpp
-  ${EmMpmGui_SOURCE_DIR}/LayersDockWidget.cpp
+#  ${EmMpmGui_SOURCE_DIR}/LayersDockWidget.cpp
   ${EmMpmGui_SOURCE_DIR}/EMMPMTask.cpp
   ${EmMpmGui_SOURCE_DIR}/ImageOpenDialog.cpp
+  ${EmMpmGui_SOURCE_DIR}/PerClassTableModel.cpp
   ${PROJECT_CODE_DIR}/AIM/Common/AIMImage.cpp
+  ${EmMpmGui_SOURCE_DIR}/PerClassItemData.cpp
 )
 
-# another list, this time it includes all header files that should 
+# another list, this time it includes all header files that should
 #  be treated with moc
 SET( EmMpmGui_MOC_HDRS
   ${EmMpmGui_SOURCE_DIR}/EmMpmGui.h
@@ -126,10 +128,13 @@ SET( EmMpmGui_MOC_HDRS
   ${EmMpmGui_SOURCE_DIR}/ManualInitData.h
   ${EmMpmGui_SOURCE_DIR}/ManualInitDataItemDelegate.h
   ${EmMpmGui_SOURCE_DIR}/AxisSettingsDialog.h
-  ${EmMpmGui_SOURCE_DIR}/LayersDockWidget.h
+#  ${EmMpmGui_SOURCE_DIR}/LayersDockWidget.h
   ${EmMpmGui_SOURCE_DIR}/UserInitAreaItemDelegate.h
   ${EmMpmGui_SOURCE_DIR}/ImageOpenDialog.h
   ${EmMpmGui_SOURCE_DIR}/EMMPMTask.h
+  ${EmMpmGui_SOURCE_DIR}/PerClassTableModel.h
+  ${EmMpmGui_SOURCE_DIR}/PerClassItemDelegate.h
+  ${EmMpmGui_SOURCE_DIR}/PerClassItemData.h
 )
 cmp_IDE_SOURCE_PROPERTIES(EmMpmGui "${EmMpmGui_MOC_HDRS}" "${EmMpmGui_SRCS}" "0")
 
@@ -162,7 +167,7 @@ SET( EmMpmGui_RCS
 )
 cmp_IDE_SOURCE_PROPERTIES(EmMpmGui/QrcFiles "${EmMpmGui_RCS}" "" "0")
 
-# -- Run MOC and UIC on the necessary files   
+# -- Run MOC and UIC on the necessary files
 QT4_ADD_RESOURCES( Generated_RC_SRCS ${EmMpmGui_RCS}  ${QRC_LICENSE_FILES})
 
 # this will run uic on .ui files:
@@ -181,12 +186,12 @@ set (Generated_Version_SRCS
 cmp_IDE_GENERATED_PROPERTIES(EmMpmGui/Generated "${Generated_Version_SRCS}" "")
 
 # -- Finally set the Project Sources to include all the sources
-SET (${PROJECT_NAME}_PROJECT_SRCS 
-  ${EmMpmGui_SRCS} 
+SET (${PROJECT_NAME}_PROJECT_SRCS
+  ${EmMpmGui_SRCS}
   ${EmMpmGui_MOC_HDRS}
   ${EmMpmGui_HDRS}
-  ${Generated_RC_SRCS} 
-  ${Generated_UI_HDRS} 
+  ${Generated_RC_SRCS}
+  ${Generated_UI_HDRS}
   ${Generated_MOC_SRCS}
   ${Generated_Version_SRCS}
 )
@@ -201,10 +206,10 @@ ENDIF(Q_WS_WIN)
 
 # Clear the file first otherwise we get duplicates
 file(WRITE ${PROJECT_BINARY_DIR}/Qt_Plugins.txt "")
-FindQt4Plugins("qgif;qjpeg;qtiff" "${PROJECT_BINARY_DIR}/Qt_Plugins.txt" 
-                "${PROJECT_BINARY_DIR}/LibSearchDirs.txt" 
+FindQt4Plugins("qgif;qjpeg;qtiff" "${PROJECT_BINARY_DIR}/Qt_Plugins.txt"
+                "${PROJECT_BINARY_DIR}/LibSearchDirs.txt"
                 "imageformats" )
-                
+
 file(READ ${PROJECT_BINARY_DIR}/Qt_Plugins.txt QT_PLUGINS)
 BuildQtAppBundle(
     TARGET ${PROJECT_NAME}
@@ -215,11 +220,11 @@ BuildQtAppBundle(
     VERSION_MINOR ${QEMMPM_VER_MINOR}
     VERSION_PATCH ${QEMMPM_VER_PATCH}
     BINARY_DIR    ${${PROJECT_NAME}_BINARY_DIR}
-    LINK_LIBRARIES ${QT_LIBRARIES} MXADataModel EMMPMLib QtSupport ${QWT_LIBRARIES} ${TIFF_LIBRARIES}
+    LINK_LIBRARIES ${QT_LIBRARIES} MXADataModel EMMPMLib QtSupport ${QWT_LIBRARIES}
     LIB_SEARCH_DIRS ${CMAKE_LIBRARY_OUTPUT_DIRECTORY} ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
     QT_PLUGINS    ${QT_PLUGINS}
 #        OTHER_PLUGINS ${OTHER_PLUGINS}
     COMPONENT     Applications
     INSTALL_DEST  "."
-)   
+)
 

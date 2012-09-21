@@ -50,12 +50,6 @@
 #include <QtGui/QFileDialog>
 #include <QtGui/QMouseEvent>
 
-
-#define PADDING 5
-#define BORDER 2
-#define IMAGE_WIDTH 17
-#define IMAGE_HEIGHT 17
-
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
@@ -99,6 +93,17 @@ void QDisclosableGroupBox::setupGui()
 // -----------------------------------------------------------------------------
 void QDisclosableGroupBox::disclose(bool on)
 {
+  if (on)
+  {
+  //    setLayout(m_Layout);
+      this->setMaximumHeight(260000);
+  }
+  else
+  {
+ //    m_Layout = layout();
+     this->setMaximumHeight(26);
+  }
+
   QObjectList objs = children();
   foreach(QObject* obj, objs)
   {
@@ -109,5 +114,6 @@ void QDisclosableGroupBox::disclose(bool on)
       else w->hide();
     }
   }
+
 }
 

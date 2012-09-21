@@ -48,8 +48,8 @@
 #include "MXA/Utilities/MXAFileInfo.h"
 
 //-- EMMPMLib Includes
-#include "EMMPMLib/Common/EMMPM.h"
-#include "EMMPMLib/Common/InitializationFunctions.h"
+#include "EMMPMLib/Core/EMMPM.h"
+#include "EMMPMLib/Core/InitializationFunctions.h"
 #include "EMMPMLib/tiff/TiffUtilities.h"
 
 #include "AIM/Common/AIMArray.hpp"
@@ -98,7 +98,7 @@ void EMMPMTask::reportProgress(EMMPM_Data::Pointer data)
     for (unsigned int y = 0; y < data->rows; ++y)
     {
       front = image.scanLine(y);
-      int bytesPerLine = image.bytesPerLine();
+     // int bytesPerLine = image.bytesPerLine();
       for (unsigned int x = 0; x < data->columns; ++x)
       {
         front[x] = data->xt[data->columns*y + x];
@@ -109,7 +109,7 @@ void EMMPMTask::reportProgress(EMMPM_Data::Pointer data)
     // Now overwrite the beginning of the color table with the gray scale values for each class
     for (int g = 0; g < data->classes; ++g)
     {
-      image.setColor(g, qRgb(data->grayTable[g], data->grayTable[g], data->grayTable[g]) );
+      image.setColor(g, data->colorTable[g] );
     }
     emit mySelf->updateImageAvailable(image);
 
@@ -126,7 +126,12 @@ void EMMPMTask::reportProgress(EMMPM_Data::Pointer data)
         emit mySelf->updateHistogramAvailable(values);
       }
     }
+  }
 
+  // Send the latest value of the MSE to the GUI for plotting or saving.
+  if (data->inside_mpm_loop == 0 && data->currentEMLoop > 0)
+  {
+      emit mySelf->mseValueUpdated(data->currentMSE);
   }
 
 #if 0
@@ -412,24 +417,31 @@ void EMMPMTask::segmentImage(int i)
   uchar* front = NULL;
   for (int y = 0; y < height; ++y)
   {
-    front = outQImage.scanLine(y);
-    int bytesPerLine = outQImage.bytesPerLine();
-    for (int x = 0; x < width; ++x)
-    {
-      front[x] = m_data->xt[width*y + x];
-    }
+      front = outQImage.scanLine(y);
+      // int bytesPerLine = outQImage.bytesPerLine();
+      for (int x = 0; x < width; ++x)
+      {
+          front[x] = m_data->xt[width*y + x];
+      }
   }
-   outQImage.setColorCount(m_data->classes);
+  outQImage.setColorCount(m_data->classes);
 
   // Now overwrite the beginning of the color table with the gray scale values for each class
   for (int g = 0; g < m_data->classes; ++g)
   {
-    outQImage.setColor(g, qRgb(m_data->grayTable[g], m_data->grayTable[g], m_data->grayTable[g]) );
+      outQImage.setColor(g, m_data->colorTable[g]);
   }
 
   // Save the output image to a file
   QFileInfo fi (QString(m_data->output_file_name));
   QString ext = fi.suffix();
+
+  bool success = outQImage.save(m_data->output_file_name);
+  if (!success)
+  {
+    UPDATE_PROGRESS(QString("EM/MPM Error Writing Output Image"), 100); emit
+  }
+#if 0
   if (ext.compare(QString("tif"), Qt::CaseInsensitive) == 0
       || ext.compare(QString("tiff"), Qt::CaseInsensitive) == 0)
   {
@@ -452,7 +464,7 @@ void EMMPMTask::segmentImage(int i)
        UPDATE_PROGRESS(QString("EM/MPM Error Writing Output Image"), 95);
      }
   }
-
+#endif
 
   if (m_OutputStatsFile.empty() == false)
   {
@@ -460,12 +472,17 @@ void EMMPMTask::segmentImage(int i)
     fprintf(f, "InputFile:%s\n", m_data->input_file_name);
     fprintf(f, "SegmentedFile:%s\n" , m_data->output_file_name);
     fprintf(f, "NumClasses:%d\n", m_data->classes);
+    fprintf(f, "Proposed EM Loops:%d\n", m_data->emIterations);
+    fprintf(f, "EM Loops Completed:%d\n", m_data->currentEMLoop);
+    fprintf(f, "Final MSE:%f\n", m_data->currentMSE);
+    fprintf(f, "Stopping Threshold:%f\n", m_data->stoppingThreshold);
+    fprintf(f, "Use Stopping Criteria:%d\n", (int)(m_data->useStoppingThreshold));
     fprintf(f, "Class,Mu,Sigma\n");
     // Remember the Sigma is the Square Root of the variance
     for(int i = 0; i < m_data->classes; ++i)
     {
       // note we are taking the Squart Root of the variance to get the standard deviation (sigma)
-      fprintf(f, "%d,%f,%f\n", i,  m_data->m[i] , sqrtf(m_data->v[i]) );
+      fprintf(f, "%d,%f,%f\n", i,  m_data->mean[i] , sqrtf(m_data->variance[i]) );
     }
 
     fclose(f);

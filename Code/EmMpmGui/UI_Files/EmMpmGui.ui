@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>935</width>
-    <height>665</height>
+    <width>1160</width>
+    <height>816</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -25,11 +25,22 @@
   <property name="windowTitle">
    <string>EM/MPM</string>
   </property>
+  <property name="styleSheet">
+   <string notr="true"> QMainWindow::separator {
+ /*    background: lightgray; */
+     width: 2px; /* when vertical */
+     height: 2px; /* when horizontal */
+ }
+
+ QMainWindow::separator:hover {
+     background: black;
+ }</string>
+  </property>
   <property name="dockNestingEnabled">
    <bool>true</bool>
   </property>
   <property name="dockOptions">
-   <set>QMainWindow::AllowNestedDocks|QMainWindow::AllowTabbedDocks|QMainWindow::AnimatedDocks|QMainWindow::VerticalTabs</set>
+   <set>QMainWindow::AllowNestedDocks|QMainWindow::AllowTabbedDocks|QMainWindow::VerticalTabs</set>
   </property>
   <property name="unifiedTitleAndToolBarOnMac">
    <bool>true</bool>
@@ -54,7 +65,7 @@
     <item>
      <widget class="QTabWidget" name="tabWidget">
       <property name="currentIndex">
-       <number>1</number>
+       <number>0</number>
       </property>
       <widget class="QWidget" name="filesInputTab">
        <attribute name="title">
@@ -143,12 +154,21 @@
          </widget>
         </item>
         <item>
-         <widget class="QLabel" name="label_17">
-          <property name="font">
-           <font>
-            <weight>75</weight>
-            <bold>true</bold>
-           </font>
+         <widget class="QCheckBox" name="processFolder">
+          <property name="enabled">
+           <bool>true</bool>
+          </property>
+          <property name="toolTip">
+           <string>Check this box if you want to process multiple images in a single run</string>
+          </property>
+          <property name="statusTip">
+           <string>Check this box if you want to process multiple images in a single run</string>
+          </property>
+          <property name="styleSheet">
+           <string notr="true">QCheckBox {
+font-weight: bold;
+font-size: 12px;
+}</string>
           </property>
           <property name="text">
            <string>Multiple Files to Segment</string>
@@ -164,22 +184,6 @@
            <widget class="QLabel" name="label_15">
             <property name="text">
              <string>Output Folder</string>
-            </property>
-           </widget>
-          </item>
-          <item row="0" column="0">
-           <widget class="QCheckBox" name="processFolder">
-            <property name="enabled">
-             <bool>true</bool>
-            </property>
-            <property name="toolTip">
-             <string>Check this box if you want to process multiple images in a single run</string>
-            </property>
-            <property name="statusTip">
-             <string>Check this box if you want to process multiple images in a single run</string>
-            </property>
-            <property name="text">
-             <string>Process Folder</string>
             </property>
            </widget>
           </item>
@@ -639,7 +643,7 @@
            <item>
             <layout class="QHBoxLayout" name="horizontalLayout_5">
              <property name="spacing">
-              <number>0</number>
+              <number>5</number>
              </property>
              <item>
               <widget class="QToolButton" name="zoomButton">
@@ -654,6 +658,9 @@
                  <weight>50</weight>
                  <bold>false</bold>
                 </font>
+               </property>
+               <property name="toolTip">
+                <string>Set a specific zoon level</string>
                </property>
                <property name="statusTip">
                 <string>Selects a set magnification level</string>
@@ -673,101 +680,174 @@
               </widget>
              </item>
              <item>
-              <widget class="QToolButton" name="zoomIn">
-               <property name="maximumSize">
+              <widget class="QPushButton" name="zoomIn">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="minimumSize">
                 <size>
-                 <width>20</width>
-                 <height>20</height>
+                 <width>24</width>
+                 <height>24</height>
                 </size>
                </property>
-               <property name="font">
-                <font>
-                 <pointsize>11</pointsize>
-                 <weight>50</weight>
-                 <bold>false</bold>
-                </font>
+               <property name="maximumSize">
+                <size>
+                 <width>24</width>
+                 <height>24</height>
+                </size>
                </property>
-               <property name="statusTip">
-                <string>Zooms into the image(s) making them appear larger</string>
+               <property name="toolTip">
+                <string>Zoom in to the image</string>
                </property>
                <property name="text">
                 <string/>
                </property>
                <property name="icon">
                 <iconset resource="../../../Resources/icons/images/Icons.qrc">
-                 <normaloff>:/plus.png</normaloff>:/plus.png</iconset>
+                 <normaloff>:/zoom_in.png</normaloff>:/zoom_in.png</iconset>
                </property>
                <property name="iconSize">
                 <size>
-                 <width>16</width>
-                 <height>16</height>
+                 <width>24</width>
+                 <height>24</height>
                 </size>
                </property>
-               <property name="shortcut">
-                <string>Ctrl+S</string>
+               <property name="flat">
+                <bool>true</bool>
                </property>
               </widget>
              </item>
              <item>
-              <widget class="QToolButton" name="zoomOut">
-               <property name="maximumSize">
+              <widget class="QPushButton" name="zoomOut">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="minimumSize">
                 <size>
-                 <width>20</width>
-                 <height>20</height>
+                 <width>24</width>
+                 <height>24</height>
                 </size>
                </property>
-               <property name="font">
-                <font>
-                 <weight>75</weight>
-                 <bold>true</bold>
-                </font>
-               </property>
-               <property name="statusTip">
-                <string>Zooms Out from the image(s) making them appear smaller</string>
-               </property>
-               <property name="text">
-                <string>-</string>
-               </property>
-               <property name="icon">
-                <iconset resource="../../../Resources/icons/images/Icons.qrc">
-                 <normaloff>:/minus.png</normaloff>:/minus.png</iconset>
-               </property>
-               <property name="iconSize">
-                <size>
-                 <width>16</width>
-                 <height>16</height>
-                </size>
-               </property>
-               <property name="shortcut">
-                <string>Ctrl+S</string>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <widget class="QToolButton" name="fitToWindow">
                <property name="maximumSize">
                 <size>
-                 <width>20</width>
-                 <height>20</height>
+                 <width>24</width>
+                 <height>24</height>
                 </size>
                </property>
                <property name="toolTip">
-                <string>Fits the image(s) into the current window size area.</string>
-               </property>
-               <property name="statusTip">
-                <string>Fits the image(s) into the current window size area.</string>
+                <string>Zoon out from the image</string>
                </property>
                <property name="text">
-                <string>Fit</string>
+                <string/>
                </property>
                <property name="icon">
                 <iconset resource="../../../Resources/icons/images/Icons.qrc">
-                 <normaloff>:/magnifyingglass.png</normaloff>:/magnifyingglass.png</iconset>
+                 <normaloff>:/zoom_out.png</normaloff>:/zoom_out.png</iconset>
+               </property>
+               <property name="iconSize">
+                <size>
+                 <width>24</width>
+                 <height>24</height>
+                </size>
+               </property>
+               <property name="flat">
+                <bool>true</bool>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QPushButton" name="fitToWindow">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="minimumSize">
+                <size>
+                 <width>24</width>
+                 <height>24</height>
+                </size>
+               </property>
+               <property name="maximumSize">
+                <size>
+                 <width>24</width>
+                 <height>24</height>
+                </size>
+               </property>
+               <property name="toolTip">
+                <string>Fit the image to the display area</string>
+               </property>
+               <property name="text">
+                <string/>
+               </property>
+               <property name="icon">
+                <iconset resource="../../../Resources/icons/images/Icons.qrc">
+                 <normaloff>:/fit_to_size.png</normaloff>:/fit_to_size.png</iconset>
+               </property>
+               <property name="iconSize">
+                <size>
+                 <width>24</width>
+                 <height>24</height>
+                </size>
+               </property>
+               <property name="flat">
+                <bool>true</bool>
                </property>
               </widget>
              </item>
              <item>
               <spacer name="horizontalSpacer">
+               <property name="orientation">
+                <enum>Qt::Horizontal</enum>
+               </property>
+               <property name="sizeHint" stdset="0">
+                <size>
+                 <width>40</width>
+                 <height>20</height>
+                </size>
+               </property>
+              </spacer>
+             </item>
+             <item>
+              <widget class="QSlider" name="opacitySlider">
+               <property name="enabled">
+                <bool>false</bool>
+               </property>
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="minimumSize">
+                <size>
+                 <width>65</width>
+                 <height>0</height>
+                </size>
+               </property>
+               <property name="toolTip">
+                <string>Adjust the opacity of the segmented image. 0 makes the segmented image opaque. 100 makes the segmented image transparent </string>
+               </property>
+               <property name="maximum">
+                <number>100</number>
+               </property>
+               <property name="value">
+                <number>40</number>
+               </property>
+               <property name="orientation">
+                <enum>Qt::Horizontal</enum>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <spacer name="horizontalSpacer_2">
                <property name="orientation">
                 <enum>Qt::Horizontal</enum>
                </property>
@@ -783,43 +863,55 @@
               </spacer>
              </item>
              <item>
-              <widget class="QToolButton" name="layersPalette">
-               <property name="maximumSize">
-                <size>
-                 <width>20</width>
-                 <height>20</height>
-                </size>
-               </property>
+              <widget class="QComboBox" name="imageDisplaySelection">
                <property name="toolTip">
-                <string>Click to show the Layers Adjustments Palette</string>
+                <string>Select which image to show</string>
                </property>
-               <property name="statusTip">
-                <string>Click to show the Layers Adjustments Palette</string>
-               </property>
-               <property name="text">
-                <string>...</string>
-               </property>
-               <property name="icon">
-                <iconset resource="../../../Resources/icons/images/Icons.qrc">
-                 <normaloff>:/photos.png</normaloff>:/photos.png</iconset>
-               </property>
-               <property name="checkable">
-                <bool>false</bool>
-               </property>
+               <item>
+                <property name="text">
+                 <string>Original Image</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>Segmented Image</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>Both</string>
+                </property>
+               </item>
               </widget>
              </item>
              <item>
-              <spacer name="horizontalSpacer_2">
+              <spacer name="horizontalSpacer_12">
                <property name="orientation">
                 <enum>Qt::Horizontal</enum>
                </property>
+               <property name="sizeType">
+                <enum>QSizePolicy::Fixed</enum>
+               </property>
                <property name="sizeHint" stdset="0">
                 <size>
-                 <width>40</width>
+                 <width>12</width>
                  <height>20</height>
                 </size>
                </property>
               </spacer>
+             </item>
+             <item>
+              <widget class="QComboBox" name="compositeModeCB">
+               <property name="enabled">
+                <bool>false</bool>
+               </property>
+               <property name="toolTip">
+                <string>Select the type of compositing of the original and segmented images</string>
+               </property>
+               <property name="statusTip">
+                <string/>
+               </property>
+              </widget>
              </item>
             </layout>
            </item>
@@ -850,7 +942,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>935</width>
+     <width>1160</width>
      <height>22</height>
     </rect>
    </property>
@@ -883,13 +975,19 @@
     <addaction name="actionParameters"/>
     <addaction name="actionHistogram"/>
     <addaction name="actionUser_Initialization"/>
-    <addaction name="actionLayers_Palette"/>
+    <addaction name="actionMSE_Plot"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuWindow"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
   <widget class="QDockWidget" name="ParametersDockWidget">
+   <property name="minimumSize">
+    <size>
+     <width>300</width>
+     <height>138</height>
+    </size>
+   </property>
    <property name="floating">
     <bool>false</bool>
    </property>
@@ -908,13 +1006,19 @@
    <widget class="QWidget" name="dockWidgetContents">
     <layout class="QVBoxLayout" name="verticalLayout_6">
      <property name="spacing">
-      <number>0</number>
+      <number>2</number>
      </property>
      <property name="margin">
       <number>0</number>
      </property>
      <item>
       <widget class="QScrollArea" name="scrollArea">
+       <property name="minimumSize">
+        <size>
+         <width>200</width>
+         <height>0</height>
+        </size>
+       </property>
        <property name="widgetResizable">
         <bool>true</bool>
        </property>
@@ -923,8 +1027,8 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>341</width>
-          <height>850</height>
+          <width>327</width>
+          <height>884</height>
          </rect>
         </property>
         <layout class="QVBoxLayout" name="verticalLayout_4">
@@ -944,9 +1048,9 @@
           <number>5</number>
          </property>
          <item>
-          <widget class="QDisclosableGroupBox" name="groupBox">
+          <widget class="QDisclosableGroupBox" name="parameters_groupbox">
            <property name="sizePolicy">
-            <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+            <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
              <horstretch>0</horstretch>
              <verstretch>0</verstretch>
             </sizepolicy>
@@ -957,27 +1061,19 @@
              <height>0</height>
             </size>
            </property>
-           <property name="font">
-            <font>
-             <family>Arial</family>
-             <pointsize>12</pointsize>
-             <weight>75</weight>
-             <italic>true</italic>
-             <bold>true</bold>
-            </font>
-           </property>
            <property name="styleSheet">
             <string notr="true">QGroupBox
 {
-background-color: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #FFFFFF, stop: 1 #E6E6E6);
+/*background-color: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #FFFFFF, stop: 1 #DCDCDC); */
 background-image: url(:/DisclosableGroupBoxHeader.png);
 background-position: top ;
 background-repeat: repeat-x;
-padding: 17 0 0 0px;
-font: 85 italic 12pt &quot;Arial&quot;;
+padding: 30 0 0 0px;
+font: 85% italic 12pt &quot;Arial&quot;;
 font-weight: bold;
 border: 0px solid gray;
 margin: 0px;
+color: white;
 }
  
 QGroupBox::title
@@ -987,6 +1083,7 @@ subcontrol-position: top left;
 padding: 5 5px;    
 background-color: rgba(255, 255, 255, 0);
 }
+
 QGroupBox::indicator {    
 width: 17px;    
 height: 17px;
@@ -1015,9 +1112,18 @@ image: url(:/bullet_triangle_grey_down.png);
            <property name="checkable">
             <bool>true</bool>
            </property>
-           <layout class="QFormLayout" name="formLayout_2">
-            <property name="fieldGrowthPolicy">
-             <enum>QFormLayout::FieldsStayAtSizeHint</enum>
+           <layout class="QGridLayout" name="gridLayout_15">
+            <property name="leftMargin">
+             <number>3</number>
+            </property>
+            <property name="topMargin">
+             <number>0</number>
+            </property>
+            <property name="rightMargin">
+             <number>3</number>
+            </property>
+            <property name="bottomMargin">
+             <number>6</number>
             </property>
             <property name="horizontalSpacing">
              <number>4</number>
@@ -1025,20 +1131,45 @@ image: url(:/bullet_triangle_grey_down.png);
             <property name="verticalSpacing">
              <number>6</number>
             </property>
-            <property name="leftMargin">
-             <number>4</number>
-            </property>
-            <property name="topMargin">
-             <number>17</number>
-            </property>
-            <property name="rightMargin">
-             <number>4</number>
-            </property>
-            <property name="bottomMargin">
-             <number>5</number>
-            </property>
-            <item row="0" column="0">
-             <widget class="QLabel" name="label_12">
+            <item row="1" column="1">
+             <widget class="QSpinBox" name="m_EmIterations">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="minimumSize">
+               <size>
+                <width>60</width>
+                <height>0</height>
+               </size>
+              </property>
+              <property name="maximumSize">
+               <size>
+                <width>60</width>
+                <height>16777215</height>
+               </size>
+              </property>
+              <property name="toolTip">
+               <string>The number of EM Loops to use when segmenting</string>
+              </property>
+              <property name="statusTip">
+               <string>The number of EM Loops to use when segmenting</string>
+              </property>
+              <property name="minimum">
+               <number>0</number>
+              </property>
+              <property name="maximum">
+               <number>32000</number>
+              </property>
+              <property name="value">
+               <number>5</number>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="0">
+             <widget class="QLabel" name="label_11">
               <property name="sizePolicy">
                <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
                 <horstretch>0</horstretch>
@@ -1052,19 +1183,22 @@ image: url(:/bullet_triangle_grey_down.png);
                </size>
               </property>
               <property name="toolTip">
-               <string>The number of EM/MPM classes to segment into</string>
+               <string>The number of EM Loops to use when segmenting</string>
               </property>
               <property name="statusTip">
-               <string>The number of EM/MPM classes to segment into</string>
+               <string>The number of EM Loops to use when segmenting</string>
+              </property>
+              <property name="styleSheet">
+               <string notr="true">QLabel {
+font-weight: bold;
+font-size: 10px;
+}</string>
               </property>
               <property name="text">
-               <string>Classes:</string>
-              </property>
-              <property name="scaledContents">
-               <bool>false</bool>
+               <string>Histogram Loops:</string>
               </property>
               <property name="alignment">
-               <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+               <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
               </property>
              </widget>
             </item>
@@ -1105,72 +1239,7 @@ image: url(:/bullet_triangle_grey_down.png);
               </property>
              </widget>
             </item>
-            <item row="1" column="0">
-             <widget class="QLabel" name="label_11">
-              <property name="sizePolicy">
-               <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-                <horstretch>0</horstretch>
-                <verstretch>0</verstretch>
-               </sizepolicy>
-              </property>
-              <property name="minimumSize">
-               <size>
-                <width>0</width>
-                <height>0</height>
-               </size>
-              </property>
-              <property name="toolTip">
-               <string>The number of EM Loops to use when segmenting</string>
-              </property>
-              <property name="statusTip">
-               <string>The number of EM Loops to use when segmenting</string>
-              </property>
-              <property name="text">
-               <string>EM Loops:</string>
-              </property>
-              <property name="alignment">
-               <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-              </property>
-             </widget>
-            </item>
-            <item row="1" column="1">
-             <widget class="QSpinBox" name="m_EmIterations">
-              <property name="sizePolicy">
-               <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
-                <horstretch>0</horstretch>
-                <verstretch>0</verstretch>
-               </sizepolicy>
-              </property>
-              <property name="minimumSize">
-               <size>
-                <width>60</width>
-                <height>0</height>
-               </size>
-              </property>
-              <property name="maximumSize">
-               <size>
-                <width>60</width>
-                <height>16777215</height>
-               </size>
-              </property>
-              <property name="toolTip">
-               <string>The number of EM Loops to use when segmenting</string>
-              </property>
-              <property name="statusTip">
-               <string>The number of EM Loops to use when segmenting</string>
-              </property>
-              <property name="minimum">
-               <number>0</number>
-              </property>
-              <property name="maximum">
-               <number>32000</number>
-              </property>
-              <property name="value">
-               <number>5</number>
-              </property>
-             </widget>
-            </item>
-            <item row="2" column="0">
+            <item row="1" column="2">
              <widget class="QLabel" name="label_10">
               <property name="sizePolicy">
                <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
@@ -1190,15 +1259,58 @@ image: url(:/bullet_triangle_grey_down.png);
               <property name="statusTip">
                <string>The number of MPM Loops to use when Segmenting</string>
               </property>
+              <property name="styleSheet">
+               <string notr="true">QLabel {
+font-weight: bold;
+font-size: 10px;
+}</string>
+              </property>
               <property name="text">
-               <string>MPM Loops:</string>
+               <string>Segmentation Loops:</string>
               </property>
               <property name="alignment">
                <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
               </property>
              </widget>
             </item>
-            <item row="2" column="1">
+            <item row="0" column="0">
+             <widget class="QLabel" name="label_12">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="minimumSize">
+               <size>
+                <width>0</width>
+                <height>0</height>
+               </size>
+              </property>
+              <property name="toolTip">
+               <string>The number of EM/MPM classes to segment into</string>
+              </property>
+              <property name="statusTip">
+               <string>The number of EM/MPM classes to segment into</string>
+              </property>
+              <property name="styleSheet">
+               <string notr="true">QLabel {
+font-weight: bold;
+font-size: 10px;
+}</string>
+              </property>
+              <property name="text">
+               <string>Classes:</string>
+              </property>
+              <property name="scaledContents">
+               <bool>false</bool>
+              </property>
+              <property name="alignment">
+               <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="3">
              <widget class="QSpinBox" name="m_MpmIterations">
               <property name="sizePolicy">
                <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
@@ -1235,7 +1347,29 @@ image: url(:/bullet_triangle_grey_down.png);
               </property>
              </widget>
             </item>
-            <item row="3" column="0">
+            <item row="4" column="0" colspan="4">
+             <widget class="QTableView" name="perClassTableView">
+              <property name="autoScroll">
+               <bool>false</bool>
+              </property>
+              <property name="editTriggers">
+               <set>QAbstractItemView::AllEditTriggers</set>
+              </property>
+              <property name="alternatingRowColors">
+               <bool>true</bool>
+              </property>
+              <property name="verticalScrollMode">
+               <enum>QAbstractItemView::ScrollPerPixel</enum>
+              </property>
+              <property name="horizontalScrollMode">
+               <enum>QAbstractItemView::ScrollPerPixel</enum>
+              </property>
+              <attribute name="verticalHeaderVisible">
+               <bool>false</bool>
+              </attribute>
+             </widget>
+            </item>
+            <item row="0" column="2">
              <widget class="QLabel" name="label_8">
               <property name="sizePolicy">
                <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
@@ -1255,15 +1389,21 @@ image: url(:/bullet_triangle_grey_down.png);
               <property name="statusTip">
                <string>The value of Beta for the EM/MPM Algorithm</string>
               </property>
+              <property name="styleSheet">
+               <string notr="true">QLabel {
+font-weight: bold;
+font-size: 10px;
+}</string>
+              </property>
               <property name="text">
-               <string>Beta</string>
+               <string>Exchange Energy:</string>
               </property>
               <property name="alignment">
                <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
               </property>
              </widget>
             </item>
-            <item row="3" column="1">
+            <item row="0" column="3">
              <widget class="QLineEdit" name="m_Beta">
               <property name="sizePolicy">
                <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
@@ -1294,47 +1434,24 @@ image: url(:/bullet_triangle_grey_down.png);
               </property>
              </widget>
             </item>
-            <item row="4" column="0">
-             <widget class="QLabel" name="label_9">
-              <property name="toolTip">
-               <string>The minimum variance that any class can use during the EM/MPM algorithm</string>
-              </property>
-              <property name="statusTip">
-               <string>The minimum variance that any class can use during the EM/MPM algorithm</string>
-              </property>
-              <property name="text">
-               <string>Min. Variance:</string>
-              </property>
+            <item row="5" column="2" colspan="2">
+             <widget class="QComboBox" name="colorTablePresets">
+              <item>
+               <property name="text">
+                <string>Color</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Gray Scale</string>
+               </property>
+              </item>
              </widget>
             </item>
-            <item row="4" column="1">
-             <widget class="QLineEdit" name="m_MinVariance">
-              <property name="sizePolicy">
-               <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
-                <horstretch>0</horstretch>
-                <verstretch>0</verstretch>
-               </sizepolicy>
-              </property>
-              <property name="minimumSize">
-               <size>
-                <width>60</width>
-                <height>0</height>
-               </size>
-              </property>
-              <property name="maximumSize">
-               <size>
-                <width>60</width>
-                <height>16777215</height>
-               </size>
-              </property>
-              <property name="toolTip">
-               <string>The minimum variance that any class can use during the EM/MPM algorithm</string>
-              </property>
-              <property name="statusTip">
-               <string>The minimum variance that any class can use during the EM/MPM algorithm</string>
-              </property>
+            <item row="5" column="0" colspan="2">
+             <widget class="QLabel" name="label_9">
               <property name="text">
-               <string>20</string>
+               <string>Color Table:</string>
               </property>
              </widget>
             </item>
@@ -1343,18 +1460,25 @@ image: url(:/bullet_triangle_grey_down.png);
          </item>
          <item>
           <widget class="QDisclosableGroupBox" name="manualInitGroupBox">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
            <property name="styleSheet">
             <string notr="true">QGroupBox
 {
-background-color: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #FFFFFF, stop: 1 #E6E6E6);
+/*background-color: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #FFFFFF, stop: 1 #DCDCDC); */
 background-image: url(:/DisclosableGroupBoxHeader.png);
 background-position: top ;
 background-repeat: repeat-x;
-padding: 17 0 0 0px;
-font: 85 italic 12pt &quot;Arial&quot;;
+padding: 30 0 0 0px;
+font: 85% italic 12pt &quot;Arial&quot;;
 font-weight: bold;
 border: 0px solid gray;
 margin: 0px;
+color: white;
 }
  
 QGroupBox::title
@@ -1364,6 +1488,7 @@ subcontrol-position: top left;
 padding: 5 5px;    
 background-color: rgba(255, 255, 255, 0);
 }
+
 QGroupBox::indicator {    
 width: 17px;    
 height: 17px;
@@ -1391,19 +1516,22 @@ image: url(:/bullet_triangle_grey_down.png);
            </property>
            <layout class="QGridLayout" name="gridLayout_9">
             <property name="leftMargin">
-             <number>0</number>
+             <number>3</number>
             </property>
             <property name="topMargin">
-             <number>17</number>
-            </property>
-            <property name="rightMargin">
              <number>0</number>
             </property>
-            <property name="bottomMargin">
-             <number>5</number>
+            <property name="rightMargin">
+             <number>3</number>
             </property>
-            <property name="spacing">
+            <property name="bottomMargin">
              <number>6</number>
+            </property>
+            <property name="horizontalSpacing">
+             <number>6</number>
+            </property>
+            <property name="verticalSpacing">
+             <number>2</number>
             </property>
             <item row="1" column="0">
              <layout class="QHBoxLayout" name="horizontalLayout_2">
@@ -1415,13 +1543,12 @@ image: url(:/bullet_triangle_grey_down.png);
               </property>
               <item>
                <widget class="QCheckBox" name="enableManualInit">
-                <property name="text">
-                 <string/>
+                <property name="styleSheet">
+                 <string notr="true">QCheckBox {
+font-weight: bold;
+font-size: 10px;
+}</string>
                 </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QLabel" name="label_20">
                 <property name="text">
                  <string>Enable Manual Initialization</string>
                 </property>
@@ -1478,15 +1605,16 @@ image: url(:/bullet_triangle_grey_down.png);
            <property name="styleSheet">
             <string notr="true">QGroupBox
 {
-background-color: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #FFFFFF, stop: 1 #E6E6E6);
+/*background-color: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #FFFFFF, stop: 1 #DCDCDC); */
 background-image: url(:/DisclosableGroupBoxHeader.png);
 background-position: top ;
 background-repeat: repeat-x;
-padding: 17 0 0 0px;
-font: 85 italic 12pt &quot;Arial&quot;;
+padding: 30 0 0 0px;
+font: 85% italic 12pt &quot;Arial&quot;;
 font-weight: bold;
 border: 0px solid gray;
 margin: 0px;
+color: white;
 }
  
 QGroupBox::title
@@ -1523,16 +1651,16 @@ image: url(:/bullet_triangle_grey_down.png);
            </property>
            <layout class="QGridLayout" name="gridLayout_8">
             <property name="leftMargin">
-             <number>4</number>
+             <number>3</number>
             </property>
             <property name="topMargin">
-             <number>17</number>
+             <number>0</number>
             </property>
             <property name="rightMargin">
-             <number>4</number>
+             <number>3</number>
             </property>
             <property name="bottomMargin">
-             <number>5</number>
+             <number>6</number>
             </property>
             <property name="spacing">
              <number>6</number>
@@ -1542,6 +1670,12 @@ image: url(:/bullet_triangle_grey_down.png);
             </item>
             <item row="1" column="0">
              <widget class="QLabel" name="label_2">
+              <property name="styleSheet">
+               <string notr="true">QLabel {
+font-weight: bold;
+font-size: 10px;
+}</string>
+              </property>
               <property name="text">
                <string>Class A:</string>
               </property>
@@ -1552,6 +1686,12 @@ image: url(:/bullet_triangle_grey_down.png);
             </item>
             <item row="1" column="1">
              <widget class="QLabel" name="label_3">
+              <property name="styleSheet">
+               <string notr="true">QLabel {
+font-weight: bold;
+font-size: 10px;
+}</string>
+              </property>
               <property name="text">
                <string>Class B:</string>
               </property>
@@ -1562,12 +1702,58 @@ image: url(:/bullet_triangle_grey_down.png);
             </item>
             <item row="1" column="2">
              <widget class="QLabel" name="label_14">
+              <property name="styleSheet">
+               <string notr="true">QLabel {
+font-weight: bold;
+font-size: 10px;
+}</string>
+              </property>
               <property name="text">
-               <string>Beta:</string>
+               <string>Exchange Energy:</string>
               </property>
              </widget>
             </item>
-            <item row="3" column="0" colspan="3">
+            <item row="4" column="0" colspan="4">
+             <widget class="QTableWidget" name="m_ClassCouplingTableWidget">
+              <property name="editTriggers">
+               <set>QAbstractItemView::AllEditTriggers</set>
+              </property>
+              <property name="alternatingRowColors">
+               <bool>true</bool>
+              </property>
+              <property name="selectionBehavior">
+               <enum>QAbstractItemView::SelectItems</enum>
+              </property>
+              <property name="verticalScrollMode">
+               <enum>QAbstractItemView::ScrollPerPixel</enum>
+              </property>
+              <property name="horizontalScrollMode">
+               <enum>QAbstractItemView::ScrollPerPixel</enum>
+              </property>
+              <property name="columnCount">
+               <number>3</number>
+              </property>
+              <attribute name="verticalHeaderVisible">
+               <bool>false</bool>
+              </attribute>
+              <column>
+               <property name="text">
+                <string>Class A</string>
+               </property>
+              </column>
+              <column>
+               <property name="text">
+                <string>Class B</string>
+               </property>
+              </column>
+              <column>
+               <property name="text">
+                <string>Exchange Energy</string>
+               </property>
+              </column>
+             </widget>
+            </item>
+            <item row="2" column="3">
              <layout class="QHBoxLayout" name="horizontalLayout">
               <property name="bottomMargin">
                <number>0</number>
@@ -1629,46 +1815,6 @@ image: url(:/bullet_triangle_grey_down.png);
               </item>
              </layout>
             </item>
-            <item row="4" column="0" colspan="3">
-             <widget class="QTableWidget" name="m_ClassCouplingTableWidget">
-              <property name="editTriggers">
-               <set>QAbstractItemView::AllEditTriggers</set>
-              </property>
-              <property name="alternatingRowColors">
-               <bool>true</bool>
-              </property>
-              <property name="selectionBehavior">
-               <enum>QAbstractItemView::SelectItems</enum>
-              </property>
-              <property name="verticalScrollMode">
-               <enum>QAbstractItemView::ScrollPerPixel</enum>
-              </property>
-              <property name="horizontalScrollMode">
-               <enum>QAbstractItemView::ScrollPerPixel</enum>
-              </property>
-              <property name="columnCount">
-               <number>3</number>
-              </property>
-              <attribute name="verticalHeaderVisible">
-               <bool>false</bool>
-              </attribute>
-              <column>
-               <property name="text">
-                <string>Class A</string>
-               </property>
-              </column>
-              <column>
-               <property name="text">
-                <string>Class B</string>
-               </property>
-              </column>
-              <column>
-               <property name="text">
-                <string>Beta</string>
-               </property>
-              </column>
-             </widget>
-            </item>
            </layout>
           </widget>
          </item>
@@ -1689,15 +1835,16 @@ image: url(:/bullet_triangle_grey_down.png);
            <property name="styleSheet">
             <string notr="true">QGroupBox
 {
-background-color: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #FFFFFF, stop: 1 #E6E6E6);
+/*background-color: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #FFFFFF, stop: 1 #DCDCDC); */
 background-image: url(:/DisclosableGroupBoxHeader.png);
 background-position: top ;
 background-repeat: repeat-x;
-padding: 17 0 0 0px;
-font: 85 italic 12pt &quot;Arial&quot;;
+padding: 30 0 0 0px;
+font: 85% italic 12pt &quot;Arial&quot;;
 font-weight: bold;
 border: 0px solid gray;
 margin: 0px;
+color: white;
 }
  
 QGroupBox::title
@@ -1735,354 +1882,513 @@ image: url(:/bullet_triangle_grey_down.png);
            <property name="checkable">
             <bool>true</bool>
            </property>
-           <layout class="QFormLayout" name="formLayout_3">
-            <property name="fieldGrowthPolicy">
-             <enum>QFormLayout::FieldsStayAtSizeHint</enum>
-            </property>
-            <property name="horizontalSpacing">
-             <number>8</number>
-            </property>
-            <property name="verticalSpacing">
-             <number>8</number>
-            </property>
+           <layout class="QVBoxLayout" name="verticalLayout_2">
             <property name="leftMargin">
-             <number>4</number>
+             <number>3</number>
             </property>
             <property name="topMargin">
-             <number>17</number>
+             <number>0</number>
             </property>
             <property name="rightMargin">
-             <number>4</number>
+             <number>3</number>
             </property>
             <property name="bottomMargin">
-             <number>5</number>
+             <number>6</number>
             </property>
-            <item row="0" column="0">
-             <widget class="QLabel" name="label_18">
-              <property name="toolTip">
-               <string>Use the Simulated Anealing Algorithm</string>
-              </property>
-              <property name="statusTip">
-               <string>Use the Simulated Anealing Algorithm</string>
-              </property>
-              <property name="text">
-               <string>Use Sim. Annealing</string>
-              </property>
-             </widget>
-            </item>
-            <item row="0" column="1">
-             <widget class="QCheckBox" name="useSimulatedAnnealing">
-              <property name="toolTip">
-               <string>Use the Simulated Anealing Algorithm</string>
-              </property>
-              <property name="statusTip">
-               <string>Use the Simulated Anealing Algorithm</string>
-              </property>
-              <property name="text">
-               <string/>
-              </property>
-             </widget>
-            </item>
-            <item row="1" column="0">
-             <widget class="QLabel" name="gradientPenaltyLabel">
-              <property name="toolTip">
-               <string>Use the Gradient or Edge penalty function</string>
-              </property>
-              <property name="statusTip">
-               <string>Use the Gradient or Edge penalty function</string>
-              </property>
-              <property name="text">
-               <string>Use Gradient Penalty</string>
-              </property>
-             </widget>
-            </item>
-            <item row="1" column="1">
-             <widget class="QCheckBox" name="useGradientPenalty">
-              <property name="toolTip">
-               <string>Use the Gradient or Edge penalty function</string>
-              </property>
-              <property name="statusTip">
-               <string>Use the Gradient or Edge penalty function</string>
-              </property>
-              <property name="text">
-               <string/>
-              </property>
-             </widget>
-            </item>
-            <item row="2" column="0">
-             <widget class="QLabel" name="betaELabel">
-              <property name="enabled">
-               <bool>false</bool>
-              </property>
-              <property name="toolTip">
-               <string>The weight of the Gradient or Edge cost</string>
-              </property>
-              <property name="statusTip">
-               <string>The weight of the Gradient or Edge cost</string>
-              </property>
-              <property name="text">
-               <string>Beta E</string>
-              </property>
-             </widget>
-            </item>
-            <item row="2" column="1">
-             <widget class="QDoubleSpinBox" name="gradientBetaE">
-              <property name="enabled">
-               <bool>false</bool>
-              </property>
-              <property name="minimumSize">
-               <size>
-                <width>50</width>
-                <height>0</height>
-               </size>
-              </property>
-              <property name="toolTip">
-               <string>The weight of the Gradient or Edge cost</string>
-              </property>
-              <property name="statusTip">
-               <string>The weight of the Gradient or Edge cost</string>
-              </property>
-              <property name="decimals">
-               <number>4</number>
-              </property>
-              <property name="maximum">
-               <double>9999.989999999999782</double>
-              </property>
-              <property name="value">
-               <double>1.000000000000000</double>
-              </property>
-             </widget>
-            </item>
-            <item row="3" column="0">
-             <widget class="QLabel" name="label_19">
-              <property name="toolTip">
-               <string>Use a Curvature Penalty function</string>
-              </property>
-              <property name="statusTip">
-               <string>Use a Curvature Penalty function</string>
-              </property>
-              <property name="text">
-               <string>Use Curvature Penalty</string>
-              </property>
-             </widget>
-            </item>
-            <item row="3" column="1">
-             <widget class="QCheckBox" name="useCurvaturePenalty">
-              <property name="toolTip">
-               <string>Use a Curvature Penalty function</string>
-              </property>
-              <property name="statusTip">
-               <string>Use a Curvature Penalty function</string>
-              </property>
-              <property name="text">
-               <string/>
-              </property>
-             </widget>
-            </item>
-            <item row="4" column="0">
-             <widget class="QLabel" name="label_21">
-              <property name="enabled">
-               <bool>false</bool>
-              </property>
-              <property name="toolTip">
-               <string>The weight of the curvature Penalty</string>
-              </property>
-              <property name="statusTip">
-               <string>The weight of the curvature Penalty</string>
-              </property>
-              <property name="text">
-               <string>Beta C</string>
-              </property>
-             </widget>
-            </item>
-            <item row="4" column="1">
-             <widget class="QDoubleSpinBox" name="curvatureBetaC">
-              <property name="enabled">
-               <bool>false</bool>
-              </property>
-              <property name="minimumSize">
-               <size>
-                <width>50</width>
-                <height>0</height>
-               </size>
-              </property>
-              <property name="toolTip">
-               <string>The weight of the curvature Penalty</string>
-              </property>
-              <property name="statusTip">
-               <string>The weight of the curvature Penalty</string>
-              </property>
-              <property name="decimals">
-               <number>4</number>
-              </property>
-              <property name="maximum">
-               <double>9999.989999999999782</double>
-              </property>
-              <property name="value">
-               <double>1.000000000000000</double>
-              </property>
-             </widget>
-            </item>
-            <item row="5" column="0">
-             <widget class="QLabel" name="label_22">
-              <property name="enabled">
-               <bool>false</bool>
-              </property>
-              <property name="toolTip">
-               <string>The maximum radius to use for the curvature morphological filter</string>
-              </property>
-              <property name="statusTip">
-               <string>The maximum radius to use for the curvature morphological filter</string>
-              </property>
-              <property name="text">
-               <string>R Max</string>
-              </property>
-             </widget>
-            </item>
-            <item row="5" column="1">
-             <widget class="QDoubleSpinBox" name="curvatureRMax">
-              <property name="enabled">
-               <bool>false</bool>
-              </property>
-              <property name="minimumSize">
-               <size>
-                <width>50</width>
-                <height>0</height>
-               </size>
-              </property>
-              <property name="toolTip">
-               <string>The maximum radius to use for the curvature morphological filter</string>
-              </property>
-              <property name="statusTip">
-               <string>The maximum radius to use for the curvature morphological filter</string>
-              </property>
-              <property name="correctionMode">
-               <enum>QAbstractSpinBox::CorrectToPreviousValue</enum>
-              </property>
-              <property name="decimals">
-               <number>4</number>
-              </property>
-              <property name="value">
-               <double>15.000000000000000</double>
-              </property>
-             </widget>
-            </item>
-            <item row="6" column="0">
-             <widget class="QLabel" name="label_23">
-              <property name="enabled">
-               <bool>false</bool>
-              </property>
-              <property name="toolTip">
-               <string>Number of EM loops to delay before applying the curvature penalty</string>
-              </property>
-              <property name="statusTip">
-               <string>Number of EM loops to delay before applying the curvature penalty</string>
-              </property>
-              <property name="text">
-               <string>EM Loop Delay</string>
-              </property>
-             </widget>
-            </item>
-            <item row="6" column="1">
-             <widget class="QSpinBox" name="ccostLoopDelay">
-              <property name="enabled">
-               <bool>false</bool>
-              </property>
-              <property name="minimumSize">
-               <size>
-                <width>50</width>
-                <height>0</height>
-               </size>
-              </property>
-              <property name="toolTip">
-               <string>Number of EM loops to delay before applying the curvature penalty</string>
-              </property>
-              <property name="statusTip">
-               <string>Number of EM loops to delay before applying the curvature penalty</string>
-              </property>
-              <property name="minimum">
+            <item>
+             <layout class="QHBoxLayout" name="horizontalLayout_10">
+              <property name="bottomMargin">
                <number>0</number>
               </property>
-              <property name="value">
-               <number>1</number>
-              </property>
-             </widget>
+              <item>
+               <widget class="QCheckBox" name="useSimulatedAnnealing">
+                <property name="styleSheet">
+                 <string notr="true">QCheckBox {
+font-weight: bold;
+font-size: 10px;
+}</string>
+                </property>
+                <property name="text">
+                 <string>Use Simulated Annealing</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
             </item>
-            <item row="7" column="0">
-             <widget class="QCheckBox" name="enableUserDefinedAreas">
-              <property name="minimumSize">
-               <size>
-                <width>0</width>
-                <height>26</height>
-               </size>
+            <item>
+             <layout class="QGridLayout" name="gridLayout_11">
+              <property name="bottomMargin">
+               <number>0</number>
               </property>
-              <property name="toolTip">
-               <string>Predefine areas of the image to determine the initial mean and variance for each class.</string>
+              <property name="spacing">
+               <number>5</number>
               </property>
-              <property name="statusTip">
-               <string>Predefine areas of the image to determine the initial mean and variance for each class.</string>
-              </property>
-              <property name="text">
-               <string>User Initialization Areas</string>
-              </property>
-             </widget>
+              <item row="1" column="0" colspan="2">
+               <widget class="QCheckBox" name="useGradientPenalty">
+                <property name="toolTip">
+                 <string>Use the Gradient or Edge penalty function</string>
+                </property>
+                <property name="statusTip">
+                 <string>Use the Gradient or Edge penalty function</string>
+                </property>
+                <property name="styleSheet">
+                 <string notr="true">QCheckBox {
+font-weight: bold;
+font-size: 10px;
+}</string>
+                </property>
+                <property name="text">
+                 <string>Use Gradient Penalty</string>
+                </property>
+               </widget>
+              </item>
+              <item row="2" column="1">
+               <widget class="QDoubleSpinBox" name="gradientBetaE">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
+                <property name="minimumSize">
+                 <size>
+                  <width>50</width>
+                  <height>0</height>
+                 </size>
+                </property>
+                <property name="toolTip">
+                 <string>The weight of the Gradient or Edge cost</string>
+                </property>
+                <property name="statusTip">
+                 <string>The weight of the Gradient or Edge cost</string>
+                </property>
+                <property name="decimals">
+                 <number>4</number>
+                </property>
+                <property name="maximum">
+                 <double>9999.989999999999782</double>
+                </property>
+                <property name="value">
+                 <double>1.000000000000000</double>
+                </property>
+               </widget>
+              </item>
+              <item row="2" column="0">
+               <widget class="QLabel" name="betaELabel">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
+                <property name="toolTip">
+                 <string>The weight of the Gradient or Edge cost</string>
+                </property>
+                <property name="statusTip">
+                 <string>The weight of the Gradient or Edge cost</string>
+                </property>
+                <property name="styleSheet">
+                 <string notr="true">QLabel {
+font-weight: bold;
+font-size: 10px;
+}</string>
+                </property>
+                <property name="text">
+                 <string>Beta E</string>
+                </property>
+                <property name="alignment">
+                 <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+                </property>
+               </widget>
+              </item>
+             </layout>
             </item>
-            <item row="7" column="1">
-             <widget class="QToolButton" name="addUserInitArea">
-              <property name="enabled">
-               <bool>false</bool>
+            <item>
+             <layout class="QGridLayout" name="gridLayout_12">
+              <property name="bottomMargin">
+               <number>0</number>
               </property>
-              <property name="toolTip">
-               <string>User Initialization Lasso button. Click to start a new predefined area.</string>
+              <property name="spacing">
+               <number>5</number>
               </property>
-              <property name="statusTip">
-               <string>User Initialization Lasso button. Click to start a new predefined area.</string>
-              </property>
-              <property name="text">
-               <string/>
-              </property>
-              <property name="icon">
-               <iconset resource="../../../Resources/icons/images/Icons.qrc">
-                <normaloff>:/addUserInitArea.png</normaloff>:/addUserInitArea.png</iconset>
-              </property>
-              <property name="checkable">
-               <bool>true</bool>
-              </property>
-             </widget>
+              <item row="0" column="0" colspan="2">
+               <widget class="QCheckBox" name="useCurvaturePenalty">
+                <property name="font">
+                 <font>
+                  <pointsize>-1</pointsize>
+                  <weight>75</weight>
+                  <bold>true</bold>
+                 </font>
+                </property>
+                <property name="toolTip">
+                 <string>Use a Curvature Penalty function</string>
+                </property>
+                <property name="statusTip">
+                 <string>Use a Curvature Penalty function</string>
+                </property>
+                <property name="styleSheet">
+                 <string notr="true">QCheckBox {
+font-weight: bold;
+font-size: 10px;
+}</string>
+                </property>
+                <property name="text">
+                 <string>Use Curvature Penalty</string>
+                </property>
+               </widget>
+              </item>
+              <item row="1" column="0">
+               <widget class="QLabel" name="label_21">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
+                <property name="toolTip">
+                 <string>The weight of the curvature Penalty</string>
+                </property>
+                <property name="statusTip">
+                 <string>The weight of the curvature Penalty</string>
+                </property>
+                <property name="styleSheet">
+                 <string notr="true">QLabel {
+font-weight: bold;
+font-size: 10px;
+}</string>
+                </property>
+                <property name="text">
+                 <string>Beta C</string>
+                </property>
+                <property name="alignment">
+                 <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+                </property>
+               </widget>
+              </item>
+              <item row="1" column="1">
+               <widget class="QDoubleSpinBox" name="curvatureBetaC">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
+                <property name="minimumSize">
+                 <size>
+                  <width>50</width>
+                  <height>0</height>
+                 </size>
+                </property>
+                <property name="toolTip">
+                 <string>The weight of the curvature Penalty</string>
+                </property>
+                <property name="statusTip">
+                 <string>The weight of the curvature Penalty</string>
+                </property>
+                <property name="decimals">
+                 <number>4</number>
+                </property>
+                <property name="maximum">
+                 <double>9999.989999999999782</double>
+                </property>
+                <property name="value">
+                 <double>1.000000000000000</double>
+                </property>
+               </widget>
+              </item>
+              <item row="2" column="0">
+               <widget class="QLabel" name="label_22">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
+                <property name="toolTip">
+                 <string>The maximum radius to use for the curvature morphological filter</string>
+                </property>
+                <property name="statusTip">
+                 <string>The maximum radius to use for the curvature morphological filter</string>
+                </property>
+                <property name="styleSheet">
+                 <string notr="true">QLabel {
+font-weight: bold;
+font-size: 10px;
+}</string>
+                </property>
+                <property name="text">
+                 <string>R Max</string>
+                </property>
+                <property name="alignment">
+                 <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+                </property>
+               </widget>
+              </item>
+              <item row="2" column="1">
+               <widget class="QDoubleSpinBox" name="curvatureRMax">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
+                <property name="minimumSize">
+                 <size>
+                  <width>50</width>
+                  <height>0</height>
+                 </size>
+                </property>
+                <property name="toolTip">
+                 <string>The maximum radius to use for the curvature morphological filter</string>
+                </property>
+                <property name="statusTip">
+                 <string>The maximum radius to use for the curvature morphological filter</string>
+                </property>
+                <property name="correctionMode">
+                 <enum>QAbstractSpinBox::CorrectToPreviousValue</enum>
+                </property>
+                <property name="decimals">
+                 <number>4</number>
+                </property>
+                <property name="value">
+                 <double>15.000000000000000</double>
+                </property>
+               </widget>
+              </item>
+              <item row="3" column="0">
+               <widget class="QLabel" name="label_23">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
+                <property name="toolTip">
+                 <string>Number of EM loops to delay before applying the curvature penalty</string>
+                </property>
+                <property name="statusTip">
+                 <string>Number of EM loops to delay before applying the curvature penalty</string>
+                </property>
+                <property name="styleSheet">
+                 <string notr="true">QLabel {
+font-weight: bold;
+font-size: 10px;
+}</string>
+                </property>
+                <property name="text">
+                 <string>EM Loop Delay</string>
+                </property>
+                <property name="alignment">
+                 <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+                </property>
+               </widget>
+              </item>
+              <item row="3" column="1">
+               <widget class="QSpinBox" name="ccostLoopDelay">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
+                <property name="minimumSize">
+                 <size>
+                  <width>50</width>
+                  <height>0</height>
+                 </size>
+                </property>
+                <property name="toolTip">
+                 <string>Number of EM loops to delay before applying the curvature penalty</string>
+                </property>
+                <property name="statusTip">
+                 <string>Number of EM loops to delay before applying the curvature penalty</string>
+                </property>
+                <property name="minimum">
+                 <number>0</number>
+                </property>
+                <property name="value">
+                 <number>1</number>
+                </property>
+               </widget>
+              </item>
+             </layout>
             </item>
-            <item row="8" column="0">
-             <widget class="QLabel" name="label_24">
-              <property name="text">
-               <string>Memory Installed:</string>
+            <item>
+             <layout class="QGridLayout" name="gridLayout_14">
+              <property name="bottomMargin">
+               <number>0</number>
               </property>
-             </widget>
+              <item row="0" column="0" colspan="2">
+               <widget class="QCheckBox" name="useStoppingCriteria">
+                <property name="styleSheet">
+                 <string notr="true">QCheckBox {
+font-weight: bold;
+font-size: 10px;
+}</string>
+                </property>
+                <property name="text">
+                 <string>Use Histogram Stopping Criterion</string>
+                </property>
+               </widget>
+              </item>
+              <item row="1" column="0">
+               <widget class="QLabel" name="m_StoppingThresholdLabel">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
+                <property name="styleSheet">
+                 <string notr="true">QLabel {
+font-weight: bold;
+font-size: 10px;
+}</string>
+                </property>
+                <property name="text">
+                 <string>Threshold</string>
+                </property>
+                <property name="alignment">
+                 <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+                </property>
+               </widget>
+              </item>
+              <item row="1" column="1">
+               <widget class="QLineEdit" name="m_StoppingThreshold">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
+                <property name="toolTip">
+                 <string>Enter a value for the stopping criteria. When the calculated MSE is less than this value the segmentation will end</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
             </item>
-            <item row="8" column="1">
-             <widget class="QLabel" name="memoryInstalled">
-              <property name="text">
-               <string>0</string>
+            <item>
+             <layout class="QHBoxLayout" name="horizontalLayout_9">
+              <property name="bottomMargin">
+               <number>0</number>
               </property>
-             </widget>
+              <item>
+               <widget class="QCheckBox" name="enableUserDefinedAreas">
+                <property name="minimumSize">
+                 <size>
+                  <width>0</width>
+                  <height>26</height>
+                 </size>
+                </property>
+                <property name="toolTip">
+                 <string>Predefine areas of the image to determine the initial mean and variance for each class.</string>
+                </property>
+                <property name="statusTip">
+                 <string>Predefine areas of the image to determine the initial mean and variance for each class.</string>
+                </property>
+                <property name="styleSheet">
+                 <string notr="true">QCheckBox {
+font-weight: bold;
+font-size: 10px;
+}</string>
+                </property>
+                <property name="text">
+                 <string>User Initialization Areas</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QCheckBox" name="showUserDefinedAreas">
+                <property name="styleSheet">
+                 <string notr="true">QCheckBox {
+font-weight: bold;
+font-size: 10px;
+}</string>
+                </property>
+                <property name="text">
+                 <string>Show Regions</string>
+                </property>
+                <property name="checked">
+                 <bool>true</bool>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QToolButton" name="addUserInitArea">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
+                <property name="toolTip">
+                 <string>User Initialization Lasso button. Click to start a new predefined area.</string>
+                </property>
+                <property name="statusTip">
+                 <string>User Initialization Lasso button. Click to start a new predefined area.</string>
+                </property>
+                <property name="text">
+                 <string/>
+                </property>
+                <property name="icon">
+                 <iconset resource="../../../Resources/icons/images/Icons.qrc">
+                  <normaloff>:/addUserInitArea.png</normaloff>:/addUserInitArea.png</iconset>
+                </property>
+                <property name="checkable">
+                 <bool>true</bool>
+                </property>
+               </widget>
+              </item>
+             </layout>
             </item>
-            <item row="9" column="0">
-             <widget class="QLabel" name="label">
-              <property name="text">
-               <string>Estimated Memory Use:</string>
+            <item>
+             <layout class="QGridLayout" name="gridLayout_13">
+              <property name="bottomMargin">
+               <number>0</number>
               </property>
-             </widget>
-            </item>
-            <item row="9" column="1">
-             <widget class="QLabel" name="estimatedMemory">
-              <property name="text">
-               <string>0</string>
-              </property>
-             </widget>
+              <item row="0" column="0">
+               <widget class="QLabel" name="label_24">
+                <property name="styleSheet">
+                 <string notr="true">QLabel {
+font-weight: bold;
+font-size: 10px;
+}</string>
+                </property>
+                <property name="text">
+                 <string>Memory Installed:</string>
+                </property>
+               </widget>
+              </item>
+              <item row="0" column="1">
+               <widget class="QLabel" name="memoryInstalled">
+                <property name="styleSheet">
+                 <string notr="true">QLabel {
+font-weight: bold;
+font-size: 10px;
+}</string>
+                </property>
+                <property name="text">
+                 <string>0</string>
+                </property>
+               </widget>
+              </item>
+              <item row="1" column="0">
+               <widget class="QLabel" name="label">
+                <property name="styleSheet">
+                 <string notr="true">QLabel {
+font-weight: bold;
+font-size: 10px;
+}</string>
+                </property>
+                <property name="text">
+                 <string>Estimated Memory Use:</string>
+                </property>
+               </widget>
+              </item>
+              <item row="1" column="1">
+               <widget class="QLabel" name="estimatedMemory">
+                <property name="styleSheet">
+                 <string notr="true">QLabel {
+font-weight: bold;
+font-size: 10px;
+}</string>
+                </property>
+                <property name="text">
+                 <string>0</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
             </item>
            </layout>
           </widget>
          </item>
          <item>
           <spacer name="verticalSpacer">
+           <property name="orientation">
+            <enum>Qt::Vertical</enum>
+           </property>
+           <property name="sizeType">
+            <enum>QSizePolicy::Preferred</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>20</width>
+             <height>40</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+         <item>
+          <spacer name="verticalSpacer_2">
            <property name="orientation">
             <enum>Qt::Vertical</enum>
            </property>
@@ -2157,7 +2463,7 @@ image: url(:/bullet_triangle_grey_down.png);
   </widget>
   <widget class="QDockWidget" name="UserInitAreaDockWidget">
    <property name="sizePolicy">
-    <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+    <sizepolicy hsizetype="Preferred" vsizetype="Maximum">
      <horstretch>0</horstretch>
      <verstretch>0</verstretch>
     </sizepolicy>
@@ -2198,7 +2504,7 @@ image: url(:/bullet_triangle_grey_down.png);
   <widget class="QDockWidget" name="HistogramDockWidget">
    <property name="minimumSize">
     <size>
-     <width>108</width>
+     <width>110</width>
      <height>114</height>
     </size>
    </property>
@@ -2216,16 +2522,13 @@ image: url(:/bullet_triangle_grey_down.png);
    </attribute>
    <widget class="QWidget" name="dockWidgetContents_3">
     <layout class="QGridLayout" name="gridLayout_6">
-     <property name="horizontalSpacing">
-      <number>0</number>
-     </property>
-     <property name="verticalSpacing">
-      <number>4</number>
-     </property>
      <property name="margin">
       <number>4</number>
      </property>
-     <item row="0" column="0" colspan="4">
+     <property name="spacing">
+      <number>4</number>
+     </property>
+     <item row="0" column="0" colspan="5">
       <widget class="QwtPlot" name="m_HistogramPlot">
        <property name="sizePolicy">
         <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
@@ -2250,41 +2553,7 @@ image: url(:/bullet_triangle_grey_down.png);
        </property>
       </widget>
      </item>
-     <item row="1" column="0">
-      <widget class="QToolButton" name="axisSettingsBtn">
-       <property name="toolTip">
-        <string>Allows adjustment of the axis min and max values</string>
-       </property>
-       <property name="statusTip">
-        <string>Allows adjustment of the axis min and max values</string>
-       </property>
-       <property name="text">
-        <string>Plot Settings</string>
-       </property>
-       <property name="icon">
-        <iconset resource="../../../Resources/icons/images/Icons.qrc">
-         <normaloff>:/preferences.png</normaloff>:/preferences.png</iconset>
-       </property>
-      </widget>
-     </item>
-     <item row="1" column="1">
-      <widget class="QToolButton" name="clearTempHistograms">
-       <property name="toolTip">
-        <string>Removes Gaussian curves generated during the segmentation</string>
-       </property>
-       <property name="statusTip">
-        <string>Removes Gaussian curves generated during the segmentation</string>
-       </property>
-       <property name="text">
-        <string>Clear Curves</string>
-       </property>
-       <property name="icon">
-        <iconset resource="../../../Resources/icons/images/Icons.qrc">
-         <normaloff>:/reload.png</normaloff>:/reload.png</iconset>
-       </property>
-      </widget>
-     </item>
-     <item row="1" column="3">
+     <item row="1" column="4">
       <spacer name="horizontalSpacer_4">
        <property name="orientation">
         <enum>Qt::Horizontal</enum>
@@ -2297,22 +2566,284 @@ image: url(:/bullet_triangle_grey_down.png);
        </property>
       </spacer>
      </item>
-     <item row="1" column="2">
-      <widget class="QToolButton" name="saveCurves">
-       <property name="toolTip">
-        <string>Saves the Histogram and Gaussian Data to a CSV file</string>
+     <item row="1" column="1">
+      <widget class="QPushButton" name="axisSettingsBtn">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
        </property>
-       <property name="statusTip">
-        <string>Saves the Histogram and Gaussian Data to a CSV file</string>
+       <property name="minimumSize">
+        <size>
+         <width>24</width>
+         <height>24</height>
+        </size>
+       </property>
+       <property name="maximumSize">
+        <size>
+         <width>24</width>
+         <height>24</height>
+        </size>
+       </property>
+       <property name="toolTip">
+        <string>Show the Plot settings dialog</string>
        </property>
        <property name="text">
-        <string>Clear Curves</string>
+        <string/>
        </property>
        <property name="icon">
         <iconset resource="../../../Resources/icons/images/Icons.qrc">
-         <normaloff>:/disk.png</normaloff>:/disk.png</iconset>
+         <normaloff>:/gear.png</normaloff>:/gear.png</iconset>
+       </property>
+       <property name="iconSize">
+        <size>
+         <width>24</width>
+         <height>24</height>
+        </size>
+       </property>
+       <property name="flat">
+        <bool>true</bool>
        </property>
       </widget>
+     </item>
+     <item row="1" column="2">
+      <widget class="QPushButton" name="clearTempHistograms">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="minimumSize">
+        <size>
+         <width>24</width>
+         <height>24</height>
+        </size>
+       </property>
+       <property name="maximumSize">
+        <size>
+         <width>24</width>
+         <height>24</height>
+        </size>
+       </property>
+       <property name="toolTip">
+        <string>Remove plot curves from last segmentation run.</string>
+       </property>
+       <property name="text">
+        <string/>
+       </property>
+       <property name="icon">
+        <iconset resource="../../../Resources/icons/images/Icons.qrc">
+         <normaloff>:/refresh.png</normaloff>:/refresh.png</iconset>
+       </property>
+       <property name="iconSize">
+        <size>
+         <width>24</width>
+         <height>24</height>
+        </size>
+       </property>
+       <property name="flat">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item row="1" column="3">
+      <widget class="QPushButton" name="saveCurves">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="minimumSize">
+        <size>
+         <width>24</width>
+         <height>24</height>
+        </size>
+       </property>
+       <property name="maximumSize">
+        <size>
+         <width>24</width>
+         <height>24</height>
+        </size>
+       </property>
+       <property name="toolTip">
+        <string>Save plot data to a text file</string>
+       </property>
+       <property name="text">
+        <string/>
+       </property>
+       <property name="icon">
+        <iconset resource="../../../Resources/icons/images/Icons.qrc">
+         <normaloff>:/disk_blue.png</normaloff>:/disk_blue.png</iconset>
+       </property>
+       <property name="iconSize">
+        <size>
+         <width>24</width>
+         <height>24</height>
+        </size>
+       </property>
+       <property name="flat">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </widget>
+  </widget>
+  <widget class="QDockWidget" name="m_MSEDockWidget">
+   <property name="windowTitle">
+    <string>Mean Square Error</string>
+   </property>
+   <attribute name="dockWidgetArea">
+    <number>2</number>
+   </attribute>
+   <widget class="QWidget" name="dockWidgetContents_4">
+    <layout class="QGridLayout" name="gridLayout_10">
+     <property name="margin">
+      <number>5</number>
+     </property>
+     <property name="spacing">
+      <number>5</number>
+     </property>
+     <item row="0" column="0">
+      <widget class="QwtPlot" name="m_MSEPlot">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="minimumSize">
+        <size>
+         <width>100</width>
+         <height>50</height>
+        </size>
+       </property>
+       <property name="contextMenuPolicy">
+        <enum>Qt::CustomContextMenu</enum>
+       </property>
+       <property name="toolTip">
+        <string>Image Histogram and Mixture of Gaussians Plots</string>
+       </property>
+       <property name="statusTip">
+        <string>Image Histogram and Mixture of Gaussians Plots</string>
+       </property>
+       <property name="frameShape">
+        <enum>QFrame::NoFrame</enum>
+       </property>
+      </widget>
+     </item>
+     <item row="1" column="0">
+      <layout class="QHBoxLayout" name="horizontalLayout_3">
+       <property name="bottomMargin">
+        <number>0</number>
+       </property>
+       <item>
+        <widget class="QLabel" name="label_26">
+         <property name="styleSheet">
+          <string notr="true">QLabel {
+font-weight: bold;
+font-size: 10px;
+}</string>
+         </property>
+         <property name="text">
+          <string>X Min:</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QSpinBox" name="m_msePlotXMin">
+         <property name="toolTip">
+          <string>The minimum X Axis value</string>
+         </property>
+         <property name="maximum">
+          <number>1000</number>
+         </property>
+         <property name="value">
+          <number>0</number>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <spacer name="horizontalSpacer_10">
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>40</width>
+           <height>20</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+       <item>
+        <widget class="QPushButton" name="saveMSEDataBtn">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="minimumSize">
+          <size>
+           <width>24</width>
+           <height>24</height>
+          </size>
+         </property>
+         <property name="maximumSize">
+          <size>
+           <width>24</width>
+           <height>24</height>
+          </size>
+         </property>
+         <property name="toolTip">
+          <string>Save plot data to a text file</string>
+         </property>
+         <property name="text">
+          <string/>
+         </property>
+         <property name="icon">
+          <iconset resource="../../../Resources/icons/images/Icons.qrc">
+           <normaloff>:/disk_blue.png</normaloff>:/disk_blue.png</iconset>
+         </property>
+         <property name="iconSize">
+          <size>
+           <width>24</width>
+           <height>24</height>
+          </size>
+         </property>
+         <property name="flat">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLabel" name="label_27">
+         <property name="styleSheet">
+          <string notr="true">QLabel {
+font-weight: bold;
+font-size: 10px;
+}</string>
+         </property>
+         <property name="text">
+          <string>X Max:</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QSpinBox" name="m_msePlotXMax">
+         <property name="toolTip">
+          <string>The maximum X Axis value</string>
+         </property>
+         <property name="value">
+          <number>99</number>
+         </property>
+        </widget>
+       </item>
+      </layout>
      </item>
     </layout>
    </widget>
@@ -2386,12 +2917,18 @@ image: url(:/bullet_triangle_grey_down.png);
     <string>Load Configuration</string>
    </property>
   </action>
+  <action name="actionMSE_Plot">
+   <property name="text">
+    <string>MSE Plot</string>
+   </property>
+  </action>
  </widget>
  <customwidgets>
   <customwidget>
-   <class>QFSDropLineEdit</class>
-   <extends>QLineEdit</extends>
-   <header location="global">QFSDropLineEdit.h</header>
+   <class>UserInitAreaWidget</class>
+   <extends>QWidget</extends>
+   <header location="global">UserInitAreaWidget.h</header>
+   <container>1</container>
   </customwidget>
   <customwidget>
    <class>QwtPlot</class>
@@ -2400,21 +2937,20 @@ image: url(:/bullet_triangle_grey_down.png);
    <container>1</container>
   </customwidget>
   <customwidget>
-   <class>EMMPMGraphicsView</class>
-   <extends>QWidget</extends>
-   <header location="global">EMMPMGraphicsView.h</header>
-   <container>1</container>
-  </customwidget>
-  <customwidget>
-   <class>UserInitAreaWidget</class>
-   <extends>QWidget</extends>
-   <header location="global">UserInitAreaWidget.h</header>
-   <container>1</container>
+   <class>QFSDropLineEdit</class>
+   <extends>QLineEdit</extends>
+   <header location="global">QFSDropLineEdit.h</header>
   </customwidget>
   <customwidget>
    <class>QDisclosableGroupBox</class>
    <extends>QGroupBox</extends>
    <header location="global">QDisclosableGroupBox.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>EMMPMGraphicsView</class>
+   <extends>QWidget</extends>
+   <header location="global">EMMPMGraphicsView.h</header>
    <container>1</container>
   </customwidget>
   <customwidget>
@@ -2426,8 +2962,6 @@ image: url(:/bullet_triangle_grey_down.png);
  <tabstops>
   <tabstop>m_NumClasses</tabstop>
   <tabstop>m_EmIterations</tabstop>
-  <tabstop>m_MpmIterations</tabstop>
-  <tabstop>m_Beta</tabstop>
   <tabstop>inputImageFilePath</tabstop>
   <tabstop>inputImageFilePathBtn</tabstop>
   <tabstop>outputImageFile</tabstop>
@@ -2446,12 +2980,12 @@ image: url(:/bullet_triangle_grey_down.png);
    <slot>setEnabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>204</x>
-     <y>481</y>
+     <x>213</x>
+     <y>458</y>
     </hint>
     <hint type="destinationlabel">
-     <x>285</x>
-     <y>515</y>
+     <x>294</x>
+     <y>481</y>
     </hint>
    </hints>
   </connection>
@@ -2462,12 +2996,12 @@ image: url(:/bullet_triangle_grey_down.png);
    <slot>setEnabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>204</x>
-     <y>481</y>
+     <x>213</x>
+     <y>458</y>
     </hint>
     <hint type="destinationlabel">
-     <x>179</x>
-     <y>515</y>
+     <x>188</x>
+     <y>481</y>
     </hint>
    </hints>
   </connection>
@@ -2478,12 +3012,12 @@ image: url(:/bullet_triangle_grey_down.png);
    <slot>setEnabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>204</x>
-     <y>481</y>
+     <x>213</x>
+     <y>458</y>
     </hint>
     <hint type="destinationlabel">
-     <x>179</x>
-     <y>548</y>
+     <x>188</x>
+     <y>514</y>
     </hint>
    </hints>
   </connection>
@@ -2494,12 +3028,12 @@ image: url(:/bullet_triangle_grey_down.png);
    <slot>setEnabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>204</x>
-     <y>481</y>
+     <x>213</x>
+     <y>458</y>
     </hint>
     <hint type="destinationlabel">
-     <x>269</x>
-     <y>548</y>
+     <x>278</x>
+     <y>514</y>
     </hint>
    </hints>
   </connection>
@@ -2510,12 +3044,12 @@ image: url(:/bullet_triangle_grey_down.png);
    <slot>setEnabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>204</x>
-     <y>481</y>
+     <x>213</x>
+     <y>458</y>
     </hint>
     <hint type="destinationlabel">
-     <x>244</x>
-     <y>581</y>
+     <x>253</x>
+     <y>571</y>
     </hint>
    </hints>
   </connection>
@@ -2526,12 +3060,12 @@ image: url(:/bullet_triangle_grey_down.png);
    <slot>setEnabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>204</x>
-     <y>481</y>
+     <x>213</x>
+     <y>458</y>
     </hint>
     <hint type="destinationlabel">
-     <x>179</x>
-     <y>581</y>
+     <x>188</x>
+     <y>567</y>
     </hint>
    </hints>
   </connection>
@@ -2542,12 +3076,12 @@ image: url(:/bullet_triangle_grey_down.png);
    <slot>setEnabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>188</x>
-     <y>612</y>
+     <x>197</x>
+     <y>652</y>
     </hint>
     <hint type="destinationlabel">
-     <x>213</x>
-     <y>615</y>
+     <x>222</x>
+     <y>655</y>
     </hint>
    </hints>
   </connection>
@@ -2558,12 +3092,12 @@ image: url(:/bullet_triangle_grey_down.png);
    <slot>setDisabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>188</x>
-     <y>612</y>
+     <x>197</x>
+     <y>652</y>
     </hint>
     <hint type="destinationlabel">
-     <x>164</x>
-     <y>100</y>
+     <x>260</x>
+     <y>-108</y>
     </hint>
    </hints>
   </connection>
@@ -2574,12 +3108,12 @@ image: url(:/bullet_triangle_grey_down.png);
    <slot>setEnabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>204</x>
-     <y>424</y>
+     <x>213</x>
+     <y>405</y>
     </hint>
     <hint type="destinationlabel">
-     <x>179</x>
-     <y>458</y>
+     <x>188</x>
+     <y>428</y>
     </hint>
    </hints>
   </connection>
@@ -2590,12 +3124,44 @@ image: url(:/bullet_triangle_grey_down.png);
    <slot>setEnabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>204</x>
-     <y>424</y>
+     <x>213</x>
+     <y>405</y>
     </hint>
     <hint type="destinationlabel">
-     <x>285</x>
-     <y>458</y>
+     <x>294</x>
+     <y>428</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>useStoppingCriteria</sender>
+   <signal>clicked(bool)</signal>
+   <receiver>m_StoppingThreshold</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>225</x>
+     <y>587</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>228</x>
+     <y>605</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>useStoppingCriteria</sender>
+   <signal>clicked(bool)</signal>
+   <receiver>m_StoppingThresholdLabel</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>211</x>
+     <y>588</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>158</x>
+     <y>609</y>
     </hint>
    </hints>
   </connection>
