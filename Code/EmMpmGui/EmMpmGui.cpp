@@ -2013,24 +2013,24 @@ void EmMpmGui::generateGaussianData(int rows)
     }
     else if (m_ImageStatsReady == true)
     {
-        for(size_t i = 0; i < rows; ++i)
+        for(int i = 0; i < rows; ++i)
         {
             int classes = rows;
             if (classes % 2 == 0)
             {
-              for (size_t k = 0; k < classes / 2; k++) {
+              for (int k = 0; k < classes / 2; k++) {
                   mean[classes / 2 + k] = m_MeanOfImage + (k + 1) * m_SigmaOfImage / 2;
                   mean[classes / 2 - 1 - k] = m_MeanOfImage - (k + 1) * m_SigmaOfImage / 2;
               }
             } else  {
               mean[classes / 2] = m_MeanOfImage;
-              for (size_t k = 0; k < classes / 2; k++) {
+              for (int k = 0; k < classes / 2; k++) {
                 mean[classes / 2 + 1 + k] = m_MeanOfImage + (k + 1) * m_SigmaOfImage / 2;
                 mean[classes / 2 - 1 - k] = m_MeanOfImage - (k + 1) * m_SigmaOfImage / 2;
               }
             }
 
-            for (size_t l = 0; l < classes; l++) {
+            for (int l = 0; l < classes; l++) {
               variance[l] = 20.0;
             }
         }
@@ -2039,25 +2039,45 @@ void EmMpmGui::generateGaussianData(int rows)
     {
         QImage image = m_GraphicsView->getBaseImage();
         QSize imageSize = image.size();
+        int bytesPerLine = image.bytesPerLine();
+        int bitDepth = image.depth();
+        quint8* scanLine = NULL;
+        size_t elements = bitDepth/8;
+        size_t offsets[3];
+        if (bitDepth == 8) {offsets[0] = 0; offsets[1] = 0; offsets[2] = 0;}
+        if (bitDepth == 16) {offsets[0] = 0; offsets[1] = 1; offsets[2] = 0;}
+        if (bitDepth == 24) {offsets[0] = 0; offsets[1] = 1; offsets[2] = 2;}
+        if (bitDepth == 32) {offsets[0] = 0; offsets[1] = 1; offsets[2] = 2;}
 
+        quint8 r=0, g=0, b=0;
+        quint32 gray = 0;
         /* Initialization of parameter estimation */
-        QRgb* scanLine;
         m_MeanOfImage = 0;
         m_SigmaOfImage = 0;
         // Find the mean of the image
-        for (size_t r = 0; r < imageSize.height(); r++) {
-            scanLine = reinterpret_cast<QRgb*>(image.scanLine(r));
-            for (size_t c = 0; c < imageSize.width(); ++c) {
-                m_MeanOfImage += qGray(scanLine[c]);
+        for (int row = 0; row < imageSize.height(); row++)
+        {
+            scanLine = reinterpret_cast<quint8*>(image.scanLine(row));
+            for (size_t c = 0; c < imageSize.width(); ++c) 
+            {
+              r = scanLine[c*elements + offsets[0]];
+              g = scanLine[c*elements + offsets[1]];
+              b = scanLine[c*elements + offsets[2]];
+              m_MeanOfImage += qGray(r, g, b);  
             }
         }
         m_MeanOfImage /= (imageSize.height() * imageSize.width());
-        for (size_t r = 0; r < imageSize.height(); r++) {
-            scanLine = reinterpret_cast<QRgb*>(image.scanLine(r));
+        for (int row = 0; row < imageSize.height(); row++) {
+            scanLine = reinterpret_cast<quint8*>(image.scanLine(row));
             for (size_t c = 0; c < imageSize.width(); ++c) {
-                m_SigmaOfImage += (qGray(scanLine[c]) - m_MeanOfImage) * (qGray(scanLine[c]) - m_MeanOfImage);
+              r = scanLine[c*elements + offsets[0]];
+              g = scanLine[c*elements + offsets[1]];
+              b = scanLine[c*elements + offsets[2]];
+              gray= qGray(r, g, b);  
+              m_SigmaOfImage += (gray - m_MeanOfImage) * (gray - m_MeanOfImage);
             }
         }
+
 
         m_SigmaOfImage /= (imageSize.height() * imageSize.width());
         m_SigmaOfImage = sqrt((real_t)m_SigmaOfImage);
@@ -2065,19 +2085,19 @@ void EmMpmGui::generateGaussianData(int rows)
         int classes = rows;
         if (classes % 2 == 0)
         {
-          for (size_t k = 0; k < classes / 2; k++) {
+          for (int k = 0; k < classes / 2; k++) {
               mean[classes / 2 + k] = m_MeanOfImage + (k + 1) * m_SigmaOfImage / 2;
               mean[classes / 2 - 1 - k] = m_MeanOfImage - (k + 1) * m_SigmaOfImage / 2;
           }
         } else  {
           mean[classes / 2] = m_MeanOfImage;
-          for (size_t k = 0; k < classes / 2; k++) {
+          for (int k = 0; k < classes / 2; k++) {
             mean[classes / 2 + 1 + k] = m_MeanOfImage + (k + 1) * m_SigmaOfImage / 2;
             mean[classes / 2 - 1 - k] = m_MeanOfImage - (k + 1) * m_SigmaOfImage / 2;
           }
         }
 
-        for (size_t l = 0; l < classes; l++) {
+        for (int l = 0; l < classes; l++) {
           variance[l] = 20.0;
         }
     }
@@ -2732,7 +2752,7 @@ void EmMpmGui::on_saveMSEDataBtn_clicked()
         QMessageBox::critical(this, tr("MSE Value Save Error"), tr("The selected output file could not be opened for writing."), QMessageBox::Ok);
         return;
     }
-    double d;
+  //  double d;
     char comma[2] = {',', 0};
 
     // Write the header to the file
