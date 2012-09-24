@@ -368,8 +368,6 @@ class EmMpmGui : public QMainWindow, private Ui::EmMpmGui
     QList<QWidget*> m_ImageWidgets;
     QList<QWidget*> m_ProcessFolderWidgets;
 
-  //  LayersDockWidget*  m_LayersPalette;
-
     QVector<int>     m_StartingMuValues;
 
     QVector<qreal>   m_MSEValues;

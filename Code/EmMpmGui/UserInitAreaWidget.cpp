@@ -109,7 +109,6 @@ void UserInitAreaWidget::setUserInitArea(UserInitArea* uia)
 
   m_Class->setText(QString::number(uia->getEmMpmClass()));
 
-  bool ok = false;
   m_Mu->setText(QString::number(uia->getMu()));
   m_Sigma->setText(QString::number(uia->getSigma()));
 

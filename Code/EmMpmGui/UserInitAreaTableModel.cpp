@@ -148,8 +148,8 @@ QVariant UserInitAreaTableModel::data(const QModelIndex &index, qint32 role) con
     {
       return QVariant();
     }
-    QPoint p = uia->pos().toPoint();
-    QRect b = uia->boundingRect().toAlignedRect();
+//    QPoint p = uia->pos().toPoint();
+//    QRect b = uia->boundingRect().toAlignedRect();
     QString s;
     unsigned int x, y;
 
@@ -272,10 +272,10 @@ bool UserInitAreaTableModel::insertRows(int row, int count, const QModelIndex& i
 {
   if (true) return false;
 
-  // This is basically disabled at this point
-  qint32 binNum = 0;
-  double avg = 1.0;
-  double stdDev = 0.25;
+// This is basically disabled at this point
+//  qint32 binNum = 0;
+//  double avg = 1.0;
+//  double stdDev = 0.25;
   QString c("blue");
 
   beginInsertRows(QModelIndex(), row, row + count - 1);

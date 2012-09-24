@@ -213,10 +213,10 @@ bool ManualInitTableModel::setData(const QModelIndex & index, const QVariant & v
 bool ManualInitTableModel::insertRows(int row, int count, const QModelIndex& index)
 {
   // This is basically disabled at this point
-  qint32 binNum = 0;
+  //  qint32 binNum = 0;
   double mu = 128.0;
   double sigma = 20.0;
-  double gamma = 0.0;
+  //  double gamma = 0.0;
 
 
   beginInsertRows(QModelIndex(), row, row + count - 1);

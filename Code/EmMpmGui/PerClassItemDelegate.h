@@ -170,7 +170,6 @@ class PerClassItemDelegate : public QStyledItemDelegate
     // -----------------------------------------------------------------------------
     void setEditorData(QWidget *editor, const QModelIndex &index) const
     {
-      bool ok = false;
       qint32 col = index.column();
 
       if (col == PerClassTableModel::Gamma ||

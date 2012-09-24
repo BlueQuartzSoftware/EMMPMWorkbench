@@ -502,7 +502,7 @@ void EMMPMGraphicsView::setOverlayImage(QImage image)
   m_OriginalColorTable = m_OverlayImage.colorTable();
 
 // Convert to an Pre multiplied Image for faster rendering
-  m_OverlayImage.convertToFormat(QImage::Format_ARGB32_Premultiplied);
+  m_OverlayImage = m_OverlayImage.convertToFormat(QImage::Format_ARGB32_Premultiplied);
 
   QGraphicsScene* gScene = scene();
   if (gScene == NULL)
@@ -628,7 +628,12 @@ void EMMPMGraphicsView::createNewUserInitArea(const QPolygonF &polygon)
   double mu = 0.0;
   double sig = 0.0;
   int err = calculateMuSigma(userInitArea, mu, sig);
-  userInitArea->setMu(mu);
+    if (err < 0)
+    {
+        delete userInitArea;
+        return;
+    }
+    userInitArea->setMu(mu);
   userInitArea->setSigma(sig);
 
   // Show a dialog to let the user set the values
@@ -773,7 +778,7 @@ int EMMPMGraphicsView::calculateMuSigma(UserInitArea* uia, double &mu, double &s
   QPoint lowRight(b.x() + p.x() + b.width(), b.y() + p.y() + b.height());
 
   QImage image = getBaseImage();
-  qint32 height = image.height();
+ // qint32 height = image.height();
   qint32 width = image.width();
   QRgb rgbPixel;
   int gray;

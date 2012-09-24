@@ -159,6 +159,12 @@
 // -----------------------------------------------------------------------------
 EmMpmGui::EmMpmGui(QWidget *parent) :
 QMainWindow(parent),
+m_CurrentImageFile(""),
+m_CurrentProcessedFile(""),
+m_OutputExistsCheck(false),
+m_QueueController(NULL),
+m_OpenDialogLastDirectory(""),
+m_InputOutputFilePairList(),
 m_zoomer(NULL),
 m_picker(NULL),
 m_panner(NULL),
@@ -166,8 +172,6 @@ m_grid(NULL),
 m_histogram(NULL),
 m_CombinedGaussianCurve(NULL),
 m_ShowCombinedGaussians(false),
-m_OutputExistsCheck(false),
-m_QueueController(NULL),
 m_MSEPlotCurve(NULL),
 m_MeanOfImage(0.0),
 m_SigmaOfImage(0.0),
@@ -402,6 +406,11 @@ void EmMpmGui::readSettings(QSettings &prefs)
       double mu = 0.0;
       double sig = 0.0;
       int err = m_GraphicsView->calculateMuSigma(uia, mu, sig);
+      if (err < 0)
+      {
+        delete uia;
+        continue;
+      }
       uia->setMu(mu);
       uia->setSigma(sig);
       addUserInitArea->toggle();
@@ -1227,8 +1236,6 @@ EMMPMTask* EmMpmGui::newEmMpmTask( ProcessQueueController* queueController)
     if (NULL == model) { return NULL; }
     bool ok = false;
     int rows = model->rowCount();
-    int gv = 0;
-
 
     for(int i = 0; i < rows; ++i)
     {
@@ -2081,7 +2088,7 @@ void EmMpmGui::generateGaussianData(int rows)
     {
         QImage image = m_GraphicsView->getBaseImage();
         QSize imageSize = image.size();
-        int bytesPerLine = image.bytesPerLine();
+      //  int bytesPerLine = image.bytesPerLine();
         int bitDepth = image.depth();
         quint8* scanLine = NULL;
         size_t elements = bitDepth/8;
@@ -2637,6 +2644,10 @@ void EmMpmGui::userInitAreaUpdated(UserInitArea* uia)
   double mu = 0.0;
   double sig = 0.0;
   int err = m_GraphicsView->calculateMuSigma(uia, mu, sig);
+  if (err < 0)
+  {
+    return;
+  }
   uia->setMu(mu);
   uia->setSigma(sig);
 
@@ -2783,8 +2794,7 @@ void EmMpmGui::on_saveMSEDataBtn_clicked()
     // Update the last directory the user visited
     QFileInfo fi(outputFile);
     setOpenDialogLastDirectory(fi.absolutePath());
-
-    QwtPlotCurve* curve = NULL;
+  
     int count = m_MSEValues.size();
 
     // We now have a table of data, lets write it to a file
@@ -2794,8 +2804,6 @@ void EmMpmGui::on_saveMSEDataBtn_clicked()
         QMessageBox::critical(this, tr("MSE Value Save Error"), tr("The selected output file could not be opened for writing."), QMessageBox::Ok);
         return;
     }
-  //  double d;
-    char comma[2] = {',', 0};
 
     // Write the header to the file
     fprintf(f, "EMLoop,MSEValue\n");
@@ -3101,7 +3109,6 @@ QStringList EmMpmGui::generateInputFileList()
 void EmMpmGui::updateHistogramAxis()
 {
   double min, max;
-  bool ok = false;
   min = m_AxisSettingsDialog->getYAxisMin();
   max = m_AxisSettingsDialog->getYAxisMax();
 

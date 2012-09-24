@@ -83,8 +83,6 @@ class ManualInitDataItemDelegate : public QStyledItemDelegate
     {
       QLineEdit* editor = NULL;
       QDoubleValidator* dValidator = NULL;
-      QIntValidator* iValidator = NULL;
-      QComboBox* colorCombo = NULL;
 
       qint32 col = index.column();
       switch(col)
@@ -115,7 +113,6 @@ class ManualInitDataItemDelegate : public QStyledItemDelegate
     // -----------------------------------------------------------------------------
     void setEditorData(QWidget *editor, const QModelIndex &index) const
     {
-      bool ok = false;
       qint32 col = index.column();
       if (col == ManualInitTableModel::Mu ||
           col == ManualInitTableModel::Sigma)

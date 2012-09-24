@@ -595,7 +595,7 @@ void UserInitArea::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
 void UserInitArea::hoverMoveEvent(QGraphicsSceneHoverEvent *event)
 {
   UserInitArea::CTRL_POINTS pt = isInResizeArea(event->pos());
-  if (m_isResizing || pt != UserInitArea::NO_CTRL_POINT && isSelected() )
+  if (m_isResizing || (pt != UserInitArea::NO_CTRL_POINT && isSelected()) )
   {
 
     if (pt == UPPER_LEFT_CTRL_POINT || pt == LOWER_RIGHT_CTRL_POINT)
