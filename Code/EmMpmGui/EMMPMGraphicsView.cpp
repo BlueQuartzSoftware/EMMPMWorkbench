@@ -502,7 +502,7 @@ void EMMPMGraphicsView::setOverlayImage(QImage image)
   m_OriginalColorTable = m_OverlayImage.colorTable();
 
 // Convert to an Pre multiplied Image for faster rendering
-  m_OverlayImage = m_OverlayImage.convertToFormat(QImage::Format_ARGB32_Premultiplied);
+//  m_OverlayImage = m_OverlayImage.convertToFormat(QImage::Format_ARGB32_Premultiplied);
 
   QGraphicsScene* gScene = scene();
   if (gScene == NULL)
