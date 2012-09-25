@@ -418,8 +418,7 @@ void EmMpmGui::readSettings(QSettings &prefs)
     }
   }
 
-    updateGaussianCurves();
-
+    updateGaussianCurves(true);
 }
 
 // -----------------------------------------------------------------------------
@@ -589,7 +588,18 @@ void EmMpmGui::on_actionLoad_Config_File_triggered()
   readSettings(prefs);
 }
 
-
+// -----------------------------------------------------------------------------
+//
+// -----------------------------------------------------------------------------
+void EmMpmGui::on_action_ResetPreferences_triggered()
+{
+  #if defined (Q_OS_MAC)
+  QSettings prefs(QSettings::NativeFormat, QSettings::UserScope, "bluequartz.net", "EmMpmGui");
+#else
+  QSettings prefs(QSettings::IniFormat, QSettings::UserScope, "bluequartz.net", "EmMpmGui");
+#endif
+  prefs.clear();
+}
 
 // -----------------------------------------------------------------------------
 //
@@ -1353,8 +1363,7 @@ void EmMpmGui::queueControllerFinished()
 {
   if (this->processFolder->isChecked() == false)
   {
-    setWindowTitle(inputImageFilePath->text());
-//    setCurrentImageFile (inputImageFilePath->text());
+    setCurrentImageFile (inputImageFilePath->text());
 //    setCurrentProcessedFile(outputImageFile->text());
 //    m_GraphicsView->loadOverlayImageFile(outputImageFile->text());
    // imageDisplaySelection->setCurrentIndex(2);
@@ -2004,7 +2013,7 @@ void EmMpmGui::addRemoveManualInitTableRows()
 // -----------------------------------------------------------------------------
 void EmMpmGui::manualInitDataChanged ( const QModelIndex& topLeft, const QModelIndex& bottomRight )
 {
-  updateGaussianCurves();
+    updateGaussianCurves(true);
 }
 
 // -----------------------------------------------------------------------------
@@ -2015,7 +2024,7 @@ void EmMpmGui::perClassItemDataChanged ( const QModelIndex& topLeft, const QMode
     // THis will update all the curves with the proper data and color except if the user
     // is creating User Area Initializations at which point we really only care about
     // updating the color of the UserInitArea
-    updateGaussianCurves();
+    updateGaussianCurves(false);
 }
 
 // -----------------------------------------------------------------------------
@@ -2152,7 +2161,7 @@ void EmMpmGui::generateGaussianData(int rows)
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
-void EmMpmGui::updateGaussianCurves()
+void EmMpmGui::updateGaussianCurves(bool generateNewGaussianData)
 {
   if (NULL == m_histogram) { return; }
 
@@ -2198,19 +2207,21 @@ void EmMpmGui::updateGaussianCurves()
     }
   }
 
-  // Generate the Gaussian Data
-  generateGaussianData(rows);
-
-  m_GraphicsView->updateColorTables(colorTable);
-  m_GraphicsView->useCustomColorTable(true);
- // m_GraphicsView->updateDisplay();
-  updateDisplayState();
-
-  //Update the combine Gaussian Curve
-  plotCombinedGaussian();
-
+  if (generateNewGaussianData == true)
+  {
+    // Generate the Gaussian Data
+    generateGaussianData(rows);
+    //Update the combine Gaussian Curve
+    plotCombinedGaussian();
+  }
   // Update the plot
   m_HistogramPlot->replot();
+
+
+  // Update the colors of the segmented Image
+  m_GraphicsView->updateColorTables(colorTable);
+  m_GraphicsView->useCustomColorTable(true);
+  updateDisplayState();
 }
 
 // -----------------------------------------------------------------------------
@@ -2335,7 +2346,8 @@ void EmMpmGui::on_m_NumClasses_valueChanged(int i)
   estimateMemoryUse(size);
   addRemovePerClassTableRows();
   addRemoveManualInitTableRows();
-  updateGaussianCurves();
+  updateGaussianCurves(true); // We are adding another class or removing a class, the
+                              // gaussian data needs to be regenerated
 }
 
 // -----------------------------------------------------------------------------
@@ -2363,7 +2375,7 @@ void EmMpmGui::on_colorTablePresets_currentIndexChanged(int i)
     colorModel->setData(colorIndex, c.name()); // That will cause the 'dataChanged()' signal to be emitted
   }
   m_GraphicsView->useCustomColorTable(true);
-  updateGaussianCurves();
+  updateGaussianCurves(false); // We are just updating colors, do NOT update the gaussian curves
 }
 
 // -----------------------------------------------------------------------------
@@ -2782,7 +2794,7 @@ void EmMpmGui::on_saveMSEDataBtn_clicked()
     // Update the last directory the user visited
     QFileInfo fi(outputFile);
     setOpenDialogLastDirectory(fi.absolutePath());
-  
+
     int count = m_MSEValues.size();
 
     // We now have a table of data, lets write it to a file
@@ -2910,10 +2922,9 @@ void EmMpmGui::updateMSEValue(qreal value)
     refreshMSEPlot();
 #endif
 
-    m_msePlotXMax->setMaximum(m_MSEValues.size()-1);
-    m_msePlotXMax->setValue(m_MSEValues.size()-1);
-
-    m_msePlotXMin->setMaximum(m_MSEValues.size());
+    m_msePlotXMax->setMaximum(m_MSEValues.size());
+    m_msePlotXMin->setMaximum(m_MSEValues.size()-1);
+    m_msePlotXMax->setValue(m_MSEValues.size());
 }
 
 // -----------------------------------------------------------------------------
@@ -2924,7 +2935,7 @@ void EmMpmGui::refreshMSEPlot()
     int xmin = m_msePlotXMin->value();
     int xmax = m_msePlotXMax->value();
 
-    if (xmax >= m_MSEValues.size())
+    if (xmax > m_MSEValues.size())
     {
         return;
     }
@@ -2938,8 +2949,6 @@ void EmMpmGui::refreshMSEPlot()
             max = m_MSEValues[i];
         }
     }
-
-
 
     m_MSEPlot->setAxisScale(QwtPlot::xBottom, xmin, xmax);
     m_MSEPlot->setAxisScale(QwtPlot::yLeft, 0, max * 1.10);
@@ -3325,7 +3334,7 @@ void EmMpmGui::on_enableUserDefinedAreas_stateChanged(int state)
     m_UserInitAreaWidget->setUserInitArea(NULL);
     if(enableUserDefinedAreas->isChecked() == false )
     {
-        updateGaussianCurves();
+        updateGaussianCurves(true); // We need to generate the Gaussian curves for the User Init Area Mu/Sigma values
     }
     m_HistogramPlot->replot();
     if(enableUserDefinedAreas->isChecked() == true) {
@@ -3338,14 +3347,12 @@ void EmMpmGui::on_enableUserDefinedAreas_stateChanged(int state)
 // -----------------------------------------------------------------------------
 void EmMpmGui::on_enableManualInit_stateChanged(int state)
 {
- // m_LayersPalette->getUseColorTable()->setEnabled(enableManualInit->isChecked());
- // m_LayersPalette->getUseColorTable()->setChecked(enableManualInit->isChecked());
-
   if (enableManualInit->isChecked() == true)
   {
     enableUserDefinedAreas->setChecked(!enableManualInit->isChecked());
   }
-  updateGaussianCurves();
+  // The user is enabling or disabling the manual init table so we need to regenerate the gaussian data
+  updateGaussianCurves(true);
 }
 
 // -----------------------------------------------------------------------------

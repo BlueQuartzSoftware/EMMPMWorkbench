@@ -45,7 +45,7 @@ int main(int argc, char **argv)
   app.setQuitOnLastWindowClosed( true );
 #endif //APPLE
 
-  #if defined (Q_OS_MAC)
+#if defined (Q_OS_MAC)
   QSettings prefs(QSettings::NativeFormat, QSettings::UserScope, "bluequartz.net", "EmMpmGui");
 #else
   QSettings prefs(QSettings::IniFormat, QSettings::UserScope, "bluequartz.net", "EmMpmGui");

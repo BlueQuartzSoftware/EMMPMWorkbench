@@ -166,7 +166,7 @@ class EmMpmGui : public QMainWindow, private Ui::EmMpmGui
      void addGaussianCurve(QVector<real_t> data);
      void plotCombinedGaussian();
      void plotImageHistogram();
-     void updateGaussianCurves();
+     void updateGaussianCurves(bool generateNewGaussianData);
      void generateGaussianData(int rows);
 
   // MSE Value update/Plots
@@ -186,6 +186,7 @@ class EmMpmGui : public QMainWindow, private Ui::EmMpmGui
     void on_actionExit_triggered();
     void on_actionSave_Config_File_triggered();
     void on_actionLoad_Config_File_triggered();
+    void on_action_ResetPreferences_triggered();
 
 //Window Menu
     void on_actionParameters_triggered();

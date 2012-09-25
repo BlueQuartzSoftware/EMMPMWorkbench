@@ -489,7 +489,6 @@ void EMMPMGraphicsView::loadOverlayImageFile(const QString &filename)
 // -----------------------------------------------------------------------------
 void EMMPMGraphicsView::setOverlayImage(QImage image)
 {
-  QImage::Format format = image.format();
   m_OverlayImage = image;
 
   QSize size = m_OverlayImage.size();
@@ -715,9 +714,9 @@ void EMMPMGraphicsView::updateColorTables( QVector<QRgb> colorTable)
   {
       m_CustomColorTable[index] = colorTable[index];
   }
-  if (m_OverlayImage.isNull() == false) {
+  QImage::Format format = m_OverlayImage.format();
+  if (m_OverlayImage.isNull() == false && format != QImage::Format_Indexed8) {
     m_OverlayImage = m_OverlayImage.convertToFormat(QImage::Format_Indexed8, colorTable);
- //   m_OverlayImage.save("OverlayImage.tif");
     updateDisplay();
   }
 }

@@ -967,6 +967,8 @@ font-size: 12px;
     <addaction name="actionSave_Config_File"/>
     <addaction name="actionLoad_Config_File"/>
     <addaction name="separator"/>
+    <addaction name="action_ResetPreferences"/>
+    <addaction name="separator"/>
    </widget>
    <widget class="QMenu" name="menuWindow">
     <property name="title">
@@ -2920,6 +2922,11 @@ font-size: 10px;
   <action name="actionMSE_Plot">
    <property name="text">
     <string>MSE Plot</string>
+   </property>
+  </action>
+  <action name="action_ResetPreferences">
+   <property name="text">
+    <string>Reset Preferences</string>
    </property>
   </action>
  </widget>
