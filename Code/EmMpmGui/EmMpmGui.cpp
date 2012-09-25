@@ -1351,26 +1351,13 @@ void EmMpmGui::processingMessage(QString str)
 // -----------------------------------------------------------------------------
 void EmMpmGui::queueControllerFinished()
 {
-
-#if 0
-  if (m_LayersPalette != NULL)
-  {
-    m_LayersPalette->getSegmentedImageCheckBox()->setEnabled(true);
-    m_LayersPalette->getOriginalImageCheckBox()->setChecked(true);
-    m_LayersPalette->getSegmentedImageCheckBox()->setChecked(false);
-    m_LayersPalette->getCompositeTypeComboBox()->setCurrentIndex(EmMpm_Constants::Alpha_Blend);
-    m_LayersPalette->getOpacitySlider()->setEnabled(true);
-    m_LayersPalette->getOpacitySpinBox()->setEnabled(true);
-    m_LayersPalette->getCompositeTypeComboBox()->setEnabled(true);
-  }
-#endif
-
   if (this->processFolder->isChecked() == false)
   {
-    setCurrentImageFile (inputImageFilePath->text());
-    setCurrentProcessedFile(outputImageFile->text());
-    m_GraphicsView->loadOverlayImageFile(outputImageFile->text());
-    imageDisplaySelection->setCurrentIndex(2);
+    setWindowTitle(inputImageFilePath->text());
+//    setCurrentImageFile (inputImageFilePath->text());
+//    setCurrentProcessedFile(outputImageFile->text());
+//    m_GraphicsView->loadOverlayImageFile(outputImageFile->text());
+   // imageDisplaySelection->setCurrentIndex(2);
   }
   else
   {
@@ -2029,7 +2016,6 @@ void EmMpmGui::perClassItemDataChanged ( const QModelIndex& topLeft, const QMode
     // is creating User Area Initializations at which point we really only care about
     // updating the color of the UserInitArea
     updateGaussianCurves();
-
 }
 
 // -----------------------------------------------------------------------------
@@ -2216,7 +2202,9 @@ void EmMpmGui::updateGaussianCurves()
   generateGaussianData(rows);
 
   m_GraphicsView->updateColorTables(colorTable);
-  m_GraphicsView->updateDisplay();
+  m_GraphicsView->useCustomColorTable(true);
+ // m_GraphicsView->updateDisplay();
+  updateDisplayState();
 
   //Update the combine Gaussian Curve
   plotCombinedGaussian();
@@ -3503,15 +3491,6 @@ void EmMpmGui::updateDisplayState()
 {
     float f = (float)opacitySlider->value()/100.0;
     m_GraphicsView->setOverlayTransparency(f);
-
-//    if (useColorTable->isEnabled() && useColorTable->isChecked())
-//    {
-//      m_GraphicsView->useCustomColorTable(true);
-//    }
-//    else
-//    {
-//      m_GraphicsView->useCustomColorTable(false);
-//    }
 
     bool ok = false;
     // Display only the original image only

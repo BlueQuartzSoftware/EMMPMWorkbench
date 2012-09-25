@@ -489,6 +489,7 @@ void EMMPMGraphicsView::loadOverlayImageFile(const QString &filename)
 // -----------------------------------------------------------------------------
 void EMMPMGraphicsView::setOverlayImage(QImage image)
 {
+  QImage::Format format = image.format();
   m_OverlayImage = image;
 
   QSize size = m_OverlayImage.size();
@@ -704,8 +705,6 @@ void EMMPMGraphicsView::addNewInitArea(UserInitArea* userInitArea)
 // -----------------------------------------------------------------------------
 void EMMPMGraphicsView::updateColorTables( QVector<QRgb> colorTable)
 {
-  // Write Gray Scale values for each entry from 0 to 255 to initialize the table
-  // to something. Also initialize the Gray Scale table to the same thing
   for (quint32 i = 0; i < 256; ++i)
   {
     m_CustomColorTable[i] = qRgb(i, i, i);
@@ -716,7 +715,11 @@ void EMMPMGraphicsView::updateColorTables( QVector<QRgb> colorTable)
   {
       m_CustomColorTable[index] = colorTable[index];
   }
-
+  if (m_OverlayImage.isNull() == false) {
+    m_OverlayImage = m_OverlayImage.convertToFormat(QImage::Format_Indexed8, colorTable);
+ //   m_OverlayImage.save("OverlayImage.tif");
+    updateDisplay();
+  }
 }
 
 
