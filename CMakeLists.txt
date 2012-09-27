@@ -173,7 +173,7 @@ include_directories(${PROJECT_BINARY_DIR}/QtSupport)
 
 # --------------------------------------------------------------------
 # Compile the Enhanced EM/MPM Qt Base GUI application
-add_subdirectory(${PROJECT_CODE_DIR}/EmMpmGui ${PROJECT_BINARY_DIR}/Applications/EmMpmGui)
+add_subdirectory(${PROJECT_CODE_DIR}/EmMpmWorkbench ${PROJECT_BINARY_DIR}/Applications/EmMpmWorkbench)
 
 
 # Include code to Package our Executables into a Zip or NSIS Installer

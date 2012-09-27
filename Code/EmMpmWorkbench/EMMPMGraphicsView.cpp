@@ -42,7 +42,7 @@
 #include <QtGui/QGraphicsPolygonItem>
 #include <QtGui/QImageReader>
 
-#include "EmMpmGui.h"
+#include "EmMpmWorkbench.h"
 #include "UserInitArea.h"
 //#include "UserInitAreaTableModel.h"
 #include "UserInitAreaDialog.h"
@@ -603,7 +603,7 @@ void EMMPMGraphicsView::mouseReleaseEvent(QMouseEvent *event)
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
-void EMMPMGraphicsView::setEmMpmGui(EmMpmGui* gui)
+void EMMPMGraphicsView::setEmMpmWorkbench(EmMpmWorkbench* gui)
 {
   m_MainGui = gui;
 }

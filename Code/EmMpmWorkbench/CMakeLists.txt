@@ -4,10 +4,10 @@
 #-- BSD License: http://www.opensource.org/licenses/bsd-license.html
 #-- This code was partly written under US Air Force Contract FA8650-07-D-5800
 #--////////////////////////////////////////////////////////////////////////////
-PROJECT( EmMpmGui )
+PROJECT( EmMpmWorkbench )
 cmake_minimum_required(VERSION 2.8.6)
 
-set (CMP_HEADER_DIR ${EmMpmGui_BINARY_DIR})
+set (CMP_HEADER_DIR ${EmMpmWorkbench_BINARY_DIR})
 set (CMP_VERSION_HEADER_FILE_NAME "EMMPMGuiVersion.h")
 set (CMP_VERSION_SOURCE_FILE_NAME "EMMPMGuiVersion.cpp")
 
@@ -88,108 +88,108 @@ ENDIF(WIN32)
 
 # Set some include directories
 include_directories( ${PROJECT_CODE_DIR} )
-include_directories( ${PROJECT_CODE_DIR}/EmMpmGui )
+include_directories( ${PROJECT_CODE_DIR}/EmMpmWorkbench )
 include_directories( ${PROJECT_CODE_DIR}/QtSupport )
 
-include_directories( ${EmMpmGui_BINARY_DIR} )
+include_directories( ${EmMpmWorkbench_BINARY_DIR} )
 
 
 # --------------------------------------------------------------------
 # Set up all the source codes
-SET( EmMpmGui_SRCS
-  ${EmMpmGui_SOURCE_DIR}/main.cpp
-  ${EmMpmGui_SOURCE_DIR}/EmMpmGui.cpp
-  ${EmMpmGui_SOURCE_DIR}/EMMPMGraphicsView.cpp
-  ${EmMpmGui_SOURCE_DIR}/UserInitArea.cpp
-  ${EmMpmGui_SOURCE_DIR}/UserInitAreaTableModel.cpp
-  ${EmMpmGui_SOURCE_DIR}/UserInitAreaDialog.cpp
-  ${EmMpmGui_SOURCE_DIR}/UserInitAreaWidget.cpp
-  ${EmMpmGui_SOURCE_DIR}/ManualInitTableModel.cpp
-  ${EmMpmGui_SOURCE_DIR}/ManualInitData.cpp
-  ${EmMpmGui_SOURCE_DIR}/AxisSettingsDialog.cpp
-#  ${EmMpmGui_SOURCE_DIR}/LayersDockWidget.cpp
-  ${EmMpmGui_SOURCE_DIR}/EMMPMTask.cpp
-  ${EmMpmGui_SOURCE_DIR}/ImageOpenDialog.cpp
-  ${EmMpmGui_SOURCE_DIR}/PerClassTableModel.cpp
+SET( EmMpmWorkbench_SRCS
+  ${EmMpmWorkbench_SOURCE_DIR}/main.cpp
+  ${EmMpmWorkbench_SOURCE_DIR}/EmMpmWorkbench.cpp
+  ${EmMpmWorkbench_SOURCE_DIR}/EMMPMGraphicsView.cpp
+  ${EmMpmWorkbench_SOURCE_DIR}/UserInitArea.cpp
+  ${EmMpmWorkbench_SOURCE_DIR}/UserInitAreaTableModel.cpp
+  ${EmMpmWorkbench_SOURCE_DIR}/UserInitAreaDialog.cpp
+  ${EmMpmWorkbench_SOURCE_DIR}/UserInitAreaWidget.cpp
+  ${EmMpmWorkbench_SOURCE_DIR}/ManualInitTableModel.cpp
+  ${EmMpmWorkbench_SOURCE_DIR}/ManualInitData.cpp
+  ${EmMpmWorkbench_SOURCE_DIR}/AxisSettingsDialog.cpp
+#  ${EmMpmWorkbench_SOURCE_DIR}/LayersDockWidget.cpp
+  ${EmMpmWorkbench_SOURCE_DIR}/EMMPMTask.cpp
+  ${EmMpmWorkbench_SOURCE_DIR}/ImageOpenDialog.cpp
+  ${EmMpmWorkbench_SOURCE_DIR}/PerClassTableModel.cpp
   ${PROJECT_CODE_DIR}/AIM/Common/AIMImage.cpp
-  ${EmMpmGui_SOURCE_DIR}/PerClassItemData.cpp
+  ${EmMpmWorkbench_SOURCE_DIR}/PerClassItemData.cpp
 )
 
 # another list, this time it includes all header files that should
 #  be treated with moc
-SET( EmMpmGui_MOC_HDRS
-  ${EmMpmGui_SOURCE_DIR}/EmMpmGui.h
-  ${EmMpmGui_SOURCE_DIR}/EMMPMGraphicsView.h
-  ${EmMpmGui_SOURCE_DIR}/UserInitArea.h
-  ${EmMpmGui_SOURCE_DIR}/UserInitAreaTableModel.h
-  ${EmMpmGui_SOURCE_DIR}/UserInitAreaDialog.h
-  ${EmMpmGui_SOURCE_DIR}/UserInitAreaWidget.h
-  ${EmMpmGui_SOURCE_DIR}/ManualInitTableModel.h
-  ${EmMpmGui_SOURCE_DIR}/ManualInitData.h
-  ${EmMpmGui_SOURCE_DIR}/ManualInitDataItemDelegate.h
-  ${EmMpmGui_SOURCE_DIR}/AxisSettingsDialog.h
-#  ${EmMpmGui_SOURCE_DIR}/LayersDockWidget.h
-  ${EmMpmGui_SOURCE_DIR}/UserInitAreaItemDelegate.h
-  ${EmMpmGui_SOURCE_DIR}/ImageOpenDialog.h
-  ${EmMpmGui_SOURCE_DIR}/EMMPMTask.h
-  ${EmMpmGui_SOURCE_DIR}/PerClassTableModel.h
-  ${EmMpmGui_SOURCE_DIR}/PerClassItemDelegate.h
-  ${EmMpmGui_SOURCE_DIR}/PerClassItemData.h
+SET( EmMpmWorkbench_MOC_HDRS
+  ${EmMpmWorkbench_SOURCE_DIR}/EmMpmWorkbench.h
+  ${EmMpmWorkbench_SOURCE_DIR}/EMMPMGraphicsView.h
+  ${EmMpmWorkbench_SOURCE_DIR}/UserInitArea.h
+  ${EmMpmWorkbench_SOURCE_DIR}/UserInitAreaTableModel.h
+  ${EmMpmWorkbench_SOURCE_DIR}/UserInitAreaDialog.h
+  ${EmMpmWorkbench_SOURCE_DIR}/UserInitAreaWidget.h
+  ${EmMpmWorkbench_SOURCE_DIR}/ManualInitTableModel.h
+  ${EmMpmWorkbench_SOURCE_DIR}/ManualInitData.h
+  ${EmMpmWorkbench_SOURCE_DIR}/ManualInitDataItemDelegate.h
+  ${EmMpmWorkbench_SOURCE_DIR}/AxisSettingsDialog.h
+#  ${EmMpmWorkbench_SOURCE_DIR}/LayersDockWidget.h
+  ${EmMpmWorkbench_SOURCE_DIR}/UserInitAreaItemDelegate.h
+  ${EmMpmWorkbench_SOURCE_DIR}/ImageOpenDialog.h
+  ${EmMpmWorkbench_SOURCE_DIR}/EMMPMTask.h
+  ${EmMpmWorkbench_SOURCE_DIR}/PerClassTableModel.h
+  ${EmMpmWorkbench_SOURCE_DIR}/PerClassItemDelegate.h
+  ${EmMpmWorkbench_SOURCE_DIR}/PerClassItemData.h
 )
-cmp_IDE_SOURCE_PROPERTIES(EmMpmGui "${EmMpmGui_MOC_HDRS}" "${EmMpmGui_SRCS}" "0")
+cmp_IDE_SOURCE_PROPERTIES(EmMpmWorkbench "${EmMpmWorkbench_MOC_HDRS}" "${EmMpmWorkbench_SRCS}" "0")
 
 
-SET (EmMpmGui_HDRS
-#    ${EmMpmGui_SOURCE_DIR}/histogram_item.h
+SET (EmMpmWorkbench_HDRS
+#    ${EmMpmWorkbench_SOURCE_DIR}/histogram_item.h
     ${PROJECT_CODE_DIR}/AIM/Common/AIMImage.h
 )
-cmp_IDE_SOURCE_PROPERTIES(EmMpmGui "${EmMpmGui_HDRS}" "${EmMpmGui_SRCS}" "0")
+cmp_IDE_SOURCE_PROPERTIES(EmMpmWorkbench "${EmMpmWorkbench_HDRS}" "${EmMpmWorkbench_SRCS}" "0")
 
 
 
 # The UI files (As generated by Qt Designer
-SET( EmMpmGui_UIS
- ${EmMpmGui_SOURCE_DIR}/UI_Files/EmMpmGui.ui
- ${EmMpmGui_SOURCE_DIR}/UI_Files/UserInitAreaDialog.ui
- ${EmMpmGui_SOURCE_DIR}/UI_Files/UserInitAreaWidget.ui
- ${EmMpmGui_SOURCE_DIR}/UI_Files/AxisSettingsDialog.ui
- ${EmMpmGui_SOURCE_DIR}/UI_Files/LayersDockWidget.ui
- ${EmMpmGui_SOURCE_DIR}/UI_Files/ImageOpenDialog.ui
+SET( EmMpmWorkbench_UIS
+ ${EmMpmWorkbench_SOURCE_DIR}/UI_Files/EmMpmWorkbench.ui
+ ${EmMpmWorkbench_SOURCE_DIR}/UI_Files/UserInitAreaDialog.ui
+ ${EmMpmWorkbench_SOURCE_DIR}/UI_Files/UserInitAreaWidget.ui
+ ${EmMpmWorkbench_SOURCE_DIR}/UI_Files/AxisSettingsDialog.ui
+ ${EmMpmWorkbench_SOURCE_DIR}/UI_Files/LayersDockWidget.ui
+ ${EmMpmWorkbench_SOURCE_DIR}/UI_Files/ImageOpenDialog.ui
 )
-cmp_IDE_SOURCE_PROPERTIES(EmMpmGui/UI_Files "${EmMpmGui_UIS}" "" "0")
+cmp_IDE_SOURCE_PROPERTIES(EmMpmWorkbench/UI_Files "${EmMpmWorkbench_UIS}" "" "0")
 
 # Organize the .qrc files that were generated from the various license files
-cmp_IDE_GENERATED_PROPERTIES(EmMpmGui/Generated/License "${QRC_LICENSE_FILES}" "" "0")
+cmp_IDE_GENERATED_PROPERTIES(EmMpmWorkbench/Generated/License "${QRC_LICENSE_FILES}" "" "0")
 
 # and finally any resource files
-SET( EmMpmGui_RCS
+SET( EmMpmWorkbench_RCS
  ${PROJECT_RESOURCES_DIR}/icons/images/Icons.qrc
 )
-cmp_IDE_SOURCE_PROPERTIES(EmMpmGui/QrcFiles "${EmMpmGui_RCS}" "" "0")
+cmp_IDE_SOURCE_PROPERTIES(EmMpmWorkbench/QrcFiles "${EmMpmWorkbench_RCS}" "" "0")
 
 # -- Run MOC and UIC on the necessary files
-QT4_ADD_RESOURCES( Generated_RC_SRCS ${EmMpmGui_RCS}  ${QRC_LICENSE_FILES})
+QT4_ADD_RESOURCES( Generated_RC_SRCS ${EmMpmWorkbench_RCS}  ${QRC_LICENSE_FILES})
 
 # this will run uic on .ui files:
-QT4_WRAP_UI( Generated_UI_HDRS ${EmMpmGui_UIS} )
+QT4_WRAP_UI( Generated_UI_HDRS ${EmMpmWorkbench_UIS} )
 
 # and finally this will run moc:
-QT4_WRAP_CPP( Generated_MOC_SRCS ${EmMpmGui_MOC_HDRS} )
+QT4_WRAP_CPP( Generated_MOC_SRCS ${EmMpmWorkbench_MOC_HDRS} )
 
 #-- Put the generated files into their own group for IDEs
-cmp_IDE_GENERATED_PROPERTIES(EmMpmGui/Generated "${Generated_UI_HDRS}" "${Generated_MOC_SRCS};${Generated_RC_SRCS}")
+cmp_IDE_GENERATED_PROPERTIES(EmMpmWorkbench/Generated "${Generated_UI_HDRS}" "${Generated_MOC_SRCS};${Generated_RC_SRCS}")
 
 set (Generated_Version_SRCS
     ${CMP_HEADER_DIR}/${CMP_VERSION_HEADER_FILE_NAME}
     ${CMP_HEADER_DIR}/${CMP_VERSION_SOURCE_FILE_NAME}
 )
-cmp_IDE_GENERATED_PROPERTIES(EmMpmGui/Generated "${Generated_Version_SRCS}" "")
+cmp_IDE_GENERATED_PROPERTIES(EmMpmWorkbench/Generated "${Generated_Version_SRCS}" "")
 
 # -- Finally set the Project Sources to include all the sources
 SET (${PROJECT_NAME}_PROJECT_SRCS
-  ${EmMpmGui_SRCS}
-  ${EmMpmGui_MOC_HDRS}
-  ${EmMpmGui_HDRS}
+  ${EmMpmWorkbench_SRCS}
+  ${EmMpmWorkbench_MOC_HDRS}
+  ${EmMpmWorkbench_HDRS}
   ${Generated_RC_SRCS}
   ${Generated_UI_HDRS}
   ${Generated_MOC_SRCS}

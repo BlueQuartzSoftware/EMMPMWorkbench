@@ -28,7 +28,7 @@
  * USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 
-#include <EmMpmGui/EmMpmGui.h>
+#include <EmMpmWorkbench/EmMpmWorkbench.h>
 #include <QtSupport/QRecentFileList.h>
 #include <QApplication>
 
@@ -52,7 +52,7 @@ int main(int argc, char **argv)
 #endif
   QRecentFileList::instance()->readList(prefs);
 
-  EmMpmGui *viewer = new EmMpmGui;
+  EmMpmWorkbench *viewer = new EmMpmWorkbench;
   viewer->show();
   viewer->raise();
   viewer->activateWindow();
