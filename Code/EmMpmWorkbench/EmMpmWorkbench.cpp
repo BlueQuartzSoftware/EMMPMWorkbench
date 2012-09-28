@@ -1362,9 +1362,6 @@ void EmMpmWorkbench::queueControllerFinished()
   if (this->processFolder->isChecked() == false)
   {
     setCurrentImageFile (inputImageFilePath->text());
-//    setCurrentProcessedFile(outputImageFile->text());
-//    m_GraphicsView->loadOverlayImageFile(outputImageFile->text());
-   // imageDisplaySelection->setCurrentIndex(2);
   }
   else
   {
@@ -1890,9 +1887,13 @@ void EmMpmWorkbench::openBaseImageFile(QString imageFile)
   setWindowTitle(imageFile);
   this->setWindowFilePath(imageFile);
 
-  imageDisplaySelection->setEnabled(false);
-  imageDisplaySelection->setCurrentIndex(0);
-
+  // If we are NOT running a Queue of images being processed then set the
+  // imageDisplay to be the Original Image Only.
+  if (NULL == m_QueueController)
+  {
+    imageDisplaySelection->setEnabled(false);
+    imageDisplaySelection->setCurrentIndex(0);
+  }
   // Tell the RecentFileList to update itself then broadcast those changes.
   QRecentFileList::instance()->addFile(imageFile);
   setWidgetListEnabled(true);

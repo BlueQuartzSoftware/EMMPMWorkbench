@@ -350,7 +350,6 @@ class EmMpmWorkbench : public QMainWindow, private Ui::EmMpmWorkbench
     void initializeGrayScaleTable();
 
   private:
-  //  QVector<UserInitArea*>*      m_UserInitAreaVector;
     qint32                       m_CurrentHistogramClass;
 
     QwtPlotZoomer* m_zoomer;
@@ -365,9 +364,9 @@ class EmMpmWorkbench : public QMainWindow, private Ui::EmMpmWorkbench
     bool                    m_ShowCombinedGaussians;
     AxisSettingsDialog*     m_AxisSettingsDialog;
 
-    QList<QWidget*> m_WidgetList;
-    QList<QWidget*> m_ImageWidgets;
-    QList<QWidget*> m_ProcessFolderWidgets;
+    QList<QWidget*>         m_WidgetList;
+    QList<QWidget*>         m_ImageWidgets;
+    QList<QWidget*>         m_ProcessFolderWidgets;
 
     QVector<int>     m_StartingMuValues;
 
