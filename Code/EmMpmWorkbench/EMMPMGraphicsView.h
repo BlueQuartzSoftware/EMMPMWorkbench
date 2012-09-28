@@ -40,7 +40,7 @@
 
 
 class UserInitArea;
-class EmMpmGui;
+class EmMpmWorkbench;
 
 namespace EmMpm_Constants {
 
@@ -93,7 +93,9 @@ class EMMPMGraphicsView : public QGraphicsView
       m_UserInitAreaVector = userInitAreaVector;
     }
 
-    void setEmMpmGui(EmMpmGui* gui);
+    QVector<UserInitArea*>* getUserInitAreas() { return m_UserInitAreaVector; }
+
+    void setEmMpmWorkbench(EmMpmWorkbench* gui);
 
     /**
     * @brief Over-riding implementation from base class
@@ -183,7 +185,7 @@ class EMMPMGraphicsView : public QGraphicsView
    float          m_ZoomFactors[10];
    QVector<UserInitArea*>*      m_UserInitAreaVector;
 
-   EmMpmGui*      m_MainGui;
+   EmMpmWorkbench*      m_MainGui;
    EmMpm_Constants::ImageDisplayType           m_ImageDisplayType;
    bool           m_ShowOverlayImage;
    QPainter::CompositionMode m_composition_mode;

@@ -45,7 +45,7 @@
 #include "EMMPMLib/Core/EMMPM_Data.h"
 
 //-- UIC generated Header
-#include <ui_EmMpmGui.h>
+#include <ui_EmMpmWorkbench.h>
 
 
 class UserInitArea;
@@ -65,7 +65,7 @@ class LayersDockWidget;
 
 
 /**
- * @class EmMpmGui EmMpmGui.h Code/EmMpmGui/EmMpmGui.h
+ * @class EmMpmWorkbench EmMpmWorkbench.h Code/EmMpmWorkbench/EmMpmWorkbench.h
  * @brief This is the implementation of the Main Window for the EMMPM Gui application.
  *
  * @section additions Things to Add
@@ -78,14 +78,14 @@ class LayersDockWidget;
  * @date Apr 3, 2011
  * @version 1.0
  */
-class EmMpmGui : public QMainWindow, private Ui::EmMpmGui
+class EmMpmWorkbench : public QMainWindow, private Ui::EmMpmWorkbench
 {
 
     Q_OBJECT;
 
   public:
-    EmMpmGui(QWidget *parent = 0);
-    virtual ~EmMpmGui();
+    EmMpmWorkbench(QWidget *parent = 0);
+    virtual ~EmMpmWorkbench();
     void initWithFile(const QString imageFile, QString mountImage);
 
 
@@ -350,7 +350,6 @@ class EmMpmGui : public QMainWindow, private Ui::EmMpmGui
     void initializeGrayScaleTable();
 
   private:
-    QVector<UserInitArea*>*      m_UserInitAreaVector;
     qint32                       m_CurrentHistogramClass;
 
     QwtPlotZoomer* m_zoomer;
@@ -365,9 +364,9 @@ class EmMpmGui : public QMainWindow, private Ui::EmMpmGui
     bool                    m_ShowCombinedGaussians;
     AxisSettingsDialog*     m_AxisSettingsDialog;
 
-    QList<QWidget*> m_WidgetList;
-    QList<QWidget*> m_ImageWidgets;
-    QList<QWidget*> m_ProcessFolderWidgets;
+    QList<QWidget*>         m_WidgetList;
+    QList<QWidget*>         m_ImageWidgets;
+    QList<QWidget*>         m_ProcessFolderWidgets;
 
     QVector<int>     m_StartingMuValues;
 
@@ -381,8 +380,8 @@ class EmMpmGui : public QMainWindow, private Ui::EmMpmGui
 
     QString m_GaussianCurveColors[16];
 
-    EmMpmGui(const EmMpmGui&); // Copy Constructor Not Implemented
-    void operator=(const EmMpmGui&); // Operator '=' Not Implemented
+    EmMpmWorkbench(const EmMpmWorkbench&); // Copy Constructor Not Implemented
+    void operator=(const EmMpmWorkbench&); // Operator '=' Not Implemented
 };
 
 #endif /* EMMPMGUI_H_ */

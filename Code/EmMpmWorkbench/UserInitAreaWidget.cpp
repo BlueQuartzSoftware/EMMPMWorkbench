@@ -112,7 +112,9 @@ void UserInitAreaWidget::setUserInitArea(UserInitArea* uia)
   m_Mu->setText(QString::number(uia->getMu()));
   m_Sigma->setText(QString::number(uia->getSigma()));
 
+  m_LineWidth->blockSignals(true);
   m_LineWidth->setValue(uia->getLineWidth());
+  m_LineWidth->blockSignals(false);
 
   unsigned int x, y;
   uia->getUpperLeft(x, y);

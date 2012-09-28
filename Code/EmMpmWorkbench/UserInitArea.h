@@ -87,7 +87,7 @@ public:
     void setLineWidth(qreal w);
     qreal getLineWidth();
 
-    void setVisible(bool visible);
+   // void setVisible(bool visible);
 
 
 
@@ -129,7 +129,7 @@ private:
     double m_Mu;
     double m_Sigma;
     qreal m_LineWidth;
-    bool m_Visible;
+//    bool m_Visible;
 };
 
 

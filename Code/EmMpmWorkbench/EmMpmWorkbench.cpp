@@ -28,7 +28,7 @@
  * USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 
-#include "EmMpmGui.h"
+#include "EmMpmWorkbench.h"
 
 #include <iostream>
 #include <sstream>
@@ -91,11 +91,11 @@
 #include "EMMPMLib/tiff/TiffUtilities.h"
 
 //-- EMMPM Gui Includes
-#include "EMMPMGuiVersion.h"
+#include "EmMpmWorkbenchVersion.h"
 #include "UserInitArea.h"
 #include "EMMPMTask.h"
 #include "AxisSettingsDialog.h"
-#include "License/EmMpmGuiLicenseFiles.h"
+#include "License/EmMpmWorkbenchLicenseFiles.h"
 #include "UserInitAreaWidget.h"
 #include "LayersDockWidget.h"
 #include "ImageOpenDialog.h"
@@ -157,7 +157,7 @@
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
-EmMpmGui::EmMpmGui(QWidget *parent) :
+EmMpmWorkbench::EmMpmWorkbench(QWidget *parent) :
 QMainWindow(parent),
 m_CurrentImageFile(""),
 m_CurrentProcessedFile(""),
@@ -220,7 +220,7 @@ m_ImageStatsReady(false)
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
-EmMpmGui::~EmMpmGui()
+EmMpmWorkbench::~EmMpmWorkbench()
 {
 
 }
@@ -229,7 +229,7 @@ EmMpmGui::~EmMpmGui()
 // -----------------------------------------------------------------------------
 //  Called when the main window is closed.
 // -----------------------------------------------------------------------------
-void EmMpmGui::closeEvent(QCloseEvent *event)
+void EmMpmWorkbench::closeEvent(QCloseEvent *event)
 {
   qint32 err = checkDirtyDocument();
   if (err < 0)
@@ -253,7 +253,7 @@ void EmMpmGui::closeEvent(QCloseEvent *event)
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
-void EmMpmGui::writeIOSettings(QSettings &prefs)
+void EmMpmWorkbench::writeIOSettings(QSettings &prefs)
 {
   prefs.beginGroup("Input_Output");
   WRITE_BOOL_SETTING(prefs, processFolder, processFolder->isChecked());
@@ -273,7 +273,7 @@ void EmMpmGui::writeIOSettings(QSettings &prefs)
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
-void EmMpmGui::readIOSettings(QSettings &prefs)
+void EmMpmWorkbench::readIOSettings(QSettings &prefs)
 {
   prefs.beginGroup("Input_Output");
   inputImageFilePath->blockSignals(true);
@@ -306,7 +306,7 @@ void EmMpmGui::readIOSettings(QSettings &prefs)
 // -----------------------------------------------------------------------------
 //  Read the prefs from the local storage file
 // -----------------------------------------------------------------------------
-void EmMpmGui::readSettings(QSettings &prefs)
+void EmMpmWorkbench::readSettings(QSettings &prefs)
 {
   QString val;
   bool ok;
@@ -398,7 +398,7 @@ void EmMpmGui::readSettings(QSettings &prefs)
     showUserDefinedAreas->setEnabled(true);
     showUserDefinedAreas->setChecked(true);
     UserInitArea::deleteAllUserInitAreas(m_GraphicsView->scene());
-    m_UserInitAreaVector->clear();
+    m_GraphicsView->getUserInitAreas()->clear();
     for (int i = 0; i < userInitAreaCount; ++i)
     {
       UserInitArea* uia = UserInitArea::NewUserInitArea(prefs, i);
@@ -424,10 +424,10 @@ void EmMpmGui::readSettings(QSettings &prefs)
 // -----------------------------------------------------------------------------
 //  Write our prefs to file
 // -----------------------------------------------------------------------------
-void EmMpmGui::writeSettings(QSettings &prefs)
+void EmMpmWorkbench::writeSettings(QSettings &prefs)
 {
 
-  prefs.setValue("Version", QString::fromStdString(EmMpm_Gui::Version::Complete()));
+  prefs.setValue("Version", QString::fromStdString(EmMpm_Workbench::Version::Complete()));
 //  WRITE_STRING_SETTING(prefs, outputPrefix);
 //  WRITE_STRING_SETTING(prefs, outputSuffix);
 
@@ -458,7 +458,7 @@ void EmMpmGui::writeSettings(QSettings &prefs)
   WRITE_CHECKBOX_SETTING(prefs, enableUserDefinedAreas);
   WRITE_CHECKBOX_SETTING(prefs, showUserDefinedAreas);
   WRITE_CHECKBOX_SETTING(prefs, muSigmaFeedback);
-  int userInitAreaCount = this->m_UserInitAreaVector->size();
+  int userInitAreaCount = this->m_GraphicsView->getUserInitAreas()->size();
   WRITE_VALUE(prefs, userInitAreaCount);
 
   WRITE_CHECKBOX_SETTING(prefs, enableManualInit);
@@ -499,9 +499,9 @@ void EmMpmGui::writeSettings(QSettings &prefs)
 
   if (enableUserDefinedAreas->isChecked() == true)
   {
-    for (int i = 0; i < this->m_UserInitAreaVector->size(); ++i)
+    for (int i = 0; i < this->m_GraphicsView->getUserInitAreas()->size(); ++i)
     {
-      UserInitArea* uia = m_UserInitAreaVector->at(i);
+      UserInitArea* uia = m_GraphicsView->getUserInitAreas()->at(i);
       uia->writeSettings(prefs);
     }
   }
@@ -524,7 +524,7 @@ void EmMpmGui::writeSettings(QSettings &prefs)
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
-void EmMpmGui::readWindowSettings(QSettings &prefs)
+void EmMpmWorkbench::readWindowSettings(QSettings &prefs)
 {
   bool ok = false;
   prefs.beginGroup("WindodwSettings");
@@ -545,7 +545,7 @@ void EmMpmGui::readWindowSettings(QSettings &prefs)
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
-void EmMpmGui::writeWindowSettings(QSettings &prefs)
+void EmMpmWorkbench::writeWindowSettings(QSettings &prefs)
 {
   prefs.beginGroup("WindodwSettings");
   QByteArray geo_data = saveGeometry();
@@ -558,7 +558,7 @@ void EmMpmGui::writeWindowSettings(QSettings &prefs)
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
-void EmMpmGui::on_actionSave_Config_File_triggered()
+void EmMpmWorkbench::on_actionSave_Config_File_triggered()
 {
   QString proposedFile = m_OpenDialogLastDirectory + QDir::separator() + "EMMPM-Config.txt";
   QString file = QFileDialog::getSaveFileName(this, tr("Save EM/MPM Configuration"),
@@ -575,7 +575,7 @@ void EmMpmGui::on_actionSave_Config_File_triggered()
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
-void EmMpmGui::on_actionLoad_Config_File_triggered()
+void EmMpmWorkbench::on_actionLoad_Config_File_triggered()
 {
   QString file = QFileDialog::getOpenFileName(this, tr("Select Configuration File"),
                                                  m_OpenDialogLastDirectory,
@@ -591,12 +591,12 @@ void EmMpmGui::on_actionLoad_Config_File_triggered()
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
-void EmMpmGui::on_action_ResetPreferences_triggered()
+void EmMpmWorkbench::on_action_ResetPreferences_triggered()
 {
   #if defined (Q_OS_MAC)
-  QSettings prefs(QSettings::NativeFormat, QSettings::UserScope, "bluequartz.net", "EmMpmGui");
+  QSettings prefs(QSettings::NativeFormat, QSettings::UserScope, "bluequartz.net", "EmMpmWorkbench");
 #else
-  QSettings prefs(QSettings::IniFormat, QSettings::UserScope, "bluequartz.net", "EmMpmGui");
+  QSettings prefs(QSettings::IniFormat, QSettings::UserScope, "bluequartz.net", "EmMpmWorkbench");
 #endif
   prefs.clear();
 }
@@ -615,7 +615,7 @@ void EmMpmGui::on_action_ResetPreferences_triggered()
 }
 
 #define ZOOM_MENU_SLOT_DEF(var, index)\
-void EmMpmGui::z##var##_triggered() {\
+void EmMpmWorkbench::z##var##_triggered() {\
   zoomButton->setText(#var " % ");\
   m_GraphicsView->setZoomIndex(index);\
 }
@@ -633,7 +633,7 @@ ZOOM_MENU_SLOT_DEF(600, 8);
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
-void EmMpmGui::on_fitToWindow_clicked()
+void EmMpmWorkbench::on_fitToWindow_clicked()
 {
   m_GraphicsView->setZoomIndex(9);
 }
@@ -641,7 +641,7 @@ void EmMpmGui::on_fitToWindow_clicked()
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
-void EmMpmGui::setupGui()
+void EmMpmWorkbench::setupGui()
 {
 #ifdef Q_WS_MAC
   // Adjust for the size of the menu bar which is at the top of the screen not in the window
@@ -663,13 +663,10 @@ void EmMpmGui::setupGui()
 
   zoomButton->setMenu(zoomMenu);
 
-  m_UserInitAreaVector = new QVector<UserInitArea*>;
-
   m_AxisSettingsDialog = new AxisSettingsDialog(this);
   m_AxisSettingsDialog->setVisible(false);
 
-  m_GraphicsView->setEmMpmGui(this);
-  m_GraphicsView->setUserInitAreas(m_UserInitAreaVector);
+  m_GraphicsView->setEmMpmWorkbench(this);
 
   connect (m_GraphicsView, SIGNAL(fireOverlayImageFileLoaded(const QString &)),
            this, SLOT(overlayImageFileLoaded(const QString &)), Qt::QueuedConnection);
@@ -719,8 +716,8 @@ void EmMpmGui::setupGui()
 
   // setup the Widget List
   m_WidgetList << m_NumClasses << m_EmIterations << m_MpmIterations << m_Beta;
-  m_WidgetList << enableUserDefinedAreas << showUserDefinedAreas << useSimulatedAnnealing;
-  m_WidgetList << useCurvaturePenalty << useGradientPenalty;
+  m_WidgetList << enableUserDefinedAreas << showUserDefinedAreas;
+  m_WidgetList << useCurvaturePenalty << useGradientPenalty << useSimulatedAnnealing;
   m_WidgetList << curvatureBetaC << curvatureRMax << ccostLoopDelay;
   m_WidgetList << gradientBetaE;
   m_WidgetList << axisSettingsBtn << clearTempHistograms << saveCurves;
@@ -826,7 +823,7 @@ void EmMpmGui::setupGui()
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
-void EmMpmGui::deleteFileListItem()
+void EmMpmWorkbench::deleteFileListItem()
 {
   QList<QListWidgetItem*>selectedItems = fileListWidget->selectedItems();
   qint32 count = selectedItems.count();
@@ -840,7 +837,7 @@ void EmMpmGui::deleteFileListItem()
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
-void EmMpmGui::copyGrayValues( EMMPM_Data::Pointer inputs)
+void EmMpmWorkbench::copyGrayValues( EMMPM_Data::Pointer inputs)
 {
     int rows = perClassTableView->model()->rowCount();
     for(int i = 0; i < rows; ++i)
@@ -862,14 +859,15 @@ void EmMpmGui::copyGrayValues( EMMPM_Data::Pointer inputs)
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
-void EmMpmGui::copyInitCoords( EMMPM_Data::Pointer inputs)
+void EmMpmWorkbench::copyInitCoords( EMMPM_Data::Pointer inputs)
 {
-  int size = m_UserInitAreaVector->count();
+  int size = m_GraphicsView->getUserInitAreas()->count();
   UserInitArea* uia = NULL;
   unsigned int* cPtr = inputs->initCoords[0];
   for (int r = 0; r < size; ++r)
   {
-    uia = m_UserInitAreaVector->at(r);
+    uia = m_GraphicsView->getUserInitAreas()->at(r);
+    if (NULL == uia) { continue; }
     cPtr = inputs->initCoords[r];
     uia->getUpperLeft( cPtr[0], cPtr[1]);
     uia->getLowerRight( cPtr[2], cPtr[3] );
@@ -879,14 +877,15 @@ void EmMpmGui::copyInitCoords( EMMPM_Data::Pointer inputs)
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
-void EmMpmGui::copyIntializationValues(EMMPM_Data::Pointer inputs)
+void EmMpmWorkbench::copyIntializationValues(EMMPM_Data::Pointer inputs)
 {
-  int size = m_UserInitAreaVector->count();
+  int size = m_GraphicsView->getUserInitAreas()->count();
 
   UserInitArea* uia = NULL;
   for (int r = 0; r < size; ++r)
   {
-    uia = m_UserInitAreaVector->at(r);
+    uia = m_GraphicsView->getUserInitAreas()->at(r);
+    if (NULL == uia) { continue; }
     inputs->mean[r] = uia->getMu();
     inputs->variance[r] = uia->getSigma() * uia->getSigma();
  //   std::cout << "Initializing with Mu:" << inputs->m[r] << "  Sigma: " << inputs->v[r] << std::endl;
@@ -897,7 +896,7 @@ void EmMpmGui::copyIntializationValues(EMMPM_Data::Pointer inputs)
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
-int EmMpmGui::copyGammaMinStdDevValues(EMMPM_Data::Pointer inputs)
+int EmMpmWorkbench::copyGammaMinStdDevValues(EMMPM_Data::Pointer inputs)
 {
     PerClassTableModel* model = qobject_cast<PerClassTableModel*>(perClassTableView->model());
     QList<PerClassItemData*> items = model->getItemDatas();
@@ -972,11 +971,10 @@ void EMMPMUpdateStats(EMMPM_Data::Pointer data)
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
-void EmMpmGui::on_processBtn_clicked()
+void EmMpmWorkbench::on_processBtn_clicked()
 {
-
   /* this is a first good sanity check */
-  if (enableUserDefinedAreas->isChecked() && m_UserInitAreaVector->count() == 0)
+  if (enableUserDefinedAreas->isChecked() && m_GraphicsView->getUserInitAreas()->count() == 0)
    {
      QMessageBox::critical(this, tr("User Initialization Areas Error"), tr("Enable User Init Areas is ON but no areas are defined."), QMessageBox::Ok);
      return;
@@ -1207,7 +1205,7 @@ void EmMpmGui::on_processBtn_clicked()
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
-EMMPMTask* EmMpmGui::newEmMpmTask( ProcessQueueController* queueController)
+EMMPMTask* EmMpmWorkbench::newEmMpmTask( ProcessQueueController* queueController)
 {
   bool ok = false;
   EMMPMTask* task = new EMMPMTask(NULL);
@@ -1323,9 +1321,9 @@ EMMPMTask* EmMpmGui::newEmMpmTask( ProcessQueueController* queueController)
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
-void EmMpmGui::processingStarted()
+void EmMpmWorkbench::processingStarted()
 {
-//  std::cout << "EmMpmGui::processingStarted()" << std::endl;
+//  std::cout << "EmMpmWorkbench::processingStarted()" << std::endl;
   processBtn->setText("Cancel");
   processBtn->setVisible(false);
   this->statusBar()->showMessage("Processing Images...");
@@ -1336,7 +1334,7 @@ void EmMpmGui::processingStarted()
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
-void EmMpmGui::processingFinished()
+void EmMpmWorkbench::processingFinished()
 {
 //  std::cout << "IPHelper::processingFinished()" << std::endl;
   /* Code that cleans up anything from the processing */
@@ -1351,7 +1349,7 @@ void EmMpmGui::processingFinished()
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
-void EmMpmGui::processingMessage(QString str)
+void EmMpmWorkbench::processingMessage(QString str)
 {
   this->statusBar()->showMessage(str);
 }
@@ -1359,14 +1357,11 @@ void EmMpmGui::processingMessage(QString str)
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
-void EmMpmGui::queueControllerFinished()
+void EmMpmWorkbench::queueControllerFinished()
 {
   if (this->processFolder->isChecked() == false)
   {
     setCurrentImageFile (inputImageFilePath->text());
-//    setCurrentProcessedFile(outputImageFile->text());
-//    m_GraphicsView->loadOverlayImageFile(outputImageFile->text());
-   // imageDisplaySelection->setCurrentIndex(2);
   }
   else
   {
@@ -1394,7 +1389,7 @@ void EmMpmGui::queueControllerFinished()
   }
   setWindowTitle(m_CurrentImageFile);
   setWidgetListEnabled(true);
-  if (m_UserInitAreaVector->size() != 0)
+  if (m_GraphicsView->getUserInitAreas()->size() != 0)
   {
     m_NumClasses->setEnabled(false);
   }
@@ -1425,7 +1420,7 @@ void EmMpmGui::queueControllerFinished()
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
-void EmMpmGui::on_processFolder_stateChanged(int state)
+void EmMpmWorkbench::on_processFolder_stateChanged(int state)
 {
 
     bool checked = true;
@@ -1441,10 +1436,14 @@ void EmMpmGui::on_processFolder_stateChanged(int state)
     outputImageFile->setEnabled(!checked);
     outputImageButton->setEnabled(!checked);
 
+
+
     // If we are checked then load the first image (assuming it exists) in the image viewer
     if (checked == true)
     {
         on_sourceDirectoryLE_textChanged(QString(""));
+        // Make sure the filter is run on the file list
+        on_filterPatternLineEdit_textChanged();
     }
     else // We load up what ever file is in the input image file path line edit
     {
@@ -1457,7 +1456,7 @@ void EmMpmGui::on_processFolder_stateChanged(int state)
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
-void EmMpmGui::on_fileListWidget_itemDoubleClicked(QListWidgetItem * item)
+void EmMpmWorkbench::on_fileListWidget_itemDoubleClicked(QListWidgetItem * item)
 {
   QString path = sourceDirectoryLE->text();
   path.append(QDir::separator());
@@ -1473,7 +1472,7 @@ void EmMpmGui::on_fileListWidget_itemDoubleClicked(QListWidgetItem * item)
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
-void EmMpmGui::on_outputPrefix_textChanged()
+void EmMpmWorkbench::on_outputPrefix_textChanged()
 {
   outputFilenamePattern->setText(outputPrefix->text() + "[ORIGINAL FILE NAME]" + outputSuffix->text() + "." + outputImageType->currentText() );
   histogramFilenamePattern->setText(outputPrefix->text() + "[ORIGINAL FILE NAME]" + outputSuffix->text() + ".csv" );
@@ -1482,7 +1481,7 @@ void EmMpmGui::on_outputPrefix_textChanged()
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
-void EmMpmGui::on_outputSuffix_textChanged()
+void EmMpmWorkbench::on_outputSuffix_textChanged()
 {
   outputFilenamePattern->setText(outputPrefix->text() + "[ORIGINAL FILE NAME]" + outputSuffix->text() + "." + outputImageType->currentText() );
   histogramFilenamePattern->setText(outputPrefix->text() + "[ORIGINAL FILE NAME]" + outputSuffix->text() + ".csv" );
@@ -1491,7 +1490,7 @@ void EmMpmGui::on_outputSuffix_textChanged()
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
-void EmMpmGui::on_outputImageType_currentIndexChanged(int index)
+void EmMpmWorkbench::on_outputImageType_currentIndexChanged(int index)
 {
   outputFilenamePattern->setText(outputPrefix->text() + "[ORIGINAL FILE NAME]" + outputSuffix->text() + "." + outputImageType->currentText() );
 }
@@ -1499,7 +1498,7 @@ void EmMpmGui::on_outputImageType_currentIndexChanged(int index)
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
-void EmMpmGui::on_sourceDirectoryBtn_clicked()
+void EmMpmWorkbench::on_sourceDirectoryBtn_clicked()
 {
   QString aDir = QFileDialog::getExistingDirectory(this, tr("Select Source Directory"), getOpenDialogLastDirectory(), QFileDialog::ShowDirsOnly
           | QFileDialog::DontResolveSymlinks);
@@ -1521,7 +1520,7 @@ void EmMpmGui::on_sourceDirectoryBtn_clicked()
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
-void EmMpmGui::on_outputDirectoryBtn_clicked()
+void EmMpmWorkbench::on_outputDirectoryBtn_clicked()
 {
   bool canWrite = false;
   QString aDir = QFileDialog::getExistingDirectory(this, tr("Select Output Directory"), getOpenDialogLastDirectory(),
@@ -1547,7 +1546,7 @@ void EmMpmGui::on_outputDirectoryBtn_clicked()
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
-void EmMpmGui::on_inputImageFilePathBtn_clicked()
+void EmMpmWorkbench::on_inputImageFilePathBtn_clicked()
 {
   //std::cout << "on_actionOpen_triggered" << std::endl;
   QString imageFile =
@@ -1563,7 +1562,7 @@ void EmMpmGui::on_inputImageFilePathBtn_clicked()
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
-void EmMpmGui::on_outputImageButton_clicked()
+void EmMpmWorkbench::on_outputImageButton_clicked()
 {
   QString outputFile = getOpenDialogLastDirectory() + QDir::separator() + "Untitled.tif";
   outputFile = QFileDialog::getSaveFileName(this, tr("Save Output File As ..."), outputFile, tr("Images (*.tif *.tiff *.bmp *.jpg *.jpeg *.png)"));
@@ -1588,7 +1587,7 @@ void EmMpmGui::on_outputImageButton_clicked()
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
-void EmMpmGui::on_inputImageFilePath_textChanged(const QString & text)
+void EmMpmWorkbench::on_inputImageFilePath_textChanged(const QString & text)
 {
   if (verifyPathExists(inputImageFilePath->text(), inputImageFilePath))
   {
@@ -1599,7 +1598,7 @@ void EmMpmGui::on_inputImageFilePath_textChanged(const QString & text)
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
-void EmMpmGui::on_outputImageFile_textChanged(const QString & text)
+void EmMpmWorkbench::on_outputImageFile_textChanged(const QString & text)
 {
   //  verifyPathExists(outputImageFile->text(), movingImageFile);
 }
@@ -1607,7 +1606,7 @@ void EmMpmGui::on_outputImageFile_textChanged(const QString & text)
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
-void EmMpmGui::on_sourceDirectoryLE_textChanged(const QString & text)
+void EmMpmWorkbench::on_sourceDirectoryLE_textChanged(const QString & text)
 {
   if (true == verifyPathExists(sourceDirectoryLE->text(), sourceDirectoryLE) )
   {
@@ -1622,7 +1621,7 @@ void EmMpmGui::on_sourceDirectoryLE_textChanged(const QString & text)
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
-void EmMpmGui::on_outputDirectoryLE_textChanged(const QString & text)
+void EmMpmWorkbench::on_outputDirectoryLE_textChanged(const QString & text)
 {
   verifyPathExists(outputDirectoryLE->text(), outputDirectoryLE);
 }
@@ -1630,7 +1629,7 @@ void EmMpmGui::on_outputDirectoryLE_textChanged(const QString & text)
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
-void EmMpmGui::setWidgetListEnabled(bool b)
+void EmMpmWorkbench::setWidgetListEnabled(bool b)
 {
   foreach (QWidget* w, m_WidgetList)
   {
@@ -1656,7 +1655,7 @@ void EmMpmGui::setWidgetListEnabled(bool b)
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
-void EmMpmGui::setImageWidgetsEnabled(bool b)
+void EmMpmWorkbench::setImageWidgetsEnabled(bool b)
 {
   foreach (QWidget* w, m_ImageWidgets)
   {
@@ -1667,7 +1666,7 @@ void EmMpmGui::setImageWidgetsEnabled(bool b)
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
-void EmMpmGui::setProcessFolderWidgetsEnabled(bool b)
+void EmMpmWorkbench::setProcessFolderWidgetsEnabled(bool b)
 {
   foreach (QWidget* w, m_ProcessFolderWidgets)
   {
@@ -1678,7 +1677,7 @@ void EmMpmGui::setProcessFolderWidgetsEnabled(bool b)
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
-bool EmMpmGui::verifyOutputPathParentExists(QString outFilePath, QLineEdit* lineEdit)
+bool EmMpmWorkbench::verifyOutputPathParentExists(QString outFilePath, QLineEdit* lineEdit)
 {
   QFileInfo fileinfo(outFilePath);
   QDir parent(fileinfo.dir());
@@ -1688,7 +1687,7 @@ bool EmMpmGui::verifyOutputPathParentExists(QString outFilePath, QLineEdit* line
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
-bool EmMpmGui::verifyPathExists(QString outFilePath, QLineEdit* lineEdit)
+bool EmMpmWorkbench::verifyPathExists(QString outFilePath, QLineEdit* lineEdit)
 {
   QFileInfo fileinfo(outFilePath);
   if (false == fileinfo.exists())
@@ -1705,7 +1704,7 @@ bool EmMpmGui::verifyPathExists(QString outFilePath, QLineEdit* lineEdit)
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
-qint32 EmMpmGui::checkDirtyDocument()
+qint32 EmMpmWorkbench::checkDirtyDocument()
 {
   qint32 err = -1;
   {
@@ -1717,7 +1716,7 @@ qint32 EmMpmGui::checkDirtyDocument()
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
-void EmMpmGui::updateBaseRecentFileList(const QString &file)
+void EmMpmWorkbench::updateBaseRecentFileList(const QString &file)
 {
   // Clear the Recent Items Menu
   this->menu_FixedRecentFiles->clear();
@@ -1738,7 +1737,7 @@ void EmMpmGui::updateBaseRecentFileList(const QString &file)
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
-void EmMpmGui::openRecentBaseImageFile()
+void EmMpmWorkbench::openRecentBaseImageFile()
 {
   QAction *action = qobject_cast<QAction *>(sender());
   if (action)
@@ -1752,7 +1751,7 @@ void EmMpmGui::openRecentBaseImageFile()
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
-void EmMpmGui::on_actionOpenBaseImage_triggered()
+void EmMpmWorkbench::on_actionOpenBaseImage_triggered()
 {
   //std::cout << "on_actionOpen_triggered" << std::endl;
   QString imageFile = QFileDialog::getOpenFileName(this, tr("Open Image File"),
@@ -1771,7 +1770,7 @@ void EmMpmGui::on_actionOpenBaseImage_triggered()
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
-void EmMpmGui::on_actionOpenOverlayImage_triggered()
+void EmMpmWorkbench::on_actionOpenOverlayImage_triggered()
 {
   //std::cout << "on_actionOpen_triggered" << std::endl;
   QString imageFile = QFileDialog::getOpenFileName(this, tr("Open Segmented Image File"),
@@ -1790,7 +1789,7 @@ void EmMpmGui::on_actionOpenOverlayImage_triggered()
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
-void EmMpmGui::on_actionSaveCanvas_triggered()
+void EmMpmWorkbench::on_actionSaveCanvas_triggered()
 {
   QImage image = m_GraphicsView->getOverlayImage();
   if (imageDisplaySelection->currentIndex() == 2)
@@ -1820,12 +1819,12 @@ void EmMpmGui::on_actionSaveCanvas_triggered()
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
-void EmMpmGui::on_actionAbout_triggered()
+void EmMpmWorkbench::on_actionAbout_triggered()
 {
   ApplicationAboutBoxDialog about(QEMMPM::LicenseList, this);
   QString an = QCoreApplication::applicationName();
   QString version("");
-  version.append(EmMpm_Gui::Version::PackageComplete().c_str());
+  version.append(EmMpm_Workbench::Version::PackageComplete().c_str());
   about.setApplicationInfo(an, version);
   about.exec();
 }
@@ -1833,7 +1832,7 @@ void EmMpmGui::on_actionAbout_triggered()
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
-void EmMpmGui::on_actionExit_triggered()
+void EmMpmWorkbench::on_actionExit_triggered()
 {
   this->close();
 }
@@ -1841,7 +1840,7 @@ void EmMpmGui::on_actionExit_triggered()
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
-void EmMpmGui::setCurrentProcessedImage(QString imageFile)
+void EmMpmWorkbench::setCurrentProcessedImage(QString imageFile)
 {
   openBaseImageFile(imageFile);
 }
@@ -1849,12 +1848,34 @@ void EmMpmGui::setCurrentProcessedImage(QString imageFile)
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
-void EmMpmGui::openBaseImageFile(QString imageFile)
+void EmMpmWorkbench::openBaseImageFile(QString imageFile)
 {
   if ( true == imageFile.isEmpty() ) // User cancelled the operation
   {
     return;
   }
+
+#if 0
+  UserInitArea::deleteAllUserInitAreas(m_GraphicsView->scene());
+
+  // Delete all the User Init Areas from the Scene
+  enableUserDefinedAreas->setCheckState(Qt::Unchecked);
+  on_enableUserDefinedAreas_stateChanged(Qt::Unchecked);
+  //Clear out the UserInitAreas that we are tracking. They have all been released
+  // in memory we just simply need to clear the tracking vector. This class does
+  // not own the pointer so we don't worry about cleaning up the memory.
+  UserInitArea::deleteAllUserInitAreas(m_GraphicsView->scene());
+  m_GraphicsView->getUserInitAreas()->clear();
+#endif
+
+#if 0
+  enableUserDefinedAreas->setEnabled(false);
+  showUserDefinedAreas->setEnabled(false);
+
+  showUserDefinedAreas->setChecked(false);
+  enableUserDefinedAreas->setChecked(false);
+  m_GraphicsView->updateDisplay();
+#endif
 
   QFileInfo fi(imageFile);
   m_OpenDialogLastDirectory = fi.absolutePath();
@@ -1866,32 +1887,24 @@ void EmMpmGui::openBaseImageFile(QString imageFile)
   setWindowTitle(imageFile);
   this->setWindowFilePath(imageFile);
 
-  imageDisplaySelection->setEnabled(false);
-  imageDisplaySelection->setCurrentIndex(0);
-
+  // If we are NOT running a Queue of images being processed then set the
+  // imageDisplay to be the Original Image Only.
+  if (NULL == m_QueueController)
+  {
+    imageDisplaySelection->setEnabled(false);
+    imageDisplaySelection->setCurrentIndex(0);
+  }
   // Tell the RecentFileList to update itself then broadcast those changes.
   QRecentFileList::instance()->addFile(imageFile);
   setWidgetListEnabled(true);
   setImageWidgetsEnabled(true);
   updateBaseRecentFileList(imageFile);
 
-  UserInitArea::deleteAllUserInitAreas(m_GraphicsView->scene());
-
-  // Delete all the User Init Areas from the Scene
-  enableUserDefinedAreas->setCheckState(Qt::Unchecked);
-  on_enableUserDefinedAreas_stateChanged(Qt::Unchecked);
-  //Clear out the UserInitAreas that we are tracking. They have all been released
-  // in memory we just simply need to clear the tracking vector. This class does
-  // not own the pointer so we don't worry about cleaning up the memory.
-  m_UserInitAreaVector->clear();
-
   ImageOpenDialog d(this);
 
   d.show();
-  //d.raise();
   d.activateWindow();
   d.setModal(false);
-
   d.setStatus("Loading Image File....");
   m_GraphicsView->loadBaseImageFile(imageFile);
   clearGaussianCurves();
@@ -1932,7 +1945,7 @@ void EmMpmGui::openBaseImageFile(QString imageFile)
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
-void EmMpmGui::addRemovePerClassTableRows()
+void EmMpmWorkbench::addRemovePerClassTableRows()
 {
 
     PerClassTableModel* model = qobject_cast<PerClassTableModel*>(perClassTableView->model());
@@ -1977,7 +1990,7 @@ void EmMpmGui::addRemovePerClassTableRows()
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
-void EmMpmGui::addRemoveManualInitTableRows()
+void EmMpmWorkbench::addRemoveManualInitTableRows()
 {
   ManualInitTableModel* model = qobject_cast<ManualInitTableModel*>(manualInitTableView->model());
   if (NULL == model) { return; }
@@ -2011,7 +2024,7 @@ void EmMpmGui::addRemoveManualInitTableRows()
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
-void EmMpmGui::manualInitDataChanged ( const QModelIndex& topLeft, const QModelIndex& bottomRight )
+void EmMpmWorkbench::manualInitDataChanged ( const QModelIndex& topLeft, const QModelIndex& bottomRight )
 {
     updateGaussianCurves(true);
 }
@@ -2019,7 +2032,7 @@ void EmMpmGui::manualInitDataChanged ( const QModelIndex& topLeft, const QModelI
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
-void EmMpmGui::perClassItemDataChanged ( const QModelIndex& topLeft, const QModelIndex& bottomRight )
+void EmMpmWorkbench::perClassItemDataChanged ( const QModelIndex& topLeft, const QModelIndex& bottomRight )
 {
     // THis will update all the curves with the proper data and color except if the user
     // is creating User Area Initializations at which point we really only care about
@@ -2030,7 +2043,7 @@ void EmMpmGui::perClassItemDataChanged ( const QModelIndex& topLeft, const QMode
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
-void EmMpmGui::generateGaussianData(int rows)
+void EmMpmWorkbench::generateGaussianData(int rows)
 {
     QVector<double> mean(m_NumClasses->value());
     QVector<double> variance(m_NumClasses->value());
@@ -2161,7 +2174,7 @@ void EmMpmGui::generateGaussianData(int rows)
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
-void EmMpmGui::updateGaussianCurves(bool generateNewGaussianData)
+void EmMpmWorkbench::updateGaussianCurves(bool generateNewGaussianData)
 {
   if (NULL == m_histogram) { return; }
 
@@ -2196,10 +2209,11 @@ void EmMpmGui::updateGaussianCurves(bool generateNewGaussianData)
     // update its color with the color from the gaussian curve
     if (true == enableUserDefinedAreas->isChecked())
     {
-        int count = m_UserInitAreaVector->count();
+        int count = m_GraphicsView->getUserInitAreas()->count();
         if (i < count)
         {
-            UserInitArea* uia = m_UserInitAreaVector->at(i);
+            UserInitArea* uia = m_GraphicsView->getUserInitAreas()->at(i);
+            if (NULL == uia) { continue; }
             QColor uicColor = c;
             uicColor.setAlpha(128);
             uia->setColor(uicColor);
@@ -2227,7 +2241,7 @@ void EmMpmGui::updateGaussianCurves(bool generateNewGaussianData)
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
-void EmMpmGui::imageLoadingComplete()
+void EmMpmWorkbench::imageLoadingComplete()
 {
   clearGaussianCurves();
   plotImageHistogram(); // <== This can take a while if the image is large
@@ -2239,7 +2253,7 @@ void EmMpmGui::imageLoadingComplete()
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
-void EmMpmGui::estimateMemoryUse(QSize size)
+void EmMpmWorkbench::estimateMemoryUse(QSize size)
 {
   int rows = size.height();
   int cols = size.width();
@@ -2321,7 +2335,7 @@ void EmMpmGui::estimateMemoryUse(QSize size)
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
-void EmMpmGui::on_useCurvaturePenalty_clicked()
+void EmMpmWorkbench::on_useCurvaturePenalty_clicked()
 {
   QSize size = m_GraphicsView->getBaseImage().size();
 
@@ -2330,7 +2344,7 @@ void EmMpmGui::on_useCurvaturePenalty_clicked()
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
-void EmMpmGui::on_useGradientPenalty_clicked()
+void EmMpmWorkbench::on_useGradientPenalty_clicked()
 {
   QSize size = m_GraphicsView->getBaseImage().size();
 
@@ -2339,7 +2353,7 @@ void EmMpmGui::on_useGradientPenalty_clicked()
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
-void EmMpmGui::on_m_NumClasses_valueChanged(int i)
+void EmMpmWorkbench::on_m_NumClasses_valueChanged(int i)
 {
   QSize size = m_GraphicsView->getBaseImage().size();
 
@@ -2353,7 +2367,7 @@ void EmMpmGui::on_m_NumClasses_valueChanged(int i)
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
-void EmMpmGui::on_colorTablePresets_currentIndexChanged(int i)
+void EmMpmWorkbench::on_colorTablePresets_currentIndexChanged(int i)
 {
   if (colorTablePresets->currentIndex() == 0)
   {
@@ -2381,7 +2395,7 @@ void EmMpmGui::on_colorTablePresets_currentIndexChanged(int i)
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
-void EmMpmGui::initializeColorTable()
+void EmMpmWorkbench::initializeColorTable()
 {
   int index = 0;
   /* Color Names are taken from the W3C SVG Spec
@@ -2408,7 +2422,7 @@ void EmMpmGui::initializeColorTable()
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
-void EmMpmGui::initializeGrayScaleTable()
+void EmMpmWorkbench::initializeGrayScaleTable()
 {
   int index = 0;
   /* Color Names are taken from the W3C SVG Spec
@@ -2435,7 +2449,7 @@ void EmMpmGui::initializeGrayScaleTable()
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
-void EmMpmGui::openOverlayImage(QString processedImage)
+void EmMpmWorkbench::openOverlayImage(QString processedImage)
 {
   if ( true == processedImage.isEmpty() ) // User cancelled the operation
   {
@@ -2464,9 +2478,9 @@ void EmMpmGui::openOverlayImage(QString processedImage)
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
-void EmMpmGui::overlayImageFileLoaded(const QString &filename)
+void EmMpmWorkbench::overlayImageFileLoaded(const QString &filename)
 {
-  // std::cout << "EmMpmGui::overlayImageFileLoaded" << std::endl;
+  // std::cout << "EmMpmWorkbench::overlayImageFileLoaded" << std::endl;
   outputImageFile->blockSignals(true);
   outputImageFile->setText(filename);
   outputImageFile->blockSignals(false);
@@ -2475,7 +2489,7 @@ void EmMpmGui::overlayImageFileLoaded(const QString &filename)
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
-void EmMpmGui::segmentedImageAvailable(QImage image)
+void EmMpmWorkbench::segmentedImageAvailable(QImage image)
 {
     imageDisplaySelection->setEnabled(true);
     if (m_GraphicsView)
@@ -2487,7 +2501,7 @@ void EmMpmGui::segmentedImageAvailable(QImage image)
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
-void EmMpmGui::clearGaussianCurves()
+void EmMpmWorkbench::clearGaussianCurves()
 {
   //Loop over each entry in the table
   QwtPlotCurve* curve = NULL;
@@ -2514,9 +2528,9 @@ void EmMpmGui::clearGaussianCurves()
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
-void EmMpmGui::addGaussianCurve(QVector<real_t> data)
+void EmMpmWorkbench::addGaussianCurve(QVector<real_t> data)
 {
-  //std::cout << "EmMpmGui::setProcessHistograms..... " << std::endl;
+  //std::cout << "EmMpmWorkbench::setProcessHistograms..... " << std::endl;
   QwtPlotCurve* curve = NULL;
   const int numValues = data.size();
   // Generate the Histogram Bins (X Axis)
@@ -2531,9 +2545,9 @@ void EmMpmGui::addGaussianCurve(QVector<real_t> data)
 
   QPen pen(Qt::red, 1.5, Qt::SolidLine);
 
-  if(enableUserDefinedAreas->isChecked() == true && m_UserInitAreaVector->size() > 0)
+  if(enableUserDefinedAreas->isChecked() == true && m_GraphicsView->getUserInitAreas()->size() > m_CurrentHistogramClass)
   {
-    QColor c = m_UserInitAreaVector->at(m_CurrentHistogramClass)->getColor();
+    QColor c = m_GraphicsView->getUserInitAreas()->at(m_CurrentHistogramClass)->getColor();
     c.setAlpha(255);
     pen.setColor(c);
 
@@ -2562,7 +2576,7 @@ void EmMpmGui::addGaussianCurve(QVector<real_t> data)
   ++m_CurrentHistogramClass;
 
   // Only update the combined Gaussian when all the individual Gaussian's are in place
-  if(m_UserInitAreaVector->size() == m_CurrentHistogramClass)
+  if(m_GraphicsView->getUserInitAreas()->size() == m_CurrentHistogramClass)
   {
     plotCombinedGaussian();
   }
@@ -2576,7 +2590,7 @@ void EmMpmGui::addGaussianCurve(QVector<real_t> data)
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
-void EmMpmGui::userInitAreaSelected(UserInitArea* uia)
+void EmMpmWorkbench::userInitAreaSelected(UserInitArea* uia)
 {
 
 }
@@ -2584,7 +2598,7 @@ void EmMpmGui::userInitAreaSelected(UserInitArea* uia)
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
-void EmMpmGui::userInitAreaLostFocus()
+void EmMpmWorkbench::userInitAreaLostFocus()
 {
   m_UserInitAreaWidget->setUserInitArea(NULL);
 }
@@ -2592,7 +2606,7 @@ void EmMpmGui::userInitAreaLostFocus()
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
-void EmMpmGui::calcGaussianCurve(double mu, double sig, QwtArray<double> &intervals, QwtArray<double> &values)
+void EmMpmWorkbench::calcGaussianCurve(double mu, double sig, QwtArray<double> &intervals, QwtArray<double> &values)
 {
   double max = std::numeric_limits<double>::min();
 
@@ -2632,7 +2646,7 @@ void EmMpmGui::calcGaussianCurve(double mu, double sig, QwtArray<double> &interv
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
-void EmMpmGui::userInitAreaUpdated(UserInitArea* uia)
+void EmMpmWorkbench::userInitAreaUpdated(UserInitArea* uia)
 {
 //  std::cout << "UserInitArea Updated" << std::endl;
   if (NULL == uia)
@@ -2658,7 +2672,11 @@ void EmMpmGui::userInitAreaUpdated(UserInitArea* uia)
 
   // Locate our curve object by getting the row from the TableModel that corresponds
   // to the UIA object that was passed in
-  int row = m_UserInitAreaVector->indexOf(uia, 0);
+  int row = m_GraphicsView->getUserInitAreas()->indexOf(uia, 0);
+  if (row >= m_GaussianCurves.count() )
+  {
+    return;
+  }
   QwtPlotCurve* curve = m_GaussianCurves[row];
   curve->setData(intervals, values);
 
@@ -2673,7 +2691,7 @@ void EmMpmGui::userInitAreaUpdated(UserInitArea* uia)
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
-void EmMpmGui::plotImageHistogram()
+void EmMpmWorkbench::plotImageHistogram()
 {
   QImage image = m_GraphicsView->getBaseImage();
   const int numValues = 256;
@@ -2735,7 +2753,7 @@ void EmMpmGui::plotImageHistogram()
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
-void EmMpmGui::plotCombinedGaussian()
+void EmMpmWorkbench::plotCombinedGaussian()
 {
   if (m_ShowCombinedGaussians == false)
   {
@@ -2782,7 +2800,7 @@ void EmMpmGui::plotCombinedGaussian()
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
-void EmMpmGui::on_saveMSEDataBtn_clicked()
+void EmMpmWorkbench::on_saveMSEDataBtn_clicked()
 {
     QString outputFile = getOpenDialogLastDirectory() + QDir::separator() + "MSEData.csv";
     outputFile = QFileDialog::getSaveFileName(this, tr("Save MSE Data As ..."), outputFile, tr("CSV (*.csv)"));
@@ -2820,7 +2838,7 @@ void EmMpmGui::on_saveMSEDataBtn_clicked()
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
-void EmMpmGui::on_useStoppingCriteria_clicked()
+void EmMpmWorkbench::on_useStoppingCriteria_clicked()
 {
     m_StoppingThreshold->setEnabled(useStoppingCriteria->isChecked());
     m_StoppingThresholdLabel->setEnabled(useStoppingCriteria->isChecked());
@@ -2834,7 +2852,7 @@ void EmMpmGui::on_useStoppingCriteria_clicked()
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
-void EmMpmGui::on_useSimulatedAnnealing_clicked()
+void EmMpmWorkbench::on_useSimulatedAnnealing_clicked()
 {
 
     // These are mutually exclusive
@@ -2846,7 +2864,7 @@ void EmMpmGui::on_useSimulatedAnnealing_clicked()
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
-void EmMpmGui::on_m_msePlotXMax_valueChanged(int value)
+void EmMpmWorkbench::on_m_msePlotXMax_valueChanged(int value)
 {
     if (m_msePlotXMin->value() < m_msePlotXMax->value() ) {
         refreshMSEPlot();
@@ -2856,7 +2874,7 @@ void EmMpmGui::on_m_msePlotXMax_valueChanged(int value)
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
-void EmMpmGui::on_m_msePlotXMin_valueChanged(int value)
+void EmMpmWorkbench::on_m_msePlotXMin_valueChanged(int value)
 {
     if (m_msePlotXMin->value() < m_msePlotXMax->value() ) {
         refreshMSEPlot();
@@ -2866,7 +2884,7 @@ void EmMpmGui::on_m_msePlotXMin_valueChanged(int value)
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
-void EmMpmGui::updateMSEValue(qreal value)
+void EmMpmWorkbench::updateMSEValue(qreal value)
 {
   //  std::cout << "MSE: " << value << std::endl;
     QString str("Current MSE Value: ");
@@ -2930,7 +2948,7 @@ void EmMpmGui::updateMSEValue(qreal value)
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
-void EmMpmGui::refreshMSEPlot()
+void EmMpmWorkbench::refreshMSEPlot()
 {
     int xmin = m_msePlotXMin->value();
     int xmax = m_msePlotXMax->value();
@@ -2959,9 +2977,9 @@ void EmMpmGui::refreshMSEPlot()
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
-void EmMpmGui::deleteUserInitArea(UserInitArea* uia)
+void EmMpmWorkbench::deleteUserInitArea(UserInitArea* uia)
 {
-  int row = m_UserInitAreaVector->indexOf(uia, 0);
+  int row = m_GraphicsView->getUserInitAreas()->indexOf(uia, 0);
   if (row >= m_GaussianCurves.count() )
   {
     return;
@@ -2973,17 +2991,18 @@ void EmMpmGui::deleteUserInitArea(UserInitArea* uia)
   delete curve; // Clean up the memory
   m_HistogramPlot->replot();
 
-  uia = m_UserInitAreaVector->at(row);
-  m_UserInitAreaVector->remove(row);
+  uia = m_GraphicsView->getUserInitAreas()->at(row);
+  m_GraphicsView->getUserInitAreas()->remove(row);
+
 
   // Now renumber the classes:
-  qint32 size = m_UserInitAreaVector->size();
+  qint32 size = m_GraphicsView->getUserInitAreas()->size();
   for(qint32 i = 0; i < size; ++i)
   {
-    m_UserInitAreaVector->at(i)->setEmMpmClass(i);
+    m_GraphicsView->getUserInitAreas()->at(i)->setEmMpmClass(i);
   }
-  m_NumClasses->setValue(m_UserInitAreaVector->size());
-  if (m_UserInitAreaVector->size() == 0)
+  m_NumClasses->setValue(m_GraphicsView->getUserInitAreas()->size());
+  if (m_GraphicsView->getUserInitAreas()->size() == 0)
   {
     m_NumClasses->setEnabled(true);
   }
@@ -2992,9 +3011,8 @@ void EmMpmGui::deleteUserInitArea(UserInitArea* uia)
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
-void EmMpmGui::userInitAreaAdded(UserInitArea* uia)
+void EmMpmWorkbench::userInitAreaAdded(UserInitArea* uia)
 {
- // std::cout << "EmMpmGui::userInitAreaAdded()" << std::endl;
   m_UserInitAreaWidget->setUserInitArea(uia);
 
   if (NULL == uia) { return; }
@@ -3003,11 +3021,11 @@ void EmMpmGui::userInitAreaAdded(UserInitArea* uia)
 
   // Figure out the proper row to insert the curve object to keep it in sync with
   // the table model
-  int row = m_UserInitAreaVector->indexOf(uia, 0);
+  int row = m_GraphicsView->getUserInitAreas()->indexOf(uia, 0);
   // This will have the cascade effect of removing or adding rows to both the PerClass
   // TableView and the Manual Initialization Table View
-  m_NumClasses->setValue(m_UserInitAreaVector->size());
-  if (m_UserInitAreaVector->size() != 0)
+  m_NumClasses->setValue(m_GraphicsView->getUserInitAreas()->size());
+  if (m_GraphicsView->getUserInitAreas()->size() != 0)
   {
     m_NumClasses->setEnabled(false);
   }
@@ -3031,7 +3049,7 @@ void EmMpmGui::userInitAreaAdded(UserInitArea* uia)
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
-void EmMpmGui::populateFileTable(QLineEdit* sourceDirectoryLE, QListWidget *fileListView)
+void EmMpmWorkbench::populateFileTable(QLineEdit* sourceDirectoryLE, QListWidget *fileListView)
 {
   QDir sourceDir(sourceDirectoryLE->text());
   sourceDir.setFilter(QDir::Files | QDir::NoDotAndDotDot | QDir::NoSymLinks);
@@ -3050,7 +3068,7 @@ void EmMpmGui::populateFileTable(QLineEdit* sourceDirectoryLE, QListWidget *file
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
-void EmMpmGui::on_filterPatternLineEdit_textChanged()
+void EmMpmWorkbench::on_filterPatternLineEdit_textChanged()
 {
 
   QDir sourceDir(sourceDirectoryLE->text());
@@ -3064,37 +3082,17 @@ void EmMpmGui::on_filterPatternLineEdit_textChanged()
     QListWidgetItem* item  = new QListWidgetItem(strList.at(i));
     fileListWidget->addItem(item);
   }
-
-
-  // std::cout << "filterPattern: " << std::endl;
-//  getProxyModel()->setFilterFixedString(filterPatternLineEdit->text());
-//  getProxyModel()->setFilterCaseSensitivity(Qt::CaseInsensitive);
 }
 
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
-QStringList EmMpmGui::generateInputFileList()
+QStringList EmMpmWorkbench::generateInputFileList()
 {
   QStringList list;
-#if 0
-  int count = this->m_ProxyModel->rowCount();
-  // this->fileListView->selectAll();
-  QAbstractItemModel* sourceModel = this->m_ProxyModel->sourceModel();
-  for (int i = 0; i < count; ++i)
-  {
-    QModelIndex proxyIndex = this->m_ProxyModel->index(i,0);
-    QModelIndex sourceIndex = this->m_ProxyModel->mapToSource(proxyIndex);
-    list.append( sourceModel->data(sourceIndex, 0).toString() );
-  }
-#endif
   int count = fileListWidget->count();
   for(int i = 0; i < count; ++i)
   {
-    //QString path = sourceDirectoryLE->text();
-    //path.append(QDir::separator());
-    //path.append(fileListWidget->item(i)->text());
-
     list.append(fileListWidget->item(i)->text());
   }
   return list;
@@ -3103,7 +3101,7 @@ QStringList EmMpmGui::generateInputFileList()
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
-void EmMpmGui::updateHistogramAxis()
+void EmMpmWorkbench::updateHistogramAxis()
 {
   double min, max;
   min = m_AxisSettingsDialog->getYAxisMin();
@@ -3120,7 +3118,7 @@ void EmMpmGui::updateHistogramAxis()
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
-void EmMpmGui::on_axisSettingsBtn_clicked()
+void EmMpmWorkbench::on_axisSettingsBtn_clicked()
 {
 
   QwtScaleDiv* sd = m_HistogramPlot->axisScaleDiv(QwtPlot::yLeft);
@@ -3142,7 +3140,7 @@ void EmMpmGui::on_axisSettingsBtn_clicked()
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
-void EmMpmGui::on_saveCurves_clicked()
+void EmMpmWorkbench::on_saveCurves_clicked()
 {
   QString outputFile = getOpenDialogLastDirectory() + QDir::separator() + "Curves.csv";
   outputFile = QFileDialog::getSaveFileName(this, tr("Save Plot Curve File As ..."), outputFile, tr("CSV (*.csv)"));
@@ -3253,17 +3251,18 @@ void EmMpmGui::on_saveCurves_clicked()
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
-void EmMpmGui::on_clearTempHistograms_clicked()
+void EmMpmWorkbench::on_clearTempHistograms_clicked()
 {
+  std::cout << "EmMpmWorkbench::on_clearTempHistograms_clicked()" << std::endl;
   clearGaussianCurves();
   plotImageHistogram();
   if (enableUserDefinedAreas->isChecked() )
   {
-    int size = m_UserInitAreaVector->count();
+    int size = m_GraphicsView->getUserInitAreas()->count();
     UserInitArea* uia = NULL;
     for (int r = 0; r < size; ++r)
     {
-      uia = m_UserInitAreaVector->at(r);
+      uia = m_GraphicsView->getUserInitAreas()->at(r);
       userInitAreaAdded(uia);
     }
   }
@@ -3273,79 +3272,65 @@ void EmMpmGui::on_clearTempHistograms_clicked()
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
-void EmMpmGui::on_showUserDefinedAreas_stateChanged(int state)
+void EmMpmWorkbench::on_showUserDefinedAreas_stateChanged(int state)
 {
-    int size = m_UserInitAreaVector->count();
-    UserInitArea* uia = NULL;
+  int size = m_GraphicsView->getUserInitAreas()->count();
+  UserInitArea* uia = NULL;
 
-    for (int r = 0; r < size; ++r)
+  for (int r = 0; r < size; ++r)
+  {
+    uia = m_GraphicsView->getUserInitAreas()->value(r, NULL);
+    if(uia)
     {
-        uia = m_UserInitAreaVector->at(r);
-        if (uia)
+      if(showUserDefinedAreas->isChecked())
+      {
+        uia->setVisible(true);
+        if(m_GraphicsView->scene() != uia->scene())
         {
-            if(showUserDefinedAreas->isChecked())
-            {
-                uia->setVisible(true);
-                m_GraphicsView->scene()->addItem(uia);
-            }
-            else
-            {
-                uia->setVisible(false);
-                if ( uia->scene())
-                {
-                    m_GraphicsView->scene()->removeItem(uia);
-                }
-            }
+          m_GraphicsView->scene()->addItem(uia);
         }
+        userInitAreaAdded(uia);
+      }
+      else
+      {
+        if(uia->scene() == m_GraphicsView->scene())
+        {
+          m_GraphicsView->scene()->removeItem(uia);
+          uia->setVisible(false);
+        }
+      }
     }
+  }
+  m_GraphicsView->updateDisplay();
 }
 
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
-void EmMpmGui::on_enableUserDefinedAreas_stateChanged(int state)
+void EmMpmWorkbench::on_enableUserDefinedAreas_stateChanged(int state)
 {
-    m_NumClasses->setEnabled( !enableUserDefinedAreas->isChecked() );
-    showUserDefinedAreas->setEnabled( enableUserDefinedAreas->isChecked() );
-    if (enableUserDefinedAreas->isChecked() == false)
-    {
-        showUserDefinedAreas->setChecked(false);
-    }
+  m_NumClasses->setEnabled( !enableUserDefinedAreas->isChecked() );
+  showUserDefinedAreas->setEnabled( enableUserDefinedAreas->isChecked() );
+  if (enableUserDefinedAreas->isChecked() == false)
+  {
+    showUserDefinedAreas->setChecked(false);
+  }
 
-    int size = m_UserInitAreaVector->count();
-    UserInitArea* uia = NULL;
-//    int s = m_GaussianCurves.size();
-//    int u = m_UserInitAreaVector->size();
-
-    // If we are enabling the User Init Areas, then make sure we can see them
-    if(enableUserDefinedAreas->isChecked())
-    {
-      showUserDefinedAreas->setChecked(true);
-    }
-
-    for (int r = 0; r < size; ++r)
-    {
-        uia = m_UserInitAreaVector->at(r);
-        if(enableUserDefinedAreas->isChecked())
-        {
-            userInitAreaAdded(uia);
-        }
-    }
-    m_UserInitAreaWidget->setUserInitArea(NULL);
-    if(enableUserDefinedAreas->isChecked() == false )
-    {
-        updateGaussianCurves(true); // We need to generate the Gaussian curves for the User Init Area Mu/Sigma values
-    }
-    m_HistogramPlot->replot();
-    if(enableUserDefinedAreas->isChecked() == true) {
-        enableManualInit->setChecked(!enableUserDefinedAreas->isChecked());
-    }
+  m_UserInitAreaWidget->setUserInitArea(NULL);
+  if(enableUserDefinedAreas->isChecked() == false )
+  {
+    updateGaussianCurves(true); // We need to generate the Gaussian curves for the User Init Area Mu/Sigma values
+  }
+  m_HistogramPlot->replot();
+  if(enableUserDefinedAreas->isChecked() == true) {
+    enableManualInit->setChecked(!enableUserDefinedAreas->isChecked());
+  }
 }
 
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
-void EmMpmGui::on_enableManualInit_stateChanged(int state)
+void EmMpmWorkbench::on_enableManualInit_stateChanged(int state)
 {
   if (enableManualInit->isChecked() == true)
   {
@@ -3358,7 +3343,7 @@ void EmMpmGui::on_enableManualInit_stateChanged(int state)
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
-UserInitAreaWidget* EmMpmGui::getUserInitAreaWidget()
+UserInitAreaWidget* EmMpmWorkbench::getUserInitAreaWidget()
 {
   return m_UserInitAreaWidget;
 }
@@ -3366,7 +3351,7 @@ UserInitAreaWidget* EmMpmGui::getUserInitAreaWidget()
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
-void EmMpmGui::on_actionUser_Initialization_triggered()
+void EmMpmWorkbench::on_actionUser_Initialization_triggered()
 {
   UserInitAreaDockWidget->show();
 }
@@ -3374,7 +3359,7 @@ void EmMpmGui::on_actionUser_Initialization_triggered()
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
-void EmMpmGui::on_actionHistogram_triggered()
+void EmMpmWorkbench::on_actionHistogram_triggered()
 {
   HistogramDockWidget->show();
 }
@@ -3382,7 +3367,7 @@ void EmMpmGui::on_actionHistogram_triggered()
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
-void EmMpmGui::on_actionParameters_triggered()
+void EmMpmWorkbench::on_actionParameters_triggered()
 {
   ParametersDockWidget->show();
 }
@@ -3390,7 +3375,7 @@ void EmMpmGui::on_actionParameters_triggered()
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
-void EmMpmGui::on_actionMSE_Plot_triggered()
+void EmMpmWorkbench::on_actionMSE_Plot_triggered()
 {
     m_MSEDockWidget->show();
 }
@@ -3398,7 +3383,7 @@ void EmMpmGui::on_actionMSE_Plot_triggered()
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
-void EmMpmGui::on_addClassCoupling_clicked()
+void EmMpmWorkbench::on_addClassCoupling_clicked()
 {
   if(m_ClassA->text().isEmpty() == false
       && m_ClassB->text().isEmpty() == false
@@ -3441,7 +3426,7 @@ void EmMpmGui::on_addClassCoupling_clicked()
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
-void EmMpmGui::on_removeClassCoupling_clicked()
+void EmMpmWorkbench::on_removeClassCoupling_clicked()
 {
   QModelIndexList indices = m_ClassCouplingTableWidget->selectionModel()->selection().indexes();
   int count = indices.count();
@@ -3455,7 +3440,7 @@ void EmMpmGui::on_removeClassCoupling_clicked()
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
-void EmMpmGui::on_imageDisplaySelection_currentIndexChanged(int index)
+void EmMpmWorkbench::on_imageDisplaySelection_currentIndexChanged(int index)
 {
     updateDisplayState();
 }
@@ -3463,7 +3448,7 @@ void EmMpmGui::on_imageDisplaySelection_currentIndexChanged(int index)
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
-void EmMpmGui::on_opacitySlider_valueChanged(int value)
+void EmMpmWorkbench::on_opacitySlider_valueChanged(int value)
 {
     float f = (float)value/100.0;
     m_GraphicsView->setOverlayTransparency(f);
@@ -3473,7 +3458,7 @@ void EmMpmGui::on_opacitySlider_valueChanged(int value)
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
-void EmMpmGui::on_compositeModeCB_currentIndexChanged()
+void EmMpmWorkbench::on_compositeModeCB_currentIndexChanged()
 {
     //  std::cout << "on_compositeModeCB_indexChanged" << std::endl;
       bool ok = false;
@@ -3494,7 +3479,7 @@ void EmMpmGui::on_compositeModeCB_currentIndexChanged()
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
-void EmMpmGui::updateDisplayState()
+void EmMpmWorkbench::updateDisplayState()
 {
     float f = (float)opacitySlider->value()/100.0;
     m_GraphicsView->setOverlayTransparency(f);

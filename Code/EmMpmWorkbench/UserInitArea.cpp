@@ -47,7 +47,11 @@
 //
 // -----------------------------------------------------------------------------
 UserInitArea::UserInitArea(int userIndex, const QPolygonF &polygon,  QGraphicsItem *parent) :
-QGraphicsPolygonItem(polygon, parent)
+QGraphicsPolygonItem(polygon, parent),
+m_Class(userIndex),
+m_Mu(-1.0),
+m_Sigma(-1.0),
+m_LineWidth(1)
 {
   setFlag(QGraphicsItem::ItemIsMovable, true);
   setFlag(QGraphicsItem::ItemIsSelectable, true);
@@ -58,11 +62,11 @@ QGraphicsPolygonItem(polygon, parent)
   m_CurrentResizeHandle = UserInitArea::NO_CTRL_POINT;
   ctrlPointSize = 7.0f;
 
-  m_Class = userIndex;
-  m_Mu = 1.0;
-  m_Sigma = 0.1;
-  m_LineWidth = 1.0;
-  m_Visible = true;
+//  m_Class = userIndex;
+//  m_Mu = 1.0;
+//  m_Sigma = 0.1;
+//  m_LineWidth = 1.0;
+//  m_Visible = true;
 
   QPoint p = pos().toPoint();
   QRect b = boundingRect().toAlignedRect();
@@ -80,7 +84,7 @@ QGraphicsPolygonItem(polygon, parent)
 // -----------------------------------------------------------------------------
 UserInitArea::~UserInitArea()
 {
-  //std::cout << "~UserInitArea" << std::endl;
+  std::cout << "~UserInitArea" << std::endl;
 }
 
 #define READ_VALUE(prefs, var, ok, temp, default, type)\
@@ -255,17 +259,17 @@ qreal UserInitArea::getLineWidth()
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
-void UserInitArea::setVisible(bool visible)
-{
-  m_Visible = visible;
-}
+//void UserInitArea::setVisible(bool visible)
+//{
+//  m_Visible = visible;
+//}
 
 // -----------------------------------------------------------------------------
 //
 // -----------------------------------------------------------------------------
 void UserInitArea::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget)
 {
-  if (m_Visible == false)
+  if (isVisible() == false)
   {
     std::cout << "UserInitArea::paint Visible=false" << std::endl;
     return;

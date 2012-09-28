@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>EmMpmGui</class>
- <widget class="QMainWindow" name="EmMpmGui">
+ <class>EmMpmWorkbench</class>
+ <widget class="QMainWindow" name="EmMpmWorkbench">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -23,7 +23,7 @@
    </size>
   </property>
   <property name="windowTitle">
-   <string>EM/MPM</string>
+   <string>EM/MPM Workbench</string>
   </property>
   <property name="styleSheet">
    <string notr="true"> QMainWindow::separator {
@@ -34,7 +34,8 @@
 
  QMainWindow::separator:hover {
      background: black;
- }</string>
+ }
+</string>
   </property>
   <property name="dockNestingEnabled">
    <bool>true</bool>
@@ -65,7 +66,7 @@
     <item>
      <widget class="QTabWidget" name="tabWidget">
       <property name="currentIndex">
-       <number>1</number>
+       <number>0</number>
       </property>
       <widget class="QWidget" name="filesInputTab">
        <attribute name="title">
@@ -1029,7 +1030,7 @@ font-size: 12px;
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>329</width>
+          <width>327</width>
           <height>884</height>
          </rect>
         </property>
