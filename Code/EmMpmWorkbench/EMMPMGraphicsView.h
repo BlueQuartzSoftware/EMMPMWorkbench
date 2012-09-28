@@ -93,6 +93,8 @@ class EMMPMGraphicsView : public QGraphicsView
       m_UserInitAreaVector = userInitAreaVector;
     }
 
+    QVector<UserInitArea*>* getUserInitAreas() { return m_UserInitAreaVector; }
+
     void setEmMpmWorkbench(EmMpmWorkbench* gui);
 
     /**

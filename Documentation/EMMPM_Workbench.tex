@@ -286,9 +286,61 @@ During the segmentation the mixture of Gaussians will be updated on the same plo
 \end{center}
 \end{figure}
 
+\chapter{Processing Multiple Images}
+EMMPM Workbench allows the user to segment multiple images in one run. These images can be from a 3D stack of images possibly or from a 2D mosaic or just a bunch of images that are generally similar. The basic process is to first select an input directory that contains all the images. The use the filename filter to make sure only the images you want to have segmented are in the list. If you want to segment the images in a specific order the user can drag-n-drop files within the list to set a new order. The user should also select an output directory and optionally give the output files either a unique prefix and/or suffix. Some new options for processing multiple images is to use the final values for the Mean and Standard Deviation from the current image as the Initialization inputs into the next image. This gives the advantage of starting the next image with a mixture of Gaussians that is closer to the final mean and standard deviation values. This could potentially allow the user to use less EM loops to attain the same segmentation. Another option available is to output the mixture of Gaussian data along with the histogram to a CSV formatted file for each image. Some simple statistics are also output to a text file for each image that is segmented.
+\begin{figure}[htbp]
+\begin{center}
+\includegraphics[width=6.4in]{images/Untitled15.png}
+\caption{Processing Multiple Files}
+\label{Untitled15}
+\end{center}
+\end{figure}
 
+\chapter{Miscellanious Notes}
 
-\chapter{Miscellanious Notes}\section{Number of Classes}Use more classes if you need more Gaussians to fit odd shaped peaks. In this sample, there are 2 peaks in the histogram and the method successfully fits two Gaussian peaks within it that gives a good segmentation.\section{Histogram (EM) Loops}Quality of optimization of the Gaussian fit to the histogram. Too few gives bad fit to histogram.\section{Segmentation (MPM) Loops}Controls the degree of convergence of the segmentation. Too few gives a speckled image.\section{Exchange Energy (Beta)}Typically, without the morphology regularization, beta of 0.5 gives jagged edges of precipitates. Too low of a value leads to jaggy boundaries whereas too high a value leads to welding of particles.\section{Simulated Annealing}Simulated annealing raises the Beta value as the segmentation goes on. On samples with really fine channels, it tends to weld things together because of capillarity (Beta is the pairwise interaction between pixels. Really large values of Beta simulate real large interfacial energies. Regions in contact tend to grow together to remove interfacial energy). Not using simulated annealing can lead to speckled images. Using it can lead to particle welding.\section{Edge Gradient Penalty}The gradient penalty detects systematic drops in intensity and allows you to split the particles apart, even though the intensity in the channel doesn't ever drop to what you would put as a threshold. Not using a gradient penalty can lead to intensity dips being smoothed out. Using too high a gradient penalty can cause individual pixels to be segmented because of Poisson noise that changes their intensity vis a vis neighboring pixels.\section{Beta E}Segmentation is very sensitive to Beta E values. On some samples, you have a lot of Poisson noise, and it's not useful to raise Beta E above maybe 2 or 3. If you do, you just get sand, because it splits the high brightness pixels from their neighbors. Too low a Beta E can lead to jaggy boundaries.\section{Curvature Penalty}There are two ways of smoothing a curve: raising Beta E and applying a curvature penalty. Raising Beta E makes particles consolidate, Curvature penalties do not.\section{Beta C}You may be able to get smoother boundaries by increasing this value, but morphological filtering does not have prior knowledge in it. If you get unrealistic segmentations with Beta C, they will show more about the actual structuring element used in the morphological filter than the material or prior knowledge. Too high a value of Beta C can lead to unrealistically shaped particles. Too low can lead to jaggy edges that you're tempted to smooth out with Beta E increases, which causes particles to weld.\section{R Max}R Max is (roughly) the maximum number of pixels you can erode back from the boundary. You have to use a larger value of Beta C if you use a smaller value of R Max. Larger R Max values lead to longer segmentation times. Too low a value can lead to jaggy interfaces. Too high can lead to excessive wait times for segmentations.\section{Chemical Potential}Increasing Chemical Potential leads to bigger particles because it favors growth of particles, at the expense of the matrix. We're off by a scaling value on this. The original papers on MPM concluded that Chemical Potential had little influence on the final segmentation. But, magnitudes on the order of 100 lead to noticeable results. A high value of Chemical Potential for a class causes pixels to leave that class, all other things being equal. Too low a value can lead to particles that are too small. Too large can lead to particles that are too large.
+\section{Number of Classes}Use more classes if you need more Gaussians to fit odd shaped peaks. In this sample, there are 2 peaks in the histogram and the method successfully fits two Gaussian peaks within it that gives a good segmentation.
+
+\section{Histogram (EM) Loops}Quality of optimization of the Gaussian fit to the histogram. Too few gives bad fit to histogram.
+
+\section{Segmentation (MPM) Loops}Controls the degree of convergence of the segmentation. Too few gives a speckled image.
+
+\section{Exchange Energy (Beta)}
+The Exchange Energy is the pairwise energy associated with a class mismatch
+between two pixels and is always positive. Setting the Exchange Energy sets
+this value for {\bfseries any} mismatch between two pixels. The Class Coupling allows
+you to tailor this value for an interface between two specific classes. The
+relative values of the Exchange Energies for the interfaces in an image
+produces all of the capillarity effects that you would see with surface
+tension.
+
+\section{Chemical Potential (Gamma)}The Chemical Potential is a thermodynamic variable that represents the free
+energy change when a unit amount of an element is added to a mixture. In the
+context of EM/MPM, the chemical potential is on a "per phase" basis, so
+increasing the Chemical Potential increases the amount of that "phase." More
+correctly, it increases the amount of the class for which the Chemical
+Potential is set. Decreasing the Chemical Potential decreases that amount.
+Note that, on the EM/MPM interface, the negative of the Chemical Potential
+is given, so the numerical trend for -Chemical Potential is the opposite and
+increasing this value can be viewed as penalizing the classification of
+pixels into that class.
+
+\subsection{Specific Strategies}
+
+To increase an already segmented class by several pixels in the boundary
+region, decrease the value of (-Chemical Potential) by a small amount.
+
+To make small regions go away, increase the value of (-Chemical Potential)
+and increase the value of the Exchange Energy between those regions and the
+surrounding class.
+
+To divide two different particles that are both embedded in a matrix,
+increase the Exchange Energy between each of the particle classes and the
+matrix, and decrease the Exchange Energy between the two particles. It may
+be necessary to decrease the (-Chemical Potential) of the matrix phase.
+
+To fuse two different particles that are embedded in a matrix, do the
+opposite.
+\section{Simulated Annealing}Simulated annealing raises the Beta value as the segmentation goes on. On samples with really fine channels, it tends to weld things together because of capillarity (Beta is the pairwise interaction between pixels. Really large values of Beta simulate real large interfacial energies. Regions in contact tend to grow together to remove interfacial energy). Not using simulated annealing can lead to speckled images. Using it can lead to particle welding.\section{Edge Gradient Penalty}The gradient penalty detects systematic drops in intensity and allows you to split the particles apart, even though the intensity in the channel doesn't ever drop to what you would put as a threshold. Not using a gradient penalty can lead to intensity dips being smoothed out. Using too high a gradient penalty can cause individual pixels to be segmented because of Poisson noise that changes their intensity vis a vis neighboring pixels.\section{Beta E}Segmentation is very sensitive to Beta E values. On some samples, you have a lot of Poisson noise, and it's not useful to raise Beta E above maybe 2 or 3. If you do, you just get sand, because it splits the high brightness pixels from their neighbors. Too low a Beta E can lead to jaggy boundaries.\section{Curvature Penalty}There are two ways of smoothing a curve: raising Beta E and applying a curvature penalty. Raising Beta E makes particles consolidate, Curvature penalties do not.\section{Beta C}You may be able to get smoother boundaries by increasing this value, but morphological filtering does not have prior knowledge in it. If you get unrealistic segmentations with Beta C, they will show more about the actual structuring element used in the morphological filter than the material or prior knowledge. Too high a value of Beta C can lead to unrealistically shaped particles. Too low can lead to jaggy edges that you're tempted to smooth out with Beta E increases, which causes particles to weld.\section{R Max}R Max is (roughly) the maximum number of pixels you can erode back from the boundary. You have to use a larger value of Beta C if you use a smaller value of R Max. Larger R Max values lead to longer segmentation times. Too low a value can lead to jaggy interfaces. Too high can lead to excessive wait times for segmentations.
 
 \newpage
 \begin{thebibliography}{4}

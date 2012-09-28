@@ -91,7 +91,7 @@
 #include "EMMPMLib/tiff/TiffUtilities.h"
 
 //-- EMMPM Gui Includes
-#include "EMMPMGuiVersion.h"
+#include "EmMpmWorkbenchVersion.h"
 #include "UserInitArea.h"
 #include "EMMPMTask.h"
 #include "AxisSettingsDialog.h"
@@ -398,7 +398,7 @@ void EmMpmWorkbench::readSettings(QSettings &prefs)
     showUserDefinedAreas->setEnabled(true);
     showUserDefinedAreas->setChecked(true);
     UserInitArea::deleteAllUserInitAreas(m_GraphicsView->scene());
-    m_UserInitAreaVector->clear();
+    m_GraphicsView->getUserInitAreas()->clear();
     for (int i = 0; i < userInitAreaCount; ++i)
     {
       UserInitArea* uia = UserInitArea::NewUserInitArea(prefs, i);
@@ -427,7 +427,7 @@ void EmMpmWorkbench::readSettings(QSettings &prefs)
 void EmMpmWorkbench::writeSettings(QSettings &prefs)
 {
 
-  prefs.setValue("Version", QString::fromStdString(EmMpm_Gui::Version::Complete()));
+  prefs.setValue("Version", QString::fromStdString(EmMpm_Workbench::Version::Complete()));
 //  WRITE_STRING_SETTING(prefs, outputPrefix);
 //  WRITE_STRING_SETTING(prefs, outputSuffix);
 
@@ -458,7 +458,7 @@ void EmMpmWorkbench::writeSettings(QSettings &prefs)
   WRITE_CHECKBOX_SETTING(prefs, enableUserDefinedAreas);
   WRITE_CHECKBOX_SETTING(prefs, showUserDefinedAreas);
   WRITE_CHECKBOX_SETTING(prefs, muSigmaFeedback);
-  int userInitAreaCount = this->m_UserInitAreaVector->size();
+  int userInitAreaCount = this->m_GraphicsView->getUserInitAreas()->size();
   WRITE_VALUE(prefs, userInitAreaCount);
 
   WRITE_CHECKBOX_SETTING(prefs, enableManualInit);
@@ -499,9 +499,9 @@ void EmMpmWorkbench::writeSettings(QSettings &prefs)
 
   if (enableUserDefinedAreas->isChecked() == true)
   {
-    for (int i = 0; i < this->m_UserInitAreaVector->size(); ++i)
+    for (int i = 0; i < this->m_GraphicsView->getUserInitAreas()->size(); ++i)
     {
-      UserInitArea* uia = m_UserInitAreaVector->at(i);
+      UserInitArea* uia = m_GraphicsView->getUserInitAreas()->at(i);
       uia->writeSettings(prefs);
     }
   }
@@ -663,13 +663,10 @@ void EmMpmWorkbench::setupGui()
 
   zoomButton->setMenu(zoomMenu);
 
-  m_UserInitAreaVector = new QVector<UserInitArea*>;
-
   m_AxisSettingsDialog = new AxisSettingsDialog(this);
   m_AxisSettingsDialog->setVisible(false);
 
   m_GraphicsView->setEmMpmWorkbench(this);
-  m_GraphicsView->setUserInitAreas(m_UserInitAreaVector);
 
   connect (m_GraphicsView, SIGNAL(fireOverlayImageFileLoaded(const QString &)),
            this, SLOT(overlayImageFileLoaded(const QString &)), Qt::QueuedConnection);
@@ -719,8 +716,8 @@ void EmMpmWorkbench::setupGui()
 
   // setup the Widget List
   m_WidgetList << m_NumClasses << m_EmIterations << m_MpmIterations << m_Beta;
-  m_WidgetList << enableUserDefinedAreas << showUserDefinedAreas << useSimulatedAnnealing;
-  m_WidgetList << useCurvaturePenalty << useGradientPenalty;
+  m_WidgetList << enableUserDefinedAreas << showUserDefinedAreas;
+  m_WidgetList << useCurvaturePenalty << useGradientPenalty << useSimulatedAnnealing;
   m_WidgetList << curvatureBetaC << curvatureRMax << ccostLoopDelay;
   m_WidgetList << gradientBetaE;
   m_WidgetList << axisSettingsBtn << clearTempHistograms << saveCurves;
@@ -864,12 +861,13 @@ void EmMpmWorkbench::copyGrayValues( EMMPM_Data::Pointer inputs)
 // -----------------------------------------------------------------------------
 void EmMpmWorkbench::copyInitCoords( EMMPM_Data::Pointer inputs)
 {
-  int size = m_UserInitAreaVector->count();
+  int size = m_GraphicsView->getUserInitAreas()->count();
   UserInitArea* uia = NULL;
   unsigned int* cPtr = inputs->initCoords[0];
   for (int r = 0; r < size; ++r)
   {
-    uia = m_UserInitAreaVector->at(r);
+    uia = m_GraphicsView->getUserInitAreas()->at(r);
+    if (NULL == uia) { continue; }
     cPtr = inputs->initCoords[r];
     uia->getUpperLeft( cPtr[0], cPtr[1]);
     uia->getLowerRight( cPtr[2], cPtr[3] );
@@ -881,12 +879,13 @@ void EmMpmWorkbench::copyInitCoords( EMMPM_Data::Pointer inputs)
 // -----------------------------------------------------------------------------
 void EmMpmWorkbench::copyIntializationValues(EMMPM_Data::Pointer inputs)
 {
-  int size = m_UserInitAreaVector->count();
+  int size = m_GraphicsView->getUserInitAreas()->count();
 
   UserInitArea* uia = NULL;
   for (int r = 0; r < size; ++r)
   {
-    uia = m_UserInitAreaVector->at(r);
+    uia = m_GraphicsView->getUserInitAreas()->at(r);
+    if (NULL == uia) { continue; }
     inputs->mean[r] = uia->getMu();
     inputs->variance[r] = uia->getSigma() * uia->getSigma();
  //   std::cout << "Initializing with Mu:" << inputs->m[r] << "  Sigma: " << inputs->v[r] << std::endl;
@@ -974,9 +973,8 @@ void EMMPMUpdateStats(EMMPM_Data::Pointer data)
 // -----------------------------------------------------------------------------
 void EmMpmWorkbench::on_processBtn_clicked()
 {
-
   /* this is a first good sanity check */
-  if (enableUserDefinedAreas->isChecked() && m_UserInitAreaVector->count() == 0)
+  if (enableUserDefinedAreas->isChecked() && m_GraphicsView->getUserInitAreas()->count() == 0)
    {
      QMessageBox::critical(this, tr("User Initialization Areas Error"), tr("Enable User Init Areas is ON but no areas are defined."), QMessageBox::Ok);
      return;
@@ -1394,7 +1392,7 @@ void EmMpmWorkbench::queueControllerFinished()
   }
   setWindowTitle(m_CurrentImageFile);
   setWidgetListEnabled(true);
-  if (m_UserInitAreaVector->size() != 0)
+  if (m_GraphicsView->getUserInitAreas()->size() != 0)
   {
     m_NumClasses->setEnabled(false);
   }
@@ -1441,10 +1439,14 @@ void EmMpmWorkbench::on_processFolder_stateChanged(int state)
     outputImageFile->setEnabled(!checked);
     outputImageButton->setEnabled(!checked);
 
+
+
     // If we are checked then load the first image (assuming it exists) in the image viewer
     if (checked == true)
     {
         on_sourceDirectoryLE_textChanged(QString(""));
+        // Make sure the filter is run on the file list
+        on_filterPatternLineEdit_textChanged();
     }
     else // We load up what ever file is in the input image file path line edit
     {
@@ -1825,7 +1827,7 @@ void EmMpmWorkbench::on_actionAbout_triggered()
   ApplicationAboutBoxDialog about(QEMMPM::LicenseList, this);
   QString an = QCoreApplication::applicationName();
   QString version("");
-  version.append(EmMpm_Gui::Version::PackageComplete().c_str());
+  version.append(EmMpm_Workbench::Version::PackageComplete().c_str());
   about.setApplicationInfo(an, version);
   about.exec();
 }
@@ -1856,6 +1858,28 @@ void EmMpmWorkbench::openBaseImageFile(QString imageFile)
     return;
   }
 
+#if 0
+  UserInitArea::deleteAllUserInitAreas(m_GraphicsView->scene());
+
+  // Delete all the User Init Areas from the Scene
+  enableUserDefinedAreas->setCheckState(Qt::Unchecked);
+  on_enableUserDefinedAreas_stateChanged(Qt::Unchecked);
+  //Clear out the UserInitAreas that we are tracking. They have all been released
+  // in memory we just simply need to clear the tracking vector. This class does
+  // not own the pointer so we don't worry about cleaning up the memory.
+  UserInitArea::deleteAllUserInitAreas(m_GraphicsView->scene());
+  m_GraphicsView->getUserInitAreas()->clear();
+#endif
+
+#if 0
+  enableUserDefinedAreas->setEnabled(false);
+  showUserDefinedAreas->setEnabled(false);
+
+  showUserDefinedAreas->setChecked(false);
+  enableUserDefinedAreas->setChecked(false);
+  m_GraphicsView->updateDisplay();
+#endif
+
   QFileInfo fi(imageFile);
   m_OpenDialogLastDirectory = fi.absolutePath();
 
@@ -1875,23 +1899,11 @@ void EmMpmWorkbench::openBaseImageFile(QString imageFile)
   setImageWidgetsEnabled(true);
   updateBaseRecentFileList(imageFile);
 
-  UserInitArea::deleteAllUserInitAreas(m_GraphicsView->scene());
-
-  // Delete all the User Init Areas from the Scene
-  enableUserDefinedAreas->setCheckState(Qt::Unchecked);
-  on_enableUserDefinedAreas_stateChanged(Qt::Unchecked);
-  //Clear out the UserInitAreas that we are tracking. They have all been released
-  // in memory we just simply need to clear the tracking vector. This class does
-  // not own the pointer so we don't worry about cleaning up the memory.
-  m_UserInitAreaVector->clear();
-
   ImageOpenDialog d(this);
 
   d.show();
-  //d.raise();
   d.activateWindow();
   d.setModal(false);
-
   d.setStatus("Loading Image File....");
   m_GraphicsView->loadBaseImageFile(imageFile);
   clearGaussianCurves();
@@ -2196,10 +2208,11 @@ void EmMpmWorkbench::updateGaussianCurves(bool generateNewGaussianData)
     // update its color with the color from the gaussian curve
     if (true == enableUserDefinedAreas->isChecked())
     {
-        int count = m_UserInitAreaVector->count();
+        int count = m_GraphicsView->getUserInitAreas()->count();
         if (i < count)
         {
-            UserInitArea* uia = m_UserInitAreaVector->at(i);
+            UserInitArea* uia = m_GraphicsView->getUserInitAreas()->at(i);
+            if (NULL == uia) { continue; }
             QColor uicColor = c;
             uicColor.setAlpha(128);
             uia->setColor(uicColor);
@@ -2531,9 +2544,9 @@ void EmMpmWorkbench::addGaussianCurve(QVector<real_t> data)
 
   QPen pen(Qt::red, 1.5, Qt::SolidLine);
 
-  if(enableUserDefinedAreas->isChecked() == true && m_UserInitAreaVector->size() > 0)
+  if(enableUserDefinedAreas->isChecked() == true && m_GraphicsView->getUserInitAreas()->size() > m_CurrentHistogramClass)
   {
-    QColor c = m_UserInitAreaVector->at(m_CurrentHistogramClass)->getColor();
+    QColor c = m_GraphicsView->getUserInitAreas()->at(m_CurrentHistogramClass)->getColor();
     c.setAlpha(255);
     pen.setColor(c);
 
@@ -2562,7 +2575,7 @@ void EmMpmWorkbench::addGaussianCurve(QVector<real_t> data)
   ++m_CurrentHistogramClass;
 
   // Only update the combined Gaussian when all the individual Gaussian's are in place
-  if(m_UserInitAreaVector->size() == m_CurrentHistogramClass)
+  if(m_GraphicsView->getUserInitAreas()->size() == m_CurrentHistogramClass)
   {
     plotCombinedGaussian();
   }
@@ -2658,7 +2671,11 @@ void EmMpmWorkbench::userInitAreaUpdated(UserInitArea* uia)
 
   // Locate our curve object by getting the row from the TableModel that corresponds
   // to the UIA object that was passed in
-  int row = m_UserInitAreaVector->indexOf(uia, 0);
+  int row = m_GraphicsView->getUserInitAreas()->indexOf(uia, 0);
+  if (row >= m_GaussianCurves.count() )
+  {
+    return;
+  }
   QwtPlotCurve* curve = m_GaussianCurves[row];
   curve->setData(intervals, values);
 
@@ -2961,7 +2978,7 @@ void EmMpmWorkbench::refreshMSEPlot()
 // -----------------------------------------------------------------------------
 void EmMpmWorkbench::deleteUserInitArea(UserInitArea* uia)
 {
-  int row = m_UserInitAreaVector->indexOf(uia, 0);
+  int row = m_GraphicsView->getUserInitAreas()->indexOf(uia, 0);
   if (row >= m_GaussianCurves.count() )
   {
     return;
@@ -2973,17 +2990,18 @@ void EmMpmWorkbench::deleteUserInitArea(UserInitArea* uia)
   delete curve; // Clean up the memory
   m_HistogramPlot->replot();
 
-  uia = m_UserInitAreaVector->at(row);
-  m_UserInitAreaVector->remove(row);
+  uia = m_GraphicsView->getUserInitAreas()->at(row);
+  m_GraphicsView->getUserInitAreas()->remove(row);
+
 
   // Now renumber the classes:
-  qint32 size = m_UserInitAreaVector->size();
+  qint32 size = m_GraphicsView->getUserInitAreas()->size();
   for(qint32 i = 0; i < size; ++i)
   {
-    m_UserInitAreaVector->at(i)->setEmMpmClass(i);
+    m_GraphicsView->getUserInitAreas()->at(i)->setEmMpmClass(i);
   }
-  m_NumClasses->setValue(m_UserInitAreaVector->size());
-  if (m_UserInitAreaVector->size() == 0)
+  m_NumClasses->setValue(m_GraphicsView->getUserInitAreas()->size());
+  if (m_GraphicsView->getUserInitAreas()->size() == 0)
   {
     m_NumClasses->setEnabled(true);
   }
@@ -2994,7 +3012,6 @@ void EmMpmWorkbench::deleteUserInitArea(UserInitArea* uia)
 // -----------------------------------------------------------------------------
 void EmMpmWorkbench::userInitAreaAdded(UserInitArea* uia)
 {
- // std::cout << "EmMpmWorkbench::userInitAreaAdded()" << std::endl;
   m_UserInitAreaWidget->setUserInitArea(uia);
 
   if (NULL == uia) { return; }
@@ -3003,11 +3020,11 @@ void EmMpmWorkbench::userInitAreaAdded(UserInitArea* uia)
 
   // Figure out the proper row to insert the curve object to keep it in sync with
   // the table model
-  int row = m_UserInitAreaVector->indexOf(uia, 0);
+  int row = m_GraphicsView->getUserInitAreas()->indexOf(uia, 0);
   // This will have the cascade effect of removing or adding rows to both the PerClass
   // TableView and the Manual Initialization Table View
-  m_NumClasses->setValue(m_UserInitAreaVector->size());
-  if (m_UserInitAreaVector->size() != 0)
+  m_NumClasses->setValue(m_GraphicsView->getUserInitAreas()->size());
+  if (m_GraphicsView->getUserInitAreas()->size() != 0)
   {
     m_NumClasses->setEnabled(false);
   }
@@ -3064,11 +3081,6 @@ void EmMpmWorkbench::on_filterPatternLineEdit_textChanged()
     QListWidgetItem* item  = new QListWidgetItem(strList.at(i));
     fileListWidget->addItem(item);
   }
-
-
-  // std::cout << "filterPattern: " << std::endl;
-//  getProxyModel()->setFilterFixedString(filterPatternLineEdit->text());
-//  getProxyModel()->setFilterCaseSensitivity(Qt::CaseInsensitive);
 }
 
 // -----------------------------------------------------------------------------
@@ -3077,24 +3089,9 @@ void EmMpmWorkbench::on_filterPatternLineEdit_textChanged()
 QStringList EmMpmWorkbench::generateInputFileList()
 {
   QStringList list;
-#if 0
-  int count = this->m_ProxyModel->rowCount();
-  // this->fileListView->selectAll();
-  QAbstractItemModel* sourceModel = this->m_ProxyModel->sourceModel();
-  for (int i = 0; i < count; ++i)
-  {
-    QModelIndex proxyIndex = this->m_ProxyModel->index(i,0);
-    QModelIndex sourceIndex = this->m_ProxyModel->mapToSource(proxyIndex);
-    list.append( sourceModel->data(sourceIndex, 0).toString() );
-  }
-#endif
   int count = fileListWidget->count();
   for(int i = 0; i < count; ++i)
   {
-    //QString path = sourceDirectoryLE->text();
-    //path.append(QDir::separator());
-    //path.append(fileListWidget->item(i)->text());
-
     list.append(fileListWidget->item(i)->text());
   }
   return list;
@@ -3255,15 +3252,16 @@ void EmMpmWorkbench::on_saveCurves_clicked()
 // -----------------------------------------------------------------------------
 void EmMpmWorkbench::on_clearTempHistograms_clicked()
 {
+  std::cout << "EmMpmWorkbench::on_clearTempHistograms_clicked()" << std::endl;
   clearGaussianCurves();
   plotImageHistogram();
   if (enableUserDefinedAreas->isChecked() )
   {
-    int size = m_UserInitAreaVector->count();
+    int size = m_GraphicsView->getUserInitAreas()->count();
     UserInitArea* uia = NULL;
     for (int r = 0; r < size; ++r)
     {
-      uia = m_UserInitAreaVector->at(r);
+      uia = m_GraphicsView->getUserInitAreas()->at(r);
       userInitAreaAdded(uia);
     }
   }
@@ -3275,29 +3273,34 @@ void EmMpmWorkbench::on_clearTempHistograms_clicked()
 // -----------------------------------------------------------------------------
 void EmMpmWorkbench::on_showUserDefinedAreas_stateChanged(int state)
 {
-    int size = m_UserInitAreaVector->count();
-    UserInitArea* uia = NULL;
+  int size = m_GraphicsView->getUserInitAreas()->count();
+  UserInitArea* uia = NULL;
 
-    for (int r = 0; r < size; ++r)
+  for (int r = 0; r < size; ++r)
+  {
+    uia = m_GraphicsView->getUserInitAreas()->value(r, NULL);
+    if(uia)
     {
-        uia = m_UserInitAreaVector->at(r);
-        if (uia)
+      if(showUserDefinedAreas->isChecked())
+      {
+        uia->setVisible(true);
+        if(m_GraphicsView->scene() != uia->scene())
         {
-            if(showUserDefinedAreas->isChecked())
-            {
-                uia->setVisible(true);
-                m_GraphicsView->scene()->addItem(uia);
-            }
-            else
-            {
-                uia->setVisible(false);
-                if ( uia->scene())
-                {
-                    m_GraphicsView->scene()->removeItem(uia);
-                }
-            }
+          m_GraphicsView->scene()->addItem(uia);
         }
+        userInitAreaAdded(uia);
+      }
+      else
+      {
+        if(uia->scene() == m_GraphicsView->scene())
+        {
+          m_GraphicsView->scene()->removeItem(uia);
+          uia->setVisible(false);
+        }
+      }
     }
+  }
+  m_GraphicsView->updateDisplay();
 }
 
 // -----------------------------------------------------------------------------
@@ -3305,41 +3308,22 @@ void EmMpmWorkbench::on_showUserDefinedAreas_stateChanged(int state)
 // -----------------------------------------------------------------------------
 void EmMpmWorkbench::on_enableUserDefinedAreas_stateChanged(int state)
 {
-    m_NumClasses->setEnabled( !enableUserDefinedAreas->isChecked() );
-    showUserDefinedAreas->setEnabled( enableUserDefinedAreas->isChecked() );
-    if (enableUserDefinedAreas->isChecked() == false)
-    {
-        showUserDefinedAreas->setChecked(false);
-    }
+  m_NumClasses->setEnabled( !enableUserDefinedAreas->isChecked() );
+  showUserDefinedAreas->setEnabled( enableUserDefinedAreas->isChecked() );
+  if (enableUserDefinedAreas->isChecked() == false)
+  {
+    showUserDefinedAreas->setChecked(false);
+  }
 
-    int size = m_UserInitAreaVector->count();
-    UserInitArea* uia = NULL;
-//    int s = m_GaussianCurves.size();
-//    int u = m_UserInitAreaVector->size();
-
-    // If we are enabling the User Init Areas, then make sure we can see them
-    if(enableUserDefinedAreas->isChecked())
-    {
-      showUserDefinedAreas->setChecked(true);
-    }
-
-    for (int r = 0; r < size; ++r)
-    {
-        uia = m_UserInitAreaVector->at(r);
-        if(enableUserDefinedAreas->isChecked())
-        {
-            userInitAreaAdded(uia);
-        }
-    }
-    m_UserInitAreaWidget->setUserInitArea(NULL);
-    if(enableUserDefinedAreas->isChecked() == false )
-    {
-        updateGaussianCurves(true); // We need to generate the Gaussian curves for the User Init Area Mu/Sigma values
-    }
-    m_HistogramPlot->replot();
-    if(enableUserDefinedAreas->isChecked() == true) {
-        enableManualInit->setChecked(!enableUserDefinedAreas->isChecked());
-    }
+  m_UserInitAreaWidget->setUserInitArea(NULL);
+  if(enableUserDefinedAreas->isChecked() == false )
+  {
+    updateGaussianCurves(true); // We need to generate the Gaussian curves for the User Init Area Mu/Sigma values
+  }
+  m_HistogramPlot->replot();
+  if(enableUserDefinedAreas->isChecked() == true) {
+    enableManualInit->setChecked(!enableUserDefinedAreas->isChecked());
+  }
 }
 
 // -----------------------------------------------------------------------------

@@ -59,6 +59,7 @@ EMMPMGraphicsView::EMMPMGraphicsView(QWidget *parent)
   setAcceptDrops(true);
   setDragMode(RubberBandDrag);
   m_AddUserInitArea = false;
+  m_UserInitAreaVector = new QVector<UserInitArea*>;
 
   m_ZoomFactors[0] = 0.1f;
   m_ZoomFactors[1] = 0.25f;
@@ -400,9 +401,6 @@ void EMMPMGraphicsView::loadBaseImageFile(const QString &filename)
   m_OverlayImage = m_BaseImage;
   m_CompositedImage = m_BaseImage;
 
-//  m_OverlayImage = QImage(pSize, QImage::Format_ARGB32_Premultiplied);
-//  m_CompositedImage = QImage(pSize, QImage::Format_ARGB32_Premultiplied);
-
   QVector<QRgb > colorTable(256);
   for (quint32 i = 0; i < 256; ++i)
   {
@@ -410,7 +408,6 @@ void EMMPMGraphicsView::loadBaseImageFile(const QString &filename)
   }
   m_BaseImage.setColorTable(colorTable);
 
-  //m_BaseImage = m_BaseImage.convertToFormat(QImage::Format_ARGB32_Premultiplied);
   if (m_BaseImage.isNull() == true)
   {
     std::cout << "Base Image was NULL for some reason. Returning" << std::endl;
@@ -429,7 +426,10 @@ void EMMPMGraphicsView::loadBaseImageFile(const QString &filename)
       UserInitArea* ui = m_UserInitAreaVector->at(i);
       if(ui)
       {
-        scene()->removeItem(ui);
+        if (ui->scene() != NULL)
+        {
+            ui->scene()->removeItem(ui);
+        }
         ui->setParentItem(NULL);
       }
     }
@@ -441,7 +441,8 @@ void EMMPMGraphicsView::loadBaseImageFile(const QString &filename)
     delete m_ImageGraphicsItem;
     m_ImageGraphicsItem = NULL;
   }
-  if (NULL == m_ImageGraphicsItem) {
+  if (NULL == m_ImageGraphicsItem)
+  {
     QImageReader reader(filename);
     QPixmap pixmap = QPixmap::fromImageReader(&reader, 0);
     m_ImageGraphicsItem = gScene->addPixmap(pixmap);
@@ -452,8 +453,13 @@ void EMMPMGraphicsView::loadBaseImageFile(const QString &filename)
   for(int i = 0; i < m_UserInitAreaVector->size(); ++i)
   {
     UserInitArea* ui = m_UserInitAreaVector->at(i);
-    if(ui){
+    if(ui)
+    {
       ui->setParentItem(m_ImageGraphicsItem);
+      if (ui->isVisible() == false)
+      {
+        ui->scene()->removeItem(ui);
+      }
     }
   }
 
@@ -656,13 +662,12 @@ void EMMPMGraphicsView::createNewUserInitArea(const QPolygonF &polygon)
 // -----------------------------------------------------------------------------
 void EMMPMGraphicsView::addNewInitArea(UserInitArea* userInitArea)
 {
- // std::cout << "EMMPMGraphicsView::addNewInitArea()" << std::endl;
-
-
   // Set the Parent Item
   userInitArea->setParentItem(m_ImageGraphicsItem);
   // Add it to the vector of UserInitAreas
   m_UserInitAreaVector->push_back(userInitArea);
+  // Make it visible
+  userInitArea->setVisible(true);
 
   // Hook up the signals and slots
   connect (userInitArea, SIGNAL(fireUserInitAreaAboutToDelete(UserInitArea*)),
@@ -677,11 +682,8 @@ void EMMPMGraphicsView::addNewInitArea(UserInitArea* userInitArea)
   connect (userInitArea, SIGNAL (fireUserInitAreaUpdated(UserInitArea*)),
            this, SLOT(userInitAreaUpdated(UserInitArea*)), Qt::QueuedConnection);
 
-
-
     qint32 size = m_UserInitAreaVector->size();
     QVector<QRgb> colorTable(size);
-  //  QVector<QRgb> grayTable(size);
     UserInitArea* u = NULL;
     for(qint32 i = 0; i < size; ++i)
     {
@@ -690,13 +692,12 @@ void EMMPMGraphicsView::addNewInitArea(UserInitArea* userInitArea)
       {
         int index = u->getEmMpmClass(); // Get the class value which will be the index values that are written to the indexed image
         colorTable[index] = u->getColor().rgb();
-    //    grayTable[index] = qRgb(u->getEmMpmGrayLevel(), u->getEmMpmGrayLevel(), u->getEmMpmGrayLevel());
       }
     }
 
     updateColorTables(colorTable);
 
-  emit fireUserInitAreaAdded(userInitArea);
+    emit fireUserInitAreaAdded(userInitArea);
 }
 
 // -----------------------------------------------------------------------------

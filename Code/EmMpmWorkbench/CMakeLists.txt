@@ -8,8 +8,8 @@ PROJECT( EmMpmWorkbench )
 cmake_minimum_required(VERSION 2.8.6)
 
 set (CMP_HEADER_DIR ${EmMpmWorkbench_BINARY_DIR})
-set (CMP_VERSION_HEADER_FILE_NAME "EMMPMGuiVersion.h")
-set (CMP_VERSION_SOURCE_FILE_NAME "EMMPMGuiVersion.cpp")
+set (CMP_VERSION_HEADER_FILE_NAME "EmMpmWorkbenchVersion.h")
+set (CMP_VERSION_SOURCE_FILE_NAME "EmMpmWorkbenchVersion.cpp")
 
 # --------------------------------------------------------------------
 # In order to increment the version of EMMPMGuiProj simply adjust these variables.
@@ -28,14 +28,14 @@ set(CMP_VERSION_MAJOR "v2")
 if (EXISTS ${EMMPMGuiProj_SOURCE_DIR}/.git)
 cmpVersionStringsFromGit(GENERATED_HEADER_FILE_PATH ${CMP_HEADER_DIR}/${CMP_VERSION_HEADER_FILE_NAME}
                          GENERATED_SOURCE_FILE_PATH ${CMP_HEADER_DIR}/${CMP_VERSION_SOURCE_FILE_NAME}
-                         NAMESPACE EmMpm_Gui
-                         cmpProjectName EMMPMGui
+                         NAMESPACE EmMpm_Workbench
+                         cmpProjectName EmMpmWorkbench
                          WORKING_DIRECTORY ${EMMPMGuiProj_SOURCE_DIR} )
 else()
    cmpGenerateVersionString(GENERATED_HEADER_FILE_PATH ${CMP_HEADER_DIR}/${CMP_VERSION_HEADER_FILE_NAME}
                          GENERATED_SOURCE_FILE_PATH ${CMP_HEADER_DIR}/${CMP_VERSION_SOURCE_FILE_NAME}
-                         NAMESPACE EmMpm_Gui
-                         cmpProjectName EMMPMGui
+                         NAMESPACE EmMpm_Workbench
+                         cmpProjectName EmMpmWorkbench
                          WORKING_DIRECTORY ${EMMPMGuiProj_SOURCE_DIR}
                          MAJOR 0 MINOR 0 PATCH 0)
 endif()
