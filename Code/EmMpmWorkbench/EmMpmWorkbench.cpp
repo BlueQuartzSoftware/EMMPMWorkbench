@@ -1412,6 +1412,8 @@ void EmMpmWorkbench::queueControllerFinished()
   /* Update MSE Plot with better title */
   m_MSEPlot->setTitle("MSE Plot");
 
+  /* Update other number classes and user init widgets */
+  on_enableUserDefinedAreas_stateChanged(enableUserDefinedAreas->checkState());
 
   // Make sure the image manipulating widgets are enabled
   setImageWidgetsEnabled(true);
