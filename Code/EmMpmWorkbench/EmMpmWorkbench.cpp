@@ -233,6 +233,7 @@ EmMpmWorkbench* EmMpmWorkbench::CreateNewWindow()
   viewer->show();
   viewer->raise();
   viewer->activateWindow();
+  return viewer;
 }
 
 // -----------------------------------------------------------------------------
