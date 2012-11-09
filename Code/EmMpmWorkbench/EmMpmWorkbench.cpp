@@ -222,9 +222,18 @@ m_ImageStatsReady(false)
 // -----------------------------------------------------------------------------
 EmMpmWorkbench::~EmMpmWorkbench()
 {
-
 }
 
+// -----------------------------------------------------------------------------
+//
+// -----------------------------------------------------------------------------
+EmMpmWorkbench* EmMpmWorkbench::CreateNewWindow()
+{
+  EmMpmWorkbench *viewer = new EmMpmWorkbench;
+  viewer->show();
+  viewer->raise();
+  viewer->activateWindow();
+}
 
 // -----------------------------------------------------------------------------
 //  Called when the main window is closed.
@@ -593,12 +602,21 @@ void EmMpmWorkbench::on_actionLoad_Config_File_triggered()
 // -----------------------------------------------------------------------------
 void EmMpmWorkbench::on_action_ResetPreferences_triggered()
 {
+  // Close the window
+  this->close();
+
+  // Get the preferences and clear them
 #if defined (Q_OS_MAC)
   QSettings prefs(QSettings::NativeFormat, QSettings::UserScope, QCoreApplication::organizationDomain(), QCoreApplication::applicationName());
 #else
   QSettings prefs(QSettings::IniFormat, QSettings::UserScope, QCoreApplication::organizationDomain(), QCoreApplication::applicationName());
 #endif
   prefs.clear();
+
+  // Create a new EmMpmWorkbench Window
+  EmMpmWorkbench::CreateNewWindow();
+  // Delete this window later on.
+  this->deleteLater();
 }
 
 // -----------------------------------------------------------------------------

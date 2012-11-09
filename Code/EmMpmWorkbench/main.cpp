@@ -52,10 +52,8 @@ int main(int argc, char **argv)
 #endif
   QRecentFileList::instance()->readList(prefs);
 
-  EmMpmWorkbench *viewer = new EmMpmWorkbench;
-  viewer->show();
-  viewer->raise();
-  viewer->activateWindow();
+  EmMpmWorkbench *viewer = EmMpmWorkbench::CreateNewWindow();
+
   int app_return = app.exec();
 
   QRecentFileList::instance()->writeList(prefs);

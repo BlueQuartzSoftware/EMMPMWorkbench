@@ -86,6 +86,10 @@ class EmMpmWorkbench : public QMainWindow, private Ui::EmMpmWorkbench
   public:
     EmMpmWorkbench(QWidget *parent = 0);
     virtual ~EmMpmWorkbench();
+
+    static EmMpmWorkbench* CreateNewWindow();
+
+
     void initWithFile(const QString imageFile, QString mountImage);
 
 
