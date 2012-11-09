@@ -134,8 +134,11 @@ void EMMPMGraphicsView::setZoomIndex(int index)
 {
   if (index == 9)
   {
-    QRectF r = scene()->sceneRect();
-    fitInView(r, Qt::KeepAspectRatio);
+    QGraphicsScene* scenePtr = scene();
+    if (NULL != scenePtr) {
+      QRectF r = scenePtr->sceneRect();
+      fitInView(r, Qt::KeepAspectRatio);
+    }
   }
   else
   {
