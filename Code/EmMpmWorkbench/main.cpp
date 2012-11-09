@@ -38,7 +38,7 @@ int main(int argc, char **argv)
   QApplication app(argc, argv);
   QCoreApplication::setOrganizationName("BlueQuartz Software");
   QCoreApplication::setOrganizationDomain("bluequartz.net");
-  QCoreApplication::setApplicationName("EmMpmGui");
+  QCoreApplication::setApplicationName("EMMPMWorkbench");
 
 #if defined( Q_WS_MAC )
   //Needed for typical Mac program behavior.
@@ -46,9 +46,9 @@ int main(int argc, char **argv)
 #endif //APPLE
 
 #if defined (Q_OS_MAC)
-  QSettings prefs(QSettings::NativeFormat, QSettings::UserScope, "bluequartz.net", "EmMpmGui");
+  QSettings prefs(QSettings::NativeFormat, QSettings::UserScope, QCoreApplication::organizationDomain(), QCoreApplication::applicationName());
 #else
-  QSettings prefs(QSettings::IniFormat, QSettings::UserScope, "bluequartz.net", "EmMpmGui");
+  QSettings prefs(QSettings::IniFormat, QSettings::UserScope, QCoreApplication::organizationDomain(), QCoreApplication::applicationName());
 #endif
   QRecentFileList::instance()->readList(prefs);
 

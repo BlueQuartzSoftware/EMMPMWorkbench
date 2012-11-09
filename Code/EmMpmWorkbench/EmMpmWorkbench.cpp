@@ -593,10 +593,10 @@ void EmMpmWorkbench::on_actionLoad_Config_File_triggered()
 // -----------------------------------------------------------------------------
 void EmMpmWorkbench::on_action_ResetPreferences_triggered()
 {
-  #if defined (Q_OS_MAC)
-  QSettings prefs(QSettings::NativeFormat, QSettings::UserScope, "bluequartz.net", "EmMpmWorkbench");
+#if defined (Q_OS_MAC)
+  QSettings prefs(QSettings::NativeFormat, QSettings::UserScope, QCoreApplication::organizationDomain(), QCoreApplication::applicationName());
 #else
-  QSettings prefs(QSettings::IniFormat, QSettings::UserScope, "bluequartz.net", "EmMpmWorkbench");
+  QSettings prefs(QSettings::IniFormat, QSettings::UserScope, QCoreApplication::organizationDomain(), QCoreApplication::applicationName());
 #endif
   prefs.clear();
 }
