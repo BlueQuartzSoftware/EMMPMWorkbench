@@ -54,6 +54,9 @@ set (CMP_LIB_SEARCH_DIRS "")
 set (CMP_MODULES_SOURCE_DIR ${CMP_SOURCE_DIR}/Modules CACHE INTERNAL "")
 set (CMP_CONFIGURED_FILES_SOURCE_DIR ${CMP_SOURCE_DIR}/ConfiguredFiles CACHE INTERRNAL "")
 
+if (UNIX AND NOT APPLE)
+    set(EmMpmWorkbench_LINUX_SYSTEM ${CMAKE_SYSTEM_NAME} CACHE STRING "The Name of the linux distrubution for packaging")
+endif()
 
 # --------------------------------------------------------------------
 # Over ride CMake's built in module directory by prepending cmp's module
