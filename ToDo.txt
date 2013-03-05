@@ -1,0 +1,3 @@
+***********
+ Marc DeGraef requested
+  Add user adjustable Simulated Annealing Profile. Allow user to set the exponent and the max value.
