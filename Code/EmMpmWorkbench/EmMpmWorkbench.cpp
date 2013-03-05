@@ -1432,7 +1432,7 @@ void EmMpmWorkbench::queueControllerFinished()
   m_MSEPlot->setTitle("MSE Plot");
 
   /* Update other number classes and user init widgets */
-  on_enableUserDefinedAreas_stateChanged(enableUserDefinedAreas->checkState());
+  //on_enableUserDefinedAreas_stateChanged(enableUserDefinedAreas->checkState());
 
   // Make sure the image manipulating widgets are enabled
   setImageWidgetsEnabled(true);
@@ -2198,7 +2198,6 @@ void EmMpmWorkbench::generateGaussianData(int rows)
 void EmMpmWorkbench::updateGaussianCurves(bool generateNewGaussianData)
 {
   if (NULL == m_histogram) { return; }
-
 
   PerClassTableModel* colorModel = qobject_cast<PerClassTableModel*>(perClassTableView->model());
   if (NULL == colorModel) { return; }
