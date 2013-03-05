@@ -316,6 +316,9 @@ void EMMPMTask::segmentImage(int i)
     return;
   }
 
+  // Recompute the image histogram for each image that we segment here.
+  m_ImageHistogram.fill(0.0, 256);
+
   m_data->rows = height;
   m_data->columns = width;
   m_data->dims = 1;
@@ -331,8 +334,16 @@ void EMMPMTask::segmentImage(int i)
       rgbPixel = image.pixel(x, y);
       gray = qGray(rgbPixel);
       inImage[index] = static_cast<unsigned char>(gray);
+      m_ImageHistogram[gray]++;
     }
   }
+  qint32 totalPixels = height * width;
+   // Normalize the bin counts by the total number of pixels
+  for (int i = 0; i < 256; ++i)
+  {
+    m_ImageHistogram[i] = m_ImageHistogram[i] / totalPixels;
+  }
+
   m_data->inputImage = inImage;
 
   // Forcing everything to grayscale
