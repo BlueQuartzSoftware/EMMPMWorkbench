@@ -242,6 +242,14 @@ void EMMPMTask::run()
     fclose(f);
   }
 
+  // Make a copy of the initial means/variances as we may need to come back to them
+  // because the values stored in the Data Structure get over written during the
+  // EMMPM functions so we save them here.
+  size_t numElements = m_data->classes * m_data->dims;
+  std::vector<real_t> initialMeans(numElements);
+  std::vector<real_t> initialVariances(numElements);
+  ::memcpy( &(initialMeans.front()), m_data->mean, sizeof(real_t) * numElements);
+  ::memcpy( &(initialVariances.front()), m_data->variance, sizeof(real_t) * numElements);
 
   // Run the first image using all the settings from the user interface
   segmentImage(0);
@@ -251,6 +259,8 @@ void EMMPMTask::run()
     emit finished(this);
     return;
   }
+
+
 
   // Now run the next set of images possibly using the output from the previous
   // image's final mu and sigma values as the initial conditions into the next
@@ -263,6 +273,11 @@ void EMMPMTask::run()
     if (true == getFeedBackInitialization() )
     {
       m_data->initType = EMMPM_ManualInit;
+    }
+    else // Copy the original mean & variance values back into the data structure.
+    {
+      ::memcpy(m_data->mean,  &(initialMeans.front()), sizeof(real_t) * numElements);
+      ::memcpy( m_data->variance, &(initialVariances.front()), sizeof(real_t) * numElements);
     }
 
     segmentImage(i);
@@ -450,7 +465,7 @@ void EMMPMTask::segmentImage(int i)
   bool success = outQImage.save(m_data->output_file_name);
   if (!success)
   {
-    UPDATE_PROGRESS(QString("EM/MPM Error Writing Output Image"), 100); emit
+    UPDATE_PROGRESS(QString("EM/MPM Error Writing Output Image"), 100);
   }
 #if 0
   if (ext.compare(QString("tif"), Qt::CaseInsensitive) == 0
