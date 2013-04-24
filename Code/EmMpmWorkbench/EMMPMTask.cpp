@@ -246,10 +246,13 @@ void EMMPMTask::run()
   // because the values stored in the Data Structure get over written during the
   // EMMPM functions so we save them here.
   size_t numElements = m_data->classes * m_data->dims;
-  std::vector<real_t> initialMeans(numElements);
-  std::vector<real_t> initialVariances(numElements);
-  ::memcpy( &(initialMeans.front()), m_data->mean, sizeof(real_t) * numElements);
-  ::memcpy( &(initialVariances.front()), m_data->variance, sizeof(real_t) * numElements);
+  m_InitialMeans.resize(numElements);
+  m_InitialVariances.resize(numElements);
+  if (m_data->initType == EMMPM_ManualInit) // Copy the original mean & variance values back into the data structure.
+  {
+    ::memcpy( &(m_InitialMeans.front()), m_data->mean,  sizeof(real_t) * numElements);
+    ::memcpy( &(m_InitialVariances.front()), m_data->variance, sizeof(real_t) * numElements);
+  }
 
   // Run the first image using all the settings from the user interface
   segmentImage(0);
@@ -274,10 +277,10 @@ void EMMPMTask::run()
     {
       m_data->initType = EMMPM_ManualInit;
     }
-    else // Copy the original mean & variance values back into the data structure.
+    else if (m_data->initType == EMMPM_ManualInit) // Copy the original mean & variance values back into the data structure.
     {
-      ::memcpy(m_data->mean,  &(initialMeans.front()), sizeof(real_t) * numElements);
-      ::memcpy( m_data->variance, &(initialVariances.front()), sizeof(real_t) * numElements);
+      ::memcpy(m_data->mean,  &(m_InitialMeans.front()), sizeof(real_t) * numElements);
+      ::memcpy( m_data->variance, &(m_InitialVariances.front()), sizeof(real_t) * numElements);
     }
 
     segmentImage(i);

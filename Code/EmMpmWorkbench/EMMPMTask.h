@@ -109,6 +109,8 @@ class EMMPMTask : public ProcessQueueTask, public StatsDelegate
     EMMPM_Data::Pointer m_data;
     AIMImage::Pointer m_OriginalImage;
     AIMImage::Pointer m_SegmentedImage;
+    std::vector<real_t> m_InitialMeans;
+    std::vector<real_t> m_InitialVariances;
 
     char* copyStringToNewBuffer(const QString &fname);
 
